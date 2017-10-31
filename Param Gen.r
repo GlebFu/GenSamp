@@ -1,23 +1,10 @@
 library(dplyr)
-library(tidyr)
-library(stargazer)
-library(htmlTable)
-library(xtable)
-library(Hmisc)
 
 rm(list = ls())
 
-######################
-# SUPPORT FUNCTIONS
-######################
+source("ParGenSource.r")
 
-# Calculates grand mean centering
-GMC <- function(x) x - mean(x, na.rm = T)
-# Standardizes scores
-STAND <- function(x) (x - mean(x, na.rm = T))/sd(x, na.rm = T)
-
-logit <- function(x) log(x / (1 - x)) 
-expit <- function(x) exp(x) / (1 + exp(x))
+genE <- function(ps) rbinom(length(ps), 1, prob = ps)
 
 ###################
 # DATA PREP
@@ -34,33 +21,22 @@ df <- mutate(df,
              pELL = ifelse(is.na(pELL), pELL_D, pELL), 
              pED = ifelse(is.na(pED), pTotfrl, pED),
              pMin = 1-ethWhite,
-             ToRu = Town + Rural)
+             ToRu = Town + Rural,
+             MEDINC = STAND(MEDINC),
+             DID = as.numeric(as.factor(LEAID)) + 1000) %>%
+  group_by(DID) %>%
+  mutate(SID = 1:n() + 10000) %>%
+  ungroup() %>%
+  mutate(DSID = paste(DID, SID, sep = "-"))
 
-
-vars <- c("LSTATE", "LEANM", "SCHNAM", "n", "ULOCAL", "pTotfrl", "pIEP_D", "pELL_D", 
+vars <- c("LSTATE", "LEANM", "SCHNAM", "DID", "SID", "DSID", "n", "ULOCAL", "pTotfrl", "pIEP_D", "pELL_D", 
           "Urban", "Suburban", "ToRu", "schPrimary", "schMIDDLE", "schHigh", 
           "schOther", "pELL", "pED", "pELA", "pMath", "pMin", "MEDINC")
 
+# apply(df[,vars], 2, function(x) sum(is.na(x)))
+
 df <- df[,vars] %>% na.omit
 
-# Create district level data
-df.dists <- select(df, -SCHNAM) %>%
-  group_by(LSTATE, LEANM) %>%
-  summarise_if(is.numeric, mean, na.rm = T) %>%
-  ungroup() %>%
-  mutate(MEDINC = STAND(MEDINC))
-
-
-# Set District SMD Goals
-dGoal <- c(.43, -.6, .22, .95, .67, .56, -.66)
-dVars <- c("Urban", "Suburban", "ToRu", "pELL", "pED", "pMin", "MEDINC")
-names(dGoal) <- dVars
-
-# Initial District Betas
-dBs <- c(0, 0, 0, 0, 0, 0)
-
-# Set urban as focus
-dEx <- "Urban"
 
 
 ###################
@@ -69,219 +45,152 @@ dEx <- "Urban"
 
 df %>%
   group_by(LSTATE) %>%
-  summarise(nDists = length(unique(LEANM)), nSch = length(SCHNAM), Students = sum(n, na.rm = T)) %>%
+  summarise(nDists = length(unique(DID)), nSch = length(DSID), Students = sum(n, na.rm = T)) %>%
   xtable(summary = F)
 
 ###################
-# SIM FUNCTIONS
+# District
 ###################
-
-calcPS <- function(Bs, MRR, vars, data, exclude, getint = F) {
-  vars <- vars[!(vars %in% exclude)]
-  X <- as.matrix(data[,vars])
-  
-  XB <- as.numeric(X %*% Bs)
-  
-  int = uniroot(function(b0) mean(expit(b0 + XB)) - MRR, c(-10,10))
-  
-  dY <- as.numeric(X %*% Bs) + int$root
-  
-  PS <- expit(dY)
-  
-  if (getint) return(list(PS = PS, Intercept = int$root))
-  
-  return(PS)
-}
-
-# calcPS(Bs = dBs,
-#        MRR = .5,
-#        vars = dVars,
-#        data = df.dists,
-#        exclude = dEx)
-# 
-# undebug(calcPS)
-
-
-
-# Calculates the Population mean and sd, and the sampled/unsampled mean and SMD from population mean
-
-calcSMD <- function(Bs, MRR, vars, data, exclude, calcPS = T, goal = NULL) {
-  
-  # Generate Propensity scores if not already present
-  if (calcPS) data$PS <- calcPS(Bs = Bs, MRR = MRR, vars = vars, data = data, exclude = exclude)
-  
-  # Calcualte IPSW
-  data$dIPSW1 <- 1/(1-data$PS)
-  data$dIPSW0 <- 1/data$PS
-  
-  
-  data[,c(dVars, "dIPSW1", "dIPSW0")] %>%
-    gather(key = wType, value = weight, dIPSW0:dIPSW1) %>%
-    gather(key = Var, value = val, -weight, -wType) %>%
-    group_by(wType, Var) %>%
-    summarise(wM = weighted.mean(val, weight)) %>%
-    spread(key = wType, value = wM) -> dMeans
-  
-  data[,vars] %>%
-    gather(key = Var, value = Val) %>%
-    group_by(Var) %>%
-    summarise(m = mean(Val), sd = sd(Val)) %>%
-    merge(dMeans) %>%
-    mutate(smdS0 = (dIPSW0 - m)/sd, smdS1 = (dIPSW1 - m)/sd)  -> dMeans
-  
-  if (!is.null(goal)) {
-    dMeans <- merge(dMeans, data.frame(Var = names(goal), goal)) %>%
-      mutate(dif = smdS1 - goal)
-  }
-  
-  return(dMeans)
-  
-}
-
-
-# calcSMD(Bs = dBs,
-#         MRR = intResp,
-#         vars = dVars,
-#         data = df.dists,
-#         exclude = dEx,
-#         goal = dGoal)
-# 
-# undebug(calcSMD)
-
-testGoal <- function(Bs, MRR, vars, data, exclude, goal = NULL) {
-  
-  trial <- calcSMD(Bs = Bs, MRR = MRR, vars = vars, 
-                   data = data, exclude = exclude, goal = goal)
-  
-  goal <- data.frame(Var = names(goal), goal = goal)
-  
-  trial <- merge(trial, goal)
-  difs <- trial$goal - trial$smdS1
-  names(difs) <- c(trial$Var)
-  
-  return(sum(difs^2))
-}
-
-# testGoal(Bs = dBs,
-#          MRR = RR,
-#          vars = dVars,
-#          data = df.dists,
-#          exclude = dEx,
-#          goal = dGoal)
-# 
-# undebug(testGoal)
 
 
 # Create district level data
-df.dists.gmc <- select(df, -SCHNAM) %>%
-  group_by(LSTATE, LEANM) %>%
+df.dist <- select(df, -SCHNAM, -LSTATE, -LEANM) %>%
+  group_by(DID) %>%
   summarise_if(is.numeric, mean, na.rm = T) %>%
-  ungroup() %>%
-  mutate_if(is.numeric, GMC) %>%
-  mutate(MEDINC = STAND(MEDINC))
+  ungroup()
 
 
 # Set District SMD Goals
-dGoal <- c(.43, -.6, .22, .95, .67, .56, -.66)
-dVars <- c("Urban", "Suburban", "ToRu", "pELL", "pED", "pMin", "MEDINC")
-names(dGoal) <- dVars
+distGoal <- c(.43, -.6, .22, .95, .67, .56, -.66)
+distVars <- c("Urban", "Suburban", "ToRu", "pELL", "pED", "pMin", "MEDINC")
+names(distGoal) <- distVars
 
 # Initial District Betas
-dBs <- c(0, 0, 0, 0, 0, 0)
+distBs <- c(0, 0, 0, 0, 0, 0)
 
 # Set urban as focus
-dEx <- "Urban"
+distEx <- "Urban"
 
-
-
-# load("171019.rdata")
 
 ######################
-# .3 Response Rate
+# Gen District Params
 ######################
-resp30 <- .3
+# resp30 <- .3
+# resp20 <- .2
+# resp10 <- .1
+# 
+# bs_RR30 <- optim(par = distBs, fn = testGoal,
+#                  MRR = resp30, vars = distVars,
+#                  data = df.dist, exclude = distEx, goal = distGoal) %>%
+#   c(resp = resp30)
+# 
+# bs_RR20 <- optim(par = distBs, fn = testGoal,
+#                  MRR = resp20, vars = distVars,
+#                  data = df.dist, exclude = distEx, goal = distGoal) %>%
+#   c(resp = resp20)
+# 
+# bs_RR10 <- optim(par = distBs, fn = testGoal,
+#                  MRR = resp10, vars = distVars,
+#                  data = df.dist, exclude = distEx, goal = distGoal) %>%
+#   c(resp = resp10)
+# 
+# 
+# save.image("Params/171031.rdata")
 
-# bs_RR30 <- optim(par = dBs, fn = testGoal,
-#                  MRR = resp30, vars = dVars,
-#                  data = df.dists.gmc, exclude = dEx, goal = dGoal)
+load("Params/171031.rdata")
 
 
-calcPS(Bs = bs_RR30$par,
-       MRR = resp30,
-       vars = dVars,
-       data = df.dists.gmc,
-       exclude = dEx,
-       getint = T) %>% 
-  lapply(summary)
 
-calcSMD(Bs = bs_RR30$par,
-        MRR = resp30,
-        vars = dVars,
-        data = df.dists.gmc,
-        exclude = dEx,
-        goal = dGoal) 
+distVals <- rbind(getVals(bs_RR30, vars = distVars, data = df.dist, exclude = distEx, goal = distGoal),
+                  getVals(bs_RR20, vars = distVars, data = df.dist, exclude = distEx, goal = distGoal),
+                  getVals(bs_RR10, vars = distVars, data = df.dist, exclude = distEx, goal = distGoal))
+
+df.dist$PS30 <- calcPS(Bs = bs_RR30$par, MRR = bs_RR30$resp, vars = distVars, data = df.dist, exclude = distEx)
+df.dist$PS20 <- calcPS(Bs = bs_RR20$par, MRR = bs_RR20$resp, vars = distVars, data = df.dist, exclude = distEx)
+df.dist$PS10 <- calcPS(Bs = bs_RR10$par, MRR = bs_RR10$resp, vars = distVars, data = df.dist, exclude = distEx)
+
+# RR_PS <- df.dist %>%
+#   select(PS30:PS10) %>%
+#   gather(key = "RR", value = "PS")
+# 
+
+# 
+# reps <- 10000
+# RR_PS$selectRate <- replicate(reps, distSelect(RR_PS)) %>% apply(1, sum)/reps 
+#   
+# RR_PS %>%
+#   filter(selectRate > .5) %>%
+#   ggplot(aes(x = selectRate, fill = RR)) +
+#   geom_histogram() +
+#   facet_wrap(~ RR)
+# 
+# RR_PS %>%
+#   ggplot(aes(x = selectRate, y = PS, color = selectRate)) +
+#   geom_point()
+
+###################
+# Schools
+###################
+df.sch <- df %>%
+  mutate(n = STAND(n))
+
+# Set School SMD Goals
+schGoal <- c(.374, .433, -.007, -.403, .081, .538, .412)
+schVars <- c("n", "Urban", "Suburban", "ToRu", "pED", "pMin", "pELL")
+names(schGoal) <- schVars
+
+# Initial School Betas
+schBs <- c(0, 0, 0, 0, 0, 0)
+
+# Set urban as focus
+schEx <- "Urban"
+
+
+
+
 
 ######################
-# .2 Response Rate
+# Gen School Params
 ######################
-resp20 <- .2
+# resp30 <- .3
+# resp20 <- .2
+# resp10 <- .1
+# 
+# schBs_RR30 <- optim(par = schBs, fn = testGoal,
+#                  MRR = resp30, vars = schVars,
+#                  data = df.sch, exclude = schEx, goal = schGoal) %>%
+#   c(resp = resp30)
+# 
+# schBs_RR20 <- optim(par = schBs, fn = testGoal,
+#                  MRR = resp20, vars = schVars,
+#                  data = df.sch, exclude = schEx, goal = schGoal) %>%
+#   c(resp = resp20)
+# 
+# schBs_RR10 <- optim(par = schBs, fn = testGoal,
+#                  MRR = resp10, vars = schVars,
+#                  data = df.sch, exclude = schEx, goal = schGoal) %>%
+#   c(resp = resp10)
+# 
+# 
+# save.image("Params/171031.rdata")
 
-# bs_RR20 <- optim(par = dBs, fn = testGoal,
-#                  MRR = resp20, vars = dVars,
-#                  data = df.dists.gmc, exclude = dEx, goal = dGoal)
-
-
-calcPS(Bs = bs_RR20$par,
-       MRR = resp20,
-       vars = dVars,
-       data = df.dists.gmc,
-       exclude = dEx,
-       getint = T) %>% 
-  lapply(summary)
-
-calcSMD(Bs = bs_RR20$par,
-        MRR = resp20,
-        vars = dVars,
-        data = df.dists.gmc,
-        exclude = dEx,
-        goal = dGoal) 
-
-######################
-# .1 Response Rate
-######################
-resp10 <- .1
-
-# bs_RR10 <- optim(par = dBs, fn = testGoal,
-#                  MRR = resp10, vars = dVars,
-#                  data = df.dists.gmc, exclude = dEx, goal = dGoal)
-
-
-calcPS(Bs = bs_RR10$par,
-       MRR = resp10,
-       vars = dVars,
-       data = df.dists.gmc,
-       exclude = dEx,
-       getint = T) %>% 
-  lapply(summary)
-
-
-calcSMD(Bs = bs_RR10$par,
-        MRR = resp10,
-        vars = dVars,
-        data = df.dists.gmc,
-        exclude = dEx,
-        goal = dGoal) 
-
-
-params <- data_frame(
-  coef = dVars[!(dVars %in% dEx)],
-  RR10 = bs_RR10$par, 
-  RR20 = bs_RR20$par, 
-  RR30 = bs_RR30$par
-)
-
-save.image("171019.rdata")
+load("Params/171031.rdata")
 
 
 
+schVals <- rbind(getVals(schBs_RR30, vars = schVars, data = df.sch, exclude = schEx, goal = schGoal),
+                  getVals(schBs_RR20, vars = schVars, data = df.sch, exclude = schEx, goal = schGoal),
+                  getVals(schBs_RR10, vars = schVars, data = df.sch, exclude = schEx, goal = schGoal))
+
+df.sch$schPS30 <- calcPS(Bs = schBs_RR30$par, MRR = schBs_RR30$resp, vars = schVars, data = df.sch, exclude = schEx)
+df.sch$schPS20 <- calcPS(Bs = schBs_RR20$par, MRR = schBs_RR20$resp, vars = schVars, data = df.sch, exclude = schEx)
+df.sch$schPS10 <- calcPS(Bs = schBs_RR10$par, MRR = schBs_RR10$resp, vars = schVars, data = df.sch, exclude = schEx)
+
+df.select <- df.dist %>% 
+  select(DID, PS30:PS10) %>% 
+  gather(key = "RR", value = "dPS", PS30:PS10)
+
+df.select2 <- df.sch %>%
+  select(DID, SID, DSID, schPS30:schPS10) %>%
+  gather(key = "RR", value = "sPS", schPS30:schPS10)
 
