@@ -214,14 +214,61 @@ sampleCS <- function(data, n = 60) {
   
 }
 
-results <- replicate(10000, sampleCS(df.select))
+# results <- replicate(10000, sampleCS(df.select))
+#
+# rsults <- data.frame(m = apply(results, 1, mean), sd = apply(results, 1, sd))
+# 
+# write.csv(results, "CS Selection.csv")
 
-write.csv(results, "CS Selection.csv")
+results <- read.csv("CS selection.csv")
+
+
+
+df.select <- ungroup(df.select) %>%
+  arrange(DSID) %>%
+  mutate(m = results$m, 
+         sd = results$sd,
+         mGroups = factor(cut(m, breaks = seq(0,1,.05)), labels = seq(.05,.95,.05))) 
+
+# df.select %>%
+#   ggplot(aes(x = mGroups, y = m)) +
+#   geom_point()
 
 df.select %>%
-  ungroup() %>%
-  arrange(DSID) %>%
-  mutate(selectRate = apply(results, 1, mean)) %>%
-  ggplot(aes(x = selectRate)) + 
-  geom_histogram() +
-  facet_wrap(~ RR)
+  group_by(RR, mGroups) %>%
+  summarise(n = n()) %>%
+  arrange(-as.numeric(mGroups)) %>%
+  mutate(nC = cumsum(n)) %>%
+  group_by(RR) %>%
+  mutate(p = n / length(n),
+         pC = cumsum(p)) %>%
+  filter(!is.na(mGroups)) %>%
+  ggplot(aes(x = mGroups, y = pC)) +
+  geom_bar(stat="identity") +
+  geom_bar(aes(y = p), stat="identity", fill = "red") +
+  facet_grid(RR~., scales = "free_y")
+
+
+df <- df.select %>%
+  select(DSID, RR, m) %>%
+  spread(key = RR, value = m) %>%
+  merge(df)
+
+
+dMeans <- df[, c(schVars, "PS10", "PS20", "PS30")] %>%
+  gather(key = wRR, value = weight, PS10:PS30) %>%
+  gather(key = Var, value = val, -weight, -wRR) %>%
+  group_by(wRR, Var) %>%
+  summarise(wM = weighted.mean(val, weight)) %>%
+  spread(key = wRR, value = wM)
+  
+df[, schVars] %>%
+  gather(key = Var, value = Val) %>%
+  group_by(Var) %>%
+  summarise(m = mean(Val), sd = sd(Val)) %>%
+  merge(dMeans) %>%
+  mutate(SMD10 = (PS10 - m)/sd,
+         SMD20 = (PS20 - m)/sd,
+         SMD30 = (PS30 - m)/sd) %>%
+  merge(data.frame(Var = names(schGoal), goal = schGoal))
+
