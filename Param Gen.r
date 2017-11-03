@@ -172,25 +172,54 @@ schEx <- "Urban"
 #   c(resp = resp10)
 # 
 # 
+# 
+# 
+# 
+# 
+# schVals <- rbind(getVals(schBs_RR30, vars = schVars, data = df.sch, exclude = schEx, goal = schGoal),
+#                   getVals(schBs_RR20, vars = schVars, data = df.sch, exclude = schEx, goal = schGoal),
+#                   getVals(schBs_RR10, vars = schVars, data = df.sch, exclude = schEx, goal = schGoal))
+# 
+# df.sch$PS30 <- calcPS(Bs = schBs_RR30$par, MRR = schBs_RR30$resp, vars = schVars, data = df.sch, exclude = schEx)
+# df.sch$PS20 <- calcPS(Bs = schBs_RR20$par, MRR = schBs_RR20$resp, vars = schVars, data = df.sch, exclude = schEx)
+# df.sch$PS10 <- calcPS(Bs = schBs_RR10$par, MRR = schBs_RR10$resp, vars = schVars, data = df.sch, exclude = schEx)
+# 
+# 
 # save.image("Params/171031.rdata")
 
 load("Params/171031.rdata")
-
-
-
-schVals <- rbind(getVals(schBs_RR30, vars = schVars, data = df.sch, exclude = schEx, goal = schGoal),
-                  getVals(schBs_RR20, vars = schVars, data = df.sch, exclude = schEx, goal = schGoal),
-                  getVals(schBs_RR10, vars = schVars, data = df.sch, exclude = schEx, goal = schGoal))
-
-df.sch$schPS30 <- calcPS(Bs = schBs_RR30$par, MRR = schBs_RR30$resp, vars = schVars, data = df.sch, exclude = schEx)
-df.sch$schPS20 <- calcPS(Bs = schBs_RR20$par, MRR = schBs_RR20$resp, vars = schVars, data = df.sch, exclude = schEx)
-df.sch$schPS10 <- calcPS(Bs = schBs_RR10$par, MRR = schBs_RR10$resp, vars = schVars, data = df.sch, exclude = schEx)
 
 df.select <- df.dist %>% 
   select(DID, PS30:PS10) %>% 
   gather(key = "RR", value = "dPS", PS30:PS10)
 
-df.select2 <- df.sch %>%
-  select(DID, SID, DSID, schPS30:schPS10) %>%
-  gather(key = "RR", value = "sPS", schPS30:schPS10)
+df.select <- df.sch %>%
+  select(DID, SID, DSID, PS30:PS10) %>%
+  gather(key = "RR", value = "sPS", PS30:PS10) %>%
+  merge(df.select)
 
+
+sampleCS <- function(data, n = 60) {
+  data <- data %>% 
+    mutate(Ej = genE(dPS), 
+           Eij = ifelse(Ej == 1, genE(sPS), 0)) %>%
+    group_by(RR) %>%
+    arrange(RR, -Eij, -dPS, -sPS) %>%
+    mutate(Rank = 1:n(),
+           Select = Rank <= n) %>%
+    ungroup() %>%
+    arrange(DSID)
+  
+  return(data$Select)
+  
+}
+
+results <- replicate(100, sampleCS(df.select))
+
+df.select %>%
+  ungroup() %>%
+  arrange(DSID) %>%
+  mutate(selectRate = apply(results, 1, mean)) %>%
+  ggplot(aes(x = selectRate)) + 
+  geom_histogram() +
+  facet_wrap(~ RR)
