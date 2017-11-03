@@ -58,8 +58,8 @@ calcSMD <- function(Bs, MRR, vars, data, exclude, calcPS = T, goal = NULL) {
   if (calcPS) data$PS <- calcPS(Bs = Bs, MRR = MRR, vars = vars, data = data, exclude = exclude)
   
   # Calcualte IPSW
-  data$dIPSW1 <- 1/(1-data$PS)
-  data$dIPSW0 <- 1/data$PS
+  data$dIPSW0 <- 1/(1-data$PS)
+  data$dIPSW1 <- 1/data$PS
   
   
   dMeans <- data[,c(vars, "dIPSW1", "dIPSW0")] %>%

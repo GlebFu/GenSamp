@@ -95,19 +95,19 @@ distEx <- "Urban"
 #   c(resp = resp10)
 # 
 # 
-# save.image("Params/171031.rdata")
-
-load("Params/171031.rdata")
-
-
-
-distVals <- rbind(getVals(bs_RR30, vars = distVars, data = df.dist, exclude = distEx, goal = distGoal),
-                  getVals(bs_RR20, vars = distVars, data = df.dist, exclude = distEx, goal = distGoal),
-                  getVals(bs_RR10, vars = distVars, data = df.dist, exclude = distEx, goal = distGoal))
-
-df.dist$PS30 <- calcPS(Bs = bs_RR30$par, MRR = bs_RR30$resp, vars = distVars, data = df.dist, exclude = distEx)
-df.dist$PS20 <- calcPS(Bs = bs_RR20$par, MRR = bs_RR20$resp, vars = distVars, data = df.dist, exclude = distEx)
-df.dist$PS10 <- calcPS(Bs = bs_RR10$par, MRR = bs_RR10$resp, vars = distVars, data = df.dist, exclude = distEx)
+# save.image("Params/171103.rdata")
+# 
+# 
+# 
+# 
+# 
+# distVals <- rbind(getVals(bs_RR30, vars = distVars, data = df.dist, exclude = distEx, goal = distGoal),
+#                   getVals(bs_RR20, vars = distVars, data = df.dist, exclude = distEx, goal = distGoal),
+#                   getVals(bs_RR10, vars = distVars, data = df.dist, exclude = distEx, goal = distGoal))
+# 
+# df.dist$PS30 <- calcPS(Bs = bs_RR30$par, MRR = bs_RR30$resp, vars = distVars, data = df.dist, exclude = distEx)
+# df.dist$PS20 <- calcPS(Bs = bs_RR20$par, MRR = bs_RR20$resp, vars = distVars, data = df.dist, exclude = distEx)
+# df.dist$PS10 <- calcPS(Bs = bs_RR10$par, MRR = bs_RR10$resp, vars = distVars, data = df.dist, exclude = distEx)
 
 # RR_PS <- df.dist %>%
 #   select(PS30:PS10) %>%
@@ -185,9 +185,9 @@ schEx <- "Urban"
 # df.sch$PS10 <- calcPS(Bs = schBs_RR10$par, MRR = schBs_RR10$resp, vars = schVars, data = df.sch, exclude = schEx)
 # 
 # 
-# save.image("Params/171031.rdata")
+# save.image("Params/171103.rdata")
 
-load("Params/171031.rdata")
+load("Params/171103.rdata")
 
 df.select <- df.dist %>% 
   select(DID, PS30:PS10) %>% 
@@ -215,8 +215,8 @@ sampleCS <- function(data, n = 60) {
 }
 
 # results <- replicate(10000, sampleCS(df.select))
-#
-# rsults <- data.frame(m = apply(results, 1, mean), sd = apply(results, 1, sd))
+# 
+# results <- data.frame(m = apply(results, 1, mean), sd = apply(results, 1, sd))
 # 
 # write.csv(results, "CS Selection.csv")
 
@@ -228,20 +228,24 @@ df.select <- ungroup(df.select) %>%
   arrange(DSID) %>%
   mutate(m = results$m, 
          sd = results$sd,
-         mGroups = factor(cut(m, breaks = seq(0,1,.05)), labels = seq(.05,.95,.05))) 
+         mGroups = factor(cut(m, breaks = seq(0,1,.05), labels = seq(0,.95,.05), right = T)))
 
+# df.select %>% select(m, mGroups)
+# 
 # df.select %>%
 #   ggplot(aes(x = mGroups, y = m)) +
-#   geom_point()
+#   geom_point() +
+#   facet_wrap(~RR)
 
 df.select %>%
-  group_by(RR, mGroups) %>%
+  group_by(mGroups, RR) %>%
   summarise(n = n()) %>%
   arrange(-as.numeric(mGroups)) %>%
   mutate(nC = cumsum(n)) %>%
   group_by(RR) %>%
-  mutate(p = n / length(n),
-         pC = cumsum(p)) %>%
+  arrange(RR) %>%
+  mutate(p = n / sum(n),
+         pC = cumsum(p)) %>% 
   filter(!is.na(mGroups)) %>%
   ggplot(aes(x = mGroups, y = pC)) +
   geom_bar(stat="identity") +
