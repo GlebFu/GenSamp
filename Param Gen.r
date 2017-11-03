@@ -214,7 +214,9 @@ sampleCS <- function(data, n = 60) {
   
 }
 
-results <- replicate(100, sampleCS(df.select))
+results <- replicate(10000, sampleCS(df.select))
+
+write.csv(results, "CS Selection.csv")
 
 df.select %>%
   ungroup() %>%
