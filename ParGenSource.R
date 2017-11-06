@@ -58,23 +58,23 @@ calcSMD <- function(Bs, MRR, vars, data, exclude, calcPS = T, goal = NULL) {
   if (calcPS) data$PS <- calcPS(Bs = Bs, MRR = MRR, vars = vars, data = data, exclude = exclude)
   
   # Calcualte IPSW
-  data$dIPSW1 <- 1/(1-data$PS)
-  data$dIPSW0 <- 1/data$PS
+  data$dIPSW0 <- 1/(1-data$PS)
+  data$dIPSW1 <- 1/data$PS
   
   
-  data[,c(vars, "dIPSW1", "dIPSW0")] %>%
+  dMeans <- data[,c(vars, "dIPSW1", "dIPSW0")] %>%
     gather(key = wType, value = weight, dIPSW0:dIPSW1) %>%
     gather(key = Var, value = val, -weight, -wType) %>%
     group_by(wType, Var) %>%
     summarise(wM = weighted.mean(val, weight)) %>%
-    spread(key = wType, value = wM) -> dMeans
+    spread(key = wType, value = wM)
   
-  data[,vars] %>%
+  dMeans <- data[,vars] %>%
     gather(key = Var, value = Val) %>%
     group_by(Var) %>%
     summarise(m = mean(Val), sd = sd(Val)) %>%
     merge(dMeans) %>%
-    mutate(smdS0 = (dIPSW0 - m)/sd, smdS1 = (dIPSW1 - m)/sd)  -> dMeans
+    mutate(smdS0 = (dIPSW0 - m)/sd, smdS1 = (dIPSW1 - m)/sd)
   
   if (!is.null(goal)) {
     dMeans <- merge(dMeans, data.frame(Var = names(goal), goal)) %>%
@@ -84,6 +84,7 @@ calcSMD <- function(Bs, MRR, vars, data, exclude, calcPS = T, goal = NULL) {
   return(dMeans)
   
 }
+
 
 
 # calcSMD(Bs = dBs,

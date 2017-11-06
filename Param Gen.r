@@ -102,11 +102,48 @@ distEx <- "Urban"
 # df.dist$PS20 <- calcPS(Bs = bs_RR20$par, MRR = bs_RR20$resp, vars = distVars, data = df.dist, exclude = distEx)
 # df.dist$PS10 <- calcPS(Bs = bs_RR10$par, MRR = bs_RR10$resp, vars = distVars, data = df.dist, exclude = distEx)
 # 
+<<<<<<< HEAD
 # save.image("Params/171031.rdata")
 
 load("Params/171031.rdata")
 
 #-----------------------
+=======
+# save.image("Params/171103.rdata")
+# 
+# 
+# 
+# 
+# 
+# distVals <- rbind(getVals(bs_RR30, vars = distVars, data = df.dist, exclude = distEx, goal = distGoal),
+#                   getVals(bs_RR20, vars = distVars, data = df.dist, exclude = distEx, goal = distGoal),
+#                   getVals(bs_RR10, vars = distVars, data = df.dist, exclude = distEx, goal = distGoal))
+# 
+# df.dist$PS30 <- calcPS(Bs = bs_RR30$par, MRR = bs_RR30$resp, vars = distVars, data = df.dist, exclude = distEx)
+# df.dist$PS20 <- calcPS(Bs = bs_RR20$par, MRR = bs_RR20$resp, vars = distVars, data = df.dist, exclude = distEx)
+# df.dist$PS10 <- calcPS(Bs = bs_RR10$par, MRR = bs_RR10$resp, vars = distVars, data = df.dist, exclude = distEx)
+
+# RR_PS <- df.dist %>%
+#   select(PS30:PS10) %>%
+#   gather(key = "RR", value = "PS")
+# 
+
+# 
+# reps <- 10000
+# RR_PS$selectRate <- replicate(reps, distSelect(RR_PS)) %>% apply(1, sum)/reps 
+#   
+# RR_PS %>%
+#   filter(selectRate > .5) %>%
+#   ggplot(aes(x = selectRate, fill = RR)) +
+#   geom_histogram() +
+#   facet_wrap(~ RR)
+# 
+# RR_PS %>%
+#   ggplot(aes(x = selectRate, y = PS, color = selectRate)) +
+#   geom_point()
+
+###################
+>>>>>>> e040028599937f6755ede435ff0cb0ec4a6d74fb
 # Schools
 #-----------------------
 df.sch <- df %>%
@@ -160,9 +197,9 @@ schEx <- "Urban"
 # df.sch$PS10 <- calcPS(Bs = schBs_RR10$par, MRR = schBs_RR10$resp, vars = schVars, data = df.sch, exclude = schEx)
 # 
 # 
-# save.image("Params/171031.rdata")
+# save.image("Params/171103.rdata")
 
-load("Params/171031.rdata")
+load("Params/171103.rdata")
 
 
 #-----------------------
@@ -282,6 +319,7 @@ Vratio <- function(clstr){
   
 }
 
+<<<<<<< HEAD
 data.frame(k = 1:K, var = sapply(clusters, Vratio)) %>%
   ggplot(aes(x = k, y = var)) +
   geom_point() +
@@ -314,3 +352,67 @@ pop$schShrt <- str_sub(pop$SCHNAM, end = 10)
 #   merge(df)
 # 
 # save(df, file = "Data/simData.Rdata")
+=======
+# results <- replicate(10000, sampleCS(df.select))
+# 
+# results <- data.frame(m = apply(results, 1, mean), sd = apply(results, 1, sd))
+# 
+# write.csv(results, "CS Selection.csv")
+
+results <- read.csv("CS selection.csv")
+
+
+
+df.select <- ungroup(df.select) %>%
+  arrange(DSID) %>%
+  mutate(m = results$m, 
+         sd = results$sd,
+         mGroups = factor(cut(m, breaks = seq(0,1,.05), labels = seq(0,.95,.05), right = T)))
+
+# df.select %>% select(m, mGroups)
+# 
+# df.select %>%
+#   ggplot(aes(x = mGroups, y = m)) +
+#   geom_point() +
+#   facet_wrap(~RR)
+
+df.select %>%
+  group_by(mGroups, RR) %>%
+  summarise(n = n()) %>%
+  arrange(-as.numeric(mGroups)) %>%
+  mutate(nC = cumsum(n)) %>%
+  group_by(RR) %>%
+  arrange(RR) %>%
+  mutate(p = n / sum(n),
+         pC = cumsum(p)) %>% 
+  filter(!is.na(mGroups)) %>%
+  ggplot(aes(x = mGroups, y = pC)) +
+  geom_bar(stat="identity") +
+  geom_bar(aes(y = p), stat="identity", fill = "red") +
+  facet_grid(RR~., scales = "free_y")
+
+
+df <- df.select %>%
+  select(DSID, RR, m) %>%
+  spread(key = RR, value = m) %>%
+  merge(df)
+
+
+dMeans <- df[, c(schVars, "PS10", "PS20", "PS30")] %>%
+  gather(key = wRR, value = weight, PS10:PS30) %>%
+  gather(key = Var, value = val, -weight, -wRR) %>%
+  group_by(wRR, Var) %>%
+  summarise(wM = weighted.mean(val, weight)) %>%
+  spread(key = wRR, value = wM)
+  
+df[, schVars] %>%
+  gather(key = Var, value = Val) %>%
+  group_by(Var) %>%
+  summarise(m = mean(Val), sd = sd(Val)) %>%
+  merge(dMeans) %>%
+  mutate(SMD10 = (PS10 - m)/sd,
+         SMD20 = (PS20 - m)/sd,
+         SMD30 = (PS30 - m)/sd) %>%
+  merge(data.frame(Var = names(schGoal), goal = schGoal))
+
+>>>>>>> e040028599937f6755ede435ff0cb0ec4a6d74fb
