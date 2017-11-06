@@ -6,12 +6,12 @@ source("ParGenSource.r")
 
 genE <- function(ps) rbinom(length(ps), 1, prob = ps)
 
-###################
+#-----------------------
 # DATA PREP
-###################
+#-----------------------
 
 # Read Data
-df <- read.csv("final data.csv", stringsAsFactors = F)
+df <- read.csv("Data/final data.csv", stringsAsFactors = F)
 
 
 # Create ELL and ED variable district data when school is unavailable
@@ -39,18 +39,18 @@ df <- df[,vars] %>% na.omit
 
 
 
-###################
+#-----------------------
 # DESCRIPTIVES
-###################
+#-----------------------
 
 df %>%
   group_by(LSTATE) %>%
   summarise(nDists = length(unique(DID)), nSch = length(DSID), Students = sum(n, na.rm = T)) %>%
   xtable(summary = F)
 
-###################
+#-----------------------
 # District
-###################
+#-----------------------
 
 
 # Create district level data
@@ -72,9 +72,9 @@ distBs <- c(0, 0, 0, 0, 0, 0)
 distEx <- "Urban"
 
 
-######################
+#-----------------------
 # Gen District Params
-######################
+#-----------------------
 # resp30 <- .3
 # resp20 <- .2
 # resp10 <- .1
@@ -94,43 +94,21 @@ distEx <- "Urban"
 #                  data = df.dist, exclude = distEx, goal = distGoal) %>%
 #   c(resp = resp10)
 # 
+# distVals <- rbind(getVals(bs_RR30, vars = distVars, data = df.dist, exclude = distEx, goal = distGoal),
+#                   getVals(bs_RR20, vars = distVars, data = df.dist, exclude = distEx, goal = distGoal),
+#                   getVals(bs_RR10, vars = distVars, data = df.dist, exclude = distEx, goal = distGoal))
+# 
+# df.dist$PS30 <- calcPS(Bs = bs_RR30$par, MRR = bs_RR30$resp, vars = distVars, data = df.dist, exclude = distEx)
+# df.dist$PS20 <- calcPS(Bs = bs_RR20$par, MRR = bs_RR20$resp, vars = distVars, data = df.dist, exclude = distEx)
+# df.dist$PS10 <- calcPS(Bs = bs_RR10$par, MRR = bs_RR10$resp, vars = distVars, data = df.dist, exclude = distEx)
 # 
 # save.image("Params/171031.rdata")
 
 load("Params/171031.rdata")
 
-
-
-distVals <- rbind(getVals(bs_RR30, vars = distVars, data = df.dist, exclude = distEx, goal = distGoal),
-                  getVals(bs_RR20, vars = distVars, data = df.dist, exclude = distEx, goal = distGoal),
-                  getVals(bs_RR10, vars = distVars, data = df.dist, exclude = distEx, goal = distGoal))
-
-df.dist$PS30 <- calcPS(Bs = bs_RR30$par, MRR = bs_RR30$resp, vars = distVars, data = df.dist, exclude = distEx)
-df.dist$PS20 <- calcPS(Bs = bs_RR20$par, MRR = bs_RR20$resp, vars = distVars, data = df.dist, exclude = distEx)
-df.dist$PS10 <- calcPS(Bs = bs_RR10$par, MRR = bs_RR10$resp, vars = distVars, data = df.dist, exclude = distEx)
-
-# RR_PS <- df.dist %>%
-#   select(PS30:PS10) %>%
-#   gather(key = "RR", value = "PS")
-# 
-
-# 
-# reps <- 10000
-# RR_PS$selectRate <- replicate(reps, distSelect(RR_PS)) %>% apply(1, sum)/reps 
-#   
-# RR_PS %>%
-#   filter(selectRate > .5) %>%
-#   ggplot(aes(x = selectRate, fill = RR)) +
-#   geom_histogram() +
-#   facet_wrap(~ RR)
-# 
-# RR_PS %>%
-#   ggplot(aes(x = selectRate, y = PS, color = selectRate)) +
-#   geom_point()
-
-###################
+#-----------------------
 # Schools
-###################
+#-----------------------
 df.sch <- df %>%
   mutate(n = STAND(n))
 
@@ -145,13 +123,10 @@ schBs <- c(0, 0, 0, 0, 0, 0)
 # Set urban as focus
 schEx <- "Urban"
 
-
-
-
-
-######################
+#-----------------------
 # Gen School Params
-######################
+#-----------------------
+
 # resp30 <- .3
 # resp20 <- .2
 # resp10 <- .1
@@ -189,39 +164,153 @@ schEx <- "Urban"
 
 load("Params/171031.rdata")
 
-df.select <- df.dist %>% 
-  select(DID, PS30:PS10) %>% 
-  gather(key = "RR", value = "dPS", PS30:PS10)
 
-df.select <- df.sch %>%
-  select(DID, SID, DSID, PS30:PS10) %>%
-  gather(key = "RR", value = "sPS", PS30:PS10) %>%
-  merge(df.select)
+#-----------------------
+# Convenience Sample SMDs
+#-----------------------
+
+# df.select <- df.dist %>% 
+#   select(DID, PS30:PS10) %>% 
+#   gather(key = "RR", value = "dPS", PS30:PS10)
+# 
+# df.select <- df.sch %>%
+#   select(DID, SID, DSID, PS30:PS10) %>%
+#   gather(key = "RR", value = "sPS", PS30:PS10) %>%
+#   merge(df.select)
+# 
+# 
+# sampleCS <- function(data, n = 60) {
+#   data <- data %>% 
+#     mutate(Ej = genE(dPS), 
+#            Eij = ifelse(Ej == 1, genE(sPS), 0)) %>%
+#     group_by(RR) %>%
+#     arrange(RR, -Eij, -dPS, -sPS) %>%
+#     mutate(Rank = 1:n(),
+#            Select = Rank <= n) %>%
+#     ungroup() %>%
+#     arrange(DSID)
+#   
+#   return(data$Select)
+#   
+# }
+# 
+# results <- replicate(10000, sampleCS(df.select))
+# 
+# write.csv(results, "Params/CS Selection.csv")
+# 
+# results <- read.csv("Params/CS Selection.csv")
+# 
+# df.select %>%
+#   ungroup() %>%
+#   arrange(DSID) %>%
+#   mutate(selectRate = apply(results, 1, mean)) %>%
+#   ggplot(aes(x = selectRate)) + 
+#   geom_histogram() +
+#   facet_wrap(~ RR)
 
 
-sampleCS <- function(data, n = 60) {
-  data <- data %>% 
-    mutate(Ej = genE(dPS), 
-           Eij = ifelse(Ej == 1, genE(sPS), 0)) %>%
-    group_by(RR) %>%
-    arrange(RR, -Eij, -dPS, -sPS) %>%
-    mutate(Rank = 1:n(),
-           Select = Rank <= n) %>%
-    ungroup() %>%
-    arrange(DSID)
-  
-  return(data$Select)
+#-----------------------
+# Run Cluster Analysis
+#-----------------------
+library(cluster)
+
+K = 10
+
+
+
+# IVs <- c("urbanicity", "G08", "FTE", "LEVEL", "edp", "ellp", "spedp", "ethOther", "ethWhite", "ethBlack", "ethHisp", "ethAsian", "genMale", "genFemale")
+# 
+# # pop <- pop %>% filter(LEVEL == "schMIDDLE",
+# #                       MAGNET == 2)
+# 
+# pop <- pop %>% filter(LEVEL == "schMIDDLE")
+# 
+# pop$region <- factor(pop$region)
+# 
+# # distance <- daisy(x = cbind(pop[,IVs], pop[,IVs[-c(1,4)]]^2, pop[,IVs[-c(1,4)]]^3),
+# #                   metric = "gower") #ORDER 3
+# distance <- daisy(x = pop[,IVs], metric = "gower")    #ORDER 1
+# 
+# 
+# clusters <- list()
+# 
+# for(i in 1:K) {
+# 
+#   clusters <- append(clusters, list(kmeans(distance, i)))
+# }
+# 
+# classign <- data.frame(sapply(clusters, function(x) x$cluster))
+# names(classign) <- paste("k", 1:K, sep = "")
+# 
+# pop <- cbind(pop, classign)
+# 
+# with(pop, table(LSTATE, k5))
+# 
+# save(pop, IVs, expandedIVs, clusters, file = "Clusters Order 1 Mid-Only.Rdata")
+
+
+findDist <- function(pat) {
+  pop[, c("LEANM", "LSTATE")][str_detect(pop$LEANM, ignore.case(pat)),] %>%
+    group_by(LEANM, LSTATE) %>%
+    summarise(length(LSTATE)) %>%
+    data.frame()
+}
+
+
+findSch <- function(pat) {
+  pop[, c("SCHNAM", "LSTATE")][str_detect(pop$SCHNAM, ignore.case(pat)),] %>%
+    group_by(SCHNAM, LSTATE) %>%
+    summarise(length(LSTATE)) %>%
+    data.frame()
+}
+
+# #
+# # findDist("austin")
+# 
+# 
+# # Vratio <- function(clstr){
+# #   Vw <- clstr$tot.withinss/(nrow(pop) - length(table(clstr$cluster)))
+# #   Vb <- clstr$betweenss/(length(table(clstr$cluster)) - 1)
+# #   Vb / (Vw + Vb)
+# #
+# # }
+
+Vratio <- function(clstr){
+  Vw <- clstr$tot.withinss
+  Vb <- clstr$betweenss
+  Vb / (Vw + Vb)
   
 }
 
-results <- replicate(10000, sampleCS(df.select))
+data.frame(k = 1:K, var = sapply(clusters, Vratio)) %>%
+  ggplot(aes(x = k, y = var)) +
+  geom_point() +
+  ggtitle("Between cluster variance by number of strata") +
+  labs(y = "Between Cluster Variance",
+       x = "Number of Strata (k)") +
+  geom_line() +
+  theme_minimal() +
+  scale_x_discrete(limits = c(1:K)) +
+  scale_y_continuous(breaks = seq(0, 1, .1))
 
-write.csv(results, "CS Selection.csv")
+ggsave("Figures/Scree2.png", dpi = 500, width = 5, height = 5)
 
-df.select %>%
-  ungroup() %>%
-  arrange(DSID) %>%
-  mutate(selectRate = apply(results, 1, mean)) %>%
-  ggplot(aes(x = selectRate)) + 
-  geom_histogram() +
-  facet_wrap(~ RR)
+
+pop$cluster <- pop$k5
+
+pop$schShrt <- str_sub(pop$SCHNAM, end = 10)
+
+
+
+
+#-----------------------
+# Export Data
+#-----------------------
+
+
+# df <- merge(df, df.dist[, c("DID","PS10", "PS20", "PS30")])
+#   
+# df <- transmute(df.sch, DID = DID, SID = SID, schPS10 = PS10, schPS20 = PS20, schPS30 = PS30) %>%
+#   merge(df)
+# 
+# save(df, file = "Data/simData.Rdata")
