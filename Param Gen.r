@@ -31,7 +31,7 @@ df <- mutate(df,
 
 vars <- c("LSTATE", "LEANM", "SCHNAM", "DID", "SID", "DSID", "n", "ULOCAL", "pTotfrl", "pIEP_D", "pELL_D", 
           "Urban", "Suburban", "ToRu", "schPrimary", "schMIDDLE", "schHigh", 
-          "schOther", "pELL", "pED", "pELA", "pMath", "pMin", "MEDINC")
+          "schOther", "pELL", "pED", "pELA", "pMath", "pMin", "MEDINC", "urbanicity")
 
 # apply(df[,vars], 2, function(x) sum(is.na(x)))
 
@@ -102,48 +102,11 @@ distEx <- "Urban"
 # df.dist$PS20 <- calcPS(Bs = bs_RR20$par, MRR = bs_RR20$resp, vars = distVars, data = df.dist, exclude = distEx)
 # df.dist$PS10 <- calcPS(Bs = bs_RR10$par, MRR = bs_RR10$resp, vars = distVars, data = df.dist, exclude = distEx)
 # 
-<<<<<<< HEAD
-# save.image("Params/171031.rdata")
+# save.image("Params/171106.rdata")
 
-load("Params/171031.rdata")
+load("Params/171106.rdata")
 
 #-----------------------
-=======
-# save.image("Params/171103.rdata")
-# 
-# 
-# 
-# 
-# 
-# distVals <- rbind(getVals(bs_RR30, vars = distVars, data = df.dist, exclude = distEx, goal = distGoal),
-#                   getVals(bs_RR20, vars = distVars, data = df.dist, exclude = distEx, goal = distGoal),
-#                   getVals(bs_RR10, vars = distVars, data = df.dist, exclude = distEx, goal = distGoal))
-# 
-# df.dist$PS30 <- calcPS(Bs = bs_RR30$par, MRR = bs_RR30$resp, vars = distVars, data = df.dist, exclude = distEx)
-# df.dist$PS20 <- calcPS(Bs = bs_RR20$par, MRR = bs_RR20$resp, vars = distVars, data = df.dist, exclude = distEx)
-# df.dist$PS10 <- calcPS(Bs = bs_RR10$par, MRR = bs_RR10$resp, vars = distVars, data = df.dist, exclude = distEx)
-
-# RR_PS <- df.dist %>%
-#   select(PS30:PS10) %>%
-#   gather(key = "RR", value = "PS")
-# 
-
-# 
-# reps <- 10000
-# RR_PS$selectRate <- replicate(reps, distSelect(RR_PS)) %>% apply(1, sum)/reps 
-#   
-# RR_PS %>%
-#   filter(selectRate > .5) %>%
-#   ggplot(aes(x = selectRate, fill = RR)) +
-#   geom_histogram() +
-#   facet_wrap(~ RR)
-# 
-# RR_PS %>%
-#   ggplot(aes(x = selectRate, y = PS, color = selectRate)) +
-#   geom_point()
-
-###################
->>>>>>> e040028599937f6755ede435ff0cb0ec4a6d74fb
 # Schools
 #-----------------------
 df.sch <- df %>%
@@ -197,9 +160,9 @@ schEx <- "Urban"
 # df.sch$PS10 <- calcPS(Bs = schBs_RR10$par, MRR = schBs_RR10$resp, vars = schVars, data = df.sch, exclude = schEx)
 # 
 # 
-# save.image("Params/171103.rdata")
+# save.image("Params/171106.rdata")
 
-load("Params/171103.rdata")
+load("Params/171106.rdata")
 
 
 #-----------------------
@@ -253,22 +216,12 @@ library(cluster)
 
 K = 10
 
+IVs <- c("n", "urbanicity", "pED", "pMin", "pELL")
 
+df$urbanicity <- factor(df$urbanicity)
 
-# IVs <- c("urbanicity", "G08", "FTE", "LEVEL", "edp", "ellp", "spedp", "ethOther", "ethWhite", "ethBlack", "ethHisp", "ethAsian", "genMale", "genFemale")
-# 
-# # pop <- pop %>% filter(LEVEL == "schMIDDLE",
-# #                       MAGNET == 2)
-# 
-# pop <- pop %>% filter(LEVEL == "schMIDDLE")
-# 
-# pop$region <- factor(pop$region)
-# 
-# # distance <- daisy(x = cbind(pop[,IVs], pop[,IVs[-c(1,4)]]^2, pop[,IVs[-c(1,4)]]^3),
-# #                   metric = "gower") #ORDER 3
-# distance <- daisy(x = pop[,IVs], metric = "gower")    #ORDER 1
-# 
-# 
+distance <- daisy(x = df[,IVs], metric = "gower")
+
 # clusters <- list()
 # 
 # for(i in 1:K) {
@@ -276,41 +229,18 @@ K = 10
 #   clusters <- append(clusters, list(kmeans(distance, i)))
 # }
 # 
-# classign <- data.frame(sapply(clusters, function(x) x$cluster))
-# names(classign) <- paste("k", 1:K, sep = "")
+# save(clusters, file = "Params/clusters10.rData")
 # 
-# pop <- cbind(pop, classign)
-# 
-# with(pop, table(LSTATE, k5))
-# 
-# save(pop, IVs, expandedIVs, clusters, file = "Clusters Order 1 Mid-Only.Rdata")
+# beepr::beep(1)
+# beepr::beep(1)
+# beepr::beep(1)
 
+load("Params/clusters10.rData")
 
-findDist <- function(pat) {
-  pop[, c("LEANM", "LSTATE")][str_detect(pop$LEANM, ignore.case(pat)),] %>%
-    group_by(LEANM, LSTATE) %>%
-    summarise(length(LSTATE)) %>%
-    data.frame()
-}
+classign <- data.frame(sapply(clusters, function(x) x$cluster))
+names(classign) <- paste("k", 1:K, sep = "")
 
-
-findSch <- function(pat) {
-  pop[, c("SCHNAM", "LSTATE")][str_detect(pop$SCHNAM, ignore.case(pat)),] %>%
-    group_by(SCHNAM, LSTATE) %>%
-    summarise(length(LSTATE)) %>%
-    data.frame()
-}
-
-# #
-# # findDist("austin")
-# 
-# 
-# # Vratio <- function(clstr){
-# #   Vw <- clstr$tot.withinss/(nrow(pop) - length(table(clstr$cluster)))
-# #   Vb <- clstr$betweenss/(length(table(clstr$cluster)) - 1)
-# #   Vb / (Vw + Vb)
-# #
-# # }
+df <- cbind(df, classign)
 
 Vratio <- function(clstr){
   Vw <- clstr$tot.withinss
@@ -319,7 +249,6 @@ Vratio <- function(clstr){
   
 }
 
-<<<<<<< HEAD
 data.frame(k = 1:K, var = sapply(clusters, Vratio)) %>%
   ggplot(aes(x = k, y = var)) +
   geom_point() +
@@ -331,88 +260,47 @@ data.frame(k = 1:K, var = sapply(clusters, Vratio)) %>%
   scale_x_discrete(limits = c(1:K)) +
   scale_y_continuous(breaks = seq(0, 1, .1))
 
-ggsave("Figures/Scree2.png", dpi = 500, width = 5, height = 5)
+ggsave("Params/Scree1.png", dpi = 500, width = 5, height = 5)
 
 
-pop$cluster <- pop$k5
+df$cluster <- df$k6
 
-pop$schShrt <- str_sub(pop$SCHNAM, end = 10)
+#-----------------------
+# Generate Within Cluster Ranks
+#-----------------------
+
+ranks <- df %>%
+  select(DSID, cluster, IVs[-2]) %>%
+  gather(key = "Var", value = "Val", -DSID, -cluster) %>%
+  group_by(Var) %>%
+  mutate(SD = sd(Val, na.rm = T),
+         zVal = (Val - mean(Val, na.rm = T)) / SD) %>%
+  group_by(Var, cluster) %>%
+  mutate(dist = (zVal - mean(zVal, na.rm = T))^2) %>%
+  group_by(DSID, cluster) %>%
+  summarise(dist = sqrt(sum(dist))) %>%
+  arrange(dist) %>%
+  group_by(cluster) %>%
+  mutate(rank = 1:n(),
+         rankp = (1:n())/n() * 100)
 
 
+df <- merge(df, ranks)
+df$cluster <- factor(df$cluster, ordered = F)
 
+df %>%
+  ggplot(aes(x = pELL, y = pMin, color = cluster, alpha = 1 - rankp)) +
+  facet_wrap(~urbanicity) +
+  geom_point()
 
 #-----------------------
 # Export Data
 #-----------------------
 
 
-# df <- merge(df, df.dist[, c("DID","PS10", "PS20", "PS30")])
-#   
-# df <- transmute(df.sch, DID = DID, SID = SID, schPS10 = PS10, schPS20 = PS20, schPS30 = PS30) %>%
-#   merge(df)
-# 
-# save(df, file = "Data/simData.Rdata")
-=======
-# results <- replicate(10000, sampleCS(df.select))
-# 
-# results <- data.frame(m = apply(results, 1, mean), sd = apply(results, 1, sd))
-# 
-# write.csv(results, "CS Selection.csv")
+df <- merge(df, df.dist[, c("DID","PS10", "PS20", "PS30")])
 
-results <- read.csv("CS selection.csv")
-
-
-
-df.select <- ungroup(df.select) %>%
-  arrange(DSID) %>%
-  mutate(m = results$m, 
-         sd = results$sd,
-         mGroups = factor(cut(m, breaks = seq(0,1,.05), labels = seq(0,.95,.05), right = T)))
-
-# df.select %>% select(m, mGroups)
-# 
-# df.select %>%
-#   ggplot(aes(x = mGroups, y = m)) +
-#   geom_point() +
-#   facet_wrap(~RR)
-
-df.select %>%
-  group_by(mGroups, RR) %>%
-  summarise(n = n()) %>%
-  arrange(-as.numeric(mGroups)) %>%
-  mutate(nC = cumsum(n)) %>%
-  group_by(RR) %>%
-  arrange(RR) %>%
-  mutate(p = n / sum(n),
-         pC = cumsum(p)) %>% 
-  filter(!is.na(mGroups)) %>%
-  ggplot(aes(x = mGroups, y = pC)) +
-  geom_bar(stat="identity") +
-  geom_bar(aes(y = p), stat="identity", fill = "red") +
-  facet_grid(RR~., scales = "free_y")
-
-
-df <- df.select %>%
-  select(DSID, RR, m) %>%
-  spread(key = RR, value = m) %>%
+df <- transmute(df.sch, DID = DID, SID = SID, schPS10 = PS10, schPS20 = PS20, schPS30 = PS30) %>%
   merge(df)
 
-
-dMeans <- df[, c(schVars, "PS10", "PS20", "PS30")] %>%
-  gather(key = wRR, value = weight, PS10:PS30) %>%
-  gather(key = Var, value = val, -weight, -wRR) %>%
-  group_by(wRR, Var) %>%
-  summarise(wM = weighted.mean(val, weight)) %>%
-  spread(key = wRR, value = wM)
-  
-df[, schVars] %>%
-  gather(key = Var, value = Val) %>%
-  group_by(Var) %>%
-  summarise(m = mean(Val), sd = sd(Val)) %>%
-  merge(dMeans) %>%
-  mutate(SMD10 = (PS10 - m)/sd,
-         SMD20 = (PS20 - m)/sd,
-         SMD30 = (PS30 - m)/sd) %>%
-  merge(data.frame(Var = names(schGoal), goal = schGoal))
-
->>>>>>> e040028599937f6755ede435ff0cb0ec4a6d74fb
+save(df, file = "Data/simData.Rdata")
