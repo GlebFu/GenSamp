@@ -22,7 +22,7 @@ df <- mutate(df,
              pED = ifelse(is.na(pED), pTotfrl, pED),
              pMin = 1-ethWhite,
              ToRu = Town + Rural,
-             MEDINC = STAND(MEDINC),
+             MEDINC = STAND(as.numeric(MEDINC)),
              DID = as.numeric(as.factor(LEAID)) + 1000) %>%
   group_by(DID) %>%
   mutate(SID = 1:n() + 10000) %>%
@@ -75,36 +75,36 @@ distEx <- "Urban"
 #-----------------------
 # Gen District Params
 #-----------------------
-# resp30 <- .3
-# resp20 <- .2
-# resp10 <- .1
-# 
-# bs_RR30 <- optim(par = distBs, fn = testGoal,
-#                  MRR = resp30, vars = distVars,
-#                  data = df.dist, exclude = distEx, goal = distGoal) %>%
-#   c(resp = resp30)
-# 
-# bs_RR20 <- optim(par = distBs, fn = testGoal,
-#                  MRR = resp20, vars = distVars,
-#                  data = df.dist, exclude = distEx, goal = distGoal) %>%
-#   c(resp = resp20)
-# 
-# bs_RR10 <- optim(par = distBs, fn = testGoal,
-#                  MRR = resp10, vars = distVars,
-#                  data = df.dist, exclude = distEx, goal = distGoal) %>%
-#   c(resp = resp10)
-# 
-# distVals <- rbind(getVals(bs_RR30, vars = distVars, data = df.dist, exclude = distEx, goal = distGoal),
-#                   getVals(bs_RR20, vars = distVars, data = df.dist, exclude = distEx, goal = distGoal),
-#                   getVals(bs_RR10, vars = distVars, data = df.dist, exclude = distEx, goal = distGoal))
-# 
-# df.dist$PS30 <- calcPS(Bs = bs_RR30$par, MRR = bs_RR30$resp, vars = distVars, data = df.dist, exclude = distEx)
-# df.dist$PS20 <- calcPS(Bs = bs_RR20$par, MRR = bs_RR20$resp, vars = distVars, data = df.dist, exclude = distEx)
-# df.dist$PS10 <- calcPS(Bs = bs_RR10$par, MRR = bs_RR10$resp, vars = distVars, data = df.dist, exclude = distEx)
-# 
-# save.image("Params/171106.rdata")
+resp30 <- .3
+resp20 <- .2
+resp10 <- .1
 
-load("Params/171106.rdata")
+bs_RR30 <- optim(par = distBs, fn = testGoal,
+                 MRR = resp30, vars = distVars,
+                 data = df.dist, exclude = distEx, goal = distGoal) %>%
+  c(resp = resp30)
+
+bs_RR20 <- optim(par = distBs, fn = testGoal,
+                 MRR = resp20, vars = distVars,
+                 data = df.dist, exclude = distEx, goal = distGoal) %>%
+  c(resp = resp20)
+
+bs_RR10 <- optim(par = distBs, fn = testGoal,
+                 MRR = resp10, vars = distVars,
+                 data = df.dist, exclude = distEx, goal = distGoal) %>%
+  c(resp = resp10)
+
+distVals <- rbind(getVals(bs_RR30, vars = distVars, data = df.dist, exclude = distEx, goal = distGoal),
+                  getVals(bs_RR20, vars = distVars, data = df.dist, exclude = distEx, goal = distGoal),
+                  getVals(bs_RR10, vars = distVars, data = df.dist, exclude = distEx, goal = distGoal))
+
+df.dist$PS30 <- calcPS(Bs = bs_RR30$par, MRR = bs_RR30$resp, vars = distVars, data = df.dist, exclude = distEx)
+df.dist$PS20 <- calcPS(Bs = bs_RR20$par, MRR = bs_RR20$resp, vars = distVars, data = df.dist, exclude = distEx)
+df.dist$PS10 <- calcPS(Bs = bs_RR10$par, MRR = bs_RR10$resp, vars = distVars, data = df.dist, exclude = distEx)
+
+save.image("Params/171115.rdata")
+
+load("Params/171115.rdata")
 
 #-----------------------
 # Schools
@@ -127,86 +127,86 @@ schEx <- "Urban"
 # Gen School Params
 #-----------------------
 
-# resp30 <- .3
-# resp20 <- .2
-# resp10 <- .1
-# 
-# schBs_RR30 <- optim(par = schBs, fn = testGoal,
-#                  MRR = resp30, vars = schVars,
-#                  data = df.sch, exclude = schEx, goal = schGoal) %>%
-#   c(resp = resp30)
-# 
-# schBs_RR20 <- optim(par = schBs, fn = testGoal,
-#                  MRR = resp20, vars = schVars,
-#                  data = df.sch, exclude = schEx, goal = schGoal) %>%
-#   c(resp = resp20)
-# 
-# schBs_RR10 <- optim(par = schBs, fn = testGoal,
-#                  MRR = resp10, vars = schVars,
-#                  data = df.sch, exclude = schEx, goal = schGoal) %>%
-#   c(resp = resp10)
-# 
-# 
-# 
-# 
-# 
-# 
-# schVals <- rbind(getVals(schBs_RR30, vars = schVars, data = df.sch, exclude = schEx, goal = schGoal),
-#                   getVals(schBs_RR20, vars = schVars, data = df.sch, exclude = schEx, goal = schGoal),
-#                   getVals(schBs_RR10, vars = schVars, data = df.sch, exclude = schEx, goal = schGoal))
-# 
-# df.sch$PS30 <- calcPS(Bs = schBs_RR30$par, MRR = schBs_RR30$resp, vars = schVars, data = df.sch, exclude = schEx)
-# df.sch$PS20 <- calcPS(Bs = schBs_RR20$par, MRR = schBs_RR20$resp, vars = schVars, data = df.sch, exclude = schEx)
-# df.sch$PS10 <- calcPS(Bs = schBs_RR10$par, MRR = schBs_RR10$resp, vars = schVars, data = df.sch, exclude = schEx)
-# 
-# 
-# save.image("Params/171106.rdata")
+resp30 <- .3
+resp20 <- .2
+resp10 <- .1
 
-load("Params/171106.rdata")
+schBs_RR30 <- optim(par = schBs, fn = testGoal,
+                 MRR = resp30, vars = schVars,
+                 data = df.sch, exclude = schEx, goal = schGoal) %>%
+  c(resp = resp30)
+
+schBs_RR20 <- optim(par = schBs, fn = testGoal,
+                 MRR = resp20, vars = schVars,
+                 data = df.sch, exclude = schEx, goal = schGoal) %>%
+  c(resp = resp20)
+
+schBs_RR10 <- optim(par = schBs, fn = testGoal,
+                 MRR = resp10, vars = schVars,
+                 data = df.sch, exclude = schEx, goal = schGoal) %>%
+  c(resp = resp10)
+
+
+
+
+
+
+schVals <- rbind(getVals(schBs_RR30, vars = schVars, data = df.sch, exclude = schEx, goal = schGoal),
+                  getVals(schBs_RR20, vars = schVars, data = df.sch, exclude = schEx, goal = schGoal),
+                  getVals(schBs_RR10, vars = schVars, data = df.sch, exclude = schEx, goal = schGoal))
+
+df.sch$PS30 <- calcPS(Bs = schBs_RR30$par, MRR = schBs_RR30$resp, vars = schVars, data = df.sch, exclude = schEx)
+df.sch$PS20 <- calcPS(Bs = schBs_RR20$par, MRR = schBs_RR20$resp, vars = schVars, data = df.sch, exclude = schEx)
+df.sch$PS10 <- calcPS(Bs = schBs_RR10$par, MRR = schBs_RR10$resp, vars = schVars, data = df.sch, exclude = schEx)
+
+
+save.image("Params/171115.rdata")
+
+load("Params/171115.rdata")
 
 
 #-----------------------
 # Convenience Sample SMDs
 #-----------------------
 
-# df.select <- df.dist %>% 
-#   select(DID, PS30:PS10) %>% 
-#   gather(key = "RR", value = "dPS", PS30:PS10)
-# 
-# df.select <- df.sch %>%
-#   select(DID, SID, DSID, PS30:PS10) %>%
-#   gather(key = "RR", value = "sPS", PS30:PS10) %>%
-#   merge(df.select)
-# 
-# 
-# sampleCS <- function(data, n = 60) {
-#   data <- data %>% 
-#     mutate(Ej = genE(dPS), 
-#            Eij = ifelse(Ej == 1, genE(sPS), 0)) %>%
-#     group_by(RR) %>%
-#     arrange(RR, -Eij, -dPS, -sPS) %>%
-#     mutate(Rank = 1:n(),
-#            Select = Rank <= n) %>%
-#     ungroup() %>%
-#     arrange(DSID)
-#   
-#   return(data$Select)
-#   
-# }
-# 
-# results <- replicate(10000, sampleCS(df.select))
-# 
-# write.csv(results, "Params/CS Selection.csv")
-# 
-# results <- read.csv("Params/CS Selection.csv")
-# 
-# df.select %>%
-#   ungroup() %>%
-#   arrange(DSID) %>%
-#   mutate(selectRate = apply(results, 1, mean)) %>%
-#   ggplot(aes(x = selectRate)) + 
-#   geom_histogram() +
-#   facet_wrap(~ RR)
+df.select <- df.dist %>%
+  select(DID, PS30:PS10) %>%
+  gather(key = "RR", value = "dPS", PS30:PS10)
+
+df.select <- df.sch %>%
+  select(DID, SID, DSID, PS30:PS10) %>%
+  gather(key = "RR", value = "sPS", PS30:PS10) %>%
+  merge(df.select)
+
+
+sampleCS <- function(data, n = 60) {
+  data <- data %>%
+    mutate(Ej = genE(dPS),
+           Eij = ifelse(Ej == 1, genE(sPS), 0)) %>%
+    group_by(RR) %>%
+    arrange(RR, -Eij, -dPS, -sPS) %>%
+    mutate(Rank = 1:n(),
+           Select = Rank <= n) %>%
+    ungroup() %>%
+    arrange(DSID)
+
+  return(data$Select)
+
+}
+
+results <- replicate(10000, sampleCS(df.select))
+
+write.csv(results, "Params/CS Selection.csv")
+
+results <- read.csv("Params/CS Selection.csv")
+
+df.select %>%
+  ungroup() %>%
+  arrange(DSID) %>%
+  mutate(selectRate = apply(results, 1, mean)) %>%
+  ggplot(aes(x = selectRate)) +
+  geom_histogram() +
+  facet_wrap(~ RR)
 
 
 #-----------------------
@@ -222,18 +222,18 @@ df$urbanicity <- factor(df$urbanicity)
 
 distance <- daisy(x = df[,IVs], metric = "gower")
 
-# clusters <- list()
-# 
-# for(i in 1:K) {
-# 
-#   clusters <- append(clusters, list(kmeans(distance, i)))
-# }
-# 
-# save(clusters, file = "Params/clusters10.rData")
-# 
-# beepr::beep(1)
-# beepr::beep(1)
-# beepr::beep(1)
+clusters <- list()
+
+for(i in 1:K) {
+
+  clusters <- append(clusters, list(kmeans(distance, i)))
+}
+
+save(clusters, file = "Params/clusters10.rData")
+
+beepr::beep(1)
+beepr::beep(1)
+beepr::beep(1)
 
 load("Params/clusters10.rData")
 
