@@ -17,17 +17,19 @@ df <- read.csv("Data/final data.csv", stringsAsFactors = F)
 # Create ELL and ED variable district data when school is unavailable
 # Create Minority variable
 # Create Town/Rural Variable
-df <- mutate(df,
-             pELL = ifelse(is.na(pELL), pELL_D, pELL), 
-             pED = ifelse(is.na(pED), pTotfrl, pED),
-             pMin = 1-ethWhite,
-             ToRu = Town + Rural,
-             MEDINC = STAND(as.numeric(MEDINC)),
-             DID = as.numeric(as.factor(LEAID)) + 1000) %>%
+df <- df %>% 
+  filter(n < 4000) %>%
+  mutate(pELL = ifelse(is.na(pELL), pELL_D, pELL), 
+         pED = ifelse(is.na(pED), pTotfrl, pED),
+         pMin = 1-ethWhite,
+         ToRu = Town + Rural,
+         MEDINC = STAND(as.numeric(MEDINC)),
+         DID = as.numeric(as.factor(LEAID)) + 1000) %>%
   group_by(DID) %>%
   mutate(SID = 1:n() + 10000) %>%
   ungroup() %>%
   mutate(DSID = paste(DID, SID, sep = "-"))
+
 
 vars <- c("LSTATE", "LEANM", "SCHNAM", "DID", "SID", "DSID", "n", "ULOCAL", "pTotfrl", "pIEP_D", "pELL_D", 
           "Urban", "Suburban", "ToRu", "schPrimary", "schMIDDLE", "schHigh", 
@@ -196,9 +198,10 @@ sampleCS <- function(data, n = 60) {
 
 results <- replicate(10000, sampleCS(df.select))
 
-write.csv(results, "Params/CS Selection.csv")
+save(results, file = "Params/CS Selection.rData")
 
-results <- read.csv("Params/CS Selection.csv")
+
+load("Params/CS Selection.rData")
 
 df.select %>%
   ungroup() %>%
