@@ -42,6 +42,7 @@ propAl <- function(cluster) {
 approached <- genE(dfPS)
 
 set.seed(1010)
+
 SRS_Sample <- approached %>%
   select(DSID:RR, Ej:Eij) %>%
   group_by(RR) %>%
@@ -49,15 +50,34 @@ SRS_Sample <- approached %>%
   arrange(rankSRS) %>%
   mutate(count = cumsum(Eij)) %>% 
   filter(count <= 60) %>%
-  merge(df, all.x = T)
-SRS_Sample %>% group_by(RR) %>% summarise(schRR = mean(Eij), accepted = sum(Eij), rejected = n() - accepted, sampled = n())
+  left_join(df, by = c("DSID", "DID", "SID", "cluster"))
+
+SRS_Sample %>% 
+  group_by(RR, DID) %>% 
+  summarise(
+    Ej = mean(Ej),
+    n_schools = n(),
+    schRR = mean(Eij),
+    accepted = sum(Eij),
+    rejected = n() - accepted
+  ) %>%
+  summarise(
+    distRR = mean(Ej),
+    schRR = weighted.mean(schRR, w = n_schools),
+    schRR_con = sum(schRR * Ej * n_schools) / sum(Ej * n_schools),
+    accepted = sum(accepted), 
+    rejected = sum(rejected),
+    district_sampled = n(),
+    schools_sampled = sum(n_schools)
+  )
 
 CS_Sample <- approached %>%
   group_by(RR) %>%
   arrange(-distPS, -schPS) %>%
   mutate(count = cumsum(Eij)) %>% 
   filter(count <= 60) %>%
-  merge(df, all.x = T)
+  left_join(df, by = c("DSID", "DID", "SID", "cluster"))
+
 CS_Sample %>% group_by(RR) %>% summarise(schRR = mean(Eij), accepted = sum(Eij), rejected = n() - accepted, sampled = n())
 
 CASS_Sample <- approached %>%
@@ -65,9 +85,12 @@ CASS_Sample <- approached %>%
   arrange(rankC) %>%
   mutate(count = cumsum(Eij)) %>%
   filter(count <= propAl(cluster)) %>%
-  merge(df, all.x = T)
+  left_join(df, by = c("DSID", "DID", "SID", "cluster"))
 
 CASS_Sample %>% group_by(RR, cluster) %>% summarise(schRR = mean(Eij), accepted = sum(Eij), rejected = n() - accepted, sampled = n())
 CASS_Sample %>% group_by(RR) %>% summarise(schRR = mean(Eij), accepted = sum(Eij), rejected = n() - accepted, sampled = n())
 
 
+
+
+sim_driver <- function(RR, )
