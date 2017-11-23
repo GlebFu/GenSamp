@@ -52,24 +52,19 @@ SRS_Sample <- approached %>%
   filter(count <= 60) %>%
   left_join(df, by = c("DSID", "DID", "SID", "cluster"))
 
-SRS_Sample %>% 
-  group_by(RR, DID) %>% 
-  summarise(
-    Ej = mean(Ej),
-    n_schools = n(),
-    schRR = mean(Eij),
-    accepted = sum(Eij),
-    rejected = n() - accepted
-  ) %>%
-  summarise(
-    distRR = mean(Ej),
-    schRR = weighted.mean(schRR, w = n_schools),
-    schRR_con = sum(schRR * Ej * n_schools) / sum(Ej * n_schools),
-    accepted = sum(accepted), 
-    rejected = sum(rejected),
-    district_sampled = n(),
-    schools_sampled = sum(n_schools)
-  )
+SRS_Sample %>%
+  group_by(RR, Ej) %>%
+  summarise(nS = n(),
+            schAcc = sum(Eij),
+            nD = length(unique(DID))) %>%
+  mutate(schRej = nS * Ej - schAcc) %>%
+  group_by(RR) %>%
+  mutate(distRej = sum(nD) - nD,
+         schRR = schAcc/nS,
+         distAcc = nD,
+         nD = sum(nD),
+         distRR = distAcc/nD) %>%
+  filter(Ej == 1)
 
 CS_Sample <- approached %>%
   group_by(RR) %>%
@@ -78,7 +73,19 @@ CS_Sample <- approached %>%
   filter(count <= 60) %>%
   left_join(df, by = c("DSID", "DID", "SID", "cluster"))
 
-CS_Sample %>% group_by(RR) %>% summarise(schRR = mean(Eij), accepted = sum(Eij), rejected = n() - accepted, sampled = n())
+CS_Sample %>%
+  group_by(RR, Ej) %>%
+  summarise(nS = n(),
+            schAcc = sum(Eij),
+            nD = length(unique(DID))) %>%
+  mutate(schRej = nS * Ej - schAcc) %>%
+  group_by(RR) %>%
+  mutate(distRej = sum(nD) - nD,
+         schRR = schAcc/nS,
+         distAcc = nD,
+         nD = sum(nD),
+         distRR = distAcc/nD) %>%
+  filter(Ej == 1)
 
 CASS_Sample <- approached %>%
   group_by(RR, cluster) %>%
@@ -87,10 +94,31 @@ CASS_Sample <- approached %>%
   filter(count <= propAl(cluster)) %>%
   left_join(df, by = c("DSID", "DID", "SID", "cluster"))
 
-CASS_Sample %>% group_by(RR, cluster) %>% summarise(schRR = mean(Eij), accepted = sum(Eij), rejected = n() - accepted, sampled = n())
-CASS_Sample %>% group_by(RR) %>% summarise(schRR = mean(Eij), accepted = sum(Eij), rejected = n() - accepted, sampled = n())
+CASS_Sample %>%
+  group_by(RR, Ej) %>%
+  summarise(nS = n(),
+            schAcc = sum(Eij),
+            nD = length(unique(DID))) %>%
+  mutate(schRej = nS * Ej - schAcc) %>%
+  group_by(RR) %>%
+  mutate(distRej = sum(nD) - nD,
+         schRR = schAcc/nS,
+         distAcc = nD,
+         nD = sum(nD),
+         distRR = distAcc/nD) %>%
+  filter(Ej == 1)
 
+CASS_Sample %>%
+  group_by(RR, Ej, cluster) %>%
+  summarise(nS = n(),
+            schAcc = sum(Eij),
+            nD = length(unique(DID))) %>%
+  mutate(schRej = nS * Ej - schAcc) %>%
+  group_by(RR, cluster) %>%
+  mutate(distRej = sum(nD) - nD,
+         schRR = schAcc/nS,
+         distAcc = nD,
+         nD = sum(nD),
+         distRR = distAcc/nD) %>%
+  filter(Ej == 1)
 
-
-
-sim_driver <- function(RR, )
