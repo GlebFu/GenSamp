@@ -97,8 +97,7 @@ CASS_Sample <- approached %>%
 CASS_Sample %>%
   group_by(RR, Ej) %>%
   summarise(nS = n(),
-            schAcc = sum(Eij),
-            nD = length(unique(DID))) %>%
+            schA  length(unique(DID))) %>%
   mutate(schRej = nS * Ej - schAcc) %>%
   group_by(RR) %>%
   mutate(distRej = sum(nD) - nD,
