@@ -18,14 +18,14 @@ dfPS <- select(df, DSID, DID, SID, distPS10:distPS30, schPS10:schPS30, cluster, 
   spread(key = unit, value = PS)
 
 # 
-sampleBinom <- function(ps) rbinom(length(ps), 1, prob = ps)
+sampleBinomial <- function(ps) rbinom(length(ps), 1, prob = ps)
 
-genE <- function(data) {
+generateE <- function(data) {
   data %>%
     group_by(RR, DID) %>%
-    mutate(Ej = sampleBinom(mean(distPS))) %>%
+    mutate(Ej = sampleBinomial(mean(distPS))) %>%
     group_by(RR) %>%
-    mutate(Eij = ifelse(Ej == 1, sampleBinom(schPS), 0)) %>%
+    mutate(Eij = ifelse(Ej == 1, sampleBinomial(schPS), 0)) %>%
     # merge(select(df, DSID, cluster, n, Urban, Suburban, ToRu, pELL, pED, pELA, pMath, pMin, MEDINC, rank, rankp)) %>%
     return()
 }
@@ -39,85 +39,79 @@ propAl <- function(cluster) {
 #-------------------------------------
 # Building sample generation function
 #-------------------------------------
-approached <- genE(dfPS)
+approached <- generateE(dfPS)
 
 set.seed(1010)
 
-SRS_Sample <- approached %>%
-  select(DSID:RR, Ej:Eij) %>%
-  group_by(RR) %>%
-  mutate(rankSRS = sample(1:n())) %>%
-  arrange(rankSRS) %>%
-  mutate(count = cumsum(Eij)) %>% 
-  filter(count <= 60) %>%
-  left_join(df, by = c("DSID", "DID", "SID", "cluster"))
+createSample <- function(data) {
+  
+  # Simple Random Sampling
+  SRS_Sample <- approached %>%
+    select(DSID:RR, Ej:Eij) %>%
+    group_by(RR) %>%
+    mutate(rankSRS = sample(1:n())) %>%
+    arrange(rankSRS) %>%
+    mutate(count = cumsum(Eij)) %>% 
+    filter(count <= 60) %>%
+    left_join(df, by = c("DSID", "DID", "SID", "cluster")) %>%
+    mutate(sample = "SRS")
+  
+  #Convenience Sampling
+  CS_Sample <- approached %>%
+    group_by(RR) %>%
+    arrange(-distPS, -schPS) %>%
+    mutate(count = cumsum(Eij)) %>% 
+    filter(count <= 60) %>%
+    left_join(df, by = c("DSID", "DID", "SID", "cluster")) %>%
+    mutate(sample = "CS")
+  
+  #Cluster Analyusis Stratified Sampling
+  CASS_Sample <- approached %>%
+    group_by(RR, cluster) %>%
+    arrange(rankC) %>%
+    mutate(count = cumsum(Eij)) %>%
+    filter(count <= propAl(cluster)) %>%
+    left_join(df, by = c("DSID", "DID", "SID", "cluster")) %>%
+    mutate(sample = "CASS")
+  
+  return(rbind(SRS_Sample, CS_Sample, CASS_Sample))
+}
 
-SRS_Sample %>%
-  group_by(RR, Ej) %>%
-  summarise(nS = n(),
-            schAcc = sum(Eij),
-            nD = length(unique(DID))) %>%
-  mutate(schRej = nS * Ej - schAcc) %>%
-  group_by(RR) %>%
-  mutate(distRej = sum(nD) - nD,
-         schRR = schAcc/nS,
-         distAcc = nD,
-         nD = sum(nD),
-         distRR = distAcc/nD) %>%
-  filter(Ej == 1)
+response_rates <- function(data, cluster = F) {
+  if(!cluster){
+    data %>%
+      group_by(sample, RR, Ej) %>%
+      summarise(nS = n(),
+                schAcc = sum(Eij),
+                nD = length(unique(DID))) %>%
+      mutate(schRej = nS * Ej - schAcc) %>%
+      group_by(sample, RR) %>%
+      mutate(distRej = sum(nD) - nD,
+             schRR = schAcc/nS,
+             distAcc = nD,
+             nD = sum(nD),
+             distRR = distAcc/nD) %>%
+      filter(Ej == 1) %>%
+      return()
+  } else {
+    data %>%
+      filter(sample == "CASS") %>%
+      group_by(RR, Ej, cluster) %>%
+      summarise(nS = n(),
+                schAcc = sum(Eij),
+                nD = length(unique(DID))) %>%
+      mutate(schRej = nS * Ej - schAcc) %>%
+      group_by(RR, cluster) %>%
+      mutate(distRej = sum(nD) - nD,
+             schRR = schAcc/nS,
+             distAcc = nD,
+             nD = sum(nD),
+             distRR = distAcc/nD) %>%
+      filter(Ej == 1)
+  }
+}
 
-CS_Sample <- approached %>%
-  group_by(RR) %>%
-  arrange(-distPS, -schPS) %>%
-  mutate(count = cumsum(Eij)) %>% 
-  filter(count <= 60) %>%
-  left_join(df, by = c("DSID", "DID", "SID", "cluster"))
+createSample(dfPS) %>%
+  response_rates(cluster = T)
 
-CS_Sample %>%
-  group_by(RR, Ej) %>%
-  summarise(nS = n(),
-            schAcc = sum(Eij),
-            nD = length(unique(DID))) %>%
-  mutate(schRej = nS * Ej - schAcc) %>%
-  group_by(RR) %>%
-  mutate(distRej = sum(nD) - nD,
-         schRR = schAcc/nS,
-         distAcc = nD,
-         nD = sum(nD),
-         distRR = distAcc/nD) %>%
-  filter(Ej == 1)
-
-CASS_Sample <- approached %>%
-  group_by(RR, cluster) %>%
-  arrange(rankC) %>%
-  mutate(count = cumsum(Eij)) %>%
-  filter(count <= propAl(cluster)) %>%
-  left_join(df, by = c("DSID", "DID", "SID", "cluster"))
-
-CASS_Sample %>%
-  group_by(RR, Ej) %>%
-  summarise(nS = n(),
-            schA  length(unique(DID))) %>%
-  mutate(schRej = nS * Ej - schAcc) %>%
-  group_by(RR) %>%
-  mutate(distRej = sum(nD) - nD,
-         schRR = schAcc/nS,
-         distAcc = nD,
-         nD = sum(nD),
-         distRR = distAcc/nD) %>%
-  filter(Ej == 1)
-
-CASS_Sample %>%
-  group_by(RR, Ej, cluster) %>%
-  summarise(nS = n(),
-            schAcc = sum(Eij),
-            nD = length(unique(DID))) %>%
-  mutate(schRej = nS * Ej - schAcc) %>%
-  group_by(RR, cluster) %>%
-  mutate(distRej = sum(nD) - nD,
-         schRR = schAcc/nS,
-         distAcc = nD,
-         nD = sum(nD),
-         distRR = distAcc/nD) %>%
-  filter(Ej == 1)
 
