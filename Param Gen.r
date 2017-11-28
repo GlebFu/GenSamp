@@ -333,3 +333,4 @@ df <- transmute(df.sch, DID = DID, SID = SID, schPS10 = PS10, schPS20 = PS20, sc
 df <- rename(df, distPS10 = PS10, distPS20 = PS20, distPS30 = PS30)
 
 save(df, file = "Data/simData.Rdata")
+save(schGoal, distGoal, file = "Data/RGM Vars.Rdata")

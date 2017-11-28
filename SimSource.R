@@ -5,8 +5,32 @@ library(stringr)
 
 rm(list = ls())
 
+#-----------------
+# Fixed data
+#-----------------
+
+# Base data set
 load("Data/simData.Rdata")
 
+# Response generating variables and goal SMD
+load("Data/RGM Vars.Rdata")
+
+# District statistics
+dist_stats <- df[,c("DID", names(distGoal))] %>%
+  gather(key = "Variable", value = "Value", names(distGoal)) %>%
+  group_by(Variable, DID) %>%
+  summarise(dist_mean = mean(Value)) %>%
+  summarise(pop_mean = mean(dist_mean),
+            pop_sd = sd(dist_mean)) %>%
+  left_join(data.frame(Variable = names(distGoal), goal_SMD = distGoal, row.names = NULL, stringsAsFactors = F))
+
+# School statistics
+sch_stats <- df[,c("DSID", names(schGoal))] %>%
+  gather(key = "Variable", value = "Value", names(schGoal)) %>%
+  group_by(Variable) %>%
+  summarise(pop_mean = mean(Value),
+            pop_sd = sd(Value)) %>%
+  left_join(data.frame(Variable = names(schGoal), goal_SMD = schGoal, row.names = NULL, stringsAsFactors = F))
 
 # Pull out necesary variables for generating selections
 dfPS <- select(df, DSID, DID, SID, distPS10:distPS30, schPS10:schPS30, cluster, rank) %>%
@@ -17,7 +41,10 @@ dfPS <- select(df, DSID, DID, SID, distPS10:distPS30, schPS10:schPS30, cluster, 
   select(-unitRR) %>%
   spread(key = unit, value = PS)
 
-# 
+#-----------------
+# Functions
+#-----------------
+
 sampleBinomial <- function(ps) rbinom(length(ps), 1, prob = ps)
 
 generateE <- function(data) {
@@ -30,23 +57,16 @@ generateE <- function(data) {
     return()
 }
 
-propAl <- function(cluster) {
+propAllocation <- function(cluster) {
   allocations <- round((table(df$cluster) / nrow(df)) * 60,0)
   return(allocations[cluster])
 }
 
-
-#-------------------------------------
-# Building sample generation function
-#-------------------------------------
-approached <- generateE(dfPS)
-
-set.seed(1010)
-
+# Creates dataset with samples for each method and response rate
 createSample <- function(data) {
   
   # Simple Random Sampling
-  SRS_Sample <- approached %>%
+  SRS_Sample <- data %>%
     select(DSID:RR, Ej:Eij) %>%
     group_by(RR) %>%
     mutate(rankSRS = sample(1:n())) %>%
@@ -57,7 +77,7 @@ createSample <- function(data) {
     mutate(sample = "SRS")
   
   #Convenience Sampling
-  CS_Sample <- approached %>%
+  CS_Sample <- data %>%
     group_by(RR) %>%
     arrange(-distPS, -schPS) %>%
     mutate(count = cumsum(Eij)) %>% 
@@ -66,52 +86,144 @@ createSample <- function(data) {
     mutate(sample = "CS")
   
   #Cluster Analyusis Stratified Sampling
-  CASS_Sample <- approached %>%
+  CASS_Sample <- data %>%
     group_by(RR, cluster) %>%
     arrange(rankC) %>%
     mutate(count = cumsum(Eij)) %>%
-    filter(count <= propAl(cluster)) %>%
+    filter(count <= propAllocation(cluster)) %>%
     left_join(df, by = c("DSID", "DID", "SID", "cluster")) %>%
     mutate(sample = "CASS")
   
   return(rbind(SRS_Sample, CS_Sample, CASS_Sample))
 }
 
-response_rates <- function(data, cluster = F) {
+# Calculates response rates and other recruiting statistics
+calcResponseRates <- function(data, cluster = F) {
   if(!cluster){
-    data %>%
-      group_by(sample, RR, Ej) %>%
-      summarise(nS = n(),
-                schAcc = sum(Eij),
-                nD = length(unique(DID))) %>%
-      mutate(schRej = nS * Ej - schAcc) %>%
-      group_by(sample, RR) %>%
-      mutate(distRej = sum(nD) - nD,
-             schRR = schAcc/nS,
-             distAcc = nD,
-             nD = sum(nD),
-             distRR = distAcc/nD) %>%
-      filter(Ej == 1) %>%
-      return()
+    data <- data %>%
+      group_by(sample, RR, Ej)
   } else {
-    data %>%
+    data <- data %>%
       filter(sample == "CASS") %>%
-      group_by(RR, Ej, cluster) %>%
-      summarise(nS = n(),
-                schAcc = sum(Eij),
-                nD = length(unique(DID))) %>%
-      mutate(schRej = nS * Ej - schAcc) %>%
-      group_by(RR, cluster) %>%
-      mutate(distRej = sum(nD) - nD,
-             schRR = schAcc/nS,
-             distAcc = nD,
-             nD = sum(nD),
-             distRR = distAcc/nD) %>%
-      filter(Ej == 1)
+      group_by(RR, Ej, cluster)
+
   }
+  data %>%
+    summarise(sch_contacted = n(),
+            sch_accepted = sum(Eij),
+            dist_contacted = length(unique(DID))) %>%
+    mutate(sch_rejected = sch_contacted * Ej - sch_accepted) %>%
+    mutate(dist_rejected = sum(dist_contacted) - dist_contacted,
+           sch_RR = sch_accepted/sch_contacted,
+           dist_accepted = dist_contacted,
+           dist_contacted = sum(dist_contacted),
+           dist_RR = dist_accepted/dist_contacted) %>%
+    filter(Ej == 1) %>%
+    select(-Ej) %>%
+    return()
 }
 
-createSample(dfPS) %>%
-  response_rates(cluster = T)
 
 
+# Calculates weighted standard deviation
+weighted.sd <- function(x, w) sqrt(sum(w * (x - weighted.mean(x, w))^2))
+
+# calculates standardized mean diferences between sample and population
+calcDistSMDs <- function(sample) {
+  sample[, c("RR", "sample","DID", "Ej", "Eij", names(distGoal))] %>%
+    gather(key = "Variable", value = "Value", names(distGoal)) %>%
+    group_by(sample, RR, Variable, DID) %>%
+    summarise(sampled = mean(Ej),
+              contributed = as.numeric(sum(Eij) > 0),
+              rejected = 1 - sampled,
+              dist_mean = mean(Value)) %>%
+    gather(key = "Group", value = "Weight", sampled:rejected) %>%
+    group_by(sample, RR, Variable, Group) %>%
+    summarise(sample_mean = weighted.mean(dist_mean, Weight),
+              sample_sd = weighted.sd(dist_mean, Weight)) %>% 
+    left_join(dist_stats) %>%
+    mutate(sim_SMD = (sample_mean - pop_mean) / pop_sd,
+           miss = sim_SMD - goal_SMD)
+}
+
+calcSchSMDs <- function(sample) {
+  sample[, c("RR", "sample","DID", "Ej", "Eij", names(schGoal))] %>%
+    gather(key = "Variable", value = "Value", names(schGoal)) %>%
+    mutate(sampled = Eij,
+              rejected = Ej - Eij) %>%
+    gather(key = "Group", value = "Weight", sampled:rejected) %>%
+    group_by(sample, RR, Variable, Group) %>%
+    summarise(sample_mean = weighted.mean(Value, Weight),
+              sample_sd = weighted.sd(Value, Weight)) %>% 
+    left_join(sch_stats) %>%
+    mutate(sim_SMD = (sample_mean - pop_mean) / pop_sd,
+           miss = sim_SMD - goal_SMD)
+}
+
+#-----------------
+# Test Sim Stages
+#-----------------
+
+set.seed(1010)
+test_approached <- generateE(dfPS)
+test_sample <- createSample(test_approached)
+test_responses <- calcResponseRates(test_sample)
+test_dist_smds <- calcDistSMDs(test_sample)
+test_sch_smds <- calcSchSMDs(test_sample)
+
+# Visualize Sampling
+
+test_responses %>%
+  gather(key = measure, value = value, -sample, -RR) %>%
+  mutate(level = str_split(measure, "_", simplify = T)[,1],
+         measure =  str_split(measure, "_", simplify = T)[,2]) %>%
+  ggplot(aes(x = RR, y = value, group = sample, color = sample)) +
+  geom_point() +
+  geom_line() +
+  facet_grid(measure ~ level, scales = "free_y") +
+  theme_minimal()
+
+# Visualize District SMDs
+test_dist_smds %>%
+  ggplot(aes(x = RR, y = abs(sim_SMD), group = sample, color = sample)) +
+  geom_point() +
+  geom_line() +
+  geom_hline(yintercept = 0) +
+  geom_hline(yintercept = c(-.1, .1), linetype = "dashed") +
+  facet_grid(Group ~ Variable) +
+  theme_minimal()
+
+# Visualize School SMDs
+test_sch_smds %>%
+  ggplot(aes(x = RR, y = abs(sim_SMD), group = sample, color = sample)) +
+  geom_point() +
+  geom_line() +
+  geom_hline(yintercept = 0) +
+  geom_hline(yintercept = c(-.1, .1), linetype = "dashed") +
+  facet_grid(Group ~ Variable) +
+  theme_minimal()
+
+
+# Compare to goal SMDs
+test_dist_smds %>%
+  ggplot(aes(x = RR, y = miss, group = sample, color = sample)) +
+  geom_point() +
+  geom_line() +
+  geom_hline(yintercept = 0) +
+  geom_hline(yintercept = c(-.1, .1), linetype = "dashed") +
+  facet_grid(Group ~ Variable) +
+  theme_minimal()
+
+testRun <- function() {
+  test_approached <- generateE(dfPS)
+  test_sample <- createSample(test_approached)
+  test_responses <- calcResponseRates(test_sample)
+  test_dist_smds <- calcDistSMDs(test_sample)
+  test_sch_smds <- calcSchSMDs(test_sample)
+}
+
+# runtime <- system.time(replicate(100, testRun()))
+# save(runtime, file = "Data/Sim Test Runtime.rdata")
+load("Data/Sim Test Runtime.rdata")
+avgRun <- runtime/100
+avgRun * 10000 / 60 / 60 # Hours
