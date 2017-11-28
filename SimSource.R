@@ -126,7 +126,8 @@ calcResponseRates <- function(data, cluster = F) {
 
 
 # Calculates weighted standard deviation
-weighted.sd <- function(x, w) sqrt(sum(w * (x - weighted.mean(x, w))^2))
+weighted.sd <- function(x, w) sqrt(sum((w * (x - weighted.mean(x, w)))^2) / (sum(w) - 1))
+# weighted.sd <- function(x, w) sd(x[w == 1])
 
 # calculates standardized mean diferences between sample and population
 calcDistSMDs <- function(sample) {
@@ -181,7 +182,7 @@ test_responses %>%
   geom_point() +
   geom_line() +
   facet_grid(measure ~ level, scales = "free_y") +
-  theme_minimal()
+  theme_bw()
 
 # Visualize District SMDs
 test_dist_smds %>%
@@ -191,7 +192,7 @@ test_dist_smds %>%
   geom_hline(yintercept = 0) +
   geom_hline(yintercept = c(-.1, .1), linetype = "dashed") +
   facet_grid(Group ~ Variable) +
-  theme_minimal()
+  theme_bw()
 
 # Visualize School SMDs
 test_sch_smds %>%
@@ -201,7 +202,7 @@ test_sch_smds %>%
   geom_hline(yintercept = 0) +
   geom_hline(yintercept = c(-.1, .1), linetype = "dashed") +
   facet_grid(Group ~ Variable) +
-  theme_minimal()
+  theme_bw()
 
 
 # Compare to goal SMDs
@@ -212,7 +213,7 @@ test_dist_smds %>%
   geom_hline(yintercept = 0) +
   geom_hline(yintercept = c(-.1, .1), linetype = "dashed") +
   facet_grid(Group ~ Variable) +
-  theme_minimal()
+  theme_bw()
 
 testRun <- function() {
   test_approached <- generateE(dfPS)

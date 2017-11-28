@@ -214,6 +214,9 @@ sPlot %>%
   geom_histogram() +
   facet_wrap(~ RR, scales = "free_x")
 
+sPlot %>%
+  group_by(RR) %>%
+  summarise(mean(selectRate == 0))
 
 #-----------------------
 # Run Cluster Analysis
