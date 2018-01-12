@@ -12,7 +12,8 @@ genE <- function(ps) rbinom(length(ps), 1, prob = ps)
 
 # Read Data
 df <- read.csv("Data/final data.csv", stringsAsFactors = F)
-
+df$urbanicity <- factor(df$urbanicity)
+levels(df$urbanicity) <- c("ToRu", "Suburban", "ToRu", "Urban")
 
 # Create ELL and ED variable district data when school is unavailable
 # Create Minority variable
@@ -77,36 +78,29 @@ distEx <- "Urban"
 #-----------------------
 # Gen District Params
 #-----------------------
-# resp30 <- .3
-# resp20 <- .2
-# resp10 <- .1
+resps <- 9:1/10
+# respNames <- paste("PS", resps*100, sep = "")
 # 
-# bs_RR30 <- optim(par = distBs, fn = testGoal,
-#                  MRR = resp30, vars = distVars,
-#                  data = df.dist, exclude = distEx, goal = distGoal) %>%
-#   c(resp = resp30)
+# calcDistParams <- function(resp) {
+#   optim(par = distBs, fn = testGoal,
+#         MRR = resp, vars = distVars,
+#         data = df.dist, exclude = distEx, goal = distGoal) %>%
+#     c(resp = resp)
+# }
 # 
-# bs_RR20 <- optim(par = distBs, fn = testGoal,
-#                  MRR = resp20, vars = distVars,
-#                  data = df.dist, exclude = distEx, goal = distGoal) %>%
-#   c(resp = resp20)
+# calcPS_RRs <- function(pars) {
+#   calcPS(Bs = pars$par, MRR = pars$resp, vars = distVars, data = df.dist, exclude = distEx)
+# }
 # 
-# bs_RR10 <- optim(par = distBs, fn = testGoal,
-#                  MRR = resp10, vars = distVars,
-#                  data = df.dist, exclude = distEx, goal = distGoal) %>%
-#   c(resp = resp10)
+# distPars <- lapply(resps, calcDistParams)
+# distVals <- lapply(distPars, getVals, vars = distVars, data = df.dist, exclude = distEx, goal = distGoal)
+# distPS <- sapply(distPars, calcPS_RRs) %>% data.frame
+# names(distPS) <- respNames
+# df.dist <- cbind(df.dist, distPS)
 # 
-# distVals <- rbind(getVals(bs_RR30, vars = distVars, data = df.dist, exclude = distEx, goal = distGoal),
-#                   getVals(bs_RR20, vars = distVars, data = df.dist, exclude = distEx, goal = distGoal),
-#                   getVals(bs_RR10, vars = distVars, data = df.dist, exclude = distEx, goal = distGoal))
-# 
-# df.dist$PS30 <- calcPS(Bs = bs_RR30$par, MRR = bs_RR30$resp, vars = distVars, data = df.dist, exclude = distEx)
-# df.dist$PS20 <- calcPS(Bs = bs_RR20$par, MRR = bs_RR20$resp, vars = distVars, data = df.dist, exclude = distEx)
-# df.dist$PS10 <- calcPS(Bs = bs_RR10$par, MRR = bs_RR10$resp, vars = distVars, data = df.dist, exclude = distEx)
-# 
-# save.image("Params/171115.rdata")
-# 
-# load("Params/171115.rdata")
+# save.image("Params/180112.rdata")
+
+load("Params/180112.rdata")
 
 #-----------------------
 # Schools
@@ -129,42 +123,26 @@ schEx <- "Urban"
 # Gen School Params
 #-----------------------
 
-# resp30 <- .3
-# resp20 <- .2
-# resp10 <- .1
+# calcSchParams <- function(resp) {
+#   optim(par = schBs, fn = testGoal,
+#         MRR = resp, vars = schVars,
+#         data = df.sch, exclude = schEx, goal = schGoal) %>%
+#     c(resp = resp)
+# }
 # 
-# schBs_RR30 <- optim(par = schBs, fn = testGoal,
-#                  MRR = resp30, vars = schVars,
-#                  data = df.sch, exclude = schEx, goal = schGoal) %>%
-#   c(resp = resp30)
+# calcPS_RRs <- function(pars) {
+#   calcPS(Bs = pars$par, MRR = pars$resp, vars = schVars, data = df.sch, exclude = schEx)
+# }
 # 
-# schBs_RR20 <- optim(par = schBs, fn = testGoal,
-#                  MRR = resp20, vars = schVars,
-#                  data = df.sch, exclude = schEx, goal = schGoal) %>%
-#   c(resp = resp20)
+# schPars <- lapply(resps, calcSchParams)
+# schVals <- lapply(schPars, getVals, vars = schVars, data = df.sch, exclude = schEx, goal = schGoal)
+# schPS <- sapply(schPars, calcPS_RRs) %>% data.frame
+# names(schPS) <- respNames
+# df.sch <- cbind(df.sch, schPS)
 # 
-# schBs_RR10 <- optim(par = schBs, fn = testGoal,
-#                  MRR = resp10, vars = schVars,
-#                  data = df.sch, exclude = schEx, goal = schGoal) %>%
-#   c(resp = resp10)
-# 
-# 
-# 
-# 
-# 
-# 
-# schVals <- rbind(getVals(schBs_RR30, vars = schVars, data = df.sch, exclude = schEx, goal = schGoal),
-#                   getVals(schBs_RR20, vars = schVars, data = df.sch, exclude = schEx, goal = schGoal),
-#                   getVals(schBs_RR10, vars = schVars, data = df.sch, exclude = schEx, goal = schGoal))
-# 
-# df.sch$PS30 <- calcPS(Bs = schBs_RR30$par, MRR = schBs_RR30$resp, vars = schVars, data = df.sch, exclude = schEx)
-# df.sch$PS20 <- calcPS(Bs = schBs_RR20$par, MRR = schBs_RR20$resp, vars = schVars, data = df.sch, exclude = schEx)
-# df.sch$PS10 <- calcPS(Bs = schBs_RR10$par, MRR = schBs_RR10$resp, vars = schVars, data = df.sch, exclude = schEx)
-# 
-# 
-# save.image("Params/171115.rdata")
-# 
-load("Params/171115.rdata")
+# save.image("Params/180112.rdata")
+
+load("Params/180112.rdata")
 
 
 #-----------------------
@@ -172,13 +150,13 @@ load("Params/171115.rdata")
 #-----------------------
 
 df.select <- df.dist %>%
-  select(DID, PS30:PS10) %>%
-  gather(key = "RR", value = "dPS", PS30:PS10)
+  select(DID, one_of(respNames)) %>%
+  gather(key = "RR", value = "dPS", -DID)
 
 df.select <- df.sch %>%
-  select(DID, SID, DSID, PS30:PS10) %>%
-  gather(key = "RR", value = "sPS", PS30:PS10) %>%
-  merge(df.select)
+  select(DID, SID, DSID, one_of(respNames)) %>%
+  gather(key = "RR", value = "sPS", -DID, -SID, -DSID) %>%
+  left_join(df.select)
 
 
 sampleCS <- function(data, n = 60) {
@@ -197,11 +175,11 @@ sampleCS <- function(data, n = 60) {
 }
 
 # results <- replicate(10000, sampleCS(df.select))
+# 
+# save(results, file = "Params/CS Selection2.rData")
 
-# save(results, file = "Params/CS Selection.rData")
 
-
-load("Params/CS Selection.rData")
+load("Params/CS Selection2.rData")
 
 sPlot <- df.select %>%
   ungroup() %>%
@@ -227,7 +205,7 @@ K = 10
 
 IVs <- c("n", "urbanicity", "pED", "pMin", "pELL")
 
-df$urbanicity <- factor(df$urbanicity)
+
 
 # distance <- daisy(x = df[,IVs], metric = "gower")
 # 
