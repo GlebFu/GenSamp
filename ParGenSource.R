@@ -23,19 +23,28 @@ expit <- function(x) exp(x) / (1 + exp(x))
 # SIM FUNCTIONS
 ###################
 
-calcPS <- function(Bs, MRR, vars, data, exclude, getint = F) {
+calcPS <- function(Bs, MRR, vars, data, exclude, getint = F, distp = NULL, int = NULL) {
   vars <- vars[!(vars %in% exclude)]
   X <- as.matrix(data[,vars])
   
   XB <- as.numeric(X %*% Bs)
   
-  int = uniroot(function(b0) mean(expit(b0 + XB)) - MRR, c(-20,20))
+  # int = uniroot(function(b0) mean(expit(b0 + XB)) - MRR, c(-20,20))
   
-  dY <- as.numeric(X %*% Bs) + int$root
+  if(is.null(int)){
+    if(is.null(distp)) {
+      int = uniroot(function(b0) mean(expit(b0 + XB)) - MRR, c(-20,20))
+    } else {
+      int = uniroot(function(b0) mean(expit(b0 + XB) * distp) - MRR, c(-20,20))
+    }
+    int <- int$root
+  }
+
+    dY <- as.numeric(X %*% Bs) + int
   
   PS <- expit(dY)
   
-  if (getint) return(list(PS = PS, Intercept = int$root))
+  if (getint) return(list(PS = PS, Intercept = int))
   
   return(PS)
 }
@@ -52,10 +61,10 @@ calcPS <- function(Bs, MRR, vars, data, exclude, getint = F) {
 
 # Calculates the Population mean and sd, and the sampled/unsampled mean and SMD from population mean
 
-calcSMD <- function(Bs, MRR, vars, data, exclude, calcPS = T, goal = NULL) {
+calcSMD <- function(Bs, MRR, vars, data, exclude, calcPS = T, goal = NULL, distp = NULL) {
   
   # Generate Propensity scores if not already present
-  if (calcPS) data$PS <- calcPS(Bs = Bs, MRR = MRR, vars = vars, data = data, exclude = exclude)
+  if (calcPS) data$PS <- calcPS(Bs = Bs, MRR = MRR, vars = vars, data = data, exclude = exclude, distp = distp)
   
   # Calcualte IPSW
   data$dIPSW0 <- 1/(1-data$PS)
@@ -96,10 +105,11 @@ calcSMD <- function(Bs, MRR, vars, data, exclude, calcPS = T, goal = NULL) {
 # 
 # undebug(calcSMD)
 
-testGoal <- function(Bs, MRR, vars, data, exclude, goal = NULL) {
+testGoal <- function(Bs, MRR, vars, data, exclude, goal = NULL, distp = NULL) {
   
   trial <- calcSMD(Bs = Bs, MRR = MRR, vars = vars, 
-                   data = data, exclude = exclude, goal = goal)
+                   data = data, exclude = exclude, 
+                   goal = goal, distp = distp)
   
   goal <- data.frame(Var = names(goal), goal = goal)
   
@@ -122,7 +132,7 @@ testGoal <- function(Bs, MRR, vars, data, exclude, goal = NULL) {
 getVals <- function (bs, vars, data, exclude, goal) {
   ps_int <- calcPS(Bs = bs$par, MRR = bs$resp, 
                    vars = vars, data = data,
-                   exclude = exclude, getint = T)
+                   exclude = exclude, getint = T, int = bs$value)
   
   data$PS <- ps_int$PS
   
@@ -131,6 +141,7 @@ getVals <- function (bs, vars, data, exclude, goal) {
   values <- merge(calcSMD(vars = vars, data = data, calcPS = F, goal = goal), pars, all = T)
   
   values$RR <- mean(bs$resp)
+  values$trueRR <- mean(mean(ps_int$PS))
   
   return(values)
   
