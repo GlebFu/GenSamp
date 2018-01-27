@@ -40,7 +40,7 @@ calcPS <- function(Bs, MRR, vars, data, exclude, getint = F, distp = NULL, int =
     int <- int$root
   }
 
-    dY <- as.numeric(X %*% Bs) + int
+  dY <- as.numeric(X %*% Bs) + int
   
   PS <- expit(dY)
   
@@ -132,7 +132,8 @@ testGoal <- function(Bs, MRR, vars, data, exclude, goal = NULL, distp = NULL) {
 getVals <- function (bs, vars, data, exclude, goal) {
   ps_int <- calcPS(Bs = bs$par, MRR = bs$resp, 
                    vars = vars, data = data,
-                   exclude = exclude, getint = T, int = bs$value)
+                   exclude = exclude, getint = T, 
+                   distp = bs$distp)
   
   data$PS <- ps_int$PS
   
@@ -142,6 +143,7 @@ getVals <- function (bs, vars, data, exclude, goal) {
   
   values$RR <- mean(bs$resp)
   values$trueRR <- mean(mean(ps_int$PS))
+  values$distRR <- bs$dresp
   
   return(values)
   

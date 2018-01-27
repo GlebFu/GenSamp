@@ -79,7 +79,7 @@ distEx <- "Urban"
 # Gen District Params
 #-----------------------
 # dist.resps <- 9:1/10
-# dist.resps <- c(.5, .6)
+# # dist.resps <- c(.4, .6)
 # 
 # dist.respNames <- paste("PS", dist.resps*100, sep = "")
 # 
@@ -100,26 +100,26 @@ distEx <- "Urban"
 # names(distPS) <- dist.respNames
 # df.dist <- cbind(df.dist, distPS)
 # 
-# save.image("Params/180112.rdata")
+# save.image("Params/180127.rdata")
 
-load("Params/180112.rdata")
+load("Params/180127.rdata")
 
-# distVals <- distVals %>%
-#   Reduce(function(dtf1,dtf2) rbind(dtf1,dtf2), .)
-# 
-# distVals %>%
-#   select(Var, RR, smdS1:goal) %>%
-#   gather(key = SMD, value = value, smdS1:goal) %>%
-#   ggplot(aes(x = RR, y = value, color = SMD)) +
-#   geom_point() +
-#   facet_wrap(~Var)
-# 
-# distVals %>%
-#   ggplot(aes(x = RR, y = dif)) +
-#   geom_point() +
-#   geom_hline(yintercept = 0) +
-#   geom_hline(yintercept = c(-1, 1) * .25, linetype = "dashed") +
-#   facet_wrap(~Var)
+distVals <- distVals %>%
+  Reduce(function(dtf1,dtf2) rbind(dtf1,dtf2), .)
+
+distVals %>%
+  select(Var, RR, smdS1:goal) %>%
+  gather(key = SMD, value = value, smdS1:goal) %>%
+  ggplot(aes(x = RR, y = value, color = SMD)) +
+  geom_point() +
+  facet_wrap(~Var)
+
+distVals %>%
+  ggplot(aes(x = RR, y = dif)) +
+  geom_point() +
+  geom_hline(yintercept = 0) +
+  geom_hline(yintercept = c(-1, 1) * .25, linetype = "dashed") +
+  facet_wrap(~Var)
 
 #-----------------------
 # Schools
@@ -141,69 +141,77 @@ schEx <- "Urban"
 #-----------------------
 # Gen School Params
 #-----------------------
-# sch.resps <- c(.3, .5, .7)
-sch.resps <- c(.3)
-
-sch.respNames <- apply(expand.grid("PS", sch.resps*100, dist.resps*100), 1, paste, collapse = "")
-
-calcSchParams <- function(sch.resps, distp = NULL, distrr) {
-  optim(par = schBs, fn = testGoal,
-        MRR = sch.resps, vars = schVars,
-        data = df.sch, exclude = schEx, 
-        goal = schGoal, distp = distp) %>%
-    c(resp = sch.resps,
-      dresp = distrr)
-}
-
-calcPS_RRs <- function(pars, distp = NULL) {
-  calcPS(Bs = pars$par, MRR = pars$resp, 
-         vars = schVars, data = df.sch, 
-         exclude = schEx, distp = distp, 
-         int = pars$value)
-}
-
-test <- df.dist[, dist.respNames]
-row.names(test) <- df.dist$DID
-test <- test[as.character(df.sch$DID),]
-
-# undebug(calcPS)
-# undebug(getVals)
-
-schPars <- list()
-
-for(i in dist.respNames) {
-  schPars <- c(schPars, lapply(sch.resps, calcSchParams, distp = test[, i], distrr = i))
-}
-
-schVals <- lapply(schPars, getVals, vars = schVars, data = df.sch, exclude = schEx, goal = schGoal)
-
-mean(calcPS_RRs(schPars[[1]]))
-mean(calcPS_RRs(schPars[[1]]) * test[, 1])
-
-schPS <- sapply(schPars, calcPS_RRs) %>% data.frame
-names(schPS) <- sch.respNames
-df.sch <- cbind(df.sch, schPS)
-
-save.image("Params/180112.rdata")
-
-load("Params/180112.rdata")
-
-# distVals <- distVals %>%
+# sch.resps <- 9:1/10
+# # sch.resps <- c(.3, .5)
+# 
+# 
+# 
+# calcSchParams <- function(sch.resps, distp = NULL, distrr) {
+#   optim(par = schBs, fn = testGoal,
+#         MRR = sch.resps, vars = schVars,
+#         data = df.sch, exclude = schEx, 
+#         goal = schGoal, distp = distp) %>%
+#     c(resp = sch.resps,
+#       dresp = distrr) %>%
+#     c(list(distp = distp))
+# }
+# 
+# calcPS_RRs <- function(pars, distp = NULL) {
+#   calcPS(Bs = pars$par, MRR = pars$resp, 
+#          vars = schVars, data = df.sch, 
+#          exclude = schEx, distp = distp, 
+#          int = pars$value)
+# }
+# 
+# test <- df.dist[, dist.respNames] %>% as.data.frame
+# row.names(test) <- df.dist$DID
+# test <- test[as.character(df.sch$DID),] %>% as.data.frame
+# names(test) <- dist.respNames
+# 
+# schPars <- list()
+# 
+# for(i in 1:length(dist.resps)) {
+#   for(j in 1:length(sch.resps)) {
+#     tryCatch(
+#       {
+#         schPars <- c(schPars, list(calcSchParams(sch.resps[j], distp = test[, i], distrr = dist.resps[i])))
+#       }, 
+#       error=function(e){cat(# "ERROR :",conditionMessage(e), "\n",
+#                             "District RR: ", dist.resps[i], " School RR: ", sch.resps[j], "\n")})
+#   }
+# 
+#   
+# }
+# 
+# schVals <- lapply(schPars, getVals, vars = schVars, data = df.sch, exclude = schEx, goal = schGoal) %>%
 #   Reduce(function(dtf1,dtf2) rbind(dtf1,dtf2), .)
+# schPS <- sapply(schPars, calcPS_RRs) %>% data.frame
 # 
-# distVals %>%
-#   select(Var, RR, smdS1:goal) %>%
-#   gather(key = SMD, value = value, smdS1:goal) %>%
-#   ggplot(aes(x = RR, y = value, color = SMD)) +
-#   geom_point() +
-#   facet_wrap(~Var)
 # 
-# distVals %>%
-#   ggplot(aes(x = RR, y = dif)) +
-#   geom_point() +
-#   geom_hline(yintercept = 0) +
-#   geom_hline(yintercept = c(-1, 1) * .25, linetype = "dashed") +
-#   facet_wrap(~Var)
+# sch.respNames <- schVals[, c("RR", "distRR")] %>% unique
+# sch.respNames <- paste("RR", sch.respNames$RR*100, sch.respNames$distRR*100, sep = "")
+# 
+# names(schPS) <- sch.respNames
+# df.sch <- cbind(df.sch, schPS)
+# 
+# save.image("Params/180127.rdata")
+
+load("Params/180127.rdata")
+
+schVals %>%
+  select(Var, RR, distRR, smdS1:goal) %>%
+  gather(key = SMD, value = value, smdS1:goal) %>%
+  ggplot(aes(x = RR, y = value, color = SMD)) +
+  geom_point() +
+  facet_grid(distRR~Var)
+
+schVals %>%
+  ggplot(aes(x = RR, y = dif)) +
+  geom_point() +
+  geom_hline(yintercept = 0) +
+  geom_hline(yintercept = c(-1, 1) * .25, linetype = "dashed") +
+  facet_grid(distRR~Var)
+
 #-----------------------
 # Convenience Sample SMDs
 #-----------------------
@@ -233,9 +241,22 @@ sampleCS <- function(data, n = 60) {
 
 }
 
-# results <- replicate(10000, sampleCS(df.select))
-# 
-# save(results, file = "Params/CS Selection2.rData")
+#create cluster
+library(parallel)
+cl <- makeCluster(detectCores()-1)  
+#get library support needed to run the code
+clusterEvalQ(cl, library(dplyr))
+#put objects in place that might be needed for the code
+clusterExport(cl,c("sampleCS", "df.select", "genE"))
+#... then parallel replicate...
+results <- parSapply(cl, 1:100, function(i,...) { sampleCS(df.select) } )
+#stop the cluster
+stopCluster(cl)
+
+
+results <- replicate(10, sampleCS(df.select))
+
+save(results, file = "Params/CS Selection2.rData")
 
 
 load("Params/CS Selection2.rData")
