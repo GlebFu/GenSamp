@@ -4,6 +4,7 @@ library(stargazer)
 library(htmlTable)
 library(xtable)
 library(Hmisc)
+library(stringr)
 
 rm(list = ls())
 

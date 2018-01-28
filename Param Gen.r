@@ -1,5 +1,3 @@
-library(dplyr)
-
 rm(list = ls())
 
 source("ParGenSource.r")
@@ -95,7 +93,9 @@ distEx <- "Urban"
 # }
 # 
 # distPars <- lapply(dist.resps, calcDistParams)
-# distVals <- lapply(distPars, getVals, vars = distVars, data = df.dist, exclude = distEx, goal = distGoal)
+# distVals <- lapply(distPars, getVals, vars = distVars, data = df.dist, exclude = distEx, goal = distGoal) %>%
+# Reduce(function(dtf1,dtf2) rbind(dtf1,dtf2), .) %>%
+  # data.frame
 # distPS <- sapply(distPars, calcPS_RRs) %>% data.frame
 # names(distPS) <- dist.respNames
 # df.dist <- cbind(df.dist, distPS)
@@ -103,9 +103,6 @@ distEx <- "Urban"
 # save.image("Params/180127.rdata")
 
 load("Params/180127.rdata")
-
-distVals <- distVals %>%
-  Reduce(function(dtf1,dtf2) rbind(dtf1,dtf2), .)
 
 distVals %>%
   select(Var, RR, smdS1:goal) %>%
@@ -115,12 +112,11 @@ distVals %>%
   facet_wrap(~Var)
 
 distVals %>%
-  ggplot(aes(x = RR, y = dif)) +
+  ggplot(aes(x = RR, y = dif, color = Var)) +
   geom_point() +
+  geom_line() +
   geom_hline(yintercept = 0) +
-  geom_hline(yintercept = c(-1, 1) * .25, linetype = "dashed") +
-  facet_wrap(~Var)
-
+  geom_hline(yintercept = c(-1, 1) * .25, linetype = "dashed")
 #-----------------------
 # Schools
 #-----------------------
@@ -203,35 +199,69 @@ schVals %>%
   gather(key = SMD, value = value, smdS1:goal) %>%
   ggplot(aes(x = RR, y = value, color = SMD)) +
   geom_point() +
-  facet_grid(distRR~Var)
+  facet_grid(distRR ~ Var)
 
 schVals %>%
-  ggplot(aes(x = RR, y = dif)) +
+  ggplot(aes(x = RR, y = dif, color = Var)) +
   geom_point() +
+  geom_line() + 
   geom_hline(yintercept = 0) +
   geom_hline(yintercept = c(-1, 1) * .25, linetype = "dashed") +
-  facet_grid(distRR~Var)
+  facet_wrap(~ distRR)
+
+schVals %>%
+  ggplot(aes(x = RR, y = dif, color = distRR, group = distRR)) +
+  geom_point() +
+  geom_line() + 
+  geom_hline(yintercept = 0) +
+  geom_hline(yintercept = c(-1, 1) * .25, linetype = "dashed") +
+  facet_wrap(~ Var)
+
+#-----------------------
+# Examin Propensity Scores
+#-----------------------
+df.dist %>%
+  select(DID, one_of(dist.respNames)) %>%
+  gather(key = "dist.RR", value = "dPS", -DID) %>%
+  ggplot(aes(x = dPS)) +
+  geom_density() +
+  facet_wrap(~ dist.RR, scales = "free_y")
+
+df.sch %>%
+  select(DID, SID, DSID, one_of(sch.respNames)) %>%
+  gather(key = "RR.S.D", value = "sPS", -DID, -SID, -DSID) %>%
+  mutate(dist.RR = str_sub(RR.S.D, start = 5),
+         sch.RR = str_sub(RR.S.D, start = 3, end = 4)) %>%
+  ggplot(aes(x = sPS,)) + 
+  geom_density() +
+  facet_wrap(sch.RR ~ dist.RR, scales = "free_y", ncol = 9)
+
+
+
+df.select <- df.dist %>%
+  select(DID, one_of(dist.respNames)) %>%
+  gather(key = "dist.RR", value = "dPS", -DID) %>%
+  mutate(dist.RR = str_sub(dist.RR, start = 3))
+
+df.select <- df.sch %>%
+  select(DID, SID, DSID, one_of(sch.respNames)) %>%
+  gather(key = "RR.S.D", value = "sPS", -DID, -SID, -DSID) %>%
+  mutate(dist.RR = str_sub(RR.S.D, start = 5),
+         sch.RR = str_sub(RR.S.D, start = 3, end = 4)) %>%
+  left_join(df.select)
 
 #-----------------------
 # Convenience Sample SMDs
 #-----------------------
 
-df.select <- df.dist %>%
-  select(DID, one_of(dist.respNames)) %>%
-  gather(key = "RR", value = "dPS", -DID)
-
-df.select <- df.sch %>%
-  select(DID, SID, DSID, one_of(sch.respNames)) %>%
-  gather(key = "RR", value = "sPS", -DID, -SID, -DSID) %>%
-  left_join(df.select)
 
 
 sampleCS <- function(data, n = 60) {
   data <- data %>%
     mutate(Ej = genE(dPS),
            Eij = ifelse(Ej == 1, genE(sPS), 0)) %>%
-    group_by(RR) %>%
-    arrange(RR, -Eij, -dPS, -sPS) %>%
+    group_by(RR.S.D) %>%
+    arrange(RR.S.D, -Eij, -dPS, -sPS) %>%
     mutate(Rank = 1:n(),
            Select = Rank <= n) %>%
     ungroup() %>%
@@ -249,12 +279,12 @@ clusterEvalQ(cl, library(dplyr))
 #put objects in place that might be needed for the code
 clusterExport(cl,c("sampleCS", "df.select", "genE"))
 #... then parallel replicate...
-results <- parSapply(cl, 1:100, function(i,...) { sampleCS(df.select) } )
+results <- parSapply(cl, 1:10000, function(i,...) { sampleCS(df.select) } )
 #stop the cluster
 stopCluster(cl)
 
 
-results <- replicate(10, sampleCS(df.select))
+# results <- replicate(10, sampleCS(df.select))
 
 save(results, file = "Params/CS Selection2.rData")
 
