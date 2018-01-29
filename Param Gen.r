@@ -222,17 +222,17 @@ schVals %>%
 #-----------------------
 df.dist %>%
   select(DID, one_of(dist.respNames)) %>%
-  gather(key = "dist.RR", value = "dPS", -DID) %>%
-  ggplot(aes(x = dPS)) +
+  gather(key = "dist.RR", value = "dist.PS", -DID) %>%
+  ggplot(aes(x = dist.PS)) +
   geom_density() +
   facet_wrap(~ dist.RR, scales = "free_y")
 
 df.sch %>%
   select(DID, SID, DSID, one_of(sch.respNames)) %>%
-  gather(key = "RR.S.D", value = "sPS", -DID, -SID, -DSID) %>%
+  gather(key = "RR.S.D", value = "sch.PS", -DID, -SID, -DSID) %>%
   mutate(dist.RR = str_sub(RR.S.D, start = 5),
          sch.RR = str_sub(RR.S.D, start = 3, end = 4)) %>%
-  ggplot(aes(x = sPS,)) + 
+  ggplot(aes(x = sch.PS,)) + 
   geom_density() +
   facet_wrap(sch.RR ~ dist.RR, scales = "free_y", ncol = 9)
 
@@ -240,16 +240,19 @@ df.sch %>%
 
 df.select <- df.dist %>%
   select(DID, one_of(dist.respNames)) %>%
-  gather(key = "dist.RR", value = "dPS", -DID) %>%
+  gather(key = "dist.RR", value = "dist.PS", -DID) %>%
   mutate(dist.RR = str_sub(dist.RR, start = 3))
 
 df.select <- df.sch %>%
   select(DID, SID, DSID, one_of(sch.respNames)) %>%
-  gather(key = "RR.S.D", value = "sPS", -DID, -SID, -DSID) %>%
+  gather(key = "RR.S.D", value = "sch.PS", -DID, -SID, -DSID) %>%
   mutate(dist.RR = str_sub(RR.S.D, start = 5),
          sch.RR = str_sub(RR.S.D, start = 3, end = 4)) %>%
   left_join(df.select)
 
+# save.image("Params/180127.rdata")
+
+load("Params/180127.rdata")
 #-----------------------
 # Convenience Sample SMDs
 #-----------------------
@@ -258,53 +261,55 @@ df.select <- df.sch %>%
 
 sampleCS <- function(data, n = 60) {
   data <- data %>%
-    mutate(Ej = genE(dPS),
-           Eij = ifelse(Ej == 1, genE(sPS), 0)) %>%
+    mutate(Ej = genE(dist.PS),
+           Eij = ifelse(Ej == 1, genE(sch.PS), 0)) %>%
     group_by(RR.S.D) %>%
-    arrange(RR.S.D, -Eij, -dPS, -sPS) %>%
+    arrange(RR.S.D, -Eij, -dist.PS, -sch.PS) %>%
     mutate(Rank = 1:n(),
            Select = Rank <= n) %>%
     ungroup() %>%
-    arrange(DSID)
+    arrange(DSID, RR.S.D)
 
   return(data$Select)
 
 }
 
-#create cluster
-library(parallel)
-cl <- makeCluster(detectCores()-1)  
-#get library support needed to run the code
-clusterEvalQ(cl, library(dplyr))
-#put objects in place that might be needed for the code
-clusterExport(cl,c("sampleCS", "df.select", "genE"))
-#... then parallel replicate...
-results <- parSapply(cl, 1:10000, function(i,...) { sampleCS(df.select) } )
-#stop the cluster
-stopCluster(cl)
-
-
-# results <- replicate(10, sampleCS(df.select))
-
-save(results, file = "Params/CS Selection2.rData")
+# #create cluster
+# library(parallel)
+# cl <- makeCluster(detectCores() - 1)  
+# #get library support needed to run the code
+# clusterEvalQ(cl, library(dplyr))
+# #put objects in place that might be needed for the code
+# clusterExport(cl,c("sampleCS", "df.select", "genE"))
+# #... then parallel replicate...
+# results <- parSapply(cl, 1:1000, function(i,...) { sampleCS(df.select) } )
+# #stop the cluster
+# stopCluster(cl)
+# 
+# 
+# # results <- replicate(10, sampleCS(df.select))
+# 
+# save(results, file = "Params/CS Selection2.rData")
 
 
 load("Params/CS Selection2.rData")
 
 sPlot <- df.select %>%
   ungroup() %>%
-  arrange(DSID) %>%
+  arrange(DSID, RR.S.D) %>%
   mutate(selectRate = apply(results, 1, mean))
   
 sPlot %>%
   filter(selectRate > 0) %>%
   ggplot(aes(x = selectRate)) +
   geom_histogram() +
-  facet_wrap(~ RR, scales = "free_x")
+  facet_grid(dist.RR ~ sch.RR)
 
 sPlot %>%
-  group_by(RR) %>%
+  group_by(dist.RR, sch.RR) %>%
   summarise(mean(selectRate == 0))
+
+rm(list = "results")
 
 #-----------------------
 # Run Cluster Analysis
@@ -366,6 +371,10 @@ df$cluster <- df$k6
 # Generate Within Cluster Ranks
 #-----------------------
 
+# save.image("Params/180127.rdata")
+
+load("Params/180127.rdata")
+
 ranks <- df %>%
   select(DSID, cluster, IVs[-2]) %>%
   gather(key = "Var", value = "Val", -DSID, -cluster) %>%
@@ -415,13 +424,38 @@ df %>%
 # Export Data
 #-----------------------
 
+# save.image("Params/180127.rdata")
 
-df <- merge(df, df.dist[, c("DID","PS10", "PS20", "PS30")])
+load("Params/180127.rdata")
 
-df <- transmute(df.sch, DID = DID, SID = SID, schPS10 = PS10, schPS20 = PS20, schPS30 = PS30) %>%
-  merge(df)
+# District statistics
+dist_stats <- df[,c("DID", names(distGoal))] %>%
+  gather(key = "Variable", value = "Value", names(distGoal)) %>%
+  group_by(Variable, DID) %>%
+  summarise(dist_mean = mean(Value)) %>%
+  summarise(pop_mean = mean(dist_mean),
+            pop_sd = sd(dist_mean)) %>%
+  left_join(data.frame(Variable = names(distGoal), goal_SMD = distGoal, row.names = NULL, stringsAsFactors = F))
 
-df <- rename(df, distPS10 = PS10, distPS20 = PS20, distPS30 = PS30)
+# School statistics
+sch_stats <- df[,c("DSID", names(schGoal))] %>%
+  gather(key = "Variable", value = "Value", names(schGoal)) %>%
+  group_by(Variable) %>%
+  summarise(pop_mean = mean(Value),
+            pop_sd = sd(Value)) %>%
+  left_join(data.frame(Variable = names(schGoal), goal_SMD = schGoal, row.names = NULL, stringsAsFactors = F))
 
-save(df, file = "Data/simData.Rdata")
+# Pull out necesary variables for generating selections
+df.select <- select(df, DSID, DID, SID, cluster, rank) %>%
+  rename(rankC = rank) %>%
+  left_join(df.select)
+
+# df <- merge(df, df.dist[, c("DID","PS10", "PS20", "PS30")])
+# 
+# df <- transmute(df.sch, DID = DID, SID = SID, schPS10 = PS10, schPS20 = PS20, schPS30 = PS30) %>%
+#   merge(df)
+# 
+# df <- rename(df, distPS10 = PS10, distPS20 = PS20, distPS30 = PS30)
+
+save(df, df.select, file = "Data/simData.Rdata")
 save(schGoal, distGoal, file = "Data/RGM Vars.Rdata")

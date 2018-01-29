@@ -15,31 +15,7 @@ load("Data/simData.Rdata")
 # Response generating variables and goal SMD
 load("Data/RGM Vars.Rdata")
 
-# District statistics
-dist_stats <- df[,c("DID", names(distGoal))] %>%
-  gather(key = "Variable", value = "Value", names(distGoal)) %>%
-  group_by(Variable, DID) %>%
-  summarise(dist_mean = mean(Value)) %>%
-  summarise(pop_mean = mean(dist_mean),
-            pop_sd = sd(dist_mean)) %>%
-  left_join(data.frame(Variable = names(distGoal), goal_SMD = distGoal, row.names = NULL, stringsAsFactors = F))
 
-# School statistics
-sch_stats <- df[,c("DSID", names(schGoal))] %>%
-  gather(key = "Variable", value = "Value", names(schGoal)) %>%
-  group_by(Variable) %>%
-  summarise(pop_mean = mean(Value),
-            pop_sd = sd(Value)) %>%
-  left_join(data.frame(Variable = names(schGoal), goal_SMD = schGoal, row.names = NULL, stringsAsFactors = F))
-
-# Pull out necesary variables for generating selections
-dfPS <- select(df, DSID, DID, SID, distPS10:distPS30, schPS10:schPS30, cluster, rank) %>%
-  rename(rankC = rank) %>%
-  gather(key = unitRR, value = PS, distPS10:schPS30) %>%
-  mutate(unit = str_sub(unitRR, end = -3),
-         RR = str_sub(unitRR, start = -2)) %>%
-  select(-unitRR) %>%
-  spread(key = unit, value = PS)
 
 #-----------------
 # Functions
@@ -49,10 +25,10 @@ sampleBinomial <- function(ps) rbinom(length(ps), 1, prob = ps)
 
 generateE <- function(data) {
   data %>%
-    group_by(RR, DID) %>%
-    mutate(Ej = sampleBinomial(mean(distPS))) %>%
+    group_by(dist.RR, sch.RR, DID) %>%
+    mutate(Ej = sampleBinomial(mean(dist.PS))) %>%
     group_by(RR) %>%
-    mutate(Eij = ifelse(Ej == 1, sampleBinomial(schPS), 0)) %>%
+    mutate(Eij = ifelse(Ej == 1, sampleBinomial(sch.PS), 0)) %>%
     # merge(select(df, DSID, cluster, n, Urban, Suburban, ToRu, pELL, pED, pELA, pMath, pMin, MEDINC, rank, rankp)) %>%
     return()
 }
@@ -79,7 +55,7 @@ createSample <- function(data) {
   #Convenience Sampling
   CS_Sample <- data %>%
     group_by(RR) %>%
-    arrange(-distPS, -schPS) %>%
+    arrange(-dist.PS, -sch.PS) %>%
     mutate(count = cumsum(Eij)) %>% 
     filter(count <= 60) %>%
     left_join(df, by = c("DSID", "DID", "SID", "cluster")) %>%
