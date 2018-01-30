@@ -27,9 +27,8 @@ generateE <- function(data) {
   data %>%
     group_by(dist.RR, sch.RR, DID) %>%
     mutate(Ej = sampleBinomial(mean(dist.PS))) %>%
-    group_by(RR) %>%
+    group_by(dist.RR, sch.RR) %>%
     mutate(Eij = ifelse(Ej == 1, sampleBinomial(sch.PS), 0)) %>%
-    # merge(select(df, DSID, cluster, n, Urban, Suburban, ToRu, pELL, pED, pELA, pMath, pMin, MEDINC, rank, rankp)) %>%
     return()
 }
 
@@ -43,10 +42,9 @@ createSample <- function(data) {
   
   # Simple Random Sampling
   SRS_Sample <- data %>%
-    select(DSID:RR, Ej:Eij) %>%
-    group_by(RR) %>%
-    mutate(rankSRS = sample(1:n())) %>%
-    arrange(rankSRS) %>%
+    group_by(dist.RR, sch.RR) %>%
+    mutate(rank.SRS = sample(1:n())) %>%
+    arrange(rank.SRS) %>%
     mutate(count = cumsum(Eij)) %>% 
     filter(count <= 60) %>%
     left_join(df, by = c("DSID", "DID", "SID", "cluster")) %>%
@@ -54,7 +52,7 @@ createSample <- function(data) {
   
   #Convenience Sampling
   CS_Sample <- data %>%
-    group_by(RR) %>%
+    group_by(dist.RR, sch.RR) %>%
     arrange(-dist.PS, -sch.PS) %>%
     mutate(count = cumsum(Eij)) %>% 
     filter(count <= 60) %>%
@@ -63,7 +61,7 @@ createSample <- function(data) {
   
   #Cluster Analyusis Stratified Sampling
   CASS_Sample <- data %>%
-    group_by(RR, cluster) %>%
+    group_by(dist.RR, sch.RR, cluster) %>%
     arrange(rankC) %>%
     mutate(count = cumsum(Eij)) %>%
     filter(count <= propAllocation(cluster)) %>%
@@ -77,11 +75,11 @@ createSample <- function(data) {
 calcResponseRates <- function(data, cluster = F) {
   if(!cluster){
     data <- data %>%
-      group_by(sample, RR, Ej)
+      group_by(sample, dist.RR, sch.RR, Ej)
   } else {
     data <- data %>%
       filter(sample == "CASS") %>%
-      group_by(RR, Ej, cluster)
+      group_by(dist.RR, sch.RR, Ej, cluster)
 
   }
   data %>%
@@ -107,15 +105,15 @@ weighted.sd <- function(x, w) sqrt(sum((w * (x - weighted.mean(x, w)))^2) / (sum
 
 # calculates standardized mean diferences between sample and population
 calcDistSMDs <- function(sample) {
-  sample[, c("RR", "sample","DID", "Ej", "Eij", names(distGoal))] %>%
+  sample[, c("dist.RR", "sch.RR", "sample","DID", "Ej", "Eij", names(distGoal))] %>%
     gather(key = "Variable", value = "Value", names(distGoal)) %>%
-    group_by(sample, RR, Variable, DID) %>%
+    group_by(sample, dist.RR, sch.RR, Variable, DID) %>%
     summarise(sampled = mean(Ej),
               contributed = as.numeric(sum(Eij) > 0),
               rejected = 1 - sampled,
               dist_mean = mean(Value)) %>%
     gather(key = "Group", value = "Weight", sampled:rejected) %>%
-    group_by(sample, RR, Variable, Group) %>%
+    group_by(sample, dist.RR, sch.RR, Variable, Group) %>%
     summarise(sample_mean = weighted.mean(dist_mean, Weight),
               sample_sd = weighted.sd(dist_mean, Weight)) %>% 
     left_join(dist_stats) %>%
@@ -124,12 +122,12 @@ calcDistSMDs <- function(sample) {
 }
 
 calcSchSMDs <- function(sample) {
-  sample[, c("RR", "sample","DID", "Ej", "Eij", names(schGoal))] %>%
+  sample[, c("dist.RR", "sch.RR", "sample","DID", "Ej", "Eij", names(schGoal))] %>%
     gather(key = "Variable", value = "Value", names(schGoal)) %>%
     mutate(sampled = Eij,
               rejected = Ej - Eij) %>%
     gather(key = "Group", value = "Weight", sampled:rejected) %>%
-    group_by(sample, RR, Variable, Group) %>%
+    group_by(sample, dist.RR, sch.RR, Variable, Group) %>%
     summarise(sample_mean = weighted.mean(Value, Weight),
               sample_sd = weighted.sd(Value, Weight)) %>% 
     left_join(sch_stats) %>%
@@ -142,7 +140,7 @@ calcSchSMDs <- function(sample) {
 #-----------------
 
 set.seed(1010)
-test_approached <- generateE(dfPS)
+test_approached <- generateE(df.select)
 test_sample <- createSample(test_approached)
 test_responses <- calcResponseRates(test_sample)
 test_dist_smds <- calcDistSMDs(test_sample)
@@ -151,10 +149,11 @@ test_sch_smds <- calcSchSMDs(test_sample)
 # Visualize Sampling
 
 test_responses %>%
-  gather(key = measure, value = value, -sample, -RR) %>%
+  filter(sch.RR == 30) %>%
+  gather(key = measure, value = value, -sample, -sch.RR, -dist.RR) %>%
   mutate(level = str_split(measure, "_", simplify = T)[,1],
          measure =  str_split(measure, "_", simplify = T)[,2]) %>%
-  ggplot(aes(x = RR, y = value, group = sample, color = sample)) +
+  ggplot(aes(x = dist.RR, y = value, group = sample, color = sample)) +
   geom_point() +
   geom_line() +
   facet_grid(measure ~ level, scales = "free_y") +
@@ -162,7 +161,8 @@ test_responses %>%
 
 # Visualize District SMDs
 test_dist_smds %>%
-  ggplot(aes(x = RR, y = abs(sim_SMD), group = sample, color = sample)) +
+  filter(sch.RR == 30) %>%
+  ggplot(aes(x = dist.RR, y = abs(sim_SMD), group = sample, color = sample)) +
   geom_point() +
   geom_line() +
   geom_hline(yintercept = 0) +
@@ -172,7 +172,8 @@ test_dist_smds %>%
 
 # Visualize School SMDs
 test_sch_smds %>%
-  ggplot(aes(x = RR, y = abs(sim_SMD), group = sample, color = sample)) +
+  filter(sch.RR == 30) %>%
+  ggplot(aes(x = dist.RR, y = abs(sim_SMD), group = sample, color = sample)) +
   geom_point() +
   geom_line() +
   geom_hline(yintercept = 0) +
@@ -183,7 +184,8 @@ test_sch_smds %>%
 
 # Compare to goal SMDs
 test_dist_smds %>%
-  ggplot(aes(x = RR, y = miss, group = sample, color = sample)) +
+  filter(sch.RR == 30) %>%
+  ggplot(aes(x = dist.RR, y = miss, group = sample, color = sample)) +
   geom_point() +
   geom_line() +
   geom_hline(yintercept = 0) +
@@ -192,7 +194,7 @@ test_dist_smds %>%
   theme_bw()
 
 testRun <- function() {
-  test_approached <- generateE(dfPS)
+  test_approached <- generateE(df.select)
   test_sample <- createSample(test_approached)
   test_responses <- calcResponseRates(test_sample)
   test_dist_smds <- calcDistSMDs(test_sample)
@@ -200,7 +202,7 @@ testRun <- function() {
 }
 
 # runtime <- system.time(replicate(100, testRun()))
-# save(runtime, file = "Data/Sim Test Runtime.rdata")
-load("Data/Sim Test Runtime.rdata")
+# save(runtime, file = "Data/Sim Test Runtime2.rdata")
+load("Data/Sim Test Runtime2.rdata")
 avgRun <- runtime/100
 avgRun * 10000 / 60 / 60 # Hours
