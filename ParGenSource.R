@@ -36,7 +36,7 @@ calcPS <- function(Bs, MRR, vars, data, exclude, getint = F, distp = NULL, int =
     if(is.null(distp)) {
       int = uniroot(function(b0) mean(expit(b0 + XB)) - MRR, c(-20,20))
     } else {
-      int = uniroot(function(b0) mean(expit(b0 + XB) * distp) - MRR, c(-20,20))
+      int = uniroot(function(b0) mean(expit(b0 + XB) * distp) - MRR * mean(distp), c(-20,20))
     }
     int <- int$root
   }
