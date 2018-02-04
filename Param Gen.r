@@ -457,5 +457,5 @@ df.select <- select(df, DSID, DID, SID, cluster, rank) %>%
 # 
 # df <- rename(df, distPS10 = PS10, distPS20 = PS20, distPS30 = PS30)
 
-save(df, df.select, file = "Data/simData.Rdata")
+save(df, df.select, dist_stats, sch_stats, file = "Data/simData.Rdata")
 save(schGoal, distGoal, file = "Data/RGM Vars.Rdata")
