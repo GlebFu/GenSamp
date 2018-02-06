@@ -139,28 +139,125 @@ calcSchSMDs <- function(sample) {
 # Test Sim Stages
 #-----------------
 
-set.seed(1010)
-test_approached <- generateE(df.select)
-test_sample <- createSample(test_approached)
-test_responses <- calcResponseRates(test_sample)
-test_dist_smds <- calcDistSMDs(test_sample)
-test_sch_smds <- calcSchSMDs(test_sample)
+# set.seed(1010)
+# test_approached <- generateE(df.select)
+# test_sample <- createSample(test_approached)
+# test_responses <- calcResponseRates(test_sample) 
+# test_dist_smds <- calcDistSMDs(test_sample)
+# test_dist_smds <- test_dist_smds %>% select(sample:Group, goal_SMD:miss)
+# test_sch_smds <- calcSchSMDs(test_sample)
+# test_sch_smds <- test_sch_smds %>% select(sample:Group, goal_SMD:miss)
+# 
+# 
+# # Visualize Sampling
+# 
+# test_responses %>%
+#   filter(sch.RR == 30) %>%
+#   gather(key = measure, value = value, -sample, -sch.RR, -dist.RR) %>%
+#   mutate(level = str_split(measure, "_", simplify = T)[,1],
+#          measure =  str_split(measure, "_", simplify = T)[,2]) %>%
+#   ggplot(aes(x = dist.RR, y = value, group = sample, color = sample)) +
+#   geom_point() +
+#   geom_line() +
+#   facet_grid(measure ~ level, scales = "free_y") +
+#   theme_bw()
+# 
+# # Visualize District SMDs
+# test_dist_smds %>%
+#   filter(sch.RR == 30) %>%
+#   ggplot(aes(x = dist.RR, y = abs(sim_SMD), group = sample, color = sample)) +
+#   geom_point() +
+#   geom_line() +
+#   geom_hline(yintercept = 0) +
+#   geom_hline(yintercept = c(-.1, .1), linetype = "dashed") +
+#   facet_grid(Group ~ Variable) +
+#   theme_bw()
+# 
+# # Visualize School SMDs
+# test_sch_smds %>%
+#   filter(sch.RR == 30) %>%
+#   ggplot(aes(x = dist.RR, y = abs(sim_SMD), group = sample, color = sample)) +
+#   geom_point() +
+#   geom_line() +
+#   geom_hline(yintercept = 0) +
+#   geom_hline(yintercept = c(-.1, .1), linetype = "dashed") +
+#   facet_grid(Group ~ Variable) +
+#   theme_bw()
+# 
+# 
+# # Compare to goal SMDs
+# test_dist_smds %>%
+#   filter(sch.RR == 30) %>%
+#   ggplot(aes(x = dist.RR, y = miss, group = sample, color = sample)) +
+#   geom_point() +
+#   geom_line() +
+#   geom_hline(yintercept = 0) +
+#   geom_hline(yintercept = c(-.1, .1), linetype = "dashed") +
+#   facet_grid(Group ~ Variable) +
+#   theme_bw()
+
+testRun <- function(data) {
+  approached <- generateE(data)
+  sample <- createSample(approached)
+  
+  responses <- calcResponseRates(sample) %>%
+    gather(key = variable, value = value, -sample, -dist.RR, -sch.RR)
+  
+  dist_smds <- calcDistSMDs(sample) %>% 
+    select(sample:Group, goal_SMD:miss) %>%
+    gather(key = variable, value = value, -sample, -dist.RR, -sch.RR, -Variable, -Group)
+  
+  sch_smds <- calcSchSMDs(sample) %>% 
+    select(sample:Group, goal_SMD:miss) %>% 
+    gather(key = variable, value = value, -sample, -dist.RR, -sch.RR, -Variable, -Group)
+  
+
+  return(list(responses, dist_smds, sch_smds))
+}
+
+
+
+
+# set.seed(0115)
+# 
+# runtime <- system.time(results <- replicate(100, testRun(df.select %>% filter(sch.RR %in% c(30, 50, 70)))))
+# save(runtime, file = "Data/Sim Test Runtime2.rdata")
+load("Data/Sim Test Runtime2.rdata")
+avgRun <- runtime/100
+avgRun * 10000 / 60 / 60 # Hours
+avgRun * 10000 / 60      # Minutes
+# 
+# # save(results, file = "Data/results.rdata")
+
+load("Data/results.rdata")
+
+
+df_responses <- bind_rows(results[1,]) %>% data.frame
+df_dist_smd <- bind_rows(results[2,]) %>% data.frame
+df_sch_smd <- bind_rows(results[3,]) %>% data.frame
 
 # Visualize Sampling
-
-test_responses %>%
-  filter(sch.RR == 30) %>%
+df_responses %>%
+  group_by(sample, dist.RR, sch.RR, variable) %>%
+  summarise(value = mean(value)) %>%
+  spread(key = variable, value = value) %>%
+  # filter(sch.RR == 50) %>%
   gather(key = measure, value = value, -sample, -sch.RR, -dist.RR) %>%
   mutate(level = str_split(measure, "_", simplify = T)[,1],
          measure =  str_split(measure, "_", simplify = T)[,2]) %>%
   ggplot(aes(x = dist.RR, y = value, group = sample, color = sample)) +
   geom_point() +
   geom_line() +
-  facet_grid(measure ~ level, scales = "free_y") +
-  theme_bw()
+  facet_grid(measure + level ~ sch.RR, scales = "free_y") +
+  theme_bw() +
+  expand_limits(y=0)
+
 
 # Visualize District SMDs
-test_dist_smds %>%
+df_dist_smd %>%
+  group_by(sample, dist.RR, sch.RR, Variable, Group, variable) %>%
+  summarise(value = mean(value, na.rm = T)) %>% # NAs due to 0 rejections by CS
+  spread(key = variable, value = value) %>%
   filter(sch.RR == 30) %>%
   ggplot(aes(x = dist.RR, y = abs(sim_SMD), group = sample, color = sample)) +
   geom_point() +
@@ -171,7 +268,10 @@ test_dist_smds %>%
   theme_bw()
 
 # Visualize School SMDs
-test_sch_smds %>%
+df_sch_smd %>%
+  group_by(sample, dist.RR, sch.RR, Variable, Group, variable) %>%
+  summarise(value = mean(value, na.rm = F)) %>% 
+  spread(key = variable, value = value) %>%
   filter(sch.RR == 30) %>%
   ggplot(aes(x = dist.RR, y = abs(sim_SMD), group = sample, color = sample)) +
   geom_point() +
@@ -183,7 +283,10 @@ test_sch_smds %>%
 
 
 # Compare to goal SMDs
-test_dist_smds %>%
+df_dist_smd %>%
+  group_by(sample, dist.RR, sch.RR, Variable, Group, variable) %>%
+  summarise(value = mean(value, na.rm = T)) %>% # NAs due to 0 rejections by CS
+  spread(key = variable, value = value) %>%
   filter(sch.RR == 30) %>%
   ggplot(aes(x = dist.RR, y = miss, group = sample, color = sample)) +
   geom_point() +
@@ -193,16 +296,15 @@ test_dist_smds %>%
   facet_grid(Group ~ Variable) +
   theme_bw()
 
-testRun <- function() {
-  test_approached <- generateE(df.select)
-  test_sample <- createSample(test_approached)
-  test_responses <- calcResponseRates(test_sample)
-  test_dist_smds <- calcDistSMDs(test_sample)
-  test_sch_smds <- calcSchSMDs(test_sample)
-}
-
-# runtime <- system.time(replicate(100, testRun()))
-# save(runtime, file = "Data/Sim Test Runtime2.rdata")
-load("Data/Sim Test Runtime2.rdata")
-avgRun <- runtime/100
-avgRun * 10000 / 60 / 60 # Hours
+df_sch_smd %>%
+  group_by(sample, dist.RR, sch.RR, Variable, Group, variable) %>%
+  summarise(value = mean(value, na.rm = T)) %>% # NAs due to 0 rejections by CS
+  spread(key = variable, value = value) %>%
+  filter(sch.RR == 30) %>%
+  ggplot(aes(x = dist.RR, y = miss, group = sample, color = sample)) +
+  geom_point() +
+  geom_line() +
+  geom_hline(yintercept = 0) +
+  geom_hline(yintercept = c(-.1, .1), linetype = "dashed") +
+  facet_grid(Group ~ Variable) +
+  theme_bw()
