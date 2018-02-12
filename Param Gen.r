@@ -122,6 +122,7 @@ distVals %>%
   geom_line() +
   geom_hline(yintercept = 0) +
   geom_hline(yintercept = c(-1, 1) * .25, linetype = "dashed")
+
 #-----------------------
 # Schools
 #-----------------------
@@ -233,6 +234,22 @@ schVals %>%
   geom_hline(yintercept = c(-1, 1) * .25, linetype = "dashed") +
   facet_wrap(~ Var)
 
+schVals %>%
+  ggplot(aes(x = RR, y = pars, color = distRR)) +
+  geom_point() + 
+  geom_smooth(method = "lm", formula = y ~ I(x^2)) +
+  facet_wrap(~ Var)
+
+smoothSchVals <- lm(pars ~ Var * (RR + I(RR^2)), data = schVals)
+schVals$parSmooth[!is.na(schVals$pars)] <- smoothSchVals$fitted.values
+
+schVals %>%
+  ggplot(aes(x = RR, y = parSmooth, color = distRR)) +
+  geom_point() + 
+  facet_wrap(~ Var)
+
+schVals$pars <- schVals$parSmooth
+
 #-----------------------
 # Examin Propensity Scores
 #-----------------------
@@ -273,8 +290,8 @@ load("Params/180203.rdata")
 # Convenience Sample SMDs
 #-----------------------
 
-# 
-# 
+
+
 # sampleCS <- function(data, n = 60) {
 #   data <- data %>%
 #     mutate(Ej = genE(dist.PS),
@@ -303,18 +320,18 @@ load("Params/180203.rdata")
 # stopCluster(cl)
 # 
 # 
-# # results <- replicate(10, sampleCS(df.select))
-# 
+# results <- replicate(10, sampleCS(df.select))
+
 # save(results, file = "Params/CS Selection2.rData")
-# 
-# 
+
+
 # load("Params/CS Selection2.rData")
 # 
 # sPlot <- df.select %>%
 #   ungroup() %>%
 #   arrange(DSID, RR.S.D) %>%
 #   mutate(selectRate = apply(results, 1, mean))
-#   
+# 
 # sPlot %>%
 #   filter(selectRate > 0) %>%
 #   ggplot(aes(x = selectRate)) +
@@ -348,10 +365,10 @@ IVs <- c("n", "urbanicity", "pED", "pMin", "pELL")
 # }
 # 
 # save(clusters, file = "Params/clusters10.rData")
-# 
-# beepr::beep(1)
-# beepr::beep(1)
-# beepr::beep(1)
+
+beepr::beep(1)
+beepr::beep(1)
+beepr::beep(1)
 
 load("Params/clusters10.rData")
 

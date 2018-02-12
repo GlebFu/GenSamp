@@ -227,9 +227,9 @@ avgRun <- runtime/100
 avgRun * 10000 / 60 / 60 # Hours
 avgRun * 10000 / 60      # Minutes
 # 
-# # save(results, file = "Data/results.rdata")
+# # save(results, file = "Data/results2.rdata")
 
-load("Data/results.rdata")
+load("Data/results2.rdata")
 
 
 df_responses <- bind_rows(results[1,]) %>% data.frame
