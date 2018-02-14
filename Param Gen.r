@@ -76,33 +76,33 @@ distEx <- "Urban"
 #-----------------------
 # Gen District Params
 #-----------------------
-# dist.resps <- 9:1/10
-# # dist.resps <- c(.4)
-# 
-# dist.respNames <- paste("PS", dist.resps*100, sep = "")
-# 
-# calcDistParams <- function(resp) {
-#   optim(par = distBs, fn = testGoal,
-#         MRR = resp, vars = distVars,
-#         data = df.dist, exclude = distEx, goal = distGoal) %>%
-#     c(resp = resp)
-# }
-# 
-# calcPS_RRs <- function(pars) {
-#   calcPS(Bs = pars$par, MRR = pars$resp, vars = distVars, data = df.dist, exclude = distEx)
-# }
-# 
-# distPars <- lapply(dist.resps, calcDistParams)
-# distVals <- lapply(distPars, getVals, vars = distVars, data = df.dist, exclude = distEx, goal = distGoal) %>%
-# Reduce(function(dtf1,dtf2) rbind(dtf1,dtf2), .) %>%
-# data.frame
-# distPS <- sapply(distPars, calcPS_RRs) %>% data.frame
-# names(distPS) <- dist.respNames
-# df.dist <- cbind(df.dist, distPS)
-# 
-# save.image("Params/180203.rdata")
+dist.resps <- 9:1/10
+# dist.resps <- c(.4)
 
-load("Params/180203.rdata")
+dist.respNames <- paste("PS", dist.resps*100, sep = "")
+
+calcDistParams <- function(resp) {
+  optim(par = distBs, fn = testGoal,
+        MRR = resp, vars = distVars,
+        data = df.dist, exclude = distEx, goal = distGoal) %>%
+    c(resp = resp)
+}
+
+calcPS_RRs <- function(pars) {
+  calcPS(Bs = pars$par, MRR = pars$resp, vars = distVars, data = df.dist, exclude = distEx)
+}
+
+distPars <- lapply(dist.resps, calcDistParams)
+distVals <- lapply(distPars, getVals, vars = distVars, data = df.dist, exclude = distEx, goal = distGoal) %>%
+Reduce(function(dtf1,dtf2) rbind(dtf1,dtf2), .) %>%
+data.frame
+distPS <- sapply(distPars, calcPS_RRs) %>% data.frame
+names(distPS) <- dist.respNames
+df.dist <- cbind(df.dist, distPS)
+
+save(distPars, file = "Params/180213/distPars.rdata")
+
+load("Params/180213/distPars.rdata")
 
 distVals %>%
   select(Var, RR, smdS1:goal) %>%
@@ -143,62 +143,62 @@ schEx <- "Urban"
 #-----------------------
 # Gen School Params
 #-----------------------
-# sch.resps <- 9:1/10
-# # sch.resps <- c(.5)
-# 
-# 
-# 
-# calcSchParams <- function(sch.resps, distp = NULL, distrr) {
-#   optim(par = schBs, fn = testGoal,
-#         MRR = sch.resps, vars = schVars,
-#         data = df.sch, exclude = schEx,
-#         goal = schGoal, distp = distp) %>%
-#     c(resp = sch.resps,
-#       dresp = distrr) %>%
-#     c(list(distp = distp))
-# }
-# 
-# calcPS_RRs <- function(pars, distp = NULL) {
-#   calcPS(Bs = pars$par, MRR = pars$resp,
-#          vars = schVars, data = df.sch,
-#          exclude = schEx, distp = distp,
-#          int = pars$value)
-# }
-# 
-# test <- df.dist[, dist.respNames] %>% as.data.frame
-# row.names(test) <- df.dist$DID
-# test <- test[as.character(df.sch$DID),] %>% as.data.frame
-# names(test) <- dist.respNames
-# 
-# schPars <- list()
-# 
-# for(i in 1:length(dist.resps)) {
-#   for(j in 1:length(sch.resps)) {
-#     tryCatch(
-#       {
-#         schPars <- c(schPars, list(calcSchParams(sch.resps[j], distp = test[, i], distrr = dist.resps[i])))
-#       },
-#       error=function(e){cat(# "ERROR :",conditionMessage(e), "\n",
-#                             "District RR: ", dist.resps[i], " School RR: ", sch.resps[j], "\n")})
-#   }
-# 
-# 
-# }
-# 
-# schVals <- lapply(schPars, getVals, vars = schVars, data = df.sch, exclude = schEx, goal = schGoal) %>%
-#   Reduce(function(dtf1,dtf2) rbind(dtf1,dtf2), .)
-# schPS <- sapply(schPars, calcPS_RRs) %>% data.frame
-# 
-# 
-# sch.respNames <- schVals[, c("RR", "distRR")] %>% unique
-# sch.respNames <- paste("RR", sch.respNames$RR*100, sch.respNames$distRR*100, sep = "")
-# 
-# names(schPS) <- sch.respNames
-# df.sch <- cbind(df.sch, schPS)
-# 
-# save.image("Params/180203.rdata")
-# 
-load("Params/180203.rdata")
+sch.resps <- 9:1/10
+# sch.resps <- c(.5)
+
+
+
+calcSchParams <- function(sch.resps, distp = NULL, distrr) {
+  optim(par = schBs, fn = testGoal,
+        MRR = sch.resps, vars = schVars,
+        data = df.sch, exclude = schEx,
+        goal = schGoal, distp = distp) %>%
+    c(resp = sch.resps,
+      dresp = distrr) %>%
+    c(list(distp = distp))
+}
+
+calcPS_RRs <- function(pars, distp = NULL) {
+  calcPS(Bs = pars$par, MRR = pars$resp,
+         vars = schVars, data = df.sch,
+         exclude = schEx, distp = distp,
+         int = pars$value)
+}
+
+test <- df.dist[, dist.respNames] %>% as.data.frame
+row.names(test) <- df.dist$DID
+test <- test[as.character(df.sch$DID),] %>% as.data.frame
+names(test) <- dist.respNames
+
+schPars <- list()
+
+for(i in 1:length(dist.resps)) {
+  for(j in 1:length(sch.resps)) {
+    tryCatch(
+      {
+        schPars <- c(schPars, list(calcSchParams(sch.resps[j], distp = test[, i], distrr = dist.resps[i])))
+      },
+      error=function(e){cat(# "ERROR :",conditionMessage(e), "\n",
+                            "District RR: ", dist.resps[i], " School RR: ", sch.resps[j], "\n")})
+  }
+
+
+}
+
+schVals <- lapply(schPars, getVals, vars = schVars, data = df.sch, exclude = schEx, goal = schGoal) %>%
+  Reduce(function(dtf1,dtf2) rbind(dtf1,dtf2), .)
+schPS <- sapply(schPars, calcPS_RRs) %>% data.frame
+
+
+sch.respNames <- schVals[, c("RR", "distRR")] %>% unique
+sch.respNames <- paste("RR", sch.respNames$RR*100, sch.respNames$distRR*100, sep = "")
+
+names(schPS) <- sch.respNames
+df.sch <- cbind(df.sch, schPS)
+
+save(schVals, schPS, schPars, file = "Params/180213/schVals.rdata")
+
+load("Params/180213/schVals.rdata")
 
 schVals %>%
   ggplot(aes(x = RR, y = pars)) +
@@ -271,21 +271,21 @@ df.sch %>%
 
 
 
-# df.select <- df.dist %>%
-#   select(DID, one_of(dist.respNames)) %>%
-#   gather(key = "dist.RR", value = "dist.PS", -DID) %>%
-#   mutate(dist.RR = str_sub(dist.RR, start = 3))
-# 
-# df.select <- df.sch %>%
-#   select(DID, SID, DSID, one_of(sch.respNames)) %>%
-#   gather(key = "RR.S.D", value = "sch.PS", -DID, -SID, -DSID) %>%
-#   mutate(dist.RR = str_sub(RR.S.D, start = 5),
-#          sch.RR = str_sub(RR.S.D, start = 3, end = 4)) %>%
-#   left_join(df.select)
-# 
-# # save.image("Params/180203.rdata")
+df.select <- df.dist %>%
+  select(DID, one_of(dist.respNames)) %>%
+  gather(key = "dist.RR", value = "dist.PS", -DID) %>%
+  mutate(dist.RR = str_sub(dist.RR, start = 3))
 
-load("Params/180203.rdata")
+df.select <- df.sch %>%
+  select(DID, SID, DSID, one_of(sch.respNames)) %>%
+  gather(key = "RR.S.D", value = "sch.PS", -DID, -SID, -DSID) %>%
+  mutate(dist.RR = str_sub(RR.S.D, start = 5),
+         sch.RR = str_sub(RR.S.D, start = 3, end = 4)) %>%
+  left_join(df.select)
+
+save(df.select, file = "Params/180213/select.rdata")
+
+load("Params/180213/select.rdata")
 #-----------------------
 # Convenience Sample SMDs
 #-----------------------
@@ -355,22 +355,21 @@ IVs <- c("n", "urbanicity", "pED", "pMin", "pELL")
 
 
 
-# distance <- daisy(x = df[,IVs], metric = "gower")
-# 
-# clusters <- list()
-# 
-# for(i in 1:K) {
-# 
-#   clusters <- append(clusters, list(kmeans(distance, i)))
-# }
-# 
-# save(clusters, file = "Params/clusters10.rData")
+distance <- daisy(x = df[,IVs], metric = "gower")
 
-beepr::beep(1)
-beepr::beep(1)
-beepr::beep(1)
+clusters <- list()
 
-load("Params/clusters10.rData")
+for(i in 1:K) {
+
+  clusters <- append(clusters, list(kmeans(distance, i)))
+}
+
+save(clusters, file = "Params/180213/clusters-full.rdata")
+
+beepr::beep(3)
+beepr::beep(3)
+
+load("Params/180213/clusters-full.rdata")
 
 classign <- data.frame(sapply(clusters, function(x) x$cluster))
 names(classign) <- paste("k", 1:K, sep = "")
@@ -403,10 +402,6 @@ df$cluster <- df$k6
 #-----------------------
 # Generate Within Cluster Ranks
 #-----------------------
-
-# save.image("Params/180203.rdata")
-
-load("Params/180203.rdata")
 
 ranks <- df %>%
   select(DSID, cluster, IVs[-2]) %>%
@@ -457,9 +452,8 @@ df %>%
 # Export Data
 #-----------------------
 
-# save.image("Params/180203.rdata")
-
-load("Params/180203.rdata")
+save.image(file = "Params/180213/image.rdata")
+load("Params/180213/image.rdata")
 
 # District statistics
 dist_stats <- df[,c("DID", names(distGoal))] %>%

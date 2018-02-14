@@ -8,6 +8,7 @@ rm(list = ls())
 #-----------------
 # Fixed data
 #-----------------
+#tets
 
 # Base data set
 load("Data/simData.Rdata")
@@ -218,16 +219,16 @@ testRun <- function(data) {
 
 
 
-# set.seed(0115)
-# 
-# runtime <- system.time(results <- replicate(100, testRun(df.select %>% filter(sch.RR %in% c(30, 50, 70)))))
-# save(runtime, file = "Data/Sim Test Runtime2.rdata")
-load("Data/Sim Test Runtime2.rdata")
+set.seed(0115)
+
+runtime <- system.time(results <- replicate(1000, testRun(df.select %>% filter(sch.RR %in% c(30, 50, 70)))))
+save(runtime, file = "Data/Sim Test Runtime3.rdata")
+load("Data/Sim Test Runtime3.rdata")
 avgRun <- runtime/100
 avgRun * 10000 / 60 / 60 # Hours
 avgRun * 10000 / 60      # Minutes
-# 
-# # save(results, file = "Data/results2.rdata")
+
+save(results, file = "Data/results2.rdata")
 
 load("Data/results2.rdata")
 
