@@ -452,8 +452,8 @@ df %>%
 # Export Data
 #-----------------------
 
-save.image(file = "Params/180213/image.rdata")
-load("Params/180213/image.rdata")
+# save.image(file = "Params/180213/image.rdata")
+# load("Params/180213/image.rdata")
 
 # District statistics
 dist_stats <- df[,c("DID", names(distGoal))] %>%

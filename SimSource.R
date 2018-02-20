@@ -218,10 +218,10 @@ testRun <- function(data) {
 
 
 
+# seed <- runif(1,0,1)*10^8
+set.seed(42987117)
 
-set.seed(0115)
-
-runtime <- system.time(results <- replicate(1000, testRun(df.select %>% filter(sch.RR %in% c(30, 50, 70)))))
+runtime <- system.time(results <- replicate(2000, testRun(df.select %>% filter(sch.RR %in% c(30, 50, 70)))))
 save(runtime, file = "Data/Sim Test Runtime3.rdata")
 load("Data/Sim Test Runtime3.rdata")
 avgRun <- runtime/100
