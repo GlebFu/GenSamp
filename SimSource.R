@@ -49,7 +49,8 @@ createSample <- function(data) {
     mutate(count = cumsum(Eij)) %>% 
     filter(count <= 60) %>%
     left_join(df, by = c("DSID", "DID", "SID")) %>%
-    mutate(sample = "SRS")
+    mutate(sample = "SRS",
+           cluster = NA)
   
   #Convenience Sampling
   CS_Sample <- data %>%
@@ -58,7 +59,8 @@ createSample <- function(data) {
     mutate(count = cumsum(Eij)) %>% 
     filter(count <= 60) %>%
     left_join(df, by = c("DSID", "DID", "SID")) %>%
-    mutate(sample = "CS")
+    mutate(sample = "CS",
+           cluster = NA)
   
   #OV Cluster Analyusis Stratified Sampling
   SUBS_OV_Sample <- data %>%
@@ -67,7 +69,8 @@ createSample <- function(data) {
     mutate(count = cumsum(Eij)) %>%
     filter(count <= propAllocation(cluster_ov, "cluster_ov")) %>%
     left_join(df, by = c("DSID", "DID", "SID", "cluster_ov")) %>%
-    mutate(sample = "SUBS_OV")
+    mutate(sample = "SUBS_OV",
+           cluster = cluster_ov)
   
   #Full Cluster Analyusis Stratified Sampling
   SUBS_F_Sample <- data %>%
@@ -76,7 +79,8 @@ createSample <- function(data) {
     mutate(count = cumsum(Eij)) %>%
     filter(count <= propAllocation(cluster_full, "cluster_full")) %>%
     left_join(df, by = c("DSID", "DID", "SID", "cluster_full")) %>%
-    mutate(sample = "SUBS_F")
+    mutate(sample = "SUBS_F",
+           cluster = cluster_full)
   
   return(rbind(SRS_Sample, CS_Sample, SUBS_OV_Sample, SUBS_F_Sample))
 }
@@ -85,13 +89,15 @@ createSample <- function(data) {
 calcResponseRates <- function(data, cluster = F) {
   if(!cluster){
     data <- data %>%
-      group_by(sample, dist.RR, sch.RR, Ej)
+      mutate(cluster = NA) %>%
+      group_by(sample, dist.RR, sch.RR, Ej, cluster)
   } else {
     data <- data %>%
       filter(sample %in% c("SUBS_F", "SUBS_OV")) %>%
-      group_by(dist.RR, sch.RR, Ej, cluster)
+      group_by(sample, dist.RR, sch.RR, Ej, cluster)
 
   }
+  
   data %>%
     summarise(sch_contacted = n(),
             sch_accepted = sum(Eij),
@@ -103,6 +109,7 @@ calcResponseRates <- function(data, cluster = F) {
            dist_contacted = sum(dist_contacted),
            dist_RR = dist_accepted/dist_contacted) %>%
     filter(Ej == 1) %>%
+    ungroup() %>%
     select(-Ej) %>%
     return()
 }
@@ -211,7 +218,11 @@ testRun <- function(data) {
   sample <- createSample(approached)
   
   responses <- calcResponseRates(sample) %>%
-    gather(key = variable, value = value, -sample, -dist.RR, -sch.RR)
+    gather(key = variable, value = value, -sample, -dist.RR, -sch.RR, -cluster)
+  
+  responses <- calcResponseRates(sample, cluster = T) %>%
+    gather(key = variable, value = value, -sample, -dist.RR, -sch.RR, -cluster) %>%
+    rbind(responses)
   
   dist_smds <- calcDistSMDs(sample) %>% 
     select(sample:Group, goal_SMD:miss) %>%
@@ -221,108 +232,8 @@ testRun <- function(data) {
     select(sample:Group, goal_SMD:miss) %>% 
     gather(key = variable, value = value, -sample, -dist.RR, -sch.RR, -Variable, -Group)
   
-
-  return(list(responses, dist_smds, sch_smds))
+  return(list(responses = responses, dist_smds = dist_smds, sch_smds = sch_smds))
 }
 
 
 
-# # seed <- runif(1,0,1)*10^8
-# set.seed(42987117)
-# 
-# # test <- testRun(df.select %>% filter(sch.RR %in% c(30, 50, 70)))
-# reps <- 1500
-# runtime <- system.time(results <- replicate(reps, testRun(df.select %>% filter(sch.RR %in% c(30, 50, 70)))))
-# save(runtime, file = "Data/Sim Test Runtime3.rdata")
-# load("Data/Sim Test Runtime3.rdata")
-# avgRun <- runtime/reps
-# avgRun * 1000 / 60 / 60 # Hours
-# avgRun * 1000 / 60      # Minutes
-# # 
-# df_responses <- bind_rows(results[1,]) %>% data.frame
-# df_dist_smd <- bind_rows(results[2,]) %>% data.frame
-# df_sch_smd <- bind_rows(results[3,]) %>% data.frame
-# 
-# save(df_responses, df_dist_smd, df_sch_smd, file = "Data/results2.rdata")
-
-load("Data/results2.rdata")
-
-# Visualize Sampling
-samplot <- df_responses %>%
-  group_by(sample, dist.RR, sch.RR, variable) %>%
-  summarise(value = mean(value)) %>%
-  spread(key = variable, value = value)
-  # filter(sch.RR == 50) %>%
-  
-samplot %>%
-  # filter(sch.RR == 50) %>%
-  gather(key = measure, value = value, -sample, -sch.RR, -dist.RR) %>%
-  mutate(level = str_split(measure, "_", simplify = T)[,1],
-         measure =  str_split(measure, "_", simplify = T)[,2]) %>%
-  ggplot(aes(x = dist.RR, y = value, group = sample, color = sample)) +
-  geom_point() +
-  geom_line() +
-  facet_grid(measure + level ~ sch.RR, scales = "free_y") +
-  theme_bw() +
-  expand_limits(y=0)
-
-
-# Visualize District SMDs
-dSMDplot <- df_dist_smd %>%
-  group_by(sample, dist.RR, sch.RR, Variable, Group, variable) %>%
-  summarise(value = mean(value, na.rm = T)) %>% # NAs due to 0 rejections by CS
-  spread(key = variable, value = value)
-  
-dSMDplot %>%
-  filter(sch.RR == 30) %>%
-  ggplot(aes(x = dist.RR, y = abs(sim_SMD), group = sample, color = sample)) +
-  geom_point() +
-  geom_line() +
-  geom_hline(yintercept = 0) +
-  geom_hline(yintercept = c(-.1, .1), linetype = "dashed") +
-  facet_grid(Group ~ Variable) +
-  theme_bw()
-
-# Visualize School SMDs
-sSMDplot <- df_sch_smd %>%
-  group_by(sample, dist.RR, sch.RR, Variable, Group, variable) %>%
-  summarise(value = mean(value, na.rm = F)) %>% 
-  spread(key = variable, value = value)
-
-sSMDplot %>%
-  filter(sch.RR == 30) %>%
-  ggplot(aes(x = dist.RR, y = abs(sim_SMD), group = sample, color = sample)) +
-  geom_point() +
-  geom_line() +
-  geom_hline(yintercept = 0) +
-  geom_hline(yintercept = c(-.1, .1), linetype = "dashed") +
-  facet_grid(Group ~ Variable) +
-  theme_bw()
-
-
-# Compare to goal SMDs
-df_dist_smd %>%
-  group_by(sample, dist.RR, sch.RR, Variable, Group, variable) %>%
-  summarise(value = mean(value, na.rm = T)) %>% # NAs due to 0 rejections by CS
-  spread(key = variable, value = value) %>%
-  filter(sch.RR == 70) %>%
-  ggplot(aes(x = dist.RR, y = miss, group = sample, color = sample)) +
-  geom_point() +
-  geom_line() +
-  geom_hline(yintercept = 0) +
-  geom_hline(yintercept = c(-.1, .1), linetype = "dashed") +
-  facet_grid(Group ~ Variable) +
-  theme_bw()
-
-df_sch_smd %>%
-  group_by(sample, dist.RR, sch.RR, Variable, Group, variable) %>%
-  summarise(value = mean(value, na.rm = T)) %>% # NAs due to 0 rejections by CS
-  spread(key = variable, value = value) %>%
-  filter(sch.RR == 70) %>%
-  ggplot(aes(x = dist.RR, y = miss, group = sample, color = sample)) +
-  geom_point() +
-  geom_line() +
-  geom_hline(yintercept = 0) +
-  geom_hline(yintercept = c(-.1, .1), linetype = "dashed") +
-  facet_grid(Group ~ Variable) +
-  theme_bw()
