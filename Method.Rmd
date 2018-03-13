@@ -1,0 +1,206 @@
+---
+title             : "Analysis Write-up"
+shorttitle        : "Analysis Write-up"
+
+author:
+  - name          : "Gleb Furman"
+    affiliation   : "1"
+  #   corresponding : yes    # Define only one corresponding author
+  #   address       : "Postal address"
+  #   email         : "my@email.com"
+  # - name          : "Ernst-August Doelle"
+  #   affiliation   : "1,2"
+
+affiliation:
+  - id            : "1"
+    institution   : "Who Kneads a PH.D. Bakery"
+#   - id            : "2"
+#     institution   : "Konstanz Business School"
+
+# author_note: |
+#   Add complete departmental affiliations for each author here. Each new line herein must be indented, like this line.
+
+#   Enter author note here.
+
+# abstract: |
+#   Enter abstract here. Each new line herein must be indented, like this line.
+  
+# keywords          : "keywords"
+# wordcount         : "X"
+
+# bibliography      : ["r-references.bib"]
+
+figsintext        : yes
+figurelist        : no
+tablelist         : no
+footnotelist      : no
+lineno            : no
+mask              : no
+
+class             : "man"
+output            : papaja::apa6_pdf
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = F, cache = F)
+```
+
+```{r load.packages, include = FALSE}
+library(papaja)
+library(tidyverse)
+
+rm(list = ls())
+```
+
+```{r analysis_preferences}
+# Seed for random number generation
+# set.seed(42)
+```
+
+```{r data}
+load("data/base data.rdata")
+
+vars <- c("LSTATE", "LEANM", "SCHNAM", "DID", "SID", "DSID", "n", "pTotfrl",
+          "Urban", "Suburban", "ToRu",
+          "pELL", "pED", "pELA", "pMath", "pMin", "MEDINC", "MEDINC_SD")
+
+covariates <- c("n", "pTotfrl", "Urban", "Suburban", "ToRu",
+                "pELL", "pED", "pELA", "pMath", "pMin", "MEDINC")
+
+cov_factors <- c("Urban", "Suburban", "ToRu")
+
+df.sch <- df[,vars]
+
+df.dist <- select(df.sch, -SCHNAM, -LSTATE, -LEANM, -SID) %>%
+  group_by(DID) %>%
+  mutate(m = n()) %>%
+  summarise_if(is.numeric, mean) %>%
+  ungroup()
+
+df.dist.w <- select(df.sch, -SCHNAM, -LSTATE, -LEANM, -SID) %>%
+  group_by(DID) %>%
+  mutate(m = n(),
+         n2 = n) %>%
+  summarise_at(vars(n:m), funs(weighted.mean(., n2))) %>%
+  ungroup()
+
+
+
+```
+
+```{r descriptives}
+tbl_desc <- df.dist %>%
+  gather(key = Variable, value = Value, n:MEDINC, m) %>%
+  group_by(Variable) %>%
+  summarise(M = mean(Value), SD = sd(Value))
+
+tbl_desc <- df.dist.w %>%
+  gather(key = Variable, value = Value, n:MEDINC, m) %>%
+  group_by(Variable) %>%
+  summarise(M = mean(Value), SD = sd(Value)) %>%
+  right_join(tbl_desc, by = "Variable")
+
+tbl_desc <- df.sch %>%
+  gather(key = Variable, value = Value, n:MEDINC) %>%
+  group_by(Variable) %>%
+  summarise(M = mean(Value), SD = sd(Value))  %>%
+  right_join(tbl_desc, by = "Variable")
+
+
+
+tbl_desc$Variable <- c("Number of Schools", "Median Income", "Number of Students", "Economically Disadvantaged", "ELA Proficiency", "English Language Learners", "Math Proficiency", "Minority Status", "Total/Free/Reduced Lunch", "Suburban", "Town and Rural", "Urban")
+
+tbl_desc <- tbl_desc[c(1,3,2,5,7,4,6,8,9,12,10,11),]
+```
+
+```{r tbl_desc, results = "asis"}
+apa_table(tbl_desc,
+          caption = "Descriptives of variables",
+          note = "District variables are derived as aggregate means of school variables",
+          stub_indents = list(Percents = c(4:9), Indicators = c(10:12)),
+          col_spanners = list(`School` = c(2,3), `District Weighted` = c(4,5), `District Unweighted` = c(6,7)),
+          align = "lcccccc",
+          col.names = c("Variables","Mean", "SD", "Mean", "SD", "Mean", "SD"))
+
+```
+
+
+# Cluster Analysis
+
+
+## Population Frame
+The population frame was comprised of data from three sources: (1) the Common Core of Data (CCD), (2) publically available accountability data, and (3) the U.S. Census. The CCD is a comprehensive database housing anually collected national statistics of all public schools and districts. Accountability data was used to calculate the proportion of students within each school performing at or above proficiency in Math and ELA. Finally, local median income was obtained from the U.S. Census and was  matched to each school by zipcode. All orignal data is school level and aggregated to get district level variables. These are reported in Table \@ref(tab:tbl_desc)
+
+
+
+### SUBS-Full
+
+```{r SUBS_FULL}
+# library(cluster)
+# 
+# df.cluster <- df.dist
+# names(df.cluster[,covariates]) <- paste(covariates, "_D", sep = "")
+# 
+# test <- clusGap(x = df.cluster[,covariates], FUNcluster = kmeans, K.max = 20)
+# plot(test)
+# 
+# K = 10
+# 
+# # distance <- daisy(x = df.cluster[,covariates], metric = "gower")
+# # 
+# # clusters <- list()
+# # 
+# # for(i in 1:K) {
+# # 
+# #   clusters <- append(clusters, list(kmeans(distance, i)))
+# # }
+# # 
+# # save(clusters, file = "Params/2018-03-03/clusters-full.rdata")
+# 
+# load("Params/2018-03-03/clusters-full.rdata")
+# 
+# classign <- data.frame(sapply(clusters, function(x) x$cluster))
+# names(classign) <- paste("k", 1:K, sep = "")
+# 
+# df.cluster <- cbind(df.cluster, classign)
+# 
+# Vratio <- function(clstr){
+#   Vw <- clstr$tot.withinss
+#   Vb <- clstr$betweenss
+#   Vb / (Vw + Vb)
+#   
+# }
+# 
+# data.frame(k = 1:K, var = sapply(clusters, Vratio)) %>%
+#   ggplot(aes(x = k, y = var)) +
+#   geom_point() +
+#   ggtitle("Between cluster variance by number of strata") +
+#   labs(y = "Between Cluster Variance",
+#        x = "Number of Strata (k)") +
+#   geom_line() +
+#   theme_minimal() +
+#   scale_x_discrete(limits = c(1:K)) +
+#   scale_y_continuous(breaks = seq(0, 1, .1))
+# 
+# ggsave("Params/Scree1.png", dpi = 500, width = 5, height = 5)
+# 
+# 
+# df$cluster_full <- df_cluster$k6
+
+
+```
+
+\newpage
+
+# References
+```{r create_r-references}
+# r_refs(file = "r-references.bib")
+```
+
+\begingroup
+\setlength{\parindent}{-0.5in}
+\setlength{\leftskip}{0.5in}
+
+<div id = "refs"></div>
+\endgroup

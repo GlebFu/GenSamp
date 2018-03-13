@@ -9,26 +9,29 @@ source("SimSource.R")
 
 reps <- 1000
 
+
+with(filter(df.select, RR.S.D == "RR9090"), table(cluster_ov, cluster_full))
+
 # seed <- runif(1,0,1)*10^8
-set.seed(42987117)
+# set.seed(42987117)
+# # 
+# # test <- testRun(df.select %>% filter(sch.RR %in% c(30, 50, 70)))
+# # 
+# # undebug(calcResponseRates)
+# # undebug(testRun)
 # 
-# test <- testRun(df.select %>% filter(sch.RR %in% c(30, 50, 70)))
+# runtimeFile <- "Data/runtime r1000.rdata"
+# resultsFile <- "Data/results r1000.rdata"
 # 
-# undebug(calcResponseRates)
-# undebug(testRun)
-
-runtimeFile <- "Data/runtime r1000.rdata"
-resultsFile <- "Data/results r1000.rdata"
-
-runtime <- system.time(results <- replicate(reps, testRun(df.select %>% filter(sch.RR %in% c(30, 50, 70)))))
-save(runtime, file = runtimeFile)
-
-#
-df_responses <- bind_rows(results[1,]) %>% data.frame
-df_dist_smd <- bind_rows(results[2,]) %>% data.frame
-df_sch_smd <- bind_rows(results[3,]) %>% data.frame
-
-save(df_responses, df_dist_smd, df_sch_smd, file = resultsFile)
+# runtime <- system.time(results <- replicate(reps, testRun(df.select %>% filter(sch.RR %in% c(30, 50, 70)))))
+# save(runtime, file = runtimeFile)
+# 
+# #
+# df_responses <- bind_rows(results[1,]) %>% data.frame
+# df_dist_smd <- bind_rows(results[2,]) %>% data.frame
+# df_sch_smd <- bind_rows(results[3,]) %>% data.frame
+# 
+# save(df_responses, df_dist_smd, df_sch_smd, file = resultsFile)
 
 load(runtimeFile)
 load(resultsFile)
@@ -53,7 +56,7 @@ samplot %>%
   ggplot(aes(x = dist.RR, y = value, group = sample, color = sample)) +
   geom_point() +
   geom_line() +
-  facet_grid(measure + level ~ sch.RR, scales = "free_y") +
+  facet_grid(level + measure ~ sch.RR, scales = "free_y") +
   theme_bw() +
   expand_limits(y=0)
 
@@ -65,16 +68,30 @@ samplot_SUBS <- df_responses %>%
 # filter(sch.RR == 50) %>%
 
 samplot_SUBS %>%
-  filter(sch.RR == 50) %>%
+  filter(sch.RR == 30) %>%
   gather(key = measure, value = value, -sample, -sch.RR, -dist.RR, -cluster) %>%
   mutate(level = str_split(measure, "_", simplify = T)[,1],
          measure =  str_split(measure, "_", simplify = T)[,2]) %>%
   ggplot(aes(x = dist.RR, y = value, group = sample, color = sample)) +
   geom_point() +
   geom_line() +
-  facet_grid(measure + level ~ cluster, scales = "free_y") +
+  facet_grid(level + measure ~ cluster, scales = "free_y") +
   theme_bw() +
   expand_limits(y=0)
+
+samplot_SUBS %>%
+  filter(sch.RR == 30) %>%
+  gather(key = measure, value = value, -sample, -sch.RR, -dist.RR, -cluster) %>%
+  mutate(level = str_split(measure, "_", simplify = T)[,1],
+         measure =  str_split(measure, "_", simplify = T)[,2]) %>%
+  ggplot(aes(x = dist.RR, y = value, group = sample, color = sample)) +
+  geom_point() +
+  geom_line() +
+  facet_grid(level + measure ~ cluster, scales = "free_y") +
+  theme_bw() +
+  expand_limits(y=0)
+
+
 
 
 # Visualize District SMDs

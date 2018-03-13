@@ -2,7 +2,6 @@ rm(list = ls())
 
 source("ParGenSource.r")
 
-genE <- function(ps) rbinom(length(ps), 1, prob = ps)
 
 #-----------------------
 # DATA PREP
@@ -18,11 +17,13 @@ levels(df$urbanicity) <- c("ToRu", "Suburban", "ToRu", "Urban")
 # Create Town/Rural Variable
 df <- df %>% 
   filter(n < 4000) %>%
+  unique() %>%
   mutate(pELL = ifelse(is.na(pELL), pELL_D, pELL), 
          pED = ifelse(is.na(pED), pTotfrl, pED),
          pMin = 1-ethWhite,
          ToRu = Town + Rural,
-         MEDINC = STAND(as.numeric(MEDINC)),
+         MEDINC = as.numeric(MEDINC),
+         MEDINC_SD = STAND((MEDINC)),
          DID = as.numeric(as.factor(LEAID)) + 1000) %>%
   group_by(DID) %>%
   mutate(SID = 1:n() + 10000) %>%
@@ -32,12 +33,13 @@ df <- df %>%
 
 vars <- c("LSTATE", "LEANM", "SCHNAM", "DID", "SID", "DSID", "n", "ULOCAL", "pTotfrl", "pIEP_D", "pELL_D", 
           "Urban", "Suburban", "ToRu", "schPrimary", "schMIDDLE", "schHigh", 
-          "schOther", "pELL", "pED", "pELA", "pMath", "pMin", "MEDINC", "urbanicity")
+          "schOther", "pELL", "pED", "pELA", "pMath", "pMin", "MEDINC", "MEDINC_SD", "urbanicity")
 
 # apply(df[,vars], 2, function(x) sum(is.na(x)))
 
-df <- df[,vars] %>% na.omit
+df <- df[,vars] %>% na.omit %>% unique()
 
+save(df, file = "data/base data.rdata")
 
 
 #-----------------------
@@ -510,6 +512,14 @@ df %>%
   ggplot(aes(x = pMin, y = pELL, color = pED, alpha = (1 - rankp_ov)/100)) +
   facet_grid(urbanicity~cluster_ov) +
   geom_point()
+
+df %>%
+  mutate(urbanicity = ifelse(urbanicity == "Rural" | urbanicity == "Town", "ToRu", as.character(urbanicity))) %>%
+  ggplot(aes(x = pMin, y = pELL, color = pED, alpha = (1 - rankp_ov)/100)) +
+  facet_grid(urbanicity~cluster_full) +
+  geom_point()
+
+
 
 df %>%
   filter(rankp_ov < 50) %>%

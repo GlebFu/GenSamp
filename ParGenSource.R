@@ -20,6 +20,9 @@ STAND <- function(x) (x - mean(x, na.rm = T))/sd(x, na.rm = T)
 logit <- function(x) log(x / (1 - x)) 
 expit <- function(x) exp(x) / (1 + exp(x))
 
+# Sampels from binomial distribution
+genE <- function(ps) rbinom(length(ps), 1, prob = ps)
+
 ###################
 # SIM FUNCTIONS
 ###################

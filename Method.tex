@@ -1,0 +1,208 @@
+\documentclass[floatsintext,man]{apa6}
+
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\usepackage{fixltx2e} % provides \textsubscript
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+\else % if luatex or xelatex
+  \ifxetex
+    \usepackage{mathspec}
+    \usepackage{xltxtra,xunicode}
+  \else
+    \usepackage{fontspec}
+  \fi
+  \defaultfontfeatures{Mapping=tex-text,Scale=MatchLowercase}
+  \newcommand{\euro}{€}
+\fi
+% use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+% use microtype if available
+\IfFileExists{microtype.sty}{\usepackage{microtype}}{}
+
+% Table formatting
+\usepackage{longtable, booktabs}
+\usepackage{lscape}
+% \usepackage[counterclockwise]{rotating}   % Landscape page setup for large tables
+\usepackage{multirow}		% Table styling
+\usepackage{tabularx}		% Control Column width
+\usepackage[flushleft]{threeparttable}	% Allows for three part tables with a specified notes section
+\usepackage{threeparttablex}            % Lets threeparttable work with longtable
+
+% Create new environments so endfloat can handle them
+% \newenvironment{ltable}
+%   {\begin{landscape}\begin{center}\begin{threeparttable}}
+%   {\end{threeparttable}\end{center}\end{landscape}}
+
+\newenvironment{lltable}
+  {\begin{landscape}\begin{center}\begin{ThreePartTable}}
+  {\end{ThreePartTable}\end{center}\end{landscape}}
+
+
+
+
+% The following enables adjusting longtable caption width to table width
+% Solution found at http://golatex.de/longtable-mit-caption-so-breit-wie-die-tabelle-t15767.html
+\makeatletter
+\newcommand\LastLTentrywidth{1em}
+\newlength\longtablewidth
+\setlength{\longtablewidth}{1in}
+\newcommand\getlongtablewidth{%
+ \begingroup
+  \ifcsname LT@\roman{LT@tables}\endcsname
+  \global\longtablewidth=0pt
+  \renewcommand\LT@entry[2]{\global\advance\longtablewidth by ##2\relax\gdef\LastLTentrywidth{##2}}%
+  \@nameuse{LT@\roman{LT@tables}}%
+  \fi
+\endgroup}
+
+
+\ifxetex
+  \usepackage[setpagesize=false, % page size defined by xetex
+              unicode=false, % unicode breaks when used with xetex
+              xetex]{hyperref}
+\else
+  \usepackage[unicode=true]{hyperref}
+\fi
+\hypersetup{breaklinks=true,
+            pdfauthor={},
+            pdftitle={Analysis Write-up},
+            colorlinks=true,
+            citecolor=blue,
+            urlcolor=blue,
+            linkcolor=black,
+            pdfborder={0 0 0}}
+\urlstyle{same}  % don't use monospace font for urls
+
+\setlength{\parindent}{0pt}
+%\setlength{\parskip}{0pt plus 0pt minus 0pt}
+
+\setlength{\emergencystretch}{3em}  % prevent overfull lines
+
+
+% Manuscript styling
+\captionsetup{font=singlespacing,justification=justified}
+\usepackage{csquotes}
+\usepackage{upgreek}
+
+
+
+\usepackage{tikz} % Variable definition to generate author note
+
+% fix for \tightlist problem in pandoc 1.14
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
+% Essential manuscript parts
+  \title{Analysis Write-up}
+
+  \shorttitle{Analysis Write-up}
+
+
+  \author{Gleb Furman\textsuperscript{1}}
+
+  % \def\affdep{{""}}%
+  % \def\affcity{{""}}%
+
+  \affiliation{
+    \vspace{0.5cm}
+          \textsuperscript{1} Who Kneads a PH.D. Bakery  }
+
+
+
+  
+
+
+
+
+\usepackage{amsthm}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}{Lemma}[section]
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[section]
+\newtheorem{corollary}{Corollary}[section]
+\newtheorem{proposition}{Proposition}[section]
+\theoremstyle{definition}
+\newtheorem{example}{Example}[section]
+\theoremstyle{definition}
+\newtheorem{exercise}{Exercise}[section]
+\theoremstyle{remark}
+\newtheorem*{remark}{Remark}
+\newtheorem*{solution}{Solution}
+\begin{document}
+
+\maketitle
+
+\setcounter{secnumdepth}{0}
+
+
+
+\begin{table}[tbp]
+\begin{center}
+\begin{threeparttable}
+\caption{\label{tab:tbl_desc}Descriptives of variables}
+\begin{tabular}{lcccccclcccccclcccccclcccccclcccccclcccccclcccccc}
+\toprule
+ & \multicolumn{2}{c}{School} & \multicolumn{2}{c}{District Weighted} & \multicolumn{2}{c}{District Unweighted} \\
+\cmidrule(r){2-3} \cmidrule(r){4-5} \cmidrule(r){6-7}
+Variables & Mean & SD & Mean & SD & Mean & SD\\
+\midrule
+Number of Schools & NA & NA & 4.84 & 12.72 & 4.84 & 12.72\\
+Number of Students & 579.07 & 203.19 & 544.59 & 228.81 & 534.77 & 225.34\\
+Median Income & 60,084.98 & 25,007.61 & 56,710.63 & 20,804.82 & 56,648.44 & 20,750.06\\
+Percents &  &  &  &  &  & \\
+\ \ \ ELA Proficiency & 0.59 & 0.23 & 0.60 & 0.20 & 0.60 & 0.20\\
+\ \ \ Math Proficiency & 0.53 & 0.29 & 0.54 & 0.26 & 0.54 & 0.26\\
+\ \ \ Economically Disadvantaged & 0.59 & 0.29 & 0.54 & 0.24 & 0.54 & 0.24\\
+\ \ \ English Language Learners & 0.23 & 0.21 & 0.14 & 0.17 & 0.14 & 0.17\\
+\ \ \ Minority Status & 0.65 & 0.30 & 0.46 & 0.32 & 0.46 & 0.32\\
+\ \ \ Total/Free/Reduced Lunch & 0.59 & 0.29 & 0.53 & 0.24 & 0.53 & 0.23\\
+Indicators &  &  &  &  &  & \\
+\ \ \ Urban & 0.40 & 0.49 & 0.15 & 0.33 & 0.15 & 0.33\\
+\ \ \ Suburban & 0.41 & 0.49 & 0.33 & 0.44 & 0.33 & 0.44\\
+\ \ \ Town and Rural & 0.19 & 0.39 & 0.51 & 0.48 & 0.51 & 0.48\\
+\bottomrule
+\addlinespace
+\end{tabular}
+\begin{tablenotes}[para]
+\textit{Note.} District variables are derived as aggregate means of school variables
+\end{tablenotes}
+\end{threeparttable}
+\end{center}
+\end{table}
+
+\section{Cluster Analysis}\label{cluster-analysis}
+
+\subsection{Population Frame}\label{population-frame}
+
+The population frame was comprised of data from three sources: (1) the
+Common Core of Data (CCD), (2) publically available accountability data,
+and (3) the U.S. Census. The CCD is a comprehensive database housing
+anually collected national statistics of all public schools and
+districts. Accountability data was used to calculate the proportion of
+students within each school performing at or above proficiency in Math
+and ELA. Finally, local median income was obtained from the U.S. Census
+and was matched to each school by zipcode. All orignal data is school
+level and aggregated to get district level variables. These are reported
+in Table @ref(tab:tbl\_desc)
+
+\subsubsection{SUBS-Full}\label{subs-full}
+
+\newpage
+
+\section{References}\label{references}
+
+\begingroup
+\setlength{\parindent}{-0.5in} \setlength{\leftskip}{0.5in}
+
+\hypertarget{refs}{}
+
+\endgroup
+
+
+
+
+
+
+\end{document}
