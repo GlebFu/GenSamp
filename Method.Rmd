@@ -93,19 +93,9 @@ df.dist.w <- list(.vars = lst("n", vars[8:17], "m"),
   reduce(inner_join, by = "DID")
 
 
-
-# df.dist.w <- select(df.sch, -SCHNAM, -LSTATE, -LEANM, -SID) %>%
-#   group_by(DID) %>%
-#   mutate(m = n(),
-#          n2 = n) %>%
-#   summarise_at(vars(n:m), funs(weighted.mean(., n2))) %>%
-#   ungroup()
-
 df.dist$dif <- df.dist.w$dif <- apply((df.dist[,-1] - df.dist.w[,-1])/apply(df.dist[,-1], 2, function(x) max(x) - min(x)), 1, function(x) mean(abs(x)))
 
-df.dist %>% arrange(-dif) %>% head
 
-df.dist.w %>% arrange(-dif) %>% head
 
 ```
 
@@ -162,52 +152,60 @@ Stratification using balanced sampling (SUBS) was performed prior to simulation 
 
 
 ```{r SUBS_FULL}
+library(parallel)
 library(cluster)
 
-df.sch
+K <- 20
 
-K = 10
+run_clusters <- function(K, distance) {
 
-distance <- daisy(x = df.cluster[, covariates], metric = "gower")
+  # Calculate the number of cores
+  no_cores <- min(K, detectCores() - 1)
 
-clusters <- list()
+  # Initiate cluster
+  cl <- makeCluster(no_cores)
 
-for(i in 1:K) {
+  clusters <- parLapply(cl, 1:K, function(x, y) kmeans(x = y, centers = x), distance)
 
-  clusters <- append(clusters, list(kmeans(distance, i)))
+  stopCluster(cl)
+
+  # clusters <- bind_cols(clusters)
+  #
+  # names(classign) <- paste("k", 1:K, sep = "")
+
+  return(clusters)
 }
 
-save(clusters, file = "Params/2018-03-03/clusters-full.rdata")
 
-load("Params/2018-03-03/clusters-full.rdata")
+distance <- daisy(x = df[, subs_f_vars[-2]], metric = "gower")
 
-classign <- data.frame(sapply(clusters, function(x) x$cluster))
-names(classign) <- paste("k", 1:K, sep = "")
+clusters <- run_clusters(K, distance)
 
-df.cluster <- cbind(df.cluster, classign)
+save(clusters, file =  "Paper Data/clusters-omitted-totfrl.rdata")
 
-Vratio <- function(clstr){
-  Vw <- clstr$tot.withinss
-  Vb <- clstr$betweenss
-  Vb / (Vw + Vb)
+load("Paper Data/clusters-full.rdata")
 
-}
+cls <- bind_cols(lapply(clusters, function(x) data.frame(x$cluster)))
+vrat <- unlist(lapply(clusters, function(x) x$betweenss / x$totss))
 
-data.frame(k = 1:K, var = sapply(clusters, Vratio)) %>%
+
+
+data.frame(k = 1:K, var = vrat, min80 = sum(vrat < .8) + .5) %>%
   ggplot(aes(x = k, y = var)) +
   geom_point() +
   ggtitle("Between cluster variance by number of strata") +
   labs(y = "Between Cluster Variance",
        x = "Number of Strata (k)") +
   geom_line() +
+  geom_vline(aes(xintercept = min80), linetype = "dashed") +
   theme_minimal() +
   scale_x_discrete(limits = c(1:K)) +
   scale_y_continuous(breaks = seq(0, 1, .1))
 
-ggsave("Params/Scree1.png", dpi = 500, width = 5, height = 5)
+# ggsave("Params/Scree1.png", dpi = 500, width = 5, height = 5)
 
 
-df$cluster_full <- df_cluster$k6
+# df$cluster_full <- df_cluster$k6
 
 
 ```
