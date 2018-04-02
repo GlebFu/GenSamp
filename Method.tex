@@ -58,15 +58,6 @@
 \endgroup}
 
 
-  \usepackage{graphicx}
-  \makeatletter
-  \def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
-  \def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
-  \makeatother
-  % Scale images if necessary, so that they will not overflow the page
-  % margins by default, and it is still possible to overwrite the defaults
-  % using explicit options in \includegraphics[width, height, ...]{}
-  \setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
 \ifxetex
   \usepackage[setpagesize=false, % page size defined by xetex
               unicode=false, % unicode breaks when used with xetex
@@ -200,15 +191,22 @@ aggregated to get district level variables. These are reported in Table
 
 Stratification using balanced sampling (SUBS) was performed prior to
 simulation because the group of schools in each strata would be static
-across condtions except where the balancing model is manipulated. The
+across conditions except where the balancing model is manipulated. The
 set of covariates in both the full model (SUBS-F) and the omitted
-variable model (SUBS-OV) include binary indicator variables ()
+variable model (SUBS-OV) include binary indicator variables
 
-\begin{figure}
-\centering
-\includegraphics{Method_files/figure-latex/SUBS_FULL-1.pdf}
-\caption{}
-\end{figure}
+\paragraph{Choosing the number of
+clusters}\label{choosing-the-number-of-clusters}
+
+\begin{itemize}
+\tightlist
+\item
+  Everitt (2011), p126
+\item
+  Milligan and Cooper (1984)
+\item
+  list 30
+\end{itemize}
 
 \newpage
 

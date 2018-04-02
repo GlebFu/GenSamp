@@ -148,14 +148,30 @@ The population frame is composed of data from three sources: (1) the Common Core
 
 
 ### SUBS
-Stratification using balanced sampling (SUBS) was performed prior to simulation because the group of schools in each strata would be static across condtions except where the balancing model is manipulated. The set of covariates in both the full model (SUBS-F) and the omitted variable model (SUBS-OV) include binary indicator variables ()
+Stratification using balanced sampling (SUBS) was performed prior to simulation because the group of schools in each strata would be static across conditions except where the balancing model is manipulated. The set of covariates in both the full model (SUBS-F) and the omitted variable model (SUBS-OV) include binary indicator variables
+
+#### Number of Clusters
+Selecting the number of clusters is one of hte most difficult problems in cluster analysis (Steinley, 2006)
+
+* Everitt (2011), p126
+  * clusterSim
+  * Continuous data?
+    * Calinski and Harabasz (1974)
+    * Duda and Hart (1973)
+  * Steinley, D. (2006a) K-means clustering: a half-century synthesis. British Journal of Mathematical
+& Statistical Psychology, 59, 1–34.  
+  
+* Milligan and Cooper (1984)
+  + list 30
+
+
 
 
 ```{r SUBS_FULL}
 library(parallel)
-library(cluster)
+library(fpc)
 
-K <- 20
+K <- 3
 
 run_clusters <- function(K, distance) {
 
@@ -177,7 +193,7 @@ run_clusters <- function(K, distance) {
 }
 
 
-distance <- daisy(x = df[, subs_f_vars[-2]], metric = "gower")
+distance <- daisy(x = df[, subs_f_vars[1:3]], metric = "gower")
 
 clusters <- run_clusters(K, distance)
 
