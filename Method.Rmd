@@ -145,13 +145,113 @@ apa_table(tbl_desc,
 ## Population Frame
 The population frame is composed of data from three sources: (1) the Common Core of Data (CCD), (2) publically available accountability data, and (3) the U.S. Census. The CCD is a comprehensive database housing anually collected national statistics of all public schools and districts. Accountability data was used to calculate the proportion of students within each school performing at or above proficiency in Math and ELA. Finally, local median income was obtained from the U.S. Census and was  matched to each school by zipcode. School level data was aggregated to get district level variables. These are reported in Table \@ref(tab:tbl_desc)
 
+```{r distributions}
+to_z <- function(x) (x - mean(x))/sd(x)
 
+forDists <- df[, c("DSID",subs_f_vars[-2])] %>%
+  mutate(n_z = to_z(n),
+         MEDINC_z = to_z(MEDINC),
+         n_log = log(n),
+         MEDINC_log = log(MEDINC))
+
+forDists %>%
+  gather(key = var, value = value, n:MEDINC_log, -urbanicity) %>%
+  ggplot(aes(x = value)) +
+  geom_histogram() +
+  facet_wrap(~ var, scales = "free")
+
+forDists %>%
+  gather(key = var, value = value, n:MEDINC_log, -urbanicity) %>%
+  ggplot(aes(x = value, color = urbanicity)) +
+  geom_density() +
+  facet_wrap(~ var, scales = c("free"))
+
+forDists %>%
+  ggplot(aes(x = pELA, y = pMath, color = n_log)) +
+  geom_point(alpha = .5) +
+  facet_wrap(~urbanicity)
+
+forDists %>%
+  ggplot(aes(x = pELL, y = pMin, color = n_log)) +
+  geom_point(alpha = .5) +
+  facet_wrap(~urbanicity)
+
+forDists %>%
+  ggplot(aes(x = MEDINC_log, y = pED, color = n_log)) +
+  geom_point(alpha = .5) +
+  facet_wrap(~urbanicity)
+```
 
 ## SUBS
+
 Stratification using balanced sampling (SUBS) was performed prior to simulation because the group of schools in each strata would be static across conditions except where the balancing model is manipulated. The set of covariates in both the full model (SUBS-F) and the omitted variable model (SUBS-OV) include binary indicator variables
 
+```{r SUBS_Funcs}
+library(parallel)
+library(fpc)
+library(cluster)
+library(tidyverse)
+
+
+run_clusters <- function(K, distance) {
+
+  # # Calculate the number of cores
+  # no_cores <- min(K, detectCores() - 7)
+  # 
+  # # Initiate cluster
+  # cl <- makeCluster(no_cores)
+  # 
+  # clusters <- parLapply(cl, 1:K, function(x, y) kmeans(x = y, centers = x), distance)
+  # 
+  # stopCluster(cl)
+  # 
+  # # clusters <- bind_cols(clusters)
+  # #
+  # # names(classign) <- paste("k", 1:K, sep = "")
+  
+  clusters <- list()
+  
+  for(k in 1:K) {
+  clusters <- append(clusters, list(kmeans(x = distance, centers = k)))
+  }
+
+  return(clusters)
+}
+
+
+
+get_CH <- function(K, distance, clusters) {
+  ch <- list()
+  
+  for(k in 2:K) {
+  ch1 <- (clusters[[k]]$betweenss / (k - 1)) / (clusters[[k]]$tot.withinss / (length(clusters[[k]]$cluster- k)))
+  ch2 <- cluster.stats(distance, clusters[[k]]$cluster,
+                              silhouette = F, G2 = FALSE, G3 = FALSE,
+                              wgap=F, sepindex=F, sepprob=0.1,
+                              sepwithnoise=F)
+  ch_d <- ch2$ch
+  
+  ch = append(ch , list(k = k, 
+                   ch = ch1,
+                   ch_d = ch_d))
+  }
+  
+  chPlot <- unlist(ch) %>%
+  matrix(3, (K-1)) %>%
+  t() %>%
+  as.data.frame %>%
+  mutate(dif = abs(V2 - V3))
+  
+  names(chPlot) <- c("k", "ch1", "ch2", "dif")
+
+  
+  return(chPlot)
+}
+
+```
+
 ### Number of Clusters
-Selecting the number of clusters is one of hte most difficult problems in cluster analysis (Steinley, 2006)
+Selecting the number of clusters, $k$, is one of the most difficult problems in cluster analysis (Steinley, 2006). To date, the most extensive investigation of methods for determining $k$ was conducted by Milligan and Cooper (1985) who analyzed 30 methods. However, aside from the limited generalizability of this study, many methods are also innapropriate in the context of non-hierarchical and thus do not support k-means clustering. Hennig and Liao (2013) argue that the method of selecting $k$ should depend on the context of the clustering and frame the issue as one of obtaining an appropriate subject-matter-dependent definition of rather than a statistical estimation.
 
 * Everitt (2011), p126
   * clusterSim
@@ -164,123 +264,122 @@ Selecting the number of clusters is one of hte most difficult problems in cluste
 * Milligan and Cooper (1984)
   + list 30
 
-```{r SUBS_FULL}
-library(parallel)
-library(fpc)
-library(cluster)
-library(tidyverse)
-
-K <- 10
-
-run_clusters <- function(K, distance) {
-
-  # Calculate the number of cores
-  no_cores <- min(K, detectCores() - 7)
-
-  # Initiate cluster
-  cl <- makeCluster(no_cores)
-
-  clusters <- parLapply(cl, 1:K, function(x, y) kmeans(x = y, centers = x), distance)
-
-  stopCluster(cl)
-
-  # clusters <- bind_cols(clusters)
-  #
-  # names(classign) <- paste("k", 1:K, sep = "")
-
-  return(clusters)
-}
+### Subs-Full
 
 
-distance <- daisy(x = df[, subs_f_vars[-2]], metric = "gower")
+```{r SUBS_FULL, eval = F}
+K <- 20
 
-clusters <- run_clusters(K, distance)
+distance <- df[, subs_f_vars[-2]] %>%
+  mutate(MEDINC = log(MEDINC),
+         n = log(n)) %>% 
+  # sample_n(100) %>%
+  daisy(metric = "gower")
 
 
-# n = 1000
-# k = 4
-# 
-# test <- cluster.stats(distance, clusters[[k]]$cluster,
-#                               silhouette = F, G2 = FALSE, G3 = FALSE,
-#                               wgap=F, sepindex=F, sepprob=0.1,
-#                               sepwithnoise=F)
-# # test2 <- cluster.stats(distance, clusters[[k+1]]$cluster)
-# 
-# c2 <- clusters[[k]]
-# 
-# (c2$betweenss / (k - 1)) / (c2$tot.withinss / (n - k))
-# calinhara(distance, c2$cluster)
-# test$ch
-# 
-# debug(cluster.stats)
+clust_time <- system.time(
+  clusters <- run_clusters(K, distance)
+)
 
-ch <- list()
-# k <- 10
-# (clusters[[k]]$betweenss / (k - 1)) / (clusters[[k]]$tot.withinss / (length(clusters[[k]]$cluster- k)))
+ch_time <- system.time(
+  chPlot <- get_CH(K, distance, clusters)
+)
 
-for(k in 2:K) {
-  ch1 <- (clusters[[k]]$betweenss / (k - 1)) / (clusters[[k]]$tot.withinss / (length(clusters[[k]]$cluster- k)))
-  ch2 <- cluster.stats(distance, clusters[[k]]$cluster,
-                              silhouette = F, G2 = FALSE, G3 = FALSE,
-                              wgap=F, sepindex=F, sepprob=0.1,
-                              sepwithnoise=F)
-  ch_d <- ch2$ch
-  
-  ch = c(ch , list(k = k, 
-                   ch = ch1,
-                   ch_d = ch_d))
-}
+# undebug(get_CH)
 
-test <- unlist(ch) %>%
-  matrix(3, (K-1)) %>%
-  t() %>%
-  as.data.frame %>%
-  mutate(dif = abs(V2 - V3))
+save(clusters, chPlot, clust_time, ch_time, K, file =  "Paper Data/clusters-full-logs.rdata")
+```
 
-names(test) <- c("k", "ch1", "ch2", "dif")
+```{r SUBS_FULL_CH}
+# load("clusters-full.rdata")
+load("Paper Data/clusters-full-logs.rdata")
 
-save(clusters, test, file =  "Paper Data/clusters-omitted-totfrl.rdata")
 
-test %>%
+chPlot %>%
   gather(key = method, value = value, ch1:dif) %>%
   ggplot(aes(x = k, y = value, color = method)) +
   geom_point() +
   geom_line()
 
-#between.cluster.ss * (n - noisen - cwn)/(within.cluster.ss * (cwn - 1))
-#between.cluster.ss * 71.27917
-# (n - noisen - cwn)/ 996
-# (within.cluster.ss * 6.379309
-# (cwn - 1)) 3
 
 
+```
 
+```{r SUBS_FULL_SSB/SST}
+cls <- bind_cols(lapply(clusters, function(x) data.frame(x$cluster)))
+vrat <- unlist(lapply(clusters, function(x) x$betweenss / x$totss))
 
-# 
-# load("Paper Data/clusters-full.rdata")
-# 
-# cls <- bind_cols(lapply(clusters, function(x) data.frame(x$cluster)))
-# vrat <- unlist(lapply(clusters, function(x) x$betweenss / x$totss))
-# 
-# 
-# 
-# data.frame(k = 1:K, var = vrat, min80 = sum(vrat < .8) + .5) %>%
-#   ggplot(aes(x = k, y = var)) +
-#   geom_point() +
-#   ggtitle("Between cluster variance by number of strata") +
-#   labs(y = "Between Cluster Variance",
-#        x = "Number of Strata (k)") +
-#   geom_line() +
-#   geom_vline(aes(xintercept = min80), linetype = "dashed") +
-#   theme_minimal() +
-#   scale_x_discrete(limits = c(1:K)) +
-#   scale_y_continuous(breaks = seq(0, 1, .1))
-# 
-# # ggsave("Params/Scree1.png", dpi = 500, width = 5, height = 5)
-# 
-# 
+data.frame(k = 1:K, var = vrat, min80 = sum(vrat < .8) + .5) %>%
+  ggplot(aes(x = k, y = var)) +
+  geom_point() +
+  ggtitle("Between cluster variance by number of strata") +
+  labs(y = "Between Cluster Variance",
+       x = "Number of Strata (k)") +
+  geom_line() +
+  geom_vline(aes(xintercept = min80), linetype = "dashed") +
+  theme_minimal() +
+  scale_x_discrete(limits = c(1:K)) +
+  scale_y_continuous(breaks = seq(0, 1, .1))
+
 # # df$cluster_full <- df_cluster$k6
 
+```
+
+### Subs-OV
+
+
+```{r SUBS_OV, eval = F}
+K <- 20
+
+distance <- df[, subs_f_vars[c(-2, -9)]] %>%
+  mutate(n = log(n)) %>% 
+  daisy(metric = "gower")
+
+
+clust_time <- system.time(
+  clusters <- run_clusters(K, distance)
+)
+
+ch_time <- system.time(
+  chPlot <- get_CH(K, distance)
+)
+
+
+save(clusters, chPlot, clust_time, ch_time, K, file =  "Paper Data/clusters-OV-logs.rdata")
+```
+
+```{r SUBS_OV_CH}
+# load("clusters-OV.rdata")
+load("Paper Data/clusters-OV-logs.rdata")
+
+
+chPlot %>%
+  gather(key = method, value = value, ch1:dif) %>%
+  ggplot(aes(x = k, y = value, color = method)) +
+  geom_point() +
+  geom_line()
+
+
+
+```
+
+```{r SUBS_OV_SSB/SST}
+cls <- bind_cols(lapply(clusters, function(x) data.frame(x$cluster)))
+vrat <- unlist(lapply(clusters, function(x) x$betweenss / x$totss))
+
+data.frame(k = 1:K, var = vrat, min80 = sum(vrat < .8) + .5) %>%
+  ggplot(aes(x = k, y = var)) +
+  geom_point() +
+  ggtitle("Between cluster variance by number of strata") +
+  labs(y = "Between Cluster Variance",
+       x = "Number of Strata (k)") +
+  geom_line() +
+  geom_vline(aes(xintercept = min80), linetype = "dashed") +
+  theme_minimal() +
+  scale_x_discrete(limits = c(1:K)) +
+  scale_y_continuous(breaks = seq(0, 1, .1))
+
+# # df$cluster_OV <- df_cluster$k6
 
 ```
 
