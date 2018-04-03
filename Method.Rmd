@@ -341,7 +341,7 @@ clust_time <- system.time(
 )
 
 ch_time <- system.time(
-  chPlot <- get_CH(K, distance)
+  chPlot <- get_CH(K, distance, clusters)
 )
 
 
