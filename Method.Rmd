@@ -323,7 +323,7 @@ data.frame(k = 1:K, var = vrat, min80 = sum(vrat < .8) + .5) %>%
 
 df$cluster_full_6 <- cls[,6]
 df$cluster_full_10 <- cls[,10]
-dist_full <- distance
+# dist_full <- distance
 
 ```
 
