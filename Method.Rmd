@@ -212,7 +212,7 @@ run_clusters <- function(K, distance) {
   clusters <- list()
   
   for(k in 1:K) {
-  clusters <- append(clusters, list(kmeans(x = distance, centers = k)))
+    clusters <- append(clusters, list(kmeans(x = distance, centers = k)))
   }
 
   return(clusters)
@@ -224,16 +224,16 @@ get_CH <- function(K, distance, clusters) {
   ch <- list()
   
   for(k in 2:K) {
-  ch1 <- (clusters[[k]]$betweenss / (k - 1)) / (clusters[[k]]$tot.withinss / (length(clusters[[k]]$cluster- k)))
-  ch2 <- cluster.stats(distance, clusters[[k]]$cluster,
-                              silhouette = F, G2 = FALSE, G3 = FALSE,
-                              wgap=F, sepindex=F, sepprob=0.1,
-                              sepwithnoise=F)
-  ch_d <- ch2$ch
-  
-  ch = append(ch , list(k = k, 
-                   ch = ch1,
-                   ch_d = ch_d))
+    ch1 <- (clusters[[k]]$betweenss / (k - 1)) / (clusters[[k]]$tot.withinss / (length(clusters[[k]]$cluster- k)))
+    ch2 <- cluster.stats(distance, clusters[[k]]$cluster,
+                                silhouette = F, G2 = FALSE, G3 = FALSE,
+                                wgap=F, sepindex=F, sepprob=0.1,
+                                sepwithnoise=F)
+    ch_d <- ch2$ch
+    
+    ch = append(ch , list(k = k, 
+                     ch = ch1,
+                     ch_d = ch_d))
   }
   
   chPlot <- unlist(ch) %>%
@@ -268,26 +268,26 @@ Selecting the number of clusters, $k$, is one of the most difficult problems in 
 
 
 ```{r SUBS_FULL, eval = F}
-K <- 20
-
-distance <- df[, subs_f_vars[-2]] %>%
-  mutate(MEDINC = log(MEDINC),
-         n = log(n)) %>% 
-  # sample_n(100) %>%
-  daisy(metric = "gower")
-
-
-clust_time <- system.time(
-  clusters <- run_clusters(K, distance)
-)
-
-ch_time <- system.time(
-  chPlot <- get_CH(K, distance, clusters)
-)
-
-# undebug(get_CH)
-
-save(clusters, chPlot, clust_time, ch_time, K, file =  "Paper Data/clusters-full-logs.rdata")
+# K <- 20
+# 
+# distance <- df[, subs_f_vars[-2]] %>%
+#   mutate(MEDINC = log(MEDINC),
+#          n = log(n)) %>%
+#   # sample_n(100) %>%
+#   daisy(metric = "gower")
+# 
+# 
+# clust_time <- system.time(
+#   clusters <- run_clusters(K, distance)
+# )
+# 
+# ch_time <- system.time(
+#   chPlot <- get_CH(K, distance, clusters)
+# )
+# 
+# # undebug(get_CH)
+# 
+# save(clusters, chPlot, clust_time, ch_time, K, distance, file =  "Paper Data/clusters-full-logs.rdata")
 ```
 
 ```{r SUBS_FULL_CH}
@@ -321,7 +321,9 @@ data.frame(k = 1:K, var = vrat, min80 = sum(vrat < .8) + .5) %>%
   scale_x_discrete(limits = c(1:K)) +
   scale_y_continuous(breaks = seq(0, 1, .1))
 
-# # df$cluster_full <- df_cluster$k6
+df$cluster_full_6 <- cls[,6]
+df$cluster_full_10 <- cls[,10]
+dist_full <- distance
 
 ```
 
@@ -329,23 +331,23 @@ data.frame(k = 1:K, var = vrat, min80 = sum(vrat < .8) + .5) %>%
 
 
 ```{r SUBS_OV, eval = F}
-K <- 20
-
-distance <- df[, subs_f_vars[c(-2, -9)]] %>%
-  mutate(n = log(n)) %>% 
-  daisy(metric = "gower")
-
-
-clust_time <- system.time(
-  clusters <- run_clusters(K, distance)
-)
-
-ch_time <- system.time(
-  chPlot <- get_CH(K, distance)
-)
-
-
-save(clusters, chPlot, clust_time, ch_time, K, file =  "Paper Data/clusters-OV-logs.rdata")
+# K <- 20
+# 
+# distance <- df[, subs_f_vars[c(-2, -9)]] %>%
+#   mutate(n = log(n)) %>% 
+#   daisy(metric = "gower")
+# 
+# 
+# clust_time <- system.time(
+#   clusters <- run_clusters(K, distance)
+# )
+# 
+# ch_time <- system.time(
+#   chPlot <- get_CH(K, distance)
+# )
+# 
+# 
+# save(clusters, chPlot, clust_time, ch_time, K, distance, file =  "Paper Data/clusters-OV-logs.rdata")
 ```
 
 ```{r SUBS_OV_CH}
@@ -379,7 +381,59 @@ data.frame(k = 1:K, var = vrat, min80 = sum(vrat < .8) + .5) %>%
   scale_x_discrete(limits = c(1:K)) +
   scale_y_continuous(breaks = seq(0, 1, .1))
 
-# # df$cluster_OV <- df_cluster$k6
+df$cluster_OV_6 <- cls[,6]
+df$cluster_OV_10 <- cls[,10]
+```
+
+```{r class_full}
+df %>%
+  select(cluster_full_6:cluster_OV_10) %>%
+  rbind(rbind(mutate(., cluster_full_6 = 20), 
+              mutate(., cluster_full_10 = 20))) %>%
+  group_by(cluster_full_6, cluster_full_10) %>%
+  summarise(n = n()) %>%
+  ungroup() %>%
+  # mutate(p = n/sum(n)) %>%
+  spread(key = cluster_full_6, value = n)
+
+```
+
+```{r class_OV}
+df %>%
+  select(cluster_full_6:cluster_OV_10) %>%
+  rbind(rbind(mutate(., cluster_OV_6 = 20), 
+              mutate(., cluster_OV_10 = 20))) %>%
+  group_by(cluster_OV_6, cluster_OV_10) %>%
+  summarise(n = n()) %>%
+  ungroup() %>%
+  # mutate(p = n/sum(n)) %>%
+  spread(key = cluster_OV_6, value = n)
+
+```
+
+```{r class_k6}
+df %>%
+  select(cluster_full_6:cluster_OV_10) %>%
+  rbind(rbind(mutate(., cluster_full_6 = 20), 
+              mutate(., cluster_OV_6 = 20))) %>%
+  group_by(cluster_full_6, cluster_OV_6) %>%
+  summarise(n = n()) %>%
+  ungroup() %>%
+  # mutate(p = n/sum(n)) %>%
+  spread(key = cluster_full_6, value = n)
+
+```
+
+```{r class_k10}
+df %>%
+  select(cluster_full_10:cluster_OV_10) %>%
+  rbind(rbind(mutate(., cluster_full_10 = 20), 
+              mutate(., cluster_OV_10 = 20))) %>%
+  group_by(cluster_full_10, cluster_OV_10) %>%
+  summarise(n = n()) %>%
+  ungroup() %>%
+  # mutate(p = n/sum(n)) %>%
+  spread(key = cluster_full_10, value = n)
 
 ```
 
