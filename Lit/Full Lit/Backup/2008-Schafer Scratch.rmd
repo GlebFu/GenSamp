@@ -1,0 +1,160 @@
+---
+title: "Untitled"
+author: "Gleb Furman"
+date: "October 27, 2016"
+output: html_document
+---
+
+```{r}
+library(dplyr)
+library(tidyr)
+
+```
+
+### Regression Estimates
+```{r}
+###################
+# Random Assignment
+###################
+N <- 5000
+B <- c(1, 1, 1)
+X <- cbind(int = rep(1,N), x = rnorm(N), g = c(rep(1,N/2), rep(0,N/2)))
+e <- rnorm(N)
+
+Y <- X %*% B + e
+
+df <- data.frame(Y, X)
+
+b <- solve(t(X) %*% X) %*% t(X) %*% Y
+
+df <- data.frame(df, 
+                 Y1 = cbind(X[, -3], g = 1) %*% b,
+                 Y0 = cbind(X[, -3], g = 0) %*% b)
+
+
+df %>% summarise(mY1 = mean(Y1),mY0 = mean(Y0), ATE = mean(Y1) - mean(Y0))
+df %>% group_by(g) %>% summarise(mY = mean(Y)) %>% spread(key = g, value = mY) %>% mutate(TE = `1` - `0`)
+
+###################
+# Self-Select 1
+###################
+
+N <- 50000
+B <- c(1, 1, 1)
+X <- cbind(int = rep(1,N), x = c(rnorm(N/2,1), rnorm(N/2)), g = c(rep(1,N/2), rep(0,N/2)))
+e <- rnorm(N)
+
+Y <- X %*% B + e
+
+df <- data.frame(Y, X)
+
+b <- solve(t(X) %*% X) %*% t(X) %*% Y
+
+df <- data.frame(df, 
+                 Y1 = cbind(X[, -3], g = 1) %*% b,
+                 Y0 = cbind(X[, -3], g = 0) %*% b)
+
+
+df %>% summarise(mY1 = mean(Y1),mY0 = mean(Y0), ATE = mean(Y1) - mean(Y0))
+df %>% group_by(g) %>% summarise(mY = mean(Y)) %>% spread(key = g, value = mY) %>% mutate(TE = `1` - `0`)
+
+###################
+# Self-Select 2
+###################
+
+N <- 5000
+B <- c(1, 1, 1)
+X <- cbind(int = rep(1,N), x = c(rnorm(N/2,1), rnorm(N/2)), g = c(rep(1,N/2), rep(0,N/2)))
+e <- rnorm(N)
+
+Y <- X %*% B + e
+
+df <- data.frame(Y, X)
+
+b <- solve(t(X) %*% X) %*% t(X) %*% Y
+
+X1 <- X[1:(N/2),-3]
+X0 <- X[(N/2+1):N,-3]
+
+b1 <- solve(t(X1) %*% X1) %*% t(X1) %*% Y[1:(N/2)]
+b0 <- solve(t(X0) %*% X0) %*% t(X0) %*% Y[(N/2+1):N]
+
+
+df <- data.frame(df, 
+                 Y1 = X[, -3] %*% b1,
+                 Y0 = X[, -3] %*% b0)
+
+
+df %>% summarise(mY1 = mean(Y1),mY0 = mean(Y0), ATE = mean(Y1) - mean(Y0))
+df %>% group_by(g) %>% summarise(mY = mean(Y)) %>% spread(key = g, value = mY) %>% mutate(TE = `1` - `0`)
+
+###################
+# x2 Predicts Treatment and Outcome 1
+###################
+N <- 5000
+B <- c(1, 1, 1, 1)
+X <- cbind(int = rep(1,N), x = rnorm(N), g = c(rep(1,N/2), rep(0,N/2)), x2 = c(rnorm(N/2,1), rnorm(N/2)))
+e <- rnorm(N)
+
+Y <- X %*% B + e
+
+X <- X[,-4]
+
+df <- data.frame(Y, X)
+
+b <- solve(t(X) %*% X) %*% t(X) %*% Y
+
+df <- data.frame(df, 
+                 Y1 = cbind(X[, -3], g = 1) %*% b,
+                 Y0 = cbind(X[, -3], g = 0) %*% b)
+
+
+df %>% summarise(mY1 = mean(Y1),mY0 = mean(Y0), ATE = mean(Y1) - mean(Y0))
+df %>% group_by(g) %>% summarise(mY = mean(Y)) %>% spread(key = g, value = mY) %>% mutate(TE = `1` - `0`)
+
+###################
+# x2 Predicts Treatment and Outcome 2
+###################
+N <- 5000
+B <- c(1, 1, 1, 1)
+X <- cbind(int = rep(1,N), x = rnorm(N), g = c(rep(1,N/2), rep(0,N/2)), x2 = c(rnorm(N/2,1), rnorm(N/2)))
+e <- rnorm(N)
+
+Y <- X %*% B + e
+
+X <- X[,-4]
+
+df <- data.frame(Y, X)
+
+b <- solve(t(X) %*% X) %*% t(X) %*% Y
+
+X1 <- X[1:(N/2),-3]
+X0 <- X[(N/2+1):N,-3]
+
+b1 <- solve(t(X1) %*% X1) %*% t(X1) %*% Y[1:(N/2)]
+b0 <- solve(t(X0) %*% X0) %*% t(X0) %*% Y[(N/2+1):N]
+
+
+df <- data.frame(df, 
+                 Y1 = X[, -3] %*% b1,
+                 Y0 = X[, -3] %*% b0)
+
+
+df %>% summarise(mY1 = mean(Y1),mY0 = mean(Y0), ATE = mean(Y1) - mean(Y0))
+df %>% group_by(g) %>% summarise(mY = mean(Y)) %>% spread(key = g, value = mY) %>% mutate(TE = `1` - `0`)
+```
+
+### EQ 13
+```{r}
+N <- 10
+B <- c(1, 1, 1)
+X <- cbind(int = rep(1,N), x = c(rnorm(N/2,1), rnorm(N/2)), g = c(rep(1,N/2), rep(0,N/2)))
+e <- rnorm(N)
+
+Y <- X %*% B + e
+
+df <- data.frame(Y, X)
+
+sum(df$g %*% df[, c("int", "x")])
+
+```
