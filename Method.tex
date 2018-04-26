@@ -275,39 +275,7 @@ definition of rather than a statistical estimation.
 \caption{}
 \end{figure}
 
-\begin{verbatim}
-## # A tibble: 11 x 8
-##    cluster_full_10   `1`   `2`   `3`   `4`   `5`   `6`  `20`
-##              <dbl> <int> <int> <int> <int> <int> <int> <int>
-##  1              1.   978    NA    NA   176    NA    NA  1154
-##  2              2.    NA    NA    NA    NA    NA  1241  1241
-##  3              3.    NA    NA    NA    NA   658    NA   658
-##  4              4.    NA   957   193    NA    NA    NA  1150
-##  5              5.    NA    NA     2    NA   667    NA   669
-##  6              6.   283    59    NA    NA   217    NA   559
-##  7              7.    NA     6  1368    NA    NA    NA  1374
-##  8              8.    NA  1458    NA    NA    NA    NA  1458
-##  9              9.    NA    NA    NA   749    NA   319  1068
-## 10             10.    45    NA    NA   495    NA     4   544
-## 11             20.  1306  2480  1563  1420  1542  1564    NA
-\end{verbatim}
-
-\begin{verbatim}
-## # A tibble: 11 x 8
-##    cluster_OV_10   `1`   `2`   `3`   `4`   `5`   `6`  `20`
-##            <dbl> <int> <int> <int> <int> <int> <int> <int>
-##  1            1.    NA    NA  1372    NA    NA    NA  1372
-##  2            2.    NA    36    NA    47    10   247   340
-##  3            3.    NA    NA    NA    NA  1106    NA  1106
-##  4            4.    NA   597    NA    54     5    NA   656
-##  5            5.    NA   888    NA    NA    NA    NA   888
-##  6            6.    NA    NA   573    NA   368    NA   941
-##  7            7.    NA    NA    NA    10    NA  1455  1465
-##  8            8.    12    NA    NA  1178    NA    NA  1190
-##  9            9.  1328    NA    NA    NA    NA     1  1329
-## 10           10.    NA    NA   185    NA   403    NA   588
-## 11           20.  1340  1521  2130  1289  1892  1703    NA
-\end{verbatim}
+\subsubsection{6 Clusters}\label{clusters}
 
 \begin{verbatim}
 ## # A tibble: 7 x 8
@@ -321,6 +289,52 @@ definition of rather than a statistical estimation.
 ## 6           6.   247  1453     3    NA    NA    NA  1703
 ## 7          20.  1306  2480  1563  1420  1542  1564    NA
 \end{verbatim}
+
+\begin{verbatim}
+## # A tibble: 15 x 3
+## # Groups:   cluster_full_6 [6]
+##    cluster_full_6 cluster_OV_6     n
+##             <int>        <int> <int>
+##  1              6            3  1564
+##  2              5            2  1501
+##  3              2            6  1453
+##  4              3            1  1332
+##  5              1            5  1038
+##  6              2            4  1019
+##  7              4            5   854
+##  8              4            3   566
+##  9              1            6   247
+## 10              3            4   228
+## 11              5            4    41
+## 12              1            2    20
+## 13              2            1     8
+## 14              3            6     3
+## 15              1            4     1
+\end{verbatim}
+
+\begin{verbatim}
+## Warning: attributes are not identical across measure variables;
+## they will be dropped
+\end{verbatim}
+
+\begin{figure}
+\centering
+\includegraphics{Method_files/figure-latex/unnamed-chunk-2-1.pdf}
+\caption{}
+\end{figure}
+
+\begin{verbatim}
+## Warning: attributes are not identical across measure variables;
+## they will be dropped
+\end{verbatim}
+
+\begin{figure}
+\centering
+\includegraphics{Method_files/figure-latex/unnamed-chunk-3-1.pdf}
+\caption{}
+\end{figure}
+
+\subsubsection{10 Clusters}\label{clusters-1}
 
 \begin{verbatim}
 ## # A tibble: 11 x 12
@@ -339,6 +353,28 @@ definition of rather than a statistical estimation.
 ## 11           20.  1154  1241   658  1150   669   559  1374  1458  1068
 ## # ... with 2 more variables: `10` <int>, `20` <int>
 \end{verbatim}
+
+\begin{verbatim}
+## Warning: attributes are not identical across measure variables;
+## they will be dropped
+\end{verbatim}
+
+\begin{figure}
+\centering
+\includegraphics{Method_files/figure-latex/unnamed-chunk-4-1.pdf}
+\caption{}
+\end{figure}
+
+\begin{verbatim}
+## Warning: attributes are not identical across measure variables;
+## they will be dropped
+\end{verbatim}
+
+\begin{figure}
+\centering
+\includegraphics{Method_files/figure-latex/unnamed-chunk-5-1.pdf}
+\caption{}
+\end{figure}
 
 \newpage
 

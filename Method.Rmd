@@ -387,44 +387,92 @@ df$cluster_OV_6 <- cls[,6]
 df$cluster_OV_10 <- cls[,10]
 ```
 
+```{r}
+# orig <- df
+# df <- orig
+```
+
+
 ```{r class_full}
-df %>%
-  select(cluster_full_6:cluster_OV_10) %>%
-  rbind(rbind(mutate(., cluster_full_6 = 20), 
-              mutate(., cluster_full_10 = 20))) %>%
-  group_by(cluster_full_6, cluster_full_10) %>%
-  summarise(n = n()) %>%
-  ungroup() %>%
-  # mutate(p = n/sum(n)) %>%
-  spread(key = cluster_full_6, value = n)
+# df %>%
+#   select(cluster_full_6:cluster_OV_10) %>%
+#   rbind(rbind(mutate(., cluster_full_6 = 20), 
+#               mutate(., cluster_full_10 = 20))) %>%
+#   group_by(cluster_full_6, cluster_full_10) %>%
+#   summarise(n = n()) %>%
+#   ungroup() %>%
+#   # mutate(p = n/sum(n)) %>%
+#   spread(key = cluster_full_6, value = n)
 
 ```
 
 ```{r class_OV}
-df %>%
-  select(cluster_full_6:cluster_OV_10) %>%
-  rbind(rbind(mutate(., cluster_OV_6 = 20), 
-              mutate(., cluster_OV_10 = 20))) %>%
-  group_by(cluster_OV_6, cluster_OV_10) %>%
-  summarise(n = n()) %>%
-  ungroup() %>%
-  # mutate(p = n/sum(n)) %>%
-  spread(key = cluster_OV_6, value = n)
+# df %>%
+#   select(cluster_full_6:cluster_OV_10) %>%
+#   rbind(rbind(mutate(., cluster_OV_6 = 20), 
+#               mutate(., cluster_OV_10 = 20))) %>%
+#   group_by(cluster_OV_6, cluster_OV_10) %>%
+#   summarise(n = n()) %>%
+#   ungroup() %>%
+#   # mutate(p = n/sum(n)) %>%
+#   spread(key = cluster_OV_6, value = n)
 
 ```
+
+### 6 Clusters
 
 ```{r class_k6}
 df %>%
   select(cluster_full_6:cluster_OV_10) %>%
-  rbind(rbind(mutate(., cluster_full_6 = 20), 
-              mutate(., cluster_OV_6 = 20))) %>%
+  rbind(rbind(mutate(., cluster_full_6 = 20),
+  mutate(., cluster_OV_6 = 20))) %>%
   group_by(cluster_full_6, cluster_OV_6) %>%
   summarise(n = n()) %>%
   ungroup() %>%
   # mutate(p = n/sum(n)) %>%
   spread(key = cluster_full_6, value = n)
 
+similar <- df %>%
+  select(cluster_full_6:cluster_OV_10) %>%
+  group_by(cluster_full_6, cluster_OV_6) %>%
+  summarise(n = n()) %>%
+  arrange(desc(n))
+
+similar
+
+similar <- rbind(similar[c(1:5),1:2], c(cluster_full_6 = 4, cluster_OV_6 = 4)) %>% arrange(cluster_full_6)
+
+df$cluster_OV_6 <- factor(df$cluster_OV_6)
+df$cluster_full_6 <- factor(df$cluster_full_6)
+
+levels(df$cluster_full_6) <- similar$cluster_OV_6
 ```
+
+
+
+```{r}
+df %>%
+  select(urbanicity, pELA, pMath, cluster_full_6, cluster_OV_6) %>%
+  gather(key = full_ov, value = cluster, cluster_full_6:cluster_OV_6) %>%
+  ggplot(aes(x = pELA, y = pMath, color = as.factor(cluster))) +
+  geom_point() +
+  facet_grid(urbanicity ~ full_ov) +
+  scale_color_brewer(type = "div")
+
+```
+
+```{r}
+df %>%
+  select(urbanicity, pELL, pED, cluster_full_6, cluster_OV_6) %>%
+  gather(key = full_ov, value = cluster, cluster_full_6:cluster_OV_6) %>%
+  ggplot(aes(x = pELL, y = pED, color = cluster)) +
+  geom_point() +
+  facet_grid(urbanicity ~ full_ov) +
+  scale_color_brewer(type = "div")
+
+```
+
+### 10 Clusters
 
 ```{r class_k10}
 df %>%
@@ -436,6 +484,41 @@ df %>%
   ungroup() %>%
   # mutate(p = n/sum(n)) %>%
   spread(key = cluster_full_10, value = n)
+
+similar <- df %>%
+  select(cluster_full_6:cluster_OV_10) %>%
+  group_by(cluster_full_10, cluster_OV_10) %>%
+  summarise(n = n()) %>%
+  arrange(desc(n))
+
+similar <- similar[c(1:10),1:2]
+
+df$cluster_OV_10 <- factor(df$cluster_OV_10)
+df$cluster_full_10 <- factor(df$cluster_full_10)
+
+levels(df$cluster_full_10) <- similar$cluster_OV_10
+
+```
+
+```{r}
+df %>%
+  select(urbanicity, pELA, pMath, cluster_full_10, cluster_OV_10) %>%
+  gather(key = full_ov, value = cluster, cluster_full_10:cluster_OV_10) %>%
+  ggplot(aes(x = pELA, y = pMath, color = as.factor(cluster))) +
+  geom_point() +
+  facet_grid(urbanicity ~ full_ov) +
+  scale_color_brewer(type = "div")
+
+```
+
+```{r}
+df %>%
+  select(urbanicity, pELL, pED, cluster_full_10, cluster_OV_10) %>%
+  gather(key = full_ov, value = cluster, cluster_full_10:cluster_OV_10) %>%
+  ggplot(aes(x = pELL, y = pED, color = cluster)) +
+  geom_point() +
+  facet_grid(urbanicity ~ full_ov) +
+  scale_color_brewer(type = "div")
 
 ```
 
