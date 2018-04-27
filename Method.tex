@@ -150,27 +150,27 @@
 \begin{table}[tbp]
 \begin{center}
 \begin{threeparttable}
-\caption{\label{tab:tbl_desc}Descriptives of variables}
-\begin{tabular}{lcccccclcccccclcccccclcccccclcccccclcccccclcccccc}
+\caption{\label{tab:tbl-desc}Descriptives of variables}
+\begin{tabular}{lcccclcccclcccclcccclcccc}
 \toprule
- & \multicolumn{2}{c}{School} & \multicolumn{2}{c}{District Weighted} & \multicolumn{2}{c}{District Unweighted} \\
-\cmidrule(r){2-3} \cmidrule(r){4-5} \cmidrule(r){6-7}
-Variables & Mean & SD & Mean & SD & Mean & SD\\
+ & \multicolumn{2}{c}{School} & \multicolumn{2}{c}{District Weighted} \\
+\cmidrule(r){2-3} \cmidrule(r){4-5}
+Variables & Mean & SD & Mean & SD\\
 \midrule
-Number of Schools & NA & NA & 9,875.00 & 0.00 & 4.84 & 12.72\\
-School Size & 579.07 & 203.19 & 534.77 & 225.34 & 534.77 & 225.34\\
-Median Income & 60,084.98 & 25,007.61 & 56,710.63 & 20,804.82 & 56,648.44 & 20,750.06\\
-Average Proportions &  &  &  &  &  & \\
-\ \ \ ELA Proficiency & 0.59 & 0.23 & 0.60 & 0.20 & 0.60 & 0.20\\
-\ \ \ Math Proficiency & 0.53 & 0.29 & 0.54 & 0.26 & 0.54 & 0.26\\
-\ \ \ Economically Disadvantaged & 0.59 & 0.29 & 0.54 & 0.24 & 0.54 & 0.24\\
-\ \ \ English Language Learners & 0.23 & 0.21 & 0.14 & 0.17 & 0.14 & 0.17\\
-\ \ \ Minority Status & 0.65 & 0.30 & 0.46 & 0.32 & 0.46 & 0.32\\
-\ \ \ Total/Free/Reduced Lunch & 0.59 & 0.29 & 0.53 & 0.24 & 0.53 & 0.23\\
-Indicators &  &  &  &  &  & \\
-\ \ \ Urban & 0.40 & 0.49 & 0.15 & 0.33 & 0.15 & 0.33\\
-\ \ \ Suburban & 0.41 & 0.49 & 0.33 & 0.44 & 0.33 & 0.44\\
-\ \ \ Town or Rural & 0.19 & 0.39 & 0.51 & 0.48 & 0.51 & 0.48\\
+Number of Schools & NA & NA & 9,875.00 & 0.00\\
+School Size & 579.07 & 203.19 & 534.77 & 225.34\\
+Median Income & 60,084.98 & 25,007.61 & 56,710.63 & 20,804.82\\
+Average Proportions &  &  &  & \\
+\ \ \ ELA Proficiency & 0.59 & 0.23 & 0.60 & 0.20\\
+\ \ \ Math Proficiency & 0.53 & 0.29 & 0.54 & 0.26\\
+\ \ \ Economically Disadvantaged & 0.59 & 0.29 & 0.54 & 0.24\\
+\ \ \ English Language Learners & 0.23 & 0.21 & 0.14 & 0.17\\
+\ \ \ Minority Status & 0.65 & 0.30 & 0.46 & 0.32\\
+\ \ \ Total/Free/Reduced Lunch & 0.59 & 0.29 & 0.53 & 0.24\\
+Indicators &  &  &  & \\
+\ \ \ Urban & 0.40 & 0.49 & 0.15 & 0.33\\
+\ \ \ Suburban & 0.41 & 0.49 & 0.33 & 0.44\\
+\ \ \ Town or Rural & 0.19 & 0.39 & 0.51 & 0.48\\
 \bottomrule
 \addlinespace
 \end{tabular}
@@ -192,15 +192,61 @@ anually collected national statistics of all public schools and
 districts. Accountability data was used to calculate the proportion of
 students within each school performing at or above proficiency in Math
 and ELA. Finally, local median income was obtained from the U.S. Census
-and was matched to each school by zipcode. School level data was
-aggregated to get district level variables. These are reported in Table
-@ref(tab:tbl\_desc)
+and was matched to each school by zipcode. Weighted means of school
+level variables were calculated using school size (number of students)
+to generate district level covariates. In this sense, district
+covariates describe the population of students rather than the
+population of schools. These are reported in Table \ref{tab:tbl-desc}
 
-\includegraphics{Method_files/figure-latex/distributions-1.pdf}
-\includegraphics{Method_files/figure-latex/distributions-2.pdf}
-\includegraphics{Method_files/figure-latex/distributions-3.pdf}
-\includegraphics{Method_files/figure-latex/distributions-4.pdf}
-\includegraphics{Method_files/figure-latex/distributions-5.pdf}
+\subsubsection{Covariates}\label{covariates}
+
+Selection of covariates was driven by prior research on district and
+school participation behavior in RCTs (Stuart et al., 2017; Tipton et
+al., 2016a; Fellers, 2017). Districts and schools with higher
+proportions of students who are English language learners (ELL),
+economically disadvantaged (ED), non-White, and living in urban settings
+are more likely to participate, as are larger districts and schools. It
+is important to note, however, that some of these characteristics might
+also make it more likely that researchers would recruit these districts
+and schools in the first place. Anecdotal evidence from several research
+teams also suggests that schools are less willing to participate in
+experimental interventions for subjects in which their students are
+already excelling, therefore math and ELA achievement covariates were
+also included.
+
+\subsubsection{Omitted Variable}\label{omitted-variable}
+
+Neighborhood median income was selected to serve as the omitted variable
+for several reasons. First, it is related to sevarl of the other
+variables and therefore likely plays a role in the likelyhood of a
+school participating. Second, because it comes from a non-educational
+data source (the census) and requires additional work to include in the
+population frame it is likely to be omitted in practice.
+
+\begin{figure}
+\centering
+\includegraphics{Method_files/figure-latex/dists-1.pdf}
+\caption{\label{fig:dists}Comparison of covariate distributions and their
+log transformations.}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics{Method_files/figure-latex/dists2-1.pdf}
+\caption{\label{fig:dists2}Distributions of the remaining covariates.}
+\end{figure}
+
+\subsubsection{Variable Transformations}\label{variable-transformations}
+
+Log-transformation was used on school size (number of students) and
+median income. This is done to allow proportional comparisons at the
+extremes of the distributions (Hennig and Liao - 2013). For instance,
+the difference between two schools with 4000 and 3000 students should be
+weighed as much as the difference between two schools with 400 and 300
+students when generating clusters. Figure \ref{fig:dists} displays a
+comparison of the distribution of these variables and hteir logs. Figure
+\ref{fig:dists2} displays the distribution of the remaining variables.
+\ref{tab:tbl-desc}
 
 \subsection{SUBS}\label{subs}
 
@@ -248,133 +294,6 @@ definition of rather than a statistical estimation.
 \end{itemize}
 
 \subsubsection{Subs-Full}\label{subs-full}
-
-\begin{figure}
-\centering
-\includegraphics{Method_files/figure-latex/SUBS_FULL_CH-1.pdf}
-\caption{}
-\end{figure}
-
-\begin{figure}
-\centering
-\includegraphics{Method_files/figure-latex/SUBS_FULL_SSB/SST-1.pdf}
-\caption{}
-\end{figure}
-
-\subsubsection{Subs-OV}\label{subs-ov}
-
-\begin{figure}
-\centering
-\includegraphics{Method_files/figure-latex/SUBS_OV_CH-1.pdf}
-\caption{}
-\end{figure}
-
-\begin{figure}
-\centering
-\includegraphics{Method_files/figure-latex/SUBS_OV_SSB/SST-1.pdf}
-\caption{}
-\end{figure}
-
-\subsubsection{6 Clusters}\label{clusters}
-
-\begin{verbatim}
-## # A tibble: 7 x 8
-##   cluster_OV_6   `1`   `2`   `3`   `4`   `5`   `6`  `20`
-##          <dbl> <int> <int> <int> <int> <int> <int> <int>
-## 1           1.    NA     8  1332    NA    NA    NA  1340
-## 2           2.    20    NA    NA    NA  1501    NA  1521
-## 3           3.    NA    NA    NA   566    NA  1564  2130
-## 4           4.     1  1019   228    NA    41    NA  1289
-## 5           5.  1038    NA    NA   854    NA    NA  1892
-## 6           6.   247  1453     3    NA    NA    NA  1703
-## 7          20.  1306  2480  1563  1420  1542  1564    NA
-\end{verbatim}
-
-\begin{verbatim}
-## # A tibble: 15 x 3
-## # Groups:   cluster_full_6 [6]
-##    cluster_full_6 cluster_OV_6     n
-##             <int>        <int> <int>
-##  1              6            3  1564
-##  2              5            2  1501
-##  3              2            6  1453
-##  4              3            1  1332
-##  5              1            5  1038
-##  6              2            4  1019
-##  7              4            5   854
-##  8              4            3   566
-##  9              1            6   247
-## 10              3            4   228
-## 11              5            4    41
-## 12              1            2    20
-## 13              2            1     8
-## 14              3            6     3
-## 15              1            4     1
-\end{verbatim}
-
-\begin{verbatim}
-## Warning: attributes are not identical across measure variables;
-## they will be dropped
-\end{verbatim}
-
-\begin{figure}
-\centering
-\includegraphics{Method_files/figure-latex/unnamed-chunk-2-1.pdf}
-\caption{}
-\end{figure}
-
-\begin{verbatim}
-## Warning: attributes are not identical across measure variables;
-## they will be dropped
-\end{verbatim}
-
-\begin{figure}
-\centering
-\includegraphics{Method_files/figure-latex/unnamed-chunk-3-1.pdf}
-\caption{}
-\end{figure}
-
-\subsubsection{10 Clusters}\label{clusters-1}
-
-\begin{verbatim}
-## # A tibble: 11 x 12
-##    cluster_OV_10   `1`   `2`   `3`   `4`   `5`   `6`   `7`   `8`   `9`
-##            <dbl> <int> <int> <int> <int> <int> <int> <int> <int> <int>
-##  1            1.    NA  1218    NA    NA    NA    NA    NA    NA   153
-##  2            2.    NA    NA     1    NA    NA   339    NA    NA    NA
-##  3            3.  1104    NA    NA    NA    NA    NA    NA    NA    NA
-##  4            4.    NA    NA   300    NA   136   220    NA    NA    NA
-##  5            5.    NA    NA   357    NA   531    NA    NA    NA    NA
-##  6            6.    50    NA    NA    NA    NA    NA    NA    NA   878
-##  7            7.    NA    NA    NA     8    NA    NA     5  1452    NA
-##  8            8.    NA    NA    NA  1130    NA    NA    57     3    NA
-##  9            9.    NA    NA    NA    12     2    NA  1312     3    NA
-## 10           10.    NA    23    NA    NA    NA    NA    NA    NA    37
-## 11           20.  1154  1241   658  1150   669   559  1374  1458  1068
-## # ... with 2 more variables: `10` <int>, `20` <int>
-\end{verbatim}
-
-\begin{verbatim}
-## Warning: attributes are not identical across measure variables;
-## they will be dropped
-\end{verbatim}
-
-\begin{figure}
-\centering
-\includegraphics{Method_files/figure-latex/unnamed-chunk-4-1.pdf}
-\caption{}
-\end{figure}
-
-\begin{verbatim}
-## Warning: attributes are not identical across measure variables;
-## they will be dropped
-\end{verbatim}
-
-\begin{figure}
-\centering
-\includegraphics{Method_files/figure-latex/unnamed-chunk-5-1.pdf}
-\caption{}
-\end{figure}
 
 \newpage
 
