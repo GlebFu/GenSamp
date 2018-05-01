@@ -259,6 +259,7 @@ chPlot %>%
 ```
 
 
+
 ```{r ratio-full, fig.cap="Ratio of between cluster sum of squares to total cluster sum of squares"}
 cls_ov <- bind_cols(lapply(clusters_ov, function(x) data.frame(x$cluster)))
 cls_f <- bind_cols(lapply(clusters_f, function(x) data.frame(x$cluster)))

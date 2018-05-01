@@ -345,7 +345,39 @@ of sampling from fewer clusters.
 
 \subsubsection{Cluster Analysis}\label{cluster-analysis-1}
 
-Figures \ref{fig:full}, \ref{fig:full}, and \ref{fig:full}
+\textless{}\textless{}\textless{}\textless{}\textless{}\textless{}\textless{}
+HEAD
+
+Cluster analysis was performed using the cluster package (Maechler et.
+al. 2017) in R. First, the \emph{daisy} function is used to compute an
+\(n\) by \(n\) pairwise distance matrix across all observations. This
+function requires two parameters: (1) the data set, and (2) the distance
+metric. For the full model, the data set included the full list of
+school level covariates presented in table \ref{tab:desc}. For the
+omitted variable model, median income was omitted from the data set. For
+both models, the metric was set to \enquote{gower}. Next the
+\emph{kmeans} function is used to generate clusters. This method uses an
+optimization algorithm to classify units into \(k\) clusters by
+minimizing the total within cluster sum of squares. This function also
+requires two parameters: (1) the distance matrix, and (2) the number of
+clusters to generate (\(k\)). For each \(k\), it is recomended to run
+\emph{kmeans} at least 10 times, and select the clustering that results
+in the smallest total within-cluster sum of squares.
+
+Taking the ratio of between to within and plotting it against number of
+clusters creates a chart allowing us to determine if the added
+homogeneity of clusters is worth the difficulty of working with a larger
+of clusters. This chart can be read as an upsidedown elbow graph, where
+as the slope decreases the tradeoff becomes less worthwile.
+Additionally, Tipton (2013) recommends selecting the number of clusters
+such that at least 80\% of the variability is between clusters. Figure
+\ref{fig:ratio-full} displays this for both the full and omitted models.
+In both models at least 10 clusters is necessary for achieving at least
+80\% between cluster variability. However each additional cluster after
+6 seems to add very little benefit individually.
+
+Figures \ref{fig:ch-full}, \ref{fig:ratio-full}, and
+\ref{fig:k-size-full}
 
 \begin{figure}
 \centering
