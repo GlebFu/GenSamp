@@ -186,13 +186,13 @@ Indicators &  &  &  & \\
 \subsection{Population Frame}\label{population-frame}
 
 The population frame is composed of data from three sources: (1) the
-Common Core of Data (CCD), (2) publically available accountability data,
+Common Core of Data (CCD), (2) publicly available accountability data,
 and (3) the U.S. Census. The CCD is a comprehensive database housing
-anually collected national statistics of all public schools and
+annually collected national statistics of all public schools and
 districts. Accountability data was used to calculate the proportion of
 students within each school performing at or above proficiency in Math
 and ELA. Finally, local median income was obtained from the U.S. Census
-and was matched to each school by zipcode. Weighted means of school
+and was matched to each school by zip code. Weighted means of school
 level variables were calculated using school size (number of students)
 to generate district level covariates. In this sense, district
 covariates describe the population of students rather than the
@@ -217,8 +217,8 @@ also included.
 \subsubsection{Omitted Variable}\label{omitted-variable}
 
 Neighborhood median income was selected to serve as the omitted variable
-for several reasons. First, it is related to sevarl of the other
-variables and therefore likely plays a role in the likelyhood of a
+for several reasons. First, it is related to several of the other
+variables and therefore likely plays a role in the likelihood of a
 school participating. Second, because it comes from a non-educational
 data source (the census) and requires additional work to include in the
 population frame it is likely to be omitted in practice.
@@ -233,7 +233,8 @@ log transformations.}
 \begin{figure}
 \centering
 \includegraphics{Method_files/figure-latex/dists2-1.pdf}
-\caption{\label{fig:dists2}Distributions of the remaining covariates.}
+\caption{\label{fig:dists2}Distributions of the remaining continuous
+covariates.}
 \end{figure}
 
 \subsubsection{Variable Transformations}\label{variable-transformations}
@@ -244,17 +245,51 @@ extremes of the distributions (Hennig and Liao - 2013). For instance,
 the difference between two schools with 4000 and 3000 students should be
 weighed as much as the difference between two schools with 400 and 300
 students when generating clusters. Figure \ref{fig:dists} displays a
-comparison of the distribution of these variables and hteir logs. Figure
+comparison of the distribution of these variables and their logs. Figure
 \ref{fig:dists2} displays the distribution of the remaining variables.
-\ref{tab:tbl-desc}
 
 \subsection{SUBS}\label{subs}
 
 Stratification using balanced sampling (SUBS) was performed prior to
 simulation because the group of schools in each strata would be static
-across conditions except where the balancing model is manipulated. The
-set of covariates in both the full model (SUBS-F) and the omitted
-variable model (SUBS-OV) include binary indicator variables
+across conditions except where the balancing model is manipulated by
+omitting median income. Per Tipton's (2013) original recomendation, we
+use k-means clustering to partition the population into strata. This
+requires selecting a distance metric and choosing the number of strata.
+
+\subsubsection{Distance Metric}\label{distance-metric}
+
+The set of covariates in both the full model (SUBS-F) and the omitted
+variable model (SUBS-OV) include continuous covariates as well as binary
+indicators for urbanicity (urban, suburban, and town/rural). Within this
+context it is generally recommended to use Gower's (1971) gemeral
+disimilarity distance (Everitt, 2011) which Tipton (2013) echos. This
+method relies on different calculations of distance depending on the
+type of covariates. Let \(d_{ii'h}\) be the distance between observed
+values of covariate \(X_{h}\) for unit \(i\) and unit \(i'\) where
+\(i \ne i'\). For categorical or dummy coded variables, \(d_{ii'h} = 1\)
+if \(X_{ih} = X_{i'h}\) and \(d_{ii'h} = 0\) otherwise. For continuous
+covariates, we use the following formula:
+
+\begin{align}
+  d_{ii'h} = 1 - \frac{|X_{ih} - X_{i'h}|}{R_h}
+\end{align}
+
+where \textbar{}.\textbar{} indicates absolute value, \(X_{ih}\) and
+\(X_{i'h}\) are values of the \(h^{th}\) covariate for units \(i\) and
+\(i'\), and \(R_h\) is the range of observations for covariate \(X_h\).
+This method restricts the range of \(d_{ii'h}\) to {[}0,1{]}. Finally,
+we calculate the general similarity between each unit pair by taking the
+weighted average of the distances between all covariates. Let
+\(d^{g}_{ii'}\) be the general similarity between unit \(i\) and unit
+\(i'\) where \(i \ne i'\).
+
+\begin{align}
+  d^{g}_{ii'} = \frac{\sum^p_{h = 1}w_{ii'h}d_{ii'h}}{\sum^p_{h = 1}w_{ii'h}}
+\end{align}
+
+where \(w_{ii'h} = 0\) if \(X_h\) is missing for either unit and
+\(w_{ii'h} = 1\) otherwise.
 
 \subsubsection{Number of Clusters}\label{number-of-clusters}
 
@@ -263,11 +298,22 @@ problems in cluster analysis (Steinley, 2006). To date, the most
 extensive investigation of methods for determining \(k\) was conducted
 by Milligan and Cooper (1985) who analyzed 30 methods. However, aside
 from the limited generalizability of this study, many methods are also
-innapropriate in the context of non-hierarchical and thus do not support
-k-means clustering. Hennig and Liao (2013) argue that the method of
-selecting \(k\) should depend on the context of the clustering and frame
-the issue as one of obtaining an appropriate subject-matter-dependent
-definition of rather than a statistical estimation.
+inappropriate in the context of non-hierarchical clustering and thus do
+not support k-means clustering. Tipton (2013) states that both
+statistical and practical criteria should be used in selecting the
+number of clusters. Specifically, a large number of clusters would
+result in more homogeneous strata and, in turn, a more robust sample.
+However as strata become smaller they also become more difficult to
+addequately sample from. Hennig and Liao (2013) also argue that the
+method of selecting \(k\) should depend on the context of the clustering
+and frame the issue as one of obtaining an appropriate
+subject-matter-dependent definition of rather than a statistical
+estimation. Ultimately three considerations were used to select the
+number of clusters: the ratio of variability between clusters to the sum
+of within and between cluster variabiltiy as recommended by Tipton
+(2013), a generalized form of the Calinski-Harabasz index (Calinski and
+Harabasz, 1974) proposed by Hennig and Liao (2013), and the practicality
+of sampling from fewer clusters.
 
 \begin{itemize}
 \item
@@ -285,15 +331,40 @@ definition of rather than a statistical estimation.
     Duda and Hart (1973)
   \end{itemize}
 \item
-  Steinley, D. (2006a) K-means clustering: a half-century synthesis.
+  Steinley, D. (2006) K-means clustering: a half-century synthesis.
   British Journal of Mathematical \& Statistical Psychology, 59, 1--34.
 \item
   Milligan and Cooper (1984)
 \item
   list 30
+\item
+  Sugar and James (2003) via Hennig \& Liao 2013 p 314
+\item
+  Modern look
 \end{itemize}
 
-\subsubsection{Subs-Full}\label{subs-full}
+\subsubsection{Cluster Analysis}\label{cluster-analysis-1}
+
+Figures \ref{fig:full}, \ref{fig:full}, and \ref{fig:full}
+
+\begin{figure}
+\centering
+\includegraphics{Method_files/figure-latex/ch-full-1.pdf}
+\caption{\label{fig:ch-full}Generalizd Calinski-Harabasz index}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics{Method_files/figure-latex/ratio-full-1.pdf}
+\caption{\label{fig:ratio-full}Ratio of between cluster sum of squares to
+total cluster sum of squares}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics{Method_files/figure-latex/k-size-full-1.pdf}
+\caption{}
+\end{figure}
 
 \newpage
 

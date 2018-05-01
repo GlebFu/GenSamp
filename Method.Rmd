@@ -49,6 +49,7 @@ knitr::opts_chunk$set(echo = F, cache = F)
 ```{r load.packages, include = FALSE}
 library(papaja)
 library(tidyverse)
+library(cluster)
 
 rm(list = ls())
 ```
@@ -126,13 +127,13 @@ apa_table(tbl_desc,
 
 
 ## Population Frame
-The population frame is composed of data from three sources: (1) the Common Core of Data (CCD), (2) publically available accountability data, and (3) the U.S. Census. The CCD is a comprehensive database housing anually collected national statistics of all public schools and districts. Accountability data was used to calculate the proportion of students within each school performing at or above proficiency in Math and ELA. Finally, local median income was obtained from the U.S. Census and was matched to each school by zipcode. Weighted means of school level variables were calculated using school size (number of students) to generate district level covariates. In this sense, district covariates describe the population of students rather than the population of schools. These are reported in Table \@ref(tab:tbl-desc)
+The population frame is composed of data from three sources: (1) the Common Core of Data (CCD), (2) publicly available accountability data, and (3) the U.S. Census. The CCD is a comprehensive database housing annually collected national statistics of all public schools and districts. Accountability data was used to calculate the proportion of students within each school performing at or above proficiency in Math and ELA. Finally, local median income was obtained from the U.S. Census and was matched to each school by zip code. Weighted means of school level variables were calculated using school size (number of students) to generate district level covariates. In this sense, district covariates describe the population of students rather than the population of schools. These are reported in Table \@ref(tab:tbl-desc)
 
 ### Covariates
 Selection of covariates was driven by prior research on district and school participation behavior in RCTs (Stuart et al., 2017; Tipton et al., 2016a; Fellers, 2017). Districts and schools with higher proportions of students who are English language learners (ELL), economically disadvantaged (ED), non-White, and living in urban settings are more likely to participate, as are larger districts and schools. It is important to note, however, that some of these characteristics might also make it more likely that researchers would recruit these districts and schools in the first place. Anecdotal evidence from several research teams also suggests that schools are less willing to participate in experimental interventions for subjects in which their students are already excelling, therefore math and ELA achievement covariates were also included.
 
 ### Omitted Variable
-Neighborhood median income was selected to serve as the omitted variable for several reasons. First, it is related to sevarl of the other variables and therefore likely plays a role in the likelyhood of a school participating. Second, because it comes from a non-educational data source (the census) and requires additional work to include in the population frame it is likely to be omitted in practice.
+Neighborhood median income was selected to serve as the omitted variable for several reasons. First, it is related to several of the other variables and therefore likely plays a role in the likelihood of a school participating. Second, because it comes from a non-educational data source (the census) and requires additional work to include in the population frame it is likely to be omitted in practice.
 
 ```{r dists, results = "asis", fig.cap="Comparison of covariate distributions and their log transformations."}
 to_z <- function(x) (x - mean(x))/sd(x)
@@ -182,29 +183,170 @@ dist_plots %>%
 ```
 
 ### Variable Transformations
-Log-transformation was used on school size (number of students) and median income. This is done to allow proportional comparisons at the extremes of the distributions (Hennig and Liao - 2013). For instance, the difference between two schools with 4000 and 3000 students should be weighed as much as the difference between two schools with 400 and 300 students when generating clusters. Figure \@ref(fig:dists) displays a comparison of the distribution of these variables and hteir logs. Figure \@ref(fig:dists2) displays the distribution of the remaining variables.
+Log-transformation was used on school size (number of students) and median income. This is done to allow proportional comparisons at the extremes of the distributions (Hennig and Liao - 2013). For instance, the difference between two schools with 4000 and 3000 students should be weighed as much as the difference between two schools with 400 and 300 students when generating clusters. Figure \@ref(fig:dists) displays a comparison of the distribution of these variables and their logs. Figure \@ref(fig:dists2) displays the distribution of the remaining variables.
 
 
 ## SUBS
 
-Stratification using balanced sampling (SUBS) was performed prior to simulation because the group of schools in each strata would be static across conditions except where the balancing model is manipulated. The set of covariates in both the full model (SUBS-F) and the omitted variable model (SUBS-OV) include binary indicator variables
+Stratification using balanced sampling (SUBS) was performed prior to simulation because the group of schools in each strata would be static across conditions except where the balancing model is manipulated by omitting median income. Per Tipton's (2013) original recomendation, we use k-means clustering to partition the population into strata. This requires selecting a distance metric and choosing the number of strata.
+
+### Distance Metric
+
+The set of covariates in both the full model (SUBS-F) and the omitted variable model (SUBS-OV) include continuous covariates as well as binary indicators for urbanicity (urban, suburban, and town/rural). Within this context it is generally recommended to use Gower's (1971) gemeral disimilarity distance (Everitt, 2011) which Tipton (2013) echos. This method relies on different calculations of distance depending on the type of covariates. Let $d_{ii'h}$ be the distance between observed values of covariate $X_{h}$ for unit $i$ and unit $i'$ where $i \ne i'$. For categorical or dummy coded variables, $d_{ii'h} = 1$ if $X_{ih} = X_{i'h}$ and $d_{ii'h} = 0$ otherwise. For continuous covariates, we use the following formula:
+\begin{align}
+  d_{ii'h} = 1 - \frac{|X_{ih} - X_{i'h}|}{R_h}
+\end{align}
+where |.| indicates absolute value, $X_{ih}$ and $X_{i'h}$ are values of the $h^{th}$ covariate for units $i$ and $i'$, and $R_h$ is the range of observations for covariate $X_h$. This method restricts the range of $d_{ii'h}$ to [0,1]. Finally, we calculate the general similarity between each unit pair by taking the weighted average of the distances between all covariates. Let $d^{g}_{ii'}$ be the general similarity between unit $i$ and unit $i'$ where $i \ne i'$.  
+
+\begin{align}
+  d^{g}_{ii'} = \frac{\sum^p_{h = 1}w_{ii'h}d_{ii'h}}{\sum^p_{h = 1}w_{ii'h}}
+\end{align}
+where $w_{ii'h} = 0$ if $X_h$ is missing for either unit and $w_{ii'h} = 1$ otherwise.
 
 ### Number of Clusters
-Selecting the number of clusters, $k$, is one of the most difficult problems in cluster analysis (Steinley, 2006). To date, the most extensive investigation of methods for determining $k$ was conducted by Milligan and Cooper (1985) who analyzed 30 methods. However, aside from the limited generalizability of this study, many methods are also innapropriate in the context of non-hierarchical and thus do not support k-means clustering. Hennig and Liao (2013) argue that the method of selecting $k$ should depend on the context of the clustering and frame the issue as one of obtaining an appropriate subject-matter-dependent definition of rather than a statistical estimation.
+Selecting the number of clusters, $k$, is one of the most difficult problems in cluster analysis (Steinley, 2006). To date, the most extensive investigation of methods for determining $k$ was conducted by Milligan and Cooper (1985) who analyzed 30 methods. However, aside from the limited generalizability of this study, many methods are also inappropriate in the context of non-hierarchical clustering and thus do not support k-means clustering. Tipton (2013) states that both statistical and practical criteria should be used in selecting the number of clusters. Specifically, a large number of clusters would result in more homogeneous strata and, in turn, a more robust sample. However as strata become smaller they also become more difficult to addequately sample from. Hennig and Liao (2013) also argue that the method of selecting $k$ should depend on the context of the clustering and frame the issue as one of obtaining an appropriate subject-matter-dependent definition of rather than a statistical estimation. Ultimately three considerations were used to select the number of clusters: the ratio of variability between clusters to the sum of within and between cluster variabiltiy as recommended by Tipton (2013), a generalized form of the Calinski-Harabasz index (Calinski and Harabasz, 1974) proposed by Hennig and Liao (2013), and the practicality of sampling from fewer clusters.
 
 * Everitt (2011), p126
   * clusterSim
   * Continuous data?
     * Calinski and Harabasz (1974)
     * Duda and Hart (1973)
-  * Steinley, D. (2006a) K-means clustering: a half-century synthesis. British Journal of Mathematical
+  * Steinley, D. (2006) K-means clustering: a half-century synthesis. British Journal of Mathematical
 & Statistical Psychology, 59, 1–34.  
   
 * Milligan and Cooper (1984)
   + list 30
+* Sugar and James (2003) via Hennig & Liao 2013 p 314
+  + Modern look
 
-### Subs-Full
+### Cluster Analysis
 
+Cluster analysis was performed using the cluster package (Maechler et. al. 2017) in R. First, the _daisy_ function is used to compute an $n$ by $n$ pairwise distance matrix across all observations. This function requires two parameters: (1) the data set, and (2) the distance metric. For the full model, the data set included the full list of school level covariates presented in table \@ref(tab:desc). For the omitted variable model, median income was omitted from the data set. For both models, the metric was set to "gower". Next the _kmeans_ function is used to generate clusters. This method uses an optimization algorithm to classify units into $k$ clusters by minimizing the total within cluster sum of squares. This function also requires two parameters: (1) the distance matrix, and (2) the number of clusters to generate ($k$). For each $k$, it is recomended to run _kmeans_ at least 10 times, and select the clustering that results in the smallest total within-cluster sum of squares.
+
+Taking the ratio of between to within and plotting it against number of clusters creates a chart allowing us to determine if the added homogeneity of clusters is worth the difficulty of working with a larger of clusters. This chart can be read as an upsidedown elbow graph, where as the slope decreases the tradeoff becomes less worthwile. Additionally, Tipton (2013) recommends selecting the number of clusters such that at least 80% of the variability is between clusters. Figure \@ref(fig:ratio-full) displays this for both the full and omitted models. In both models at least 10 clusters is necessary for achieving at least 80% between cluster variability. However each additional cluster after 6 seems to add very little benefit individually.
+
+
+
+Figures \@ref(fig:ch-full), \@ref(fig:ratio-full), and \@ref(fig:k-size-full)
+
+```{r load_clusterData}
+load("Paper Data/clusters-full-logs.rdata")
+ch_f <- chPlot
+clusters_f <- clusters
+
+ch_f$subs <- "F"
+
+load("Paper Data/clusters-OV-logs.rdata")
+ch_ov <- chPlot
+clusters_ov <- clusters
+
+ch_ov$subs <- "OV"
+
+chPlot <- rbind(ch_f, ch_ov)
+```
+
+```{r ch-full, fig.cap="Generalizd Calinski-Harabasz index"}
+chPlot %>%
+  gather(key = method, value = value, ch2) %>%
+  ggplot(aes(x = k, y = value)) +
+  geom_point() +
+  geom_line() +
+  theme_apa() +
+  scale_x_discrete(limits = c(1:K)) +
+  facet_grid(subs ~ .)
+
+
+```
+
+
+```{r ratio-full, fig.cap="Ratio of between cluster sum of squares to total cluster sum of squares"}
+cls_ov <- bind_cols(lapply(clusters_ov, function(x) data.frame(x$cluster)))
+cls_f <- bind_cols(lapply(clusters_f, function(x) data.frame(x$cluster)))
+
+ratio_data <- rbind(data.frame(k = 1:K, subs = "F", vrat = unlist(lapply(clusters_f, function(x) x$betweenss / x$totss))),
+                    data.frame(k = 1:K, subs = "OV", vrat = unlist(lapply(clusters_ov, function(x) x$betweenss / x$totss))))
+
+ratio_data %>%
+  group_by(subs) %>%
+  mutate(min80 = sum(vrat < .8) + .5) %>%
+  ungroup() %>%
+  ggplot(aes(x = k, y = vrat)) +
+  geom_point() +
+  labs(y = "Between Cluster Variance",
+       x = "Number of Strata (k)") +
+  geom_line() +
+  geom_vline(aes(xintercept = min80), linetype = "dashed") +
+  theme_apa() +
+  scale_x_discrete(limits = c(1:K)) +
+  scale_y_continuous(breaks = seq(0, 1, .1)) +
+  facet_grid(subs ~ .)
+```
+
+```{r k-size-full}
+names(cls_ov) <- names(cls_f) <- 1:K
+cls_ov$subs <- "OV"
+cls_f$subs <- "F"
+
+
+rbind(cls_f, cls_ov) %>%
+  gather(key = k, value = cluster, -subs) %>%
+  filter(k > 1) %>%
+  mutate(k = as.numeric(k)) %>%
+  group_by(k, cluster, subs) %>%
+  summarise(n = n()) %>%
+  group_by(k, subs) %>%
+  mutate(sample = (n / sum(n)) * 60) %>%
+  ggplot(aes(x = k, y = sample)) +
+  geom_point() +
+  theme_apa() +
+  labs(y = "Allocated Sample Size",
+       x = "Number of Strata (k)") +
+  scale_x_discrete(limits = c(1:K)) +
+  scale_y_continuous(breaks = seq(0, 30, 5)) +
+  stat_function(fun = function(x) 60/x, geom = "line", linetype = "dashed") +
+  facet_grid(subs ~ .)
+
+```
+
+```{r k-plots}
+# multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
+#   library(grid)
+# 
+#   # Make a list from the ... arguments and plotlist
+#   plots <- c(list(...), plotlist)
+# 
+#   numPlots = length(plots)
+# 
+#   # If layout is NULL, then use 'cols' to determine layout
+#   if (is.null(layout)) {
+#     # Make the panel
+#     # ncol: Number of columns of plots
+#     # nrow: Number of rows needed, calculated from # of cols
+#     layout <- matrix(seq(1, cols * ceiling(numPlots/cols)),
+#                     ncol = cols, nrow = ceiling(numPlots/cols))
+#   }
+# 
+#  if (numPlots==1) {
+#     print(plots[[1]])
+# 
+#   } else {
+#     # Set up the page
+#     grid.newpage()
+#     pushViewport(viewport(layout = grid.layout(nrow(layout), ncol(layout))))
+# 
+#     # Make each plot, in the correct location
+#     for (i in 1:numPlots) {
+#       # Get the i,j matrix positions of the regions that contain this subplot
+#       matchidx <- as.data.frame(which(layout == i, arr.ind = TRUE))
+# 
+#       print(plots[[i]], vp = viewport(layout.pos.row = matchidx$row,
+#                                       layout.pos.col = matchidx$col))
+#     }
+#   }
+# }
+# 
+# multiplot(ch_full, ratio_full, k_size_full, cols = 1)
+```
 
 \newpage
 
