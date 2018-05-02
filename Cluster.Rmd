@@ -41,7 +41,6 @@ df.dist <- list(.vars = lst("n", vars[8:17], "m"),
 
 ## SUBS
 
-Stratification using balanced sampling (SUBS) was performed prior to simulation because the group of schools in each strata would be static across conditions except where the balancing model is manipulated. The set of covariates in both the full model (SUBS-F) and the omitted variable model (SUBS-OV) include binary indicator variables
 
 ```{r SUBS_Funcs}
 library(parallel)
@@ -108,18 +107,6 @@ get_CH <- function(K, distance, clusters) {
 ```
 
 ### Number of Clusters
-Selecting the number of clusters, $k$, is one of the most difficult problems in cluster analysis (Steinley, 2006). To date, the most extensive investigation of methods for determining $k$ was conducted by Milligan and Cooper (1985) who analyzed 30 methods. However, aside from the limited generalizability of this study, many methods are also innapropriate in the context of non-hierarchical and thus do not support k-means clustering. Hennig and Liao (2013) argue that the method of selecting $k$ should depend on the context of the clustering and frame the issue as one of obtaining an appropriate subject-matter-dependent definition of rather than a statistical estimation.
-
-* Everitt (2011), p126
-  * clusterSim
-  * Continuous data?
-    * Calinski and Harabasz (1974)
-    * Duda and Hart (1973)
-  * Steinley, D. (2006a) K-means clustering: a half-century synthesis. British Journal of Mathematical
-& Statistical Psychology, 59, 1–34.  
-  
-* Milligan and Cooper (1984)
-  + list 30
 
 ### Subs-Full
 
