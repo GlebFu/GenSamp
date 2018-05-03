@@ -1,10 +1,8 @@
-library(dplyr)
-library(tidyr)
+library(tidyverse)
 library(stargazer)
 library(htmlTable)
 library(xtable)
 library(Hmisc)
-library(stringr)
 
 rm(list = ls())
 
@@ -20,7 +18,7 @@ STAND <- function(x) (x - mean(x, na.rm = T))/sd(x, na.rm = T)
 logit <- function(x) log(x / (1 - x)) 
 expit <- function(x) exp(x) / (1 + exp(x))
 
-# Sampels from binomial distribution
+# Samples from binomial distribution
 genE <- function(ps) rbinom(length(ps), 1, prob = ps)
 
 ###################
@@ -37,9 +35,9 @@ calcPS <- function(Bs, MRR, vars, data, exclude, getint = F, distp = NULL, int =
   
   if(is.null(int)){
     if(is.null(distp)) {
-      int = uniroot(function(b0) mean(expit(b0 + XB)) - MRR, c(-20,20))
+      int = uniroot(function(b0) mean(expit(b0 + XB)) - MRR, interval = c(-5,5))
     } else {
-      int = uniroot(function(b0) mean(expit(b0 + XB) * distp) - MRR * mean(distp), c(-20,20))
+      int = uniroot(function(b0) mean(expit(b0 + XB) * distp) - MRR * mean(distp), interval = c(-5,5))
     }
     int <- int$root
   }

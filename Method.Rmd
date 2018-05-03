@@ -30,7 +30,7 @@ affiliation:
 
 # bibliography      : ["r-references.bib"]
 
-figsintext        : yes
+figsintext        : no
 figurelist        : no
 tablelist         : no
 footnotelist      : no
@@ -44,6 +44,7 @@ output            : papaja::apa6_pdf
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = F, cache = F)
+
 ```
 
 ```{r load.packages, include = FALSE}
@@ -58,12 +59,35 @@ rm(list = ls())
 # set.seed(42)
 ```
 
-```{r data}
-load("data/base data.rdata")
+```{r data-prep}
+source("ParGenSource.R")
+# Read Data
+df <- read.csv("Data/final data.csv", stringsAsFactors = F)
+df$urbanicity <- factor(df$urbanicity)
+levels(df$urbanicity) <- c("ToRu", "Suburban", "ToRu", "Urban")
+
+# Create ELL and ED variable district data when school is unavailable
+# Create Minority variable
+# Create Town/Rural Variable
+df <- df %>% 
+  filter(n < 4000) %>%
+  unique() %>%
+  mutate(pELL = ifelse(is.na(pELL), pELL_D, pELL), 
+         pED = ifelse(is.na(pED), pTotfrl, pED),
+         pMin = 1-ethWhite,
+         ToRu = Town + Rural,
+         MEDINC = as.numeric(MEDINC),
+         DID = as.numeric(as.factor(LEAID)) + 1000) %>%
+  group_by(DID) %>%
+  mutate(SID = 1:n() + 10000) %>%
+  ungroup() %>%
+  mutate(DSID = paste(DID, SID, sep = "-"))
 
 vars <- c("LSTATE", "LEANM", "SCHNAM", "DID", "SID", "DSID", "n", "pTotfrl",
           "Urban", "Suburban", "ToRu",
-          "pELL", "pED", "pELA", "pMath", "pMin", "MEDINC", "MEDINC_SD")
+          "pELL", "pED", "pELA", "pMath", "pMin", "MEDINC")
+
+df <- df[,vars] %>% na.omit %>% unique()
 
 # Covarites 
 subs_f_vars <- c("n", "pTotfrl", "urbanicity",
@@ -85,6 +109,7 @@ df.dist <- list(.vars = lst("n", vars[8:17], "m"),
          summarise_at(.x, .y)) %>%
   reduce(inner_join, by = "DID")
 
+save(df, file = "data/base data.rdata")
 
 ```
 

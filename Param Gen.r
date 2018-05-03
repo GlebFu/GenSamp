@@ -3,43 +3,8 @@ rm(list = ls())
 source("ParGenSource.r")
 
 
-#-----------------------
-# DATA PREP
-#-----------------------
 
-# Read Data
-df <- read.csv("Data/final data.csv", stringsAsFactors = F)
-df$urbanicity <- factor(df$urbanicity)
-levels(df$urbanicity) <- c("ToRu", "Suburban", "ToRu", "Urban")
-
-# Create ELL and ED variable district data when school is unavailable
-# Create Minority variable
-# Create Town/Rural Variable
-df <- df %>% 
-  filter(n < 4000) %>%
-  unique() %>%
-  mutate(pELL = ifelse(is.na(pELL), pELL_D, pELL), 
-         pED = ifelse(is.na(pED), pTotfrl, pED),
-         pMin = 1-ethWhite,
-         ToRu = Town + Rural,
-         MEDINC = as.numeric(MEDINC),
-         MEDINC_SD = STAND((MEDINC)),
-         DID = as.numeric(as.factor(LEAID)) + 1000) %>%
-  group_by(DID) %>%
-  mutate(SID = 1:n() + 10000) %>%
-  ungroup() %>%
-  mutate(DSID = paste(DID, SID, sep = "-"))
-
-
-vars <- c("LSTATE", "LEANM", "SCHNAM", "DID", "SID", "DSID", "n", "ULOCAL", "pTotfrl", "pIEP_D", "pELL_D", 
-          "Urban", "Suburban", "ToRu", "schPrimary", "schMIDDLE", "schHigh", 
-          "schOther", "pELL", "pED", "pELA", "pMath", "pMin", "MEDINC", "MEDINC_SD", "urbanicity")
-
-# apply(df[,vars], 2, function(x) sum(is.na(x)))
-
-df <- df[,vars] %>% na.omit %>% unique()
-
-save(df, file = "data/base data.rdata")
+load("data/base data.rdata")
 
 
 #-----------------------
@@ -78,31 +43,31 @@ distEx <- "Urban"
 #-----------------------
 # Gen District Params
 #-----------------------
-dist.resps <- 9:1/10
-# dist.resps <- c(.4)
+# dist.resps <- 9:1/10
+dist.resps <- c(.25, .5, .75)
 
 dist.respNames <- paste("PS", dist.resps*100, sep = "")
-# 
-# calcDistParams <- function(resp) {
-#   optim(par = distBs, fn = testGoal,
-#         MRR = resp, vars = distVars,
-#         data = df.dist, exclude = distEx, goal = distGoal) %>%
-#     c(resp = resp)
-# }
-# 
-# calcPS_RRs <- function(pars) {
-#   calcPS(Bs = pars$par, MRR = pars$resp, vars = distVars, data = df.dist, exclude = distEx)
-# }
-# 
-# distPars <- lapply(dist.resps, calcDistParams)
-# distVals <- lapply(distPars, getVals, vars = distVars, data = df.dist, exclude = distEx, goal = distGoal) %>%
-# Reduce(function(dtf1,dtf2) rbind(dtf1,dtf2), .) %>%
-# data.frame
-# distPS <- sapply(distPars, calcPS_RRs) %>% data.frame
-# names(distPS) <- dist.respNames
-# df.dist <- cbind(df.dist, distPS)
-# 
-# save(distPars, distVals, df.dist, file = "Params/2018-02-19/distPars.rdata")
+
+calcDistParams <- function(resp) {
+  optim(par = distBs, fn = testGoal,
+        MRR = resp, vars = distVars,
+        data = df.dist, exclude = distEx, goal = distGoal) %>%
+    c(resp = resp)
+}
+
+calcPS_RRs <- function(pars) {
+  calcPS(Bs = pars$par, MRR = pars$resp, vars = distVars, data = df.dist, exclude = distEx)
+}
+
+distPars <- lapply(dist.resps, calcDistParams)
+distVals <- lapply(distPars, getVals, vars = distVars, data = df.dist, exclude = distEx, goal = distGoal) %>%
+Reduce(function(dtf1,dtf2) rbind(dtf1,dtf2), .) %>%
+data.frame
+distPS <- sapply(distPars, calcPS_RRs) %>% data.frame
+names(distPS) <- dist.respNames
+df.dist <- cbind(df.dist, distPS)
+
+save(distPars, distVals, df.dist, file = "Params/2018-02-19/distPars.rdata")
 
 load("Params/2018-02-19/distPars.rdata")
 
