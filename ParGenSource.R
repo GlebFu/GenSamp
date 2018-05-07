@@ -32,15 +32,21 @@ calcPS <- function(Bs, MRR, vars, data, exclude, getint = F, distp = NULL, int =
   XB <- as.numeric(X %*% Bs)
   
   # int = uniroot(function(b0) mean(expit(b0 + XB)) - MRR, c(-20,20))
-  
-  if(is.null(int)){
-    if(is.null(distp)) {
-      int = uniroot(function(b0) mean(expit(b0 + XB)) - MRR, interval = c(-5,5))
-    } else {
-      int = uniroot(function(b0) mean(expit(b0 + XB) * distp) - MRR * mean(distp), interval = c(-5,5))
+  # tryCatch({
+    if(is.null(int)){
+      if(is.null(distp)) {
+        int = uniroot(function(b0) mean(expit(b0 + XB)) - MRR, interval = c(-20,20))
+      } else {
+        int = uniroot(function(b0) mean(expit(b0 + XB) * distp) - MRR * mean(distp), interval = c(-20,20))
+      }
+      int <- int$root
     }
-    int <- int$root
-  }
+  # },
+  # error = function(err) {
+  #   print(err)
+  #   print(Bs)
+  # })
+
 
   dY <- as.numeric(X %*% Bs) + int
   
@@ -109,9 +115,11 @@ calcSMD <- function(Bs, MRR, vars, data, exclude, calcPS = T, goal = NULL, distp
 
 testGoal <- function(Bs, MRR, vars, data, exclude, goal = NULL, distp = NULL) {
   
+  # Calculate SMD
   trial <- calcSMD(Bs = Bs, MRR = MRR, vars = vars, 
                    data = data, exclude = exclude, 
                    goal = goal, distp = distp)
+  
   
   goal <- data.frame(Var = names(goal), goal = goal)
   

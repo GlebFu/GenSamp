@@ -20,24 +20,17 @@ df %>%
 # District
 #-----------------------
 
-
-# Create district level data
-df.dist <- select(df, -SCHNAM, -LSTATE, -LEANM, -SID) %>%
-  group_by(DID) %>%
-  summarise_if(is.numeric, mean, na.rm = T) %>%
-  ungroup()
-
-
 # Set District SMD Goals
 distGoal <- c(.43, -.6, .22, .95, .67, .56, -.66)
 distVars <- c("Urban", "Suburban", "ToRu", "pELL", "pED", "pMin", "MEDINC")
 names(distGoal) <- distVars
 
 # Initial District Betas
-distBs <- c(0, 0, 0, 0, 0, 0)
+distBs <- c(0, 0, 0, 0, 0, 0, 0)
 
 # Set urban as focus
-distEx <- "Urban"
+# distEx <- "Urban"
+distEx <- NULL
 
 
 #-----------------------
@@ -48,28 +41,33 @@ dist.resps <- c(.25, .5, .75)
 
 dist.respNames <- paste("PS", dist.resps*100, sep = "")
 
-calcDistParams <- function(resp) {
+calcDistParams <- function(resp, data) {
   optim(par = distBs, fn = testGoal,
         MRR = resp, vars = distVars,
-        data = df.dist, exclude = distEx, goal = distGoal) %>%
+        data = data, exclude = distEx, goal = distGoal) %>%
     c(resp = resp)
 }
 
-calcPS_RRs <- function(pars) {
-  calcPS(Bs = pars$par, MRR = pars$resp, vars = distVars, data = df.dist, exclude = distEx)
+calcPS_RRs <- function(pars, data) {
+  calcPS(Bs = pars$par, MRR = pars$resp, vars = distVars, data = data, exclude = distEx)
 }
 
-distPars <- lapply(dist.resps, calcDistParams)
-distVals <- lapply(distPars, getVals, vars = distVars, data = df.dist, exclude = distEx, goal = distGoal) %>%
-Reduce(function(dtf1,dtf2) rbind(dtf1,dtf2), .) %>%
-data.frame
-distPS <- sapply(distPars, calcPS_RRs) %>% data.frame
+df.dist.sd <- df.dist[,distVars] %>% mutate_all(STAND)
+
+distPars <- lapply(dist.resps[2], calcDistParams, data = df.dist.sd)
+
+# undebug(calcPS)
+
+distVals <- lapply(distPars, getVals, vars = distVars, data = df.dist.sd, exclude = distEx, goal = distGoal) %>%
+  Reduce(function(dtf1,dtf2) rbind(dtf1,dtf2), .) %>%
+  data.frame
+distPS <- sapply(distPars, calcPS_RRs, data = df.dist.sd) %>% data.frame
 names(distPS) <- dist.respNames
 df.dist <- cbind(df.dist, distPS)
 
-save(distPars, distVals, df.dist, file = "Params/2018-02-19/distPars.rdata")
+save(distPars, distVals, df.dist, file = "Params/2018-05-07/distPars.rdata")
 
-load("Params/2018-02-19/distPars.rdata")
+load("Params/2018-05-07/distPars.rdata")
 
 distVals %>%
   select(Var, RR, smdS1:goal) %>%
@@ -163,9 +161,9 @@ sch.respNames <- paste("RR", sch.respNames$RR*100, sch.respNames$distRR*100, sep
 # names(schPS) <- sch.respNames
 # df.sch <- cbind(df.sch, schPS)
 # 
-# save(schVals, schPS, schPars, file = "Params/2018-02-19/schVals.rdata")
+# save(schVals, schPS, schPars, file = "Params/2018-05-07/schVals.rdata")
 
-load("Params/2018-02-19/schVals.rdata")
+load("Params/2018-05-07/schVals.rdata")
 
 schVals %>%
   ggplot(aes(x = RR, y = pars)) +
@@ -258,9 +256,9 @@ df.sch %>%
 #          sch.RR = str_sub(RR.S.D, start = 3, end = 4)) %>%
 #   left_join(df.select)
 # 
-# save(df.select, file = "Params/2018-02-19/select.rdata")
+# save(df.select, file = "Params/2018-05-07/select.rdata")
 
-load("Params/2018-02-19/select.rdata")
+load("Params/2018-05-07/select.rdata")
 #-----------------------
 # Convenience Sample SMDs
 #-----------------------
@@ -338,9 +336,9 @@ IVs <- c("n", "urbanicity", "pED", "pMin", "pELL", "MEDINC")
 #   clusters <- append(clusters, list(kmeans(distance, i)))
 # }
 # 
-# save(clusters, file = "Params/2018-02-19/clusters-full.rdata")
+# save(clusters, file = "Params/2018-05-07/clusters-full.rdata")
 
-load("Params/2018-02-19/clusters-full.rdata")
+load("Params/2018-05-07/clusters-full.rdata")
 
 classign <- data.frame(sapply(clusters, function(x) x$cluster))
 names(classign) <- paste("k", 1:K, sep = "")
@@ -389,9 +387,9 @@ df$cluster_full <- df_cluster$k6
 #   clusters <- append(clusters, list(kmeans(distance, i)))
 # }
 # 
-# save(clusters, file = "Params/2018-02-19/clusters-OV.rdata")
+# save(clusters, file = "Params/2018-05-07/clusters-OV.rdata")
 
-load("Params/2018-02-19/clusters-OV.rdata")
+load("Params/2018-05-07/clusters-OV.rdata")
 
 classign <- data.frame(sapply(clusters, function(x) x$cluster))
 names(classign) <- paste("k", 1:K, sep = "")
@@ -504,8 +502,8 @@ df %>%
 # Export Data
 #-----------------------
 
-# save.image(file = "Params/2018-02-19/image.rdata")
-# load("Params/2018-02-19/image.rdata")
+# save.image(file = "Params/2018-05-07/image.rdata")
+# load("Params/2018-05-07/image.rdata")
 
 # District statistics
 dist_stats <- df[,c("DID", names(distGoal))] %>%

@@ -109,7 +109,7 @@ df.dist <- list(.vars = lst("n", vars[8:17], "m"),
          summarise_at(.x, .y)) %>%
   reduce(inner_join, by = "DID")
 
-save(df, file = "data/base data.rdata")
+save(df, df.sch, df.dist, file = "data/base data.rdata")
 
 ```
 
