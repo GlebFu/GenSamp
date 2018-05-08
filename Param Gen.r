@@ -36,8 +36,8 @@ distEx <- NULL
 #-----------------------
 # Gen District Params
 #-----------------------
-# dist.resps <- 9:1/10
-dist.resps <- c(.25, .5, .75)
+dist.resps <- 9:1/10
+# dist.resps <- c(.25, .5, .75)
 
 dist.respNames <- paste("PS", dist.resps*100, sep = "")
 
@@ -54,7 +54,7 @@ calcPS_RRs <- function(pars, data) {
 
 df.dist.sd <- df.dist[,distVars] %>% mutate_all(STAND)
 
-distPars <- lapply(dist.resps[2], calcDistParams, data = df.dist.sd)
+distPars <- lapply(dist.resps, calcDistParams, data = df.dist.sd)
 
 # undebug(calcPS)
 
@@ -91,77 +91,74 @@ distVals %>%
 #-----------------------
 # Schools
 #-----------------------
-df.sch <- df %>%
-  mutate(n = STAND(n))
-
 # Set School SMD Goals
 schGoal <- c(.374, .433, -.007, -.403, .081, .538, .412)
 schVars <- c("n", "Urban", "Suburban", "ToRu", "pED", "pMin", "pELL")
 names(schGoal) <- schVars
 
 # Initial School Betas
-schBs <- c(0, 0, 0, 0, 0, 0)
+schBs <- c(0, 0, 0, 0, 0, 0, 0)
 
 # Set urban as focus
-schEx <- "Urban"
+#schEx <- "Urban"
+schEx <- NULL
 
 #-----------------------
 # Gen School Params
 #-----------------------
 sch.resps <- 9:1/10
-# # sch.resps <- c(.5)
-# 
-# 
-# 
-# calcSchParams <- function(sch.resps, distp = NULL, distrr) {
-#   optim(par = schBs, fn = testGoal,
-#         MRR = sch.resps, vars = schVars,
-#         data = df.sch, exclude = schEx,
-#         goal = schGoal, distp = distp) %>%
-#     c(resp = sch.resps,
-#       dresp = distrr) %>%
-#     c(list(distp = distp))
-# }
-# 
-# calcPS_RRs <- function(pars, distp = NULL) {
-#   calcPS(Bs = pars$par, MRR = pars$resp,
-#          vars = schVars, data = df.sch,
-#          exclude = schEx, distp = distp,
-#          int = pars$value)
-# }
-# 
-# test <- df.dist[, dist.respNames] %>% as.data.frame
-# row.names(test) <- df.dist$DID
-# test <- test[as.character(df.sch$DID),] %>% as.data.frame
-# names(test) <- dist.respNames
-# 
-# schPars <- list()
-# 
-# for(i in 1:length(dist.resps)) {
-#   for(j in 1:length(sch.resps)) {
-#     tryCatch(
-#       {
-#         schPars <- c(schPars, list(calcSchParams(sch.resps[j], distp = test[, i], distrr = dist.resps[i])))
-#       },
-#       error=function(e){cat(# "ERROR :",conditionMessage(e), "\n",
-#                             "District RR: ", dist.resps[i], " School RR: ", sch.resps[j], "\n")})
-#   }
-# 
-# 
-# }
-# 
-# schVals <- lapply(schPars, getVals, vars = schVars, data = df.sch, exclude = schEx, goal = schGoal) %>%
-#   Reduce(function(dtf1,dtf2) rbind(dtf1,dtf2), .)
-# schPS <- sapply(schPars, calcPS_RRs) %>% data.frame
-# 
-# 
+# sch.resps <- c(.5)
+
+
+
+calcSchParams <- function(sch.resps, distp = NULL, distrr, data) {
+  optim(par = schBs, fn = testGoal,
+        MRR = sch.resps, vars = schVars,
+        data = data, exclude = schEx,
+        goal = schGoal, distp = distp) %>%
+    c(resp = sch.resps,
+      dresp = distrr) %>%
+    c(list(distp = distp))
+}
+
+calcPS_RRs <- function(pars, distp = NULL, data) {
+  calcPS(Bs = pars$par, MRR = pars$resp,
+         vars = schVars, data = data,
+         exclude = schEx, distp = distp,
+         int = pars$value)
+}
+
+df.sch.sd <- df.sch[,schVars] %>% mutate_all(STAND)
+
+df.sch <- merge(df.sch, df.dist[,c("DID", dist.respNames)])
+
+schPars <- list()
+
+for(i in 1:length(dist.resps)) {
+  for(j in 1:length(sch.resps)) {
+    tryCatch(
+      {
+        schPars <- c(schPars, list(calcSchParams(sch.resps[j], distp = df.sch[, dist.respNames[i]], distrr = dist.resps[i], data = df.sch.sd)))
+      },
+      error=function(e){cat("ERROR :",conditionMessage(e), "\n",
+                            "District RR: ", dist.resps[i], " School RR: ", sch.resps[j], "\n")})
+  }
+
+
+}
+
+schVals <- lapply(schPars, getVals, vars = schVars, data = df.sch.sd, exclude = schEx, goal = schGoal) %>%
+  Reduce(function(dtf1,dtf2) rbind(dtf1,dtf2), .)
+schPS <- sapply(schPars, calcPS_RRs, data = df.sch.sd) %>% data.frame
+
+
 sch.respNames <- schVals[, c("RR", "distRR")] %>% unique
 sch.respNames <- paste("RR", sch.respNames$RR*100, sch.respNames$distRR*100, sep = "")
-# 
-# names(schPS) <- sch.respNames
-# df.sch <- cbind(df.sch, schPS)
-# 
-# save(schVals, schPS, schPars, file = "Params/2018-05-07/schVals.rdata")
+
+names(schPS) <- sch.respNames
+df.sch <- cbind(df.sch, schPS)
+
+save(schVals, schPS, schPars, file = "Params/2018-05-07/schVals.rdata")
 
 load("Params/2018-05-07/schVals.rdata")
 
@@ -230,194 +227,15 @@ df.dist %>%
   select(DID, one_of(dist.respNames)) %>%
   gather(key = "dist.RR", value = "dist.PS", -DID) %>%
   ggplot(aes(x = dist.PS)) +
-  geom_density() +
+  geom_histogram() +
   facet_wrap(~ dist.RR, scales = "free_y")
 
-df.sch %>%
-  select(DID, SID, DSID, one_of(sch.respNames)) %>%
-  gather(key = "RR.S.D", value = "sch.PS", -DID, -SID, -DSID) %>%
-  mutate(dist.RR = str_sub(RR.S.D, start = 5),
-         sch.RR = str_sub(RR.S.D, start = 3, end = 4)) %>%
-  ggplot(aes(x = sch.PS,)) + 
-  geom_density() +
-  facet_wrap(sch.RR ~ dist.RR, scales = "free_y", ncol = 9)
-
-
-
-# df.select <- df.dist %>%
-#   select(DID, one_of(dist.respNames)) %>%
-#   gather(key = "dist.RR", value = "dist.PS", -DID) %>%
-#   mutate(dist.RR = str_sub(dist.RR, start = 3))
-# 
-# df.select <- df.sch %>%
-#   select(DID, SID, DSID, one_of(sch.respNames)) %>%
-#   gather(key = "RR.S.D", value = "sch.PS", -DID, -SID, -DSID) %>%
-#   mutate(dist.RR = str_sub(RR.S.D, start = 5),
-#          sch.RR = str_sub(RR.S.D, start = 3, end = 4)) %>%
-#   left_join(df.select)
-# 
-# save(df.select, file = "Params/2018-05-07/select.rdata")
-
-load("Params/2018-05-07/select.rdata")
-#-----------------------
-# Convenience Sample SMDs
-#-----------------------
-
-
-
-# sampleCS <- function(data, n = 60) {
-#   data <- data %>%
-#     mutate(Ej = genE(dist.PS),
-#            Eij = ifelse(Ej == 1, genE(sch.PS), 0)) %>%
-#     group_by(RR.S.D) %>%
-#     arrange(RR.S.D, -Eij, -dist.PS, -sch.PS) %>%
-#     mutate(Rank = 1:n(),
-#            Select = Rank <= n) %>%
-#     ungroup() %>%
-#     arrange(DSID, RR.S.D)
-# 
-#   return(data$Select)
-# 
-# }
-# 
-# #create cluster
-# library(parallel)
-# cl <- makeCluster(detectCores() - 1)
-# #get library support needed to run the code
-# clusterEvalQ(cl, library(dplyr))
-# #put objects in place that might be needed for the code
-# clusterExport(cl,c("sampleCS", "df.select", "genE"))
-# #... then parallel replicate...
-# results <- apply(parSapply(cl, 1:1000, function(i,...) { sampleCS(df.select) } ), 1, mean)
-# #stop the cluster
-# stopCluster(cl)
-# 
-# 
-# results <- replicate(10, sampleCS(df.select))
-
-# save(results, file = "Params/CS Selection2.rData")
-
-
-# load("Params/CS Selection2.rData")
-# 
-# sPlot <- df.select %>%
-#   ungroup() %>%
-#   arrange(DSID, RR.S.D) %>%
-#   mutate(selectRate = apply(results, 1, mean))
-# 
-# sPlot %>%
-#   filter(selectRate > 0) %>%
-#   ggplot(aes(x = selectRate)) +
-#   geom_histogram() +
-#   facet_grid(dist.RR ~ sch.RR)
-# 
-# sPlot %>%
-#   group_by(dist.RR, sch.RR) %>%
-#   summarise(mean(selectRate == 0))
-# 
-# rm(list = "results")
 
 #-----------------------
-# Run Full Cluster Analysis
+# Run Cluster Analysis
 #-----------------------
-library(cluster)
 
-K = 10
-
-IVs <- c("n", "urbanicity", "pED", "pMin", "pELL", "MEDINC")
-# 
-# 
-# distance <- daisy(x = df[,IVs], metric = "gower")
-# 
-# clusters <- list()
-# 
-# for(i in 1:K) {
-# 
-#   clusters <- append(clusters, list(kmeans(distance, i)))
-# }
-# 
-# save(clusters, file = "Params/2018-05-07/clusters-full.rdata")
-
-load("Params/2018-05-07/clusters-full.rdata")
-
-classign <- data.frame(sapply(clusters, function(x) x$cluster))
-names(classign) <- paste("k", 1:K, sep = "")
-
-df_cluster <- cbind(df, classign)
-
-Vratio <- function(clstr){
-  Vw <- clstr$tot.withinss
-  Vb <- clstr$betweenss
-  Vb / (Vw + Vb)
-  
-}
-
-data.frame(k = 1:K, var = sapply(clusters, Vratio)) %>%
-  ggplot(aes(x = k, y = var)) +
-  geom_point() +
-  ggtitle("Between cluster variance by number of strata") +
-  labs(y = "Between Cluster Variance",
-       x = "Number of Strata (k)") +
-  geom_line() +
-  theme_minimal() +
-  scale_x_discrete(limits = c(1:K)) +
-  scale_y_continuous(breaks = seq(0, 1, .1))
-
-ggsave("Params/Scree1.png", dpi = 500, width = 5, height = 5)
-
-
-df$cluster_full <- df_cluster$k6
-
-#-----------------------
-# Run OV Cluster Analysis
-#-----------------------
-# library(cluster)
-# 
-# K = 10
-# 
-# IVs <- c("n", "urbanicity", "pED", "pMin", "pELL")
-# 
-# 
-# distance <- daisy(x = df[,IVs], metric = "gower")
-# 
-# clusters <- list()
-# 
-# for(i in 1:K) {
-#   
-#   clusters <- append(clusters, list(kmeans(distance, i)))
-# }
-# 
-# save(clusters, file = "Params/2018-05-07/clusters-OV.rdata")
-
-load("Params/2018-05-07/clusters-OV.rdata")
-
-classign <- data.frame(sapply(clusters, function(x) x$cluster))
-names(classign) <- paste("k", 1:K, sep = "")
-
-df_cluster <- cbind(df, classign)
-
-Vratio <- function(clstr){
-  Vw <- clstr$tot.withinss
-  Vb <- clstr$betweenss
-  Vb / (Vw + Vb)
-  
-}
-
-data.frame(k = 1:K, var = sapply(clusters, Vratio)) %>%
-  ggplot(aes(x = k, y = var)) +
-  geom_point() +
-  ggtitle("Between cluster variance by number of strata") +
-  labs(y = "Between Cluster Variance",
-       x = "Number of Strata (k)") +
-  geom_line() +
-  theme_minimal() +
-  scale_x_discrete(limits = c(1:K)) +
-  scale_y_continuous(breaks = seq(0, 1, .1))
-
-ggsave("Params/Scree2.png", dpi = 500, width = 5, height = 5)
-
-
-df$cluster_ov <- df_cluster$k6
+# Cluster.Rmd
 
 #-----------------------
 # Generate Within Cluster Ranks

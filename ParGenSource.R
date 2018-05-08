@@ -35,9 +35,9 @@ calcPS <- function(Bs, MRR, vars, data, exclude, getint = F, distp = NULL, int =
   # tryCatch({
     if(is.null(int)){
       if(is.null(distp)) {
-        int = uniroot(function(b0) mean(expit(b0 + XB)) - MRR, interval = c(-20,20))
+        int = uniroot(function(b0) mean(expit(b0 + XB)) - MRR, interval = c(-30,30))
       } else {
-        int = uniroot(function(b0) mean(expit(b0 + XB) * distp) - MRR * mean(distp), interval = c(-20,20))
+        int = uniroot(function(b0) mean(expit(b0 + XB) * distp) - MRR * mean(distp), interval = c(-30,30))
       }
       int <- int$root
     }
