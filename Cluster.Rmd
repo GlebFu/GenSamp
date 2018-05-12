@@ -40,13 +40,30 @@ run_clusters <- function(K, distance) {
   clusters <- list()
   
   for(k in 1:K) {
-    clusters <- append(clusters, list(kmeans(x = distance, centers = k)))
+    clusters <- append(clusters, list(genClusters(distance = distance, k = k)))
   }
 
   return(clusters)
 }
 
-
+genClusters <- function(distance, k, iterations = 10) {
+  clusters <- list()
+  withins <- NULL
+  # seeds <- NULL
+  
+  for(i in 1:iterations){
+    seed <- round(runif(1, 0, 1) * 10^6,0)
+    set.seed(seed)
+    
+    clust <- kmeans(x = distance, centers = k)
+    clust <- append(clust, list(seed = seed))
+    withins <- c(withins, clust$tot.withinss)
+    clusters <- append(clusters, list(clust))
+  }
+  
+  return(clusters[[which(withins == min(withins))[1]]])
+  
+}
 
 get_CH <- function(K, distance, clusters) {
   ch <- list()
@@ -89,7 +106,7 @@ K <- 20
 distance <- df[, subs_f_vars] %>%
   mutate(MEDINC = log(MEDINC),
          n = log(n)) %>%
-  # sample_n(100) %>%
+  # sample_n(500) %>%
   daisy(metric = "gower")
 
 
@@ -162,7 +179,7 @@ clust_time <- system.time(
 )
 
 ch_time <- system.time(
-  chPlot <- get_CH(K, distance)
+  chPlot <- get_CH(K, distance, clusters)
 )
 
 
