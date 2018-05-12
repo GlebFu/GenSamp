@@ -10,9 +10,9 @@
 \cmidrule(r){2-3} \cmidrule(r){4-5}
 Variables & Mean & SD & Mean & SD\\
 \midrule
-Number of Schools & NA & NA & 9,875.00 & 0.00\\
-School Size & 579.07 & 203.19 & 534.77 & 225.34\\
-Median Income & 60,084.98 & 25,007.61 & 56,710.63 & 20,804.82\\
+Number of Schools & NA & NA & 4.84 & 12.72\\
+School Size & 579.10 & 203.16 & 534.72 & 225.31\\
+Median Income & 60,065.66 & 25,010.64 & 56,696.14 & 20,803.37\\
 Average Proportions &  &  &  & \\
 \ \ \ ELA Proficiency & 0.59 & 0.23 & 0.60 & 0.20\\
 \ \ \ Math Proficiency & 0.53 & 0.29 & 0.54 & 0.26\\

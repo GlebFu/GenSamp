@@ -85,15 +85,18 @@ df <- df %>%
 
 vars <- c("LSTATE", "LEANM", "SCHNAM", "DID", "SID", "DSID", "n", "pTotfrl",
           "Urban", "Suburban", "ToRu",
-          "pELL", "pED", "pELA", "pMath", "pMin", "MEDINC")
+          "pELL", "pED", "pELA", "pMath", "pMin", "MEDINC", "urbanicity")
+
+covariates <- c("n", "Urban", "Suburban", "ToRu",
+                "pELL", "pED", "pELA", "pMath", "pMin", "MEDINC")
 
 df <- df[,vars] %>% na.omit %>% unique()
 
 # Covarites 
-subs_f_vars <- c("n", "pTotfrl", "urbanicity",
+subs_f_vars <- c("n", "urbanicity",
                 "pELL", "pED", "pELA", "pMath", "pMin", "MEDINC")
 
-subs_ov_vars <- c("n", "pTotfrl", "urbanicity",
+subs_ov_vars <- c("n", "urbanicity",
                 "pELL", "pED", "pELA", "pMath", "pMin")
 
 # School Level Data
@@ -101,15 +104,15 @@ df.sch <- df[,vars]
 
 
 # District Level Data About students
-df.dist <- list(.vars = lst("n", vars[8:17], "m"),
+df.dist <- list(.vars = lst("n", covariates[-1], "m"),
      .funs = lst(mean, funs(weighted.mean(., w = n)), mean)) %>%
-  pmap(~ df.sch %>%
-         mutate(m = n()) %>%
+  pmap(~ df.sch  %>%
          group_by(DID) %>%
+         mutate(m = n()) %>%
          summarise_at(.x, .y)) %>%
   reduce(inner_join, by = "DID")
 
-save(df, df.sch, df.dist, file = "data/base data.rdata")
+save(df, df.sch, df.dist, subs_f_vars, subs_ov_vars, file = "data/base data.rdata")
 
 ```
 
@@ -161,7 +164,7 @@ Neighborhood median income was selected to serve as the omitted variable for sev
 ```{r dists, results = "asis", fig.cap="Comparison of covariate distributions and their log transformations."}
 to_z <- function(x) (x - mean(x))/sd(x)
 
-dist_plots <- df[, c("DSID",subs_f_vars[-2])] %>%
+dist_plots <- df[, c("DSID",subs_f_vars)] %>%
   mutate(n_log = log(n),
          MEDINC_log = log(MEDINC/1000),
          MEDINC = MEDINC / 1000)

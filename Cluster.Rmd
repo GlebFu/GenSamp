@@ -7,36 +7,8 @@ library(papaja)
 library(tidyverse)
 
 rm(list = ls())
-```
 
-```{r data}
 load("data/base data.rdata")
-
-vars <- c("LSTATE", "LEANM", "SCHNAM", "DID", "SID", "DSID", "n", "pTotfrl",
-          "Urban", "Suburban", "ToRu",
-          "pELL", "pED", "pELA", "pMath", "pMin", "MEDINC", "MEDINC_SD")
-
-# Covarites 
-subs_f_vars <- c("n", "pTotfrl", "urbanicity",
-                "pELL", "pED", "pELA", "pMath", "pMin", "MEDINC")
-
-subs_ov_vars <- c("n", "pTotfrl", "urbanicity",
-                "pELL", "pED", "pELA", "pMath", "pMin")
-
-# School Level Data
-df.sch <- df[,vars]
-
-
-# District Level Data About students
-df.dist <- list(.vars = lst("n", vars[8:17], "m"),
-     .funs = lst(mean, funs(weighted.mean(., w = n)), mean)) %>%
-  pmap(~ df.sch %>%
-         mutate(m = n()) %>%
-         group_by(DID) %>%
-         summarise_at(.x, .y)) %>%
-  reduce(inner_join, by = "DID")
-
-
 ```
 
 ## SUBS
@@ -112,26 +84,26 @@ get_CH <- function(K, distance, clusters) {
 
 
 ```{r SUBS_FULL, eval = F}
-# K <- 20
-# 
-# distance <- df[, subs_f_vars[-2]] %>%
-#   mutate(MEDINC = log(MEDINC),
-#          n = log(n)) %>%
-#   # sample_n(100) %>%
-#   daisy(metric = "gower")
-# 
-# 
-# clust_time <- system.time(
-#   clusters <- run_clusters(K, distance)
-# )
-# 
-# ch_time <- system.time(
-#   chPlot <- get_CH(K, distance, clusters)
-# )
-# 
-# # undebug(get_CH)
-# 
-# save(clusters, chPlot, clust_time, ch_time, K, distance, file =  "Paper Data/clusters-full-logs.rdata")
+K <- 20
+
+distance <- df[, subs_f_vars] %>%
+  mutate(MEDINC = log(MEDINC),
+         n = log(n)) %>%
+  # sample_n(100) %>%
+  daisy(metric = "gower")
+
+
+clust_time <- system.time(
+  clusters <- run_clusters(K, distance)
+)
+
+ch_time <- system.time(
+  chPlot <- get_CH(K, distance, clusters)
+)
+
+# undebug(get_CH)
+
+save(clusters, chPlot, clust_time, ch_time, K, distance, file =  "Paper Data/clusters-full-logs.rdata")
 ```
 
 ```{r SUBS_FULL_CH}
@@ -178,23 +150,23 @@ df$cluster_full_10 <- cls[,10]
 
 ```{r SUBS_OV, eval = F}
 
-# K <- 20
-# 
-# distance <- df[, subs_f_vars[c(-2, -9)]] %>%
-#   mutate(n = log(n)) %>% 
-#   daisy(metric = "gower")
-# 
-# 
-# clust_time <- system.time(
-#   clusters <- run_clusters(K, distance)
-# )
-# 
-# ch_time <- system.time(
-#   chPlot <- get_CH(K, distance)
-# )
-# 
-# 
-# save(clusters, chPlot, clust_time, ch_time, K, distance, file =  "Paper Data/clusters-OV-logs.rdata")
+K <- 20
+
+distance <- df[, subs_ov_vars] %>%
+  mutate(n = log(n)) %>%
+  daisy(metric = "gower")
+
+
+clust_time <- system.time(
+  clusters <- run_clusters(K, distance)
+)
+
+ch_time <- system.time(
+  chPlot <- get_CH(K, distance)
+)
+
+
+save(clusters, chPlot, clust_time, ch_time, K, distance, file =  "Paper Data/clusters-OV-logs.rdata")
 
 ```
 
