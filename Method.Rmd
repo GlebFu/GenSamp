@@ -87,7 +87,7 @@ vars <- c("LSTATE", "LEANM", "SCHNAM", "DID", "SID", "DSID", "n", "pTotfrl",
           "Urban", "Suburban", "ToRu",
           "pELL", "pED", "pELA", "pMath", "pMin", "MEDINC", "urbanicity")
 
-covariates <- c("n", "Urban", "Suburban", "ToRu",
+covariates <- c("n", "Urban", "Suburban", "ToRu", "pTotfrl",
                 "pELL", "pED", "pELA", "pMath", "pMin", "MEDINC")
 
 df <- df[,vars] %>% na.omit %>% unique()
@@ -248,9 +248,9 @@ Selecting the number of clusters, $k$, is one of the most difficult problems in 
 ### Cluster Analysis
 Cluster analysis was performed using the _cluster_ package (Maechler et. al. 2017) in R. First, the _daisy_ function is used to compute an $n$ by $n$ pairwise distance matrix across all observations. This function requires two parameters: (1) the data set, and (2) the distance metric. For the full model, the data set included the full list of school level covariates presented in table \@ref(tab:tbl-desc). For the omitted variable model, median income was omitted from the data set. For both models, the metric was set to "gower". Next the _kmeans_ function is used to generate clusters. This method uses an optimization algorithm to classify units into $k$ clusters by minimizing the total within cluster sum of squares. This function also requires two parameters: (1) the distance matrix, and (2) the number of clusters to generate ($k$). For each $k$, it is recommended to run _kmeans_ at least 10 times, and select the clustering that results in the smallest total within-cluster sum of squares. [Get Citation]
 
-Figure \@ref(fig:ch-full) displays the Calinski-Harabasz (CH) index for each $k$ clusters generated for both the SUBS-F and SUBS-OV. The value of $k$ that maximizes the CH index should be selected. However we see several local maxima: $k = [2, 7, 10]$ for SUBS-F, and $k = 2, 6, 12$ for SUBS-OV.
+Figure \@ref(fig:ch-full) displays the Calinski-Harabasz (CH) index for each $k$ clusters generated for both the SUBS-F and SUBS-OV. The value of $k$ that maximizes the CH index should be selected. However we see several local maxima: $k = [2, 5, 8, 11]$ for SUBS-F, and $k = 2, 6, 10$ for SUBS-OV.
 
-Taking the ratio of between-cluster SS to within-cluster SS and plotting it against number of clusters creates a chart similar to an upside down elbow graph. Figure \@ref(fig:ratio-full) displays this for both SUBS-F and SUBS-OV. Tipton (2013) recommends selecting the number of clusters such that at least 80% of the variability is between clusters, indicated by the figure as a dashed line. Given this criteria it seems that in both models at least 10 clusters should be generated. However we also see that after a sharp initial increase, the slope of the graph begins to level out. This indicates that as we increase the number of clusters, the benefit of doing so decreases, while the difficulty of sampling from each cluster increases. In that case after 6 or 7 clusters the difficulty of sampling may not be worth such small increases in homogeneity within clusters.
+Taking the ratio of between-cluster SS to within-cluster SS and plotting it against number of clusters creates a chart similar to an upside down elbow graph. Figure \@ref(fig:ratio-full) displays this for both SUBS-F and SUBS-OV. Tipton (2013) recommends selecting the number of clusters such that at least 80% of the variability is between clusters, indicated by the figure as a dashed line. Given this criteria it seems that at least 10 clusters should be generated for SUBS-F, and 8 for SUBS-OV. However we also see that after a sharp initial increase, the slope of the graph begins to level out. This indicates that as we increase the number of clusters, the benefit of doing so decreases, while the difficulty of sampling from each cluster increases. In that case after 6 or 7 clusters the difficulty of sampling may not be worth such small increases in homogeneity within clusters.
 
 Figure \@ref(fig:k-size-full plots the sample size that needs to be selected from each cluster to fulfill the proportional allocation requirement such that the number of units sampled from each cluster is proportional to the size of the cluster in the population. The dashed line indicates the ideal allocation if all clusters were of equal size. We see that for SUBS-F when 8 or less clusters are generated, they are more equally sized, with the exception of 3 and 6 clusters where one is much larger than the others. For SUBS-OV this is less apparent. Instead a sensible cutoff may be determined by looking at the size of the smallest cluster. At $k > 7$ it seems that the smallest clusters would require less than 5 units being sampled, which may be very difficult in a practical setting.
 
@@ -332,7 +332,8 @@ rbind(cls_f, cls_ov) %>%
   scale_x_discrete(limits = c(1:K)) +
   scale_y_continuous(breaks = seq(0, 30, 5)) +
   stat_function(fun = function(x) 60/x, geom = "line", linetype = "dashed") +
-  facet_grid(subs ~ .)
+  facet_grid(subs ~ .) +
+  geom_hline(yintercept = 5, linetype = "dotted")
 
 ```
 
