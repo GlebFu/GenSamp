@@ -7,31 +7,29 @@ rm(list = ls())
 
 source("SimSource.R")
 
-reps <- 1000
+reps <- 10
 
 
-with(filter(df.select, RR.S.D == "RR9090"), table(cluster_ov, cluster_full))
+seed <- runif(1,0,1)*10^8
+set.seed(42987117)
 
-# seed <- runif(1,0,1)*10^8
-# set.seed(42987117)
-# # 
-# # test <- testRun(df.select %>% filter(sch.RR %in% c(30, 50, 70)))
-# # 
-# # undebug(calcResponseRates)
-# # undebug(testRun)
+# test <- testRun(df.select %>% filter(sch.RR %in% c(25)))
 # 
-# runtimeFile <- "Data/runtime r1000.rdata"
-# resultsFile <- "Data/results r1000.rdata"
-# 
-# runtime <- system.time(results <- replicate(reps, testRun(df.select %>% filter(sch.RR %in% c(30, 50, 70)))))
-# save(runtime, file = runtimeFile)
-# 
-# #
-# df_responses <- bind_rows(results[1,]) %>% data.frame
-# df_dist_smd <- bind_rows(results[2,]) %>% data.frame
-# df_sch_smd <- bind_rows(results[3,]) %>% data.frame
-# 
-# save(df_responses, df_dist_smd, df_sch_smd, file = resultsFile)
+# undebug(calcDistSMDs)
+# undebug(testRun)
+
+runtimeFile <- "Data/2018-5-14/runtime r10.rdata"
+resultsFile <- "Data/2018-5-14/results r10.rdata"
+
+runtime <- system.time(results <- replicate(reps, testRun(df.select)))
+save(runtime, file = runtimeFile)
+
+#
+df_responses <- bind_rows(results[1,]) %>% data.frame
+df_dist_smd <- bind_rows(results[2,]) %>% data.frame
+df_sch_smd <- bind_rows(results[3,]) %>% data.frame
+
+save(df_responses, df_dist_smd, df_sch_smd, file = resultsFile)
 
 load(runtimeFile)
 load(resultsFile)
@@ -68,7 +66,7 @@ samplot_SUBS <- df_responses %>%
 # filter(sch.RR == 50) %>%
 
 samplot_SUBS %>%
-  filter(sch.RR == 30) %>%
+  filter(sch.RR == 25) %>%
   gather(key = measure, value = value, -sample, -sch.RR, -dist.RR, -cluster) %>%
   mutate(level = str_split(measure, "_", simplify = T)[,1],
          measure =  str_split(measure, "_", simplify = T)[,2]) %>%
@@ -80,7 +78,7 @@ samplot_SUBS %>%
   expand_limits(y=0)
 
 samplot_SUBS %>%
-  filter(sch.RR == 30) %>%
+  filter(sch.RR == 25) %>%
   gather(key = measure, value = value, -sample, -sch.RR, -dist.RR, -cluster) %>%
   mutate(level = str_split(measure, "_", simplify = T)[,1],
          measure =  str_split(measure, "_", simplify = T)[,2]) %>%
@@ -101,7 +99,7 @@ dSMDplot <- df_dist_smd %>%
   spread(key = variable, value = value)
 
 dSMDplot %>%
-  filter(sch.RR == 30) %>%
+  filter(sch.RR == 50) %>%
   ggplot(aes(x = dist.RR, y = abs(sim_SMD), group = sample, color = sample)) +
   geom_point() +
   geom_line() +
@@ -117,7 +115,7 @@ sSMDplot <- df_sch_smd %>%
   spread(key = variable, value = value)
 
 sSMDplot %>%
-  filter(sch.RR == 30) %>%
+  filter(sch.RR == 50) %>%
   ggplot(aes(x = dist.RR, y = abs(sim_SMD), group = sample, color = sample)) +
   geom_point() +
   geom_line() +
@@ -132,7 +130,7 @@ df_dist_smd %>%
   group_by(sample, dist.RR, sch.RR, Variable, Group, variable) %>%
   summarise(value = mean(value, na.rm = T)) %>% # NAs due to 0 rejections by CS
   spread(key = variable, value = value) %>%
-  filter(sch.RR == 70) %>%
+  filter(sch.RR == 75) %>%
   ggplot(aes(x = dist.RR, y = miss, group = sample, color = sample)) +
   geom_point() +
   geom_line() +
@@ -145,7 +143,7 @@ df_sch_smd %>%
   group_by(sample, dist.RR, sch.RR, Variable, Group, variable) %>%
   summarise(value = mean(value, na.rm = T)) %>% # NAs due to 0 rejections by CS
   spread(key = variable, value = value) %>%
-  filter(sch.RR == 70) %>%
+  filter(sch.RR == 75) %>%
   ggplot(aes(x = dist.RR, y = miss, group = sample, color = sample)) +
   geom_point() +
   geom_line() +

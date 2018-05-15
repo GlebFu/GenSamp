@@ -36,22 +36,22 @@ distEx <- NULL
 #-----------------------
 # Gen District Params
 #-----------------------
-dist.resps <- 9:1/10
+# dist.resps <- 9:1/10
 # dist.resps <- c(.25, .5, .75)
-
-dist.respNames <- paste("PS", dist.resps*100, sep = "")
-
-calcDistParams <- function(resp, data) {
-  optim(par = distBs, fn = testGoal,
-        MRR = resp, vars = distVars,
-        data = data, exclude = distEx, goal = distGoal) %>%
-    c(resp = resp)
-}
-
-calcPS_RRs <- function(pars, data) {
-  calcPS(Bs = pars$par, MRR = pars$resp, vars = distVars, data = data, exclude = distEx)
-}
-
+# 
+# dist.respNames <- paste("PS", dist.resps*100, sep = "")
+# 
+# calcDistParams <- function(resp, data) {
+#   optim(par = distBs, fn = testGoal,
+#         MRR = resp, vars = distVars,
+#         data = data, exclude = distEx, goal = distGoal) %>%
+#     c(resp = resp)
+# }
+# 
+# calcPS_RRs <- function(pars, data) {
+#   calcPS(Bs = pars$par, MRR = pars$resp, vars = distVars, data = data, exclude = distEx)
+# }
+# 
 # df.dist.sd <- df.dist[,distVars] %>% mutate_all(STAND)
 # 
 # distPars <- lapply(dist.resps, calcDistParams, data = df.dist.sd)
@@ -65,9 +65,9 @@ calcPS_RRs <- function(pars, data) {
 # names(distPS) <- dist.respNames
 # df.dist <- cbind(df.dist, distPS)
 # 
-# save(distPars, distVals, df.dist, file = "Params/2018-05-07/distPars.rdata")
+# save(distPars, distVals, df.dist, dist.respNames, file = "Params/2018-05-14/distPars.rdata")
 
-load("Params/2018-05-07/distPars.rdata")
+load("Params/2018-05-14/distPars.rdata")
 
 distVals %>%
   select(Var, RR, smdS1:goal) %>%
@@ -106,28 +106,27 @@ schEx <- NULL
 #-----------------------
 # Gen School Params
 #-----------------------
-sch.resps <- 9:1/10
-# sch.resps <- c(.5)
-
-
-
-calcSchParams <- function(sch.resps, distp = NULL, distrr, data) {
-  optim(par = schBs, fn = testGoal,
-        MRR = sch.resps, vars = schVars,
-        data = data, exclude = schEx,
-        goal = schGoal, distp = distp) %>%
-    c(resp = sch.resps,
-      dresp = distrr) %>%
-    c(list(distp = distp))
-}
-
-calcPS_RRs <- function(pars, distp = NULL, data) {
-  calcPS(Bs = pars$par, MRR = pars$resp,
-         vars = schVars, data = data,
-         exclude = schEx, distp = distp,
-         int = pars$value)
-}
-
+# sch.resps <- 9:1/10
+# sch.resps <- c(.25, .5, .75)
+# 
+# 
+# 
+# calcSchParams <- function(sch.resps, distp = NULL, distrr, data) {
+#   optim(par = schBs, fn = testGoal,
+#         MRR = sch.resps, vars = schVars,
+#         data = data, exclude = schEx,
+#         goal = schGoal, distp = distp) %>%
+#     c(resp = sch.resps,
+#       dresp = distrr) %>%
+#     c(list(distp = distp))
+# }
+# 
+# calcPS_RRs <- function(pars, distp = NULL, data) {
+#   calcPS(Bs = pars$par, MRR = pars$resp,
+#          vars = schVars, data = data,
+#          exclude = schEx, distp = pars$distp)
+# }
+# 
 # df.sch.sd <- df.sch[,schVars] %>% mutate_all(STAND)
 # 
 # df.sch <- merge(df.sch, df.dist[,c("DID", dist.respNames)])
@@ -152,62 +151,63 @@ calcPS_RRs <- function(pars, distp = NULL, data) {
 # schPS <- sapply(schPars, calcPS_RRs, data = df.sch.sd) %>% data.frame
 # 
 # 
+# 
 # sch.respNames <- schVals[, c("RR", "distRR")] %>% unique
 # sch.respNames <- paste("RR", sch.respNames$RR*100, sch.respNames$distRR*100, sep = "")
 # 
 # names(schPS) <- sch.respNames
 # df.sch <- cbind(df.sch, schPS)
 # 
-# save(schVals, schPS, schPars, file = "Params/2018-05-07/schVals.rdata")
+# save(schVals, schPS, schPars, df.sch.sd, df.sch, sch.respNames, file = "Params/2018-05-14/schVals.rdata")
 
-# load("Params/2018-05-07/schVals.rdata")
-# 
-# schVals %>%
-#   ggplot(aes(x = RR, y = pars)) +
-#   geom_point() + geom_smooth(method = "lm", formula = y ~ poly(x,2)) + geom_line(aes(color = factor(distRR))) +
-#   facet_wrap(~Var)
-# 
-# schVals %>%
-#   select(Var, RR, distRR, smdS1:goal) %>%
-#   gather(key = SMD, value = value, smdS1:goal) %>%
-#   ggplot(aes(x = RR, y = value, color = SMD)) +
-#   geom_point() +
-#   facet_grid(distRR ~ Var)
-# 
-# schVals %>%
-#   ggplot(aes(x = distRR, y = pars, color = Var)) +
-#   geom_point() +
-#   geom_line() +
-#   facet_wrap(~ RR)
-# 
-# schVals %>%
-#   ggplot(aes(x = RR, y = dif, color = Var)) +
-#   geom_point() +
-#   geom_line() + 
-#   geom_hline(yintercept = 0) +
-#   geom_hline(yintercept = c(-1, 1) * .25, linetype = "dashed") +
-#   facet_wrap(~ distRR)
-# 
-# schVals %>%
-#   ggplot(aes(x = RR, y = dif, color = distRR, group = distRR)) +
-#   geom_point() +
-#   geom_line() + 
-#   geom_hline(yintercept = 0) +
-#   geom_hline(yintercept = c(-1, 1) * .25, linetype = "dashed") +
-#   facet_wrap(~ Var)
-# 
-# schVals %>%
-#   ggplot(aes(x = RR, y = pars, color = distRR)) +
-#   geom_point() + 
-#   geom_smooth(method = "lm", formula = y ~ I(x^2)) +
-#   facet_wrap(~ Var)
-# 
+load("Params/2018-05-14/schVals.rdata")
+
+schVals %>%
+  ggplot(aes(x = RR, y = pars)) +
+  geom_point() + geom_smooth(method = "lm", formula = y ~ poly(x,2)) + geom_line(aes(color = factor(distRR))) +
+  facet_wrap(~Var)
+
+schVals %>%
+  select(Var, RR, distRR, smdS1:goal) %>%
+  gather(key = SMD, value = value, smdS1:goal) %>%
+  ggplot(aes(x = RR, y = value, color = SMD)) +
+  geom_point() +
+  facet_grid(distRR ~ Var)
+
+schVals %>%
+  ggplot(aes(x = distRR, y = pars, color = Var)) +
+  geom_point() +
+  geom_line() +
+  facet_wrap(~ RR)
+
+schVals %>%
+  ggplot(aes(x = RR, y = dif, color = Var)) +
+  geom_point() +
+  geom_line() +
+  geom_hline(yintercept = 0) +
+  geom_hline(yintercept = c(-1, 1) * .25, linetype = "dashed") +
+  facet_wrap(~ distRR)
+
+schVals %>%
+  ggplot(aes(x = RR, y = dif, color = distRR, group = distRR)) +
+  geom_point() +
+  geom_line() +
+  geom_hline(yintercept = 0) +
+  geom_hline(yintercept = c(-1, 1) * .25, linetype = "dashed") +
+  facet_wrap(~ Var)
+
+schVals %>%
+  ggplot(aes(x = RR, y = pars, color = distRR)) +
+  geom_point() +
+  geom_smooth(method = "lm", formula = y ~ I(x^2)) +
+  facet_wrap(~ Var)
+
 # smoothSchVals <- lm(pars ~ Var * (RR + I(RR^2)), data = schVals)
 # schVals$parSmooth[!is.na(schVals$pars)] <- smoothSchVals$fitted.values
 # 
 # schVals %>%
 #   ggplot(aes(x = RR, y = parSmooth, color = distRR)) +
-#   geom_point() + 
+#   geom_point() +
 #   facet_wrap(~ Var)
 # 
 # schVals$pars <- schVals$parSmooth
@@ -217,11 +217,13 @@ calcPS_RRs <- function(pars, distp = NULL, data) {
 #   geom_point() +
 #   geom_line() +
 #   facet_wrap(~ RR)
+# 
+# 
+# 
+# save(schVals, schPS, schPars, df.sch.sd, file = "Params/2018-05-14/schVals.rdata")
 
-# save(schVals, schPS, schPars, file = "Params/2018-05-07/schVals.rdata")
-
-load("Params/2018-05-07/schVals.rdata")
-load("Params/2018-05-07/distPars.rdata")
+load("Params/2018-05-14/schVals.rdata")
+load("Params/2018-05-14/distPars.rdata")
 #-----------------------
 # Examin Propensity Scores
 #-----------------------
@@ -245,8 +247,8 @@ df.dist %>%
 load("data/base data.rdata")
 
 load("Params/Clusters.rdata")
-load("Params/2018-05-07/schVals.rdata")
-load("Params/2018-05-07/distPars.rdata")
+load("Params/2018-05-14/schVals.rdata")
+load("Params/2018-05-14/distPars.rdata")
 
 df <- df %>%
   left_join(df.clusts) %>%
@@ -314,9 +316,9 @@ df %>%
   facet_grid(urbanicity~cluster_full) +
   geom_point()
 
-df %>%
-  select(cluster_full, cluster_ov) %>%
-  table
+# df %>%
+#   select(cluster_full, cluster_ov) %>%
+#   table
 
 df %>%
   filter(rankp_ov < 50) %>%
@@ -336,8 +338,31 @@ df %>%
 # Export Data
 #-----------------------
 
-# save.image(file = "Params/2018-05-07/image.rdata")
-load("Params/2018-05-07/image.rdata")
+# save.image(file = "Params/2018-05-14/image.rdata")
+load("Params/2018-05-14/image.rdata")
+
+names(df.dist)
+df.sch <- cbind(df.sch, schPS)
+
+head(df.dist)
+dist.PS <- df.dist %>%
+  select(DID, dist.respNames) %>%
+  gather(key = dist.RR, value = dist.PS, -DID) %>%
+  mutate(dist.RR = str_sub(dist.RR, start = 3))
+
+head(df.sch)
+sch.PS <- df.sch %>%
+  select(DID, DSID, SID, sch.respNames) %>%
+  gather(key = dist.RR, value = sch.PS, -DID, -DSID, -SID) %>%
+  mutate(sch.RR = str_sub(dist.RR, start = 3, end = 4),
+         dist.RR = str_sub(dist.RR, start = 5))
+
+df.PS <- merge(dist.PS, sch.PS)
+
+# Pull out necesary variables for generating selections
+df.select <- select(df, DSID, DID, SID, cluster_ov, cluster_full, rank_ov, rank_full)
+
+df.select <- left_join(df.select, df.PS)
 
 # District statistics
 dist_stats <- df[,c("DID", names(distGoal))] %>%
@@ -356,8 +381,5 @@ sch_stats <- df[,c("DSID", names(schGoal))] %>%
             pop_sd = sd(Value)) %>%
   left_join(data.frame(Variable = names(schGoal), goal_SMD = schGoal, row.names = NULL, stringsAsFactors = F))
 
-# Pull out necesary variables for generating selections
-df.select <- select(df, DSID, DID, SID, cluster_ov, cluster_full, rank_ov, rank_full)
-
-save(df, df.select, dist_stats, sch_stats, file = "Data/simData.Rdata")
-save(schGoal, distGoal, file = "Data/RGM Vars.Rdata")
+save(df, df.select, df.dist, df.sch, dist.PS, sch.PS, df.PS, sch_stats, dist_stats, file = "Data/simData.Rdata")
+save(schGoal, distGoal, schVals, distVals, file = "Data/RGM Vars.Rdata")
