@@ -48,7 +48,7 @@ createSample <- function(data) {
     arrange(rank.SRS) %>%
     mutate(count = cumsum(Eij)) %>% 
     filter(count <= 60) %>%
-    left_join(df, by = c("DSID", "DID", "SID")) %>%
+    left_join(df) %>%
     mutate(sample = "SRS",
            cluster = NA)
   
@@ -58,7 +58,7 @@ createSample <- function(data) {
     arrange(-dist.PS, -sch.PS) %>%
     mutate(count = cumsum(Eij)) %>% 
     filter(count <= 60) %>%
-    left_join(df, by = c("DSID", "DID", "SID")) %>%
+    left_join(df) %>%
     mutate(sample = "CS",
            cluster = NA)
   
@@ -68,7 +68,7 @@ createSample <- function(data) {
     arrange(rank_ov) %>%
     mutate(count = cumsum(Eij)) %>%
     filter(count <= propAllocation(cluster_ov, "cluster_ov")) %>%
-    left_join(df, by = c("DSID", "DID", "SID", "cluster_ov")) %>%
+    left_join(df) %>%
     mutate(sample = "SUBS_OV",
            cluster = cluster_ov)
   
@@ -78,7 +78,7 @@ createSample <- function(data) {
     arrange(rank_full) %>%
     mutate(count = cumsum(Eij)) %>%
     filter(count <= propAllocation(cluster_full, "cluster_full")) %>%
-    left_join(df, by = c("DSID", "DID", "SID", "cluster_full")) %>%
+    left_join(df) %>%
     mutate(sample = "SUBS_F",
            cluster = cluster_full)
   
@@ -103,11 +103,13 @@ calcResponseRates <- function(data, cluster = F) {
             sch_accepted = sum(Eij),
             dist_contacted = length(unique(DID))) %>%
     mutate(sch_rejected = sch_contacted * Ej - sch_accepted) %>%
-    mutate(dist_rejected = sum(dist_contacted) - dist_contacted,
+    mutate(dist_rejected = (1 - Ej) * dist_contacted,
            sch_RR = sch_accepted/sch_contacted,
-           dist_accepted = dist_contacted,
-           dist_contacted = sum(dist_contacted),
-           dist_RR = dist_accepted/dist_contacted) %>%
+           dist_accepted = dist_contacted) %>%
+    group_by(sample, dist.RR, sch.RR, cluster) %>%
+    mutate(dist_rejected = sum(dist_rejected),
+           dist_contacted = sum(dist_contacted)) %>%
+    mutate(dist_RR = dist_accepted/dist_contacted) %>%
     filter(Ej == 1) %>%
     ungroup() %>%
     select(-Ej) %>%
@@ -214,6 +216,7 @@ calcSchSMDs <- function(sample) {
 #   theme_bw()
 
 testRun <- function(data) {
+  
   approached <- generateE(data)
   sample <- createSample(approached)
   
@@ -233,6 +236,7 @@ testRun <- function(data) {
     gather(key = variable, value = value, -sample, -dist.RR, -sch.RR, -Variable, -Group)
   
   return(list(responses = responses, dist_smds = dist_smds, sch_smds = sch_smds))
+
 }
 
 

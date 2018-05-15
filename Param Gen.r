@@ -36,38 +36,51 @@ distEx <- NULL
 #-----------------------
 # Gen District Params
 #-----------------------
-# dist.resps <- 9:1/10
-# dist.resps <- c(.25, .5, .75)
-# 
-# dist.respNames <- paste("PS", dist.resps*100, sep = "")
-# 
-# calcDistParams <- function(resp, data) {
-#   optim(par = distBs, fn = testGoal,
-#         MRR = resp, vars = distVars,
-#         data = data, exclude = distEx, goal = distGoal) %>%
-#     c(resp = resp)
-# }
-# 
-# calcPS_RRs <- function(pars, data) {
-#   calcPS(Bs = pars$par, MRR = pars$resp, vars = distVars, data = data, exclude = distEx)
-# }
-# 
-# df.dist.sd <- df.dist[,distVars] %>% mutate_all(STAND)
-# 
-# distPars <- lapply(dist.resps, calcDistParams, data = df.dist.sd)
-# 
-# # undebug(calcPS)
-# 
-# distVals <- lapply(distPars, getVals, vars = distVars, data = df.dist.sd, exclude = distEx, goal = distGoal) %>%
-#   Reduce(function(dtf1,dtf2) rbind(dtf1,dtf2), .) %>%
-#   data.frame
-# distPS <- sapply(distPars, calcPS_RRs, data = df.dist.sd) %>% data.frame
-# names(distPS) <- dist.respNames
-# df.dist <- cbind(df.dist, distPS)
-# 
-# save(distPars, distVals, df.dist, dist.respNames, file = "Params/2018-05-14/distPars.rdata")
+dist.resps <- 9:1/10
+dist.resps <- c(.25, .5, .75)
 
-load("Params/2018-05-14/distPars.rdata")
+dist.respNames <- paste("PS", dist.resps*100, sep = "")
+
+calcDistParams <- function(resp, data) {
+  optim(par = distBs, fn = testGoal,
+        MRR = resp, vars = distVars,
+        data = data, exclude = distEx, goal = distGoal) %>%
+    c(resp = resp)
+}
+
+calcPS_RRs <- function(pars, data) {
+  calcPS(Bs = pars$par, MRR = pars$resp, vars = distVars, data = data, exclude = distEx)
+}
+
+df.dist.sd <- df.dist[,distVars] %>% mutate_all(STAND)
+
+distPars <- calcDistParams(dist.resps[[1]], data = df.dist.sd)
+
+distPars <- lapply(dist.resps, function(x) {
+  distPars$resp <- x
+  return(distPars)
+  })
+
+# undebug(calcPS)
+
+distVals <- lapply(distPars, getVals, vars = distVars, data = df.dist.sd, exclude = distEx, goal = distGoal) %>%
+  Reduce(function(dtf1,dtf2) rbind(dtf1,dtf2), .) %>%
+  data.frame
+distPS <- sapply(distPars, calcPS_RRs, data = df.dist.sd) %>% data.frame
+names(distPS) <- dist.respNames
+df.dist <- cbind(df.dist, distPS)
+
+apply(distPS, 2, mean)
+
+distPS %>%
+  gather(key = RR, value = PS) %>%
+  ggplot(aes(x = PS)) +
+  geom_histogram() +
+  facet_wrap(~RR)
+
+save(distPars, distVals, df.dist, dist.respNames, dist.resps, file = "Params/2018-05-15/distPars.rdata")
+
+load("Params/2018-05-15/distPars.rdata")
 
 distVals %>%
   select(Var, RR, smdS1:goal) %>%
@@ -106,9 +119,9 @@ schEx <- NULL
 #-----------------------
 # Gen School Params
 #-----------------------
-# sch.resps <- 9:1/10
+# # sch.resps <- 9:1/10
 # sch.resps <- c(.25, .5, .75)
-# 
+# # sch.resps <- .25
 # 
 # 
 # calcSchParams <- function(sch.resps, distp = NULL, distrr, data) {
@@ -134,7 +147,7 @@ schEx <- NULL
 # schPars <- list()
 # 
 # for(i in 1:length(dist.resps)) {
-#   for(j in 1:length(sch.resps)) {
+#   for(j in 1:1) {
 #     tryCatch(
 #       {
 #         schPars <- c(schPars, list(calcSchParams(sch.resps[j], distp = df.sch[, dist.respNames[i]], distrr = dist.resps[i], data = df.sch.sd)))
@@ -145,6 +158,11 @@ schEx <- NULL
 # 
 # 
 # }
+# 
+# schPars <- c(schPars, schPars, schPars)
+# 
+# schPars[[4]]$resp <- schPars[[5]]$resp <- schPars[[6]]$resp <- .5
+# schPars[[7]]$resp <- schPars[[8]]$resp <- schPars[[9]]$resp <- .75
 # 
 # schVals <- lapply(schPars, getVals, vars = schVars, data = df.sch.sd, exclude = schEx, goal = schGoal) %>%
 #   Reduce(function(dtf1,dtf2) rbind(dtf1,dtf2), .)
@@ -158,9 +176,15 @@ schEx <- NULL
 # names(schPS) <- sch.respNames
 # df.sch <- cbind(df.sch, schPS)
 # 
-# save(schVals, schPS, schPars, df.sch.sd, df.sch, sch.respNames, file = "Params/2018-05-14/schVals.rdata")
+# schPS %>%
+#   gather(key = RR, value = PS) %>%
+#   ggplot(aes(x = PS)) +
+#   geom_histogram() +
+#   facet_wrap(~RR)
+# 
+# save(schVals, schPS, schPars, df.sch.sd, df.sch, sch.respNames, file = "Params/2018-05-15/schVals.rdata")
 
-load("Params/2018-05-14/schVals.rdata")
+load("Params/2018-05-15/schVals.rdata")
 
 schVals %>%
   ggplot(aes(x = RR, y = pars)) +
@@ -220,10 +244,10 @@ schVals %>%
 # 
 # 
 # 
-# save(schVals, schPS, schPars, df.sch.sd, file = "Params/2018-05-14/schVals.rdata")
+# save(schVals, schPS, schPars, df.sch.sd, file = "Params/2018-05-15/schVals.rdata")
 
-load("Params/2018-05-14/schVals.rdata")
-load("Params/2018-05-14/distPars.rdata")
+load("Params/2018-05-15/schVals.rdata")
+load("Params/2018-05-15/distPars.rdata")
 #-----------------------
 # Examin Propensity Scores
 #-----------------------
@@ -247,8 +271,8 @@ df.dist %>%
 load("data/base data.rdata")
 
 load("Params/Clusters.rdata")
-load("Params/2018-05-14/schVals.rdata")
-load("Params/2018-05-14/distPars.rdata")
+load("Params/2018-05-15/schVals.rdata")
+load("Params/2018-05-15/distPars.rdata")
 
 df <- df %>%
   left_join(df.clusts) %>%
@@ -338,11 +362,10 @@ df %>%
 # Export Data
 #-----------------------
 
-# save.image(file = "Params/2018-05-14/image.rdata")
-load("Params/2018-05-14/image.rdata")
+# save.image(file = "Params/2018-05-15/image.rdata")
+load("Params/2018-05-15/image.rdata")
 
-names(df.dist)
-df.sch <- cbind(df.sch, schPS)
+
 
 head(df.dist)
 dist.PS <- df.dist %>%
