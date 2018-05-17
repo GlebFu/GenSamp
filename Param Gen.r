@@ -36,7 +36,7 @@ distEx <- NULL
 #-----------------------
 # Gen District Params
 #-----------------------
-dist.resps <- 9:1/10
+# dist.resps <- 9:1/10
 dist.resps <- c(.25, .5, .75)
 
 dist.respNames <- paste("PS", dist.resps*100, sep = "")
@@ -78,9 +78,9 @@ distPS %>%
   geom_histogram() +
   facet_wrap(~RR)
 
-save(distPars, distVals, df.dist, dist.respNames, dist.resps, file = "Params/2018-05-15/distPars.rdata")
+save(distPars, distVals, df.dist, dist.respNames, dist.resps, file = "Params/2018-05-17/distPars.rdata")
 
-load("Params/2018-05-15/distPars.rdata")
+load("Params/2018-05-17/distPars.rdata")
 
 distVals %>%
   select(Var, RR, smdS1:goal) %>%
@@ -105,12 +105,12 @@ distVals %>%
 # Schools
 #-----------------------
 # Set School SMD Goals
-schGoal <- c(.374, .433, -.007, -.403, .081, .538, .412)
-schVars <- c("n", "Urban", "Suburban", "ToRu", "pED", "pMin", "pELL")
+schGoal <- c(.374, .433, -.007, -.403, .081, .538, .412, -.25, -.25)
+schVars <- c("n", "Urban", "Suburban", "ToRu", "pED", "pMin", "pELL", "pELA", "pMath")
 names(schGoal) <- schVars
 
 # Initial School Betas
-schBs <- c(0, 0, 0, 0, 0, 0, 0)
+schBs <- c(0, 0, 0, 0, 0, 0, 0, 0, 0)
 
 # Set urban as focus
 #schEx <- "Urban"
@@ -119,72 +119,72 @@ schEx <- NULL
 #-----------------------
 # Gen School Params
 #-----------------------
-# # sch.resps <- 9:1/10
-# sch.resps <- c(.25, .5, .75)
-# # sch.resps <- .25
-# 
-# 
-# calcSchParams <- function(sch.resps, distp = NULL, distrr, data) {
-#   optim(par = schBs, fn = testGoal,
-#         MRR = sch.resps, vars = schVars,
-#         data = data, exclude = schEx,
-#         goal = schGoal, distp = distp) %>%
-#     c(resp = sch.resps,
-#       dresp = distrr) %>%
-#     c(list(distp = distp))
-# }
-# 
-# calcPS_RRs <- function(pars, distp = NULL, data) {
-#   calcPS(Bs = pars$par, MRR = pars$resp,
-#          vars = schVars, data = data,
-#          exclude = schEx, distp = pars$distp)
-# }
-# 
-# df.sch.sd <- df.sch[,schVars] %>% mutate_all(STAND)
-# 
-# df.sch <- merge(df.sch, df.dist[,c("DID", dist.respNames)])
-# 
-# schPars <- list()
-# 
-# for(i in 1:length(dist.resps)) {
-#   for(j in 1:1) {
-#     tryCatch(
-#       {
-#         schPars <- c(schPars, list(calcSchParams(sch.resps[j], distp = df.sch[, dist.respNames[i]], distrr = dist.resps[i], data = df.sch.sd)))
-#       },
-#       error=function(e){cat("ERROR :",conditionMessage(e), "\n",
-#                             "District RR: ", dist.resps[i], " School RR: ", sch.resps[j], "\n")})
-#   }
-# 
-# 
-# }
-# 
-# schPars <- c(schPars, schPars, schPars)
-# 
-# schPars[[4]]$resp <- schPars[[5]]$resp <- schPars[[6]]$resp <- .5
-# schPars[[7]]$resp <- schPars[[8]]$resp <- schPars[[9]]$resp <- .75
-# 
-# schVals <- lapply(schPars, getVals, vars = schVars, data = df.sch.sd, exclude = schEx, goal = schGoal) %>%
-#   Reduce(function(dtf1,dtf2) rbind(dtf1,dtf2), .)
-# schPS <- sapply(schPars, calcPS_RRs, data = df.sch.sd) %>% data.frame
-# 
-# 
-# 
-# sch.respNames <- schVals[, c("RR", "distRR")] %>% unique
-# sch.respNames <- paste("RR", sch.respNames$RR*100, sch.respNames$distRR*100, sep = "")
-# 
-# names(schPS) <- sch.respNames
-# df.sch <- cbind(df.sch, schPS)
-# 
-# schPS %>%
-#   gather(key = RR, value = PS) %>%
-#   ggplot(aes(x = PS)) +
-#   geom_histogram() +
-#   facet_wrap(~RR)
-# 
-# save(schVals, schPS, schPars, df.sch.sd, df.sch, sch.respNames, file = "Params/2018-05-15/schVals.rdata")
+# sch.resps <- 9:1/10
+sch.resps <- c(.25, .5, .75)
+# sch.resps <- .25
 
-load("Params/2018-05-15/schVals.rdata")
+
+calcSchParams <- function(sch.resps, distp = NULL, distrr, data) {
+  optim(par = schBs, fn = testGoal,
+        MRR = sch.resps, vars = schVars,
+        data = data, exclude = schEx,
+        goal = schGoal, distp = distp) %>%
+    c(resp = sch.resps,
+      dresp = distrr) %>%
+    c(list(distp = distp))
+}
+
+calcPS_RRs <- function(pars, distp = NULL, data) {
+  calcPS(Bs = pars$par, MRR = pars$resp,
+         vars = schVars, data = data,
+         exclude = schEx, distp = pars$distp)
+}
+
+df.sch.sd <- df.sch[,schVars] %>% mutate_all(STAND)
+
+df.sch <- merge(df.sch, df.dist[,c("DID", dist.respNames)])
+
+schPars <- list()
+
+for(i in 1:length(dist.resps)) {
+  for(j in 1:1) {
+    tryCatch(
+      {
+        schPars <- c(schPars, list(calcSchParams(sch.resps[j], distp = df.sch[, dist.respNames[i]], distrr = dist.resps[i], data = df.sch.sd)))
+      },
+      error=function(e){cat("ERROR :",conditionMessage(e), "\n",
+                            "District RR: ", dist.resps[i], " School RR: ", sch.resps[j], "\n")})
+  }
+
+
+}
+
+schPars <- c(schPars, schPars, schPars)
+
+schPars[[4]]$resp <- schPars[[5]]$resp <- schPars[[6]]$resp <- .5
+schPars[[7]]$resp <- schPars[[8]]$resp <- schPars[[9]]$resp <- .75
+
+schVals <- lapply(schPars, getVals, vars = schVars, data = df.sch.sd, exclude = schEx, goal = schGoal) %>%
+  Reduce(function(dtf1,dtf2) rbind(dtf1,dtf2), .)
+schPS <- sapply(schPars, calcPS_RRs, data = df.sch.sd) %>% data.frame
+
+
+
+sch.respNames <- schVals[, c("RR", "distRR")] %>% unique
+sch.respNames <- paste("RR", sch.respNames$RR*100, sch.respNames$distRR*100, sep = "")
+
+names(schPS) <- sch.respNames
+df.sch <- cbind(df.sch, schPS)
+
+schPS %>%
+  gather(key = RR, value = PS) %>%
+  ggplot(aes(x = PS)) +
+  geom_histogram() +
+  facet_wrap(~RR)
+
+save(schVals, schPS, schPars, df.sch.sd, df.sch, sch.respNames, file = "Params/2018-05-17/schVals.rdata")
+
+load("Params/2018-05-17/schVals.rdata")
 
 schVals %>%
   ggplot(aes(x = RR, y = pars)) +
@@ -244,10 +244,10 @@ schVals %>%
 # 
 # 
 # 
-# save(schVals, schPS, schPars, df.sch.sd, file = "Params/2018-05-15/schVals.rdata")
+# save(schVals, schPS, schPars, df.sch.sd, file = "Params/2018-05-17/schVals.rdata")
 
-load("Params/2018-05-15/schVals.rdata")
-load("Params/2018-05-15/distPars.rdata")
+load("Params/2018-05-17/schVals.rdata")
+load("Params/2018-05-17/distPars.rdata")
 #-----------------------
 # Examin Propensity Scores
 #-----------------------
@@ -271,8 +271,8 @@ df.dist %>%
 load("data/base data.rdata")
 
 load("Params/Clusters.rdata")
-load("Params/2018-05-15/schVals.rdata")
-load("Params/2018-05-15/distPars.rdata")
+load("Params/2018-05-17/schVals.rdata")
+load("Params/2018-05-17/distPars.rdata")
 
 df <- df %>%
   left_join(df.clusts) %>%
@@ -362,9 +362,34 @@ df %>%
 # Export Data
 #-----------------------
 
-# save.image(file = "Params/2018-05-15/image.rdata")
-load("Params/2018-05-15/image.rdata")
+save.image(file = "Params/2018-05-17/image.rdata")
+load("Params/2018-05-17/image.rdata")
 
+distVals %>%
+  select(Var, pars, RR) %>%
+  mutate(RR = paste("Dist.RR.", round(RR*100,0), sep = ""),
+         pars = round(pars,2)) %>%
+  spread(key = RR, value = pars)
+
+distVals %>%
+  select(Var, pars, RR) %>%
+  mutate(pars = round(pars,2)) %>%
+  rename(Dist.RR = RR) %>%
+  mutate(Dist.RR = ifelse(Var == "Intercept", Dist.RR, "ALL")) %>%
+  unique() %>%
+  arrange(Var) %>%
+  select(Var, Dist.RR, pars) %>%
+  write.csv("Params/District Parameters.csv")
+
+schVals %>%
+  select(Var, pars, RR, distRR) %>%
+  mutate(distRR = paste("Dist.RR.", round(distRR*100,0), sep = ""),
+         pars = round(pars,2)) %>%
+  spread(key = distRR, value = pars) %>%
+  mutate(RR = ifelse(Var == "Intercept", RR, "ALL")) %>%
+  rename(School.RR = RR) %>%
+  unique() %>%
+  write.csv("Params/School Parameters.csv")
 
 
 head(df.dist)

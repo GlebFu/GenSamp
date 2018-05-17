@@ -13,8 +13,8 @@ library(tidyverse)
 
 rm(list = ls())
 
-runtimeFile <- "Data/2018-5-16/runtime r10.rdata"
-resultsFile <- "Data/2018-5-16/results r10.rdata"
+runtimeFile <- "Data/2018-5-17/runtime r1000.rdata"
+resultsFile <- "Data/2018-5-17/results r1000.rdata"
 
 load("data/base data.rdata")
 
@@ -27,7 +27,7 @@ load("Data/RGM Vars.Rdata")
 load(runtimeFile)
 load(resultsFile)
 
-savePlot <- F
+savePlot <- T
 ```
 
 ```{r}
@@ -75,6 +75,15 @@ df_Bindex$dist.RR.f <- ordered(df_Bindex$dist.RR)
 
 levels(df_Bindex$dist.RR.f) <- paste(c("\n", "District Rate\n", "\n"), levels(df_Bindex$dist.RR.f))
 
+df_Bindex %>% 
+  select(sample:Bs) %>% 
+  filter(Bs < .1) %>%
+  as.tibble() %>%
+  group_by(sample, dist.RR, sch.RR) %>%
+  summarise(n = n())
+```
+
+```{r}
 df_Bindex %>%
   ggplot(aes(x = sample, y = Bs, fill = sample)) +
   stat_summary(fun.data = boxErrors, geom = "boxplot", position = position_dodge(width=1)) +
@@ -89,14 +98,14 @@ df_Bindex %>%
         axis.text.x = element_text(angle = 45, hjust = 1)) +
   labs(x = "Sampling Method", y = "B-Index")
   
-if(savePlot) ggsave("Figs/B-Index.jpg", dpi = 1000, width = 11, height = 8.5)
-```
 
+```
 
 ```{r}
 df_Bindex %>%
   ggplot(aes(x = sample, y = Bs, fill = sample)) +
-  stat_summary(fun.data = boxErrors, geom = "boxplot", position = position_dodge(width=1)) +
+  # stat_summary(fun.data = boxErrors, geom = "boxplot", position = position_dodge(width=1)) +
+  geom_boxplot() +
   theme_apa(box = T) +
   scale_fill_brewer(type = "seq", palette = 4, guide=FALSE) +
   scale_color_brewer(type = "qual", palette = 5)  +
@@ -106,7 +115,8 @@ df_Bindex %>%
         legend.title = element_text(size=15),
         axis.text.x = element_text(angle = 45, hjust = 1)) +
   labs(x = "Sampling Method", y = "B-Index")
-  
+
+if(savePlot) ggsave("Figs/B-Index.jpg", dpi = 1000, width = 11, height = 8.5)
 ```
 
 
