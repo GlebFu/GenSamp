@@ -24,6 +24,54 @@ load("Data/RGM Vars.Rdata")
 
 sampleBinomial <- function(ps) rbinom(length(ps), 1, prob = ps)
 
+
+Bindex <- function(dat1B, dat2B) {
+  ##Baklizi and Eidous (2006) estimator
+  # bandwidth
+  h = function(x){
+    n = length(x)
+    return((4*sqrt(var(x))^5/(3*n))^(1/5)) 
+  }
+  
+  # kernel estimators of the density and the distribution
+  kg = function(x,data){
+    hb = h(data) #bin width
+    k = r = length(x)
+    for(i in 1:k) r[i] = mean(dnorm((x[i]-data)/hb))/hb
+    return(r )
+  } 
+  
+  return( as.numeric(integrate(function(x) sqrt(kg(x,dat1B)*kg(x,dat2B)),-Inf,Inf)$value))
+  
+}
+
+getBindex <- function(sample, pop.PS) {
+  
+  forBindex <- sample %>%
+    ungroup() %>%
+    filter(Eij == 1) %>%
+    select(DSID, sample, dist.RR, sch.RR) %>%
+    left_join(pop.PS)
+  
+  Bindicies <- data.frame(B = NA, sample = NA, dist.RR = NA, sch.RR = NA)
+  
+  for(i in unique(sample$sample)) {
+    for(j in unique(sample$dist.RR)) {
+      for(k in unique(sample$sch.RR)) {
+        d1 <- filter(forBindex, sample == i, dist.RR == j, sch.RR == k)
+        d2 <- filter(pop.PS, dist.RR == j, sch.RR == k)
+        
+        B <- Bindex(d1$sch.PS, d2$sch.PS)
+        
+        Bindicies <- rbind(Bindicies, data.frame(B = B, sample = i, dist.RR = j, sch.RR = k))
+      }
+    }
+  }
+  
+  return(na.omit(Bindicies))
+}
+  
+
 generateE <- function(data) {
   data %>%
     group_by(dist.RR, sch.RR, DID) %>%
@@ -215,7 +263,7 @@ calcSchSMDs <- function(sample) {
 #   facet_grid(Group ~ Variable) +
 #   theme_bw()
 
-testRun <- function(data) {
+testRun <- function(data, pop.PS) {
   
   approached <- generateE(data)
   sample <- createSample(approached)
@@ -234,9 +282,13 @@ testRun <- function(data) {
   sch_smds <- calcSchSMDs(sample) %>% 
     select(sample:Group, goal_SMD:miss) %>% 
     gather(key = variable, value = value, -sample, -dist.RR, -sch.RR, -Variable, -Group)
-  
-  return(list(responses = responses, dist_smds = dist_smds, sch_smds = sch_smds))
 
+  # Bindicies <- getBindex(sample, pop.PS)
+    
+  # return(list(responses = responses, dist_smds = dist_smds, sch_smds = sch_smds, Bindicies = Bindicies))
+  # return(list(responses = responses, dist_smds = dist_smds, sch_smds = sch_smds))
+  
+  return(sample)
 }
 
 

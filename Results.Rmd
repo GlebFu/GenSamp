@@ -13,8 +13,8 @@ library(tidyverse)
 
 rm(list = ls())
 
-runtimeFile <- "Data/2018-5-15/runtime r1000.rdata"
-resultsFile <- "Data/2018-5-15/results r1000.rdata"
+runtimeFile <- "Data/2018-5-15/runtime r-1000.rdata"
+resultsFile <- "Data/2018-5-15/results r-1000.rdata"
 
 load("data/base data.rdata")
 
@@ -58,6 +58,130 @@ df.sch %>%
 
 ```
 
+
+
+## Standardized mean differences
+
+```{r}
+
+# Visualize District SMDs
+dSMDplot <- df_dist_smd %>%
+  group_by(sample, dist.RR, sch.RR, Variable, Group, variable) %>%
+  summarise(value = mean(abs(value), na.rm = T)) %>% # NAs due to 0 rejections by CS
+  spread(key = variable, value = value) %>%
+  ungroup() %>%
+  mutate(dist.RR.f = factor(dist.RR),
+         sch.RR.f = factor(sch.RR))
+
+levels(dSMDplot$dist.RR.f) <- paste("District: ", levels(dSMDplot$dist.RR.f), "%", sep = "")
+levels(dSMDplot$sch.RR.f) <- paste("School: ", levels(dSMDplot$sch.RR.f), "%", sep = "")
+
+dSMDplot %>%
+  filter(Group == "contributed") %>%
+  ggplot(aes(x = dist.RR, y = sim_SMD, group = sample, color = sample)) +
+  geom_point() +
+  geom_line() +
+  geom_hline(yintercept = 0) +
+  geom_hline(yintercept = .25, linetype = "dashed") +
+  facet_grid(Variable ~ sch.RR, scale = "free_y" ) +
+  theme_apa(box = T)
+
+```
+
+```{r}
+dSMDplot2 <- df_dist_smd %>%
+  group_by(sample, dist.RR, Variable, Group, variable) %>%
+  summarise(value = mean(abs(value), na.rm = T)) %>% # NAs due to 0 rejections by CS
+  spread(key = variable, value = value) %>%
+  ungroup() %>%
+  mutate(dist.RR.f = factor(dist.RR))
+
+dSMDplot2 %>%
+  filter(Group == "contributed") %>%
+  ggplot(aes(x = dist.RR, y = sim_SMD, group = sample, color = sample)) +
+  geom_point() +
+  geom_line() +
+  geom_hline(yintercept = 0) +
+  geom_hline(yintercept = .25, linetype = "dashed") +
+  facet_grid( ~ Variable, scale = "free_y") +
+  theme_apa(box = T)
+
+
+```
+
+```{r}
+dSMDplot %>%
+  filter(Group == "sampled") %>%
+  ggplot(aes(x = sample, y = sim_SMD, group = sample, fill = sample)) +
+  geom_boxplot() +
+  geom_line() +
+  geom_hline(yintercept = 0) +
+  geom_hline(yintercept = .25, linetype = "dashed") +
+  facet_grid(dist.RR.f ~ sch.RR.f, scales = "free_y") +
+  theme_apa(box = T) +
+  scale_fill_brewer(type = "qual", palette = 4, guide=FALSE) +
+  scale_color_brewer(type = "qual", palette = 5)  +
+  theme(legend.position = "none",
+        panel.spacing = unit(2, "lines"),
+        text = element_text(size=20),
+        legend.title = element_text(size=15))
+
+ggsave("Figs/Dist SMDs 2.jpg", dpi = 1000, width = 11, height = 8.5)
+
+
+```
+
+
+```{r}
+sSMDplot <- df_sch_smd %>%
+  group_by(sample, dist.RR, sch.RR, Variable, Group, variable) %>%
+  summarise(value = mean(abs(value), na.rm = F)) %>% 
+  spread(key = variable, value = value) %>%
+  ungroup() %>%
+  mutate(dist.RR = factor(dist.RR),
+         sch.RR = factor(sch.RR))
+
+levels(sSMDplot$dist.RR) <- paste("District: ", levels(sSMDplot$dist.RR), "%", sep = "")
+levels(sSMDplot$sch.RR) <- paste("School: ", levels(sSMDplot$sch.RR), "%", sep = "")
+
+sSMDplot %>%
+  filter(Group == "sampled") %>%
+  ggplot(aes(x = dist.RR, y = sim_SMD, group = sample, color = sample)) +
+  geom_point() +
+  geom_line() +
+  geom_hline(yintercept = 0) +
+  geom_hline(yintercept = .25, linetype = "dashed") +
+  facet_grid(Variable ~ sch.RR, scales = "free_y") +
+  theme_apa(box = T)
+
+
+```
+
+
+```{r}
+sSMDplot %>%
+  filter(Group == "sampled") %>%
+  ggplot(aes(x = sample, y = sim_SMD, group = sample, fill = sample)) +
+  geom_boxplot() +
+  geom_line() +
+  geom_hline(yintercept = 0) +
+  geom_hline(yintercept = .25, linetype = "dashed") +
+  facet_grid(dist.RR ~ sch.RR, scales = "free_y") +
+  theme_apa(box = T) +
+  scale_fill_brewer(type = "seq", palette = 4, guide=FALSE) +
+  scale_color_brewer(type = "qual", palette = 5)  +
+  theme(legend.position = "none",
+        panel.spacing = unit(2, "lines"),
+        text = element_text(size=20),
+        legend.title = element_text(size=15),
+        axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(x = "Sampling Method", y = "Absolute SMD")
+
+ggsave("Figs/Sch SMDs 2.jpg", dpi = 1000, width = 11, height = 8.5)
+```
+
+## Sampling Difficulty
+
 ```{r}
 samplot <- df_responses %>%
   filter(is.na(cluster)) %>%
@@ -100,107 +224,94 @@ samplot %>%
 ```{r}
 df_responses %>%
   filter(is.na(cluster), str_detect(variable, "dist_contacted")) %>%
-  ggplot(aes(x = dist.RR, y = value, color = sample)) +
+  ggplot(aes(x = sample, y = value, color = sample)) +
   stat_summary(fun.data = boxErrors, geom = "boxplot", position = position_dodge(width=1)) +
-  facet_grid(sample ~ sch.RR, scales = "free_y") +
+  facet_grid(dist.RR ~ sch.RR, scales = "free_y") +
   theme_apa(box = T)
 
 ```
 
-
 ```{r}
-
-# Visualize District SMDs
-dSMDplot <- df_dist_smd %>%
-  group_by(sample, dist.RR, sch.RR, Variable, Group, variable) %>%
-  summarise(value = mean(abs(value), na.rm = T)) %>% # NAs due to 0 rejections by CS
-  spread(key = variable, value = value) %>%
-  ungroup() %>%
-  mutate(dist.RR = factor(dist.RR),
-         sch.RR = factor(sch.RR))
-
-levels(dSMDplot$dist.RR) <- paste("Participation Rate:\n District ", levels(dSMDplot$dist.RR), "%", sep = "")
-levels(dSMDplot$sch.RR) <- paste("Participation Rate:\n School ", levels(dSMDplot$sch.RR), "%", sep = "")
-
-# dSMDplot %>%
-#   filter(sch.RR == 50) %>%
-#   ggplot(aes(x = dist.RR, y = sim_SMD, group = sample, color = sample)) +
-#   geom_point() +
-#   geom_line() +
-#   geom_hline(yintercept = 0) +
-#   geom_hline(yintercept = .25, linetype = "dashed") +
-#   facet_grid(Group ~ Variable) +
-#   theme_apa(box = T)
-
-```
-
-```{r}
-dSMDplot %>%
-  filter(Group == "sampled") %>%
-  ggplot(aes(x = sample, y = sim_SMD, group = sample, fill = sample)) +
-  geom_boxplot() +
-  geom_line() +
-  geom_hline(yintercept = 0) +
-  geom_hline(yintercept = .25, linetype = "dashed") +
+df_responses %>%
+  filter(is.na(cluster), str_detect(variable, "sch_contacted")) %>%
+  ggplot(aes(x = sample, y = value, fill = sample)) +
+  stat_summary(fun.data = boxErrors, geom = "boxplot", position = position_dodge(width=1)) +
   facet_grid(dist.RR ~ sch.RR, scales = "free_y") +
   theme_apa(box = T) +
-  scale_fill_brewer(type = "qual", palette = 4, guide=FALSE) +
-  scale_color_brewer(type = "qual", palette = 5)  +
-  theme(legend.position = "none",
-        panel.spacing = unit(2, "lines"),
-        text = element_text(size=20),
-        legend.title = element_text(size=15))
-
-ggsave("Figs/Dist SMDs.jpg", dpi = 1000, width = 11, height = 8.5)
-
-
-```
-
-
-```{r}
-sSMDplot <- df_sch_smd %>%
-  group_by(sample, dist.RR, sch.RR, Variable, Group, variable) %>%
-  summarise(value = mean(abs(value), na.rm = F)) %>% 
-  spread(key = variable, value = value) %>%
-  ungroup() %>%
-  mutate(dist.RR = factor(dist.RR),
-         sch.RR = factor(sch.RR))
-
-levels(sSMDplot$dist.RR) <- paste("Participation Rate:\nDistrict ", levels(sSMDplot$dist.RR), "%", sep = "")
-levels(sSMDplot$sch.RR) <- paste("Participation Rate:\nSchool ", levels(sSMDplot$sch.RR), "%", sep = "")
-
-# sSMDplot %>%
-#   filter(Group == "sampled") %>%
-#   ggplot(aes(x = dist.RR, y = sim_SMD, group = sample, color = sample)) +
-#   geom_point() +
-#   geom_line() +
-#   geom_hline(yintercept = 0) +
-#   geom_hline(yintercept = .25, linetype = "dashed") +
-#   facet_grid(Variable ~ sch.RR, scales = "free_y") +
-#   theme_apa(box = T)
-
-
-```
-
-
-```{r}
-sSMDplot %>%
-  filter(Group == "sampled") %>%
-  ggplot(aes(x = sample, y = sim_SMD, group = sample, fill = sample)) +
-  geom_boxplot() +
-  geom_line() +
-  geom_hline(yintercept = 0) +
-  geom_hline(yintercept = .25, linetype = "dashed") +
-  facet_grid(dist.RR ~ sch.RR, scales = "free_y") +
-  theme_apa(box = T) +
-  scale_fill_brewer(type = "qual", palette = 4, guide=FALSE) +
+  scale_fill_brewer(type = "seq", palette = 4, guide=FALSE) +
   scale_color_brewer(type = "qual", palette = 5)  +
   theme(legend.position = "none",
         panel.spacing = unit(2, "lines"),
         text = element_text(size=20),
         legend.title = element_text(size=15),
         axis.text.x = element_text(angle = 45, hjust = 1)) +
-  labs(x = "Sampling Method", y = "Absolute SMD")
+  labs(x = "Sampling Method", y = "Schools Contacted")
 
-ggsave("Figs/Sch SMDs.jpg", dpi = 1000, width = 11, height = 8.5)
+```
+
+```{r}
+samplot2 <- samplot %>%
+  gather(key = measure, value = value, -sample, -sch.RR, -dist.RR) %>%
+  mutate(level = str_split(measure, "_", simplify = T)[,1],
+         measure =  str_split(measure, "_", simplify = T)[,2]) %>%
+  filter(measure == "contacted") %>%
+  mutate(sch.RR.f = paste("School Rate \n", sch.RR, "%", sep = ""),
+         level = ifelse(level == "sch", "Schools", "Districts"))
+
+samplot2 %>%
+  ggplot(aes(x = dist.RR, y = value, group = sample, color = sample)) +
+  geom_point() +
+  geom_line() +
+  facet_grid(level ~ sch.RR.f, scales = "free_y") +
+  expand_limits(y=0) +
+  theme_apa(box = T) +
+  scale_fill_brewer(type = "seq", palette = 4) +
+  scale_color_brewer(type = "qual", palette = 3)  +
+  theme(legend.position = "bottom",
+        panel.spacing = unit(2, "lines"),
+        text = element_text(size=20),
+        legend.title = element_text(size=15),
+        axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(x = "District Rate", y = "Units Contacted")
+
+ggsave("Figs/Units Contacted.jpg", dpi = 1000, width = 11, height = 8.5)
+
+```
+
+```{r}
+df.rr <- df_responses %>%
+  filter(str_detect(variable, "sch_RR"), is.na(cluster)) %>%
+  group_by(sample, sch.RR) %>%
+  summarise(value = mean(value)) %>%
+  rename(RR = sch.RR) %>%
+  mutate(Unit = "School")
+
+df.rr <- df_responses %>%
+  filter(str_detect(variable, "dist_RR"), is.na(cluster)) %>%
+  group_by(sample, dist.RR) %>%
+  summarise(value = mean(value)) %>%
+  rename(RR = dist.RR) %>%
+  mutate(Unit = "District") %>%
+  rbind(df.rr) %>%
+  mutate(value = value * 100)
+
+df.rr %>%
+  ggplot(aes(x = RR, y = value, group = sample, color = sample)) +
+  geom_point() +
+  geom_line() +
+  facet_grid(~ Unit) +
+  expand_limits(y = 0) +
+  theme_apa(box = T) +
+  scale_fill_brewer(type = "seq", palette = 4) +
+  scale_color_brewer(type = "qual", palette = 3)  +
+  theme(legend.position = "bottom",
+        panel.spacing = unit(2, "lines"),
+        text = element_text(size=20),
+        legend.title = element_text(size=15),
+        axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(x = "Generating Repsonse Rate", y = "Actual Response Rate") +
+  geom_abline(slope = 25, intercept = 1, linetype = "dashed")
+
+ggsave("Figs/response rates 2.jpg", dpi = 1000, width = 11, height = 8.5)
+
 ```

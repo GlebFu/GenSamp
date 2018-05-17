@@ -7,30 +7,48 @@ rm(list = ls())
 
 source("SimSource.R")
 
-reps <- 1000
+vars <- c("n", "urbanicity", "pELL", "pED", "pELA", "pMath", "pMin", "MEDINC")
+
+reps <- 10
 
 
 seed <- runif(1,0,1)*10^8
 set.seed(42987117)
 
-# test <- testRun(df.select %>% filter(sch.RR %in% c(25)))
-# 
-# 
 # undebug(testRun)
-# undebug(calcResponseRates)
+# undebug(getBindex)
 
-runtimeFile <- "Data/2018-5-15/runtime r1000.rdata"
-resultsFile <- "Data/2018-5-15/results r1000.rdata"
 
-runtime <- system.time(results <- replicate(reps, testRun(df.select)))
+test <- testRun(df.select %>% filter(sch.RR %in% c(25)), pop.PS = sch.PS)
+
+head(test)
+
+df.test <- df %>% ungroup() %>% select(DSID, vars)
+
+s.test <- test %>%
+  group_by(sample, dist.RR, sch.RR) %>%
+  select(DSID, Eij, vars) %>%
+  nest() %>%
+  mutate(data = map(data, full_join, df.test))
+
+s.test %>%
+  unnest()
+
+
+runtimeFile <- "Data/2018-5-16/runtime r10.rdata"
+resultsFile <- "Data/2018-5-16/results r10.rdata"
+
+
+runtime <- system.time(results <- replicate(reps, testRun(df.select,  pop.PS = sch.PS)))
 save(runtime, file = runtimeFile)
 
 
 df_responses <- bind_rows(results[1,]) %>% data.frame
 df_dist_smd <- bind_rows(results[2,]) %>% data.frame
 df_sch_smd <- bind_rows(results[3,]) %>% data.frame
+df_Bindex <- bind_rows(results[4,]) %>% data.frame
 
-save(df_responses, df_dist_smd, df_sch_smd, file = resultsFile)
+save(df_responses, df_dist_smd, df_sch_smd, df_Bindex, file = resultsFile)
 
 load(runtimeFile)
 load(resultsFile)
