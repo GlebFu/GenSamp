@@ -25,7 +25,10 @@ load("Data/RGM Vars.Rdata")
 sampleBinomial <- function(ps) rbinom(length(ps), 1, prob = ps)
 
 
-Bindex <- function(dat1B, dat2B) {
+Bindex <- function(PS, Eij) {
+  
+  dat1B <- PS[Eij == 1]
+  dat2B <- PS[Eij == 0]
   ##Baklizi and Eidous (2006) estimator
   # bandwidth
   h = function(x){
@@ -263,7 +266,7 @@ calcSchSMDs <- function(sample) {
 #   facet_grid(Group ~ Variable) +
 #   theme_bw()
 
-testRun <- function(data, pop.PS) {
+testRun <- function(data, pop.PS, frm, vars) {
   
   approached <- generateE(data)
   sample <- createSample(approached)
@@ -283,12 +286,25 @@ testRun <- function(data, pop.PS) {
     select(sample:Group, goal_SMD:miss) %>% 
     gather(key = variable, value = value, -sample, -dist.RR, -sch.RR, -Variable, -Group)
 
-  # Bindicies <- getBindex(sample, pop.PS)
+  Bindicies <- sample %>%
+    select(sample, DSID, Eij, vars, dist.RR, sch.RR) %>%
+    group_by(sample, dist.RR, sch.RR) %>%
+    nest() %>%
+    mutate(data = map(data, full_join, pop.PS)) %>%
+    unnest() %>%
+    mutate(Eij = ifelse(is.na(Eij), 0, Eij)) %>% 
+    group_by(sample, dist.RR, sch.RR) %>%
+    nest() %>% 
+    mutate(PS_sample = map(data, glm, formula = frm, family = quasibinomial()),
+           PS_sample = map(PS_sample, fitted)) %>%
+    unnest() %>%
+    group_by(sample, dist.RR, sch.RR) %>%
+    summarise(Bs = Bindex(PS_sample, Eij))
     
-  # return(list(responses = responses, dist_smds = dist_smds, sch_smds = sch_smds, Bindicies = Bindicies))
+  return(list(responses = responses, dist_smds = dist_smds, sch_smds = sch_smds, Bindicies = Bindicies))
   # return(list(responses = responses, dist_smds = dist_smds, sch_smds = sch_smds))
   
-  return(sample)
+  # return(sample)
 }
 
 

@@ -13,8 +13,8 @@ library(tidyverse)
 
 rm(list = ls())
 
-runtimeFile <- "Data/2018-5-15/runtime r-1000.rdata"
-resultsFile <- "Data/2018-5-15/results r-1000.rdata"
+runtimeFile <- "Data/2018-5-16/runtime r10.rdata"
+resultsFile <- "Data/2018-5-16/results r10.rdata"
 
 load("data/base data.rdata")
 
@@ -26,6 +26,8 @@ load("Data/RGM Vars.Rdata")
 
 load(runtimeFile)
 load(resultsFile)
+
+savePlot <- F
 ```
 
 ```{r}
@@ -58,7 +60,34 @@ df.sch %>%
 
 ```
 
+## B Index
 
+```{R}
+
+df_Bindex$sch.RR.f <- ordered(df_Bindex$sch.RR)
+
+levels(df_Bindex$sch.RR.f) <- paste(c("\n", "School Rate\n", "\n"), levels(df_Bindex$sch.RR.f))
+
+df_Bindex$dist.RR.f <- ordered(df_Bindex$dist.RR)
+
+levels(df_Bindex$dist.RR.f) <- paste(c("\n", "District Rate\n", "\n"), levels(df_Bindex$dist.RR.f))
+
+df_Bindex %>%
+  ggplot(aes(x = sample, y = Bs, fill = sample)) +
+  stat_summary(fun.data = boxErrors, geom = "boxplot", position = position_dodge(width=1)) +
+  facet_grid(dist.RR.f ~ sch.RR.f, scales = "free_y") +
+  theme_apa(box = T) +
+  scale_fill_brewer(type = "seq", palette = 4, guide=FALSE) +
+  scale_color_brewer(type = "qual", palette = 5)  +
+  theme(legend.position = "none",
+        panel.spacing = unit(2, "lines"),
+        text = element_text(size=20),
+        legend.title = element_text(size=15),
+        axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(x = "Sampling Method", y = "B-Index")
+  
+if(savePlot) ggsave("Figs/B-Index.jpg", dpi = 1000, width = 11, height = 8.5)
+```
 
 ## Standardized mean differences
 
@@ -126,7 +155,7 @@ dSMDplot %>%
         text = element_text(size=20),
         legend.title = element_text(size=15))
 
-ggsave("Figs/Dist SMDs 2.jpg", dpi = 1000, width = 11, height = 8.5)
+if(savePlot) ggsave("Figs/Dist SMDs.jpg", dpi = 1000, width = 11, height = 8.5)
 
 
 ```
@@ -177,7 +206,7 @@ sSMDplot %>%
         axis.text.x = element_text(angle = 45, hjust = 1)) +
   labs(x = "Sampling Method", y = "Absolute SMD")
 
-ggsave("Figs/Sch SMDs 2.jpg", dpi = 1000, width = 11, height = 8.5)
+if(savePlot)  ggsave("Figs/Sch SMDs.jpg", dpi = 1000, width = 11, height = 8.5)
 ```
 
 ## Sampling Difficulty
@@ -274,7 +303,7 @@ samplot2 %>%
         axis.text.x = element_text(angle = 45, hjust = 1)) +
   labs(x = "District Rate", y = "Units Contacted")
 
-ggsave("Figs/Units Contacted.jpg", dpi = 1000, width = 11, height = 8.5)
+if(savePlot)  ggsave("Figs/Units Contacted.jpg", dpi = 1000, width = 11, height = 8.5)
 
 ```
 
@@ -312,6 +341,6 @@ df.rr %>%
   labs(x = "Generating Repsonse Rate", y = "Actual Response Rate") +
   geom_abline(slope = 25, intercept = 1, linetype = "dashed")
 
-ggsave("Figs/response rates 2.jpg", dpi = 1000, width = 11, height = 8.5)
+if(savePlot)  ggsave("Figs/response rates.jpg", dpi = 1000, width = 11, height = 8.5)
 
 ```

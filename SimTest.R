@@ -1,7 +1,4 @@
-library(dplyr)
-library(tidyr)
-library(ggplot2)
-library(stringr)
+library(tidyverse)
 
 rm(list = ls())
 
@@ -9,37 +6,28 @@ source("SimSource.R")
 
 vars <- c("n", "urbanicity", "pELL", "pED", "pELA", "pMath", "pMin", "MEDINC")
 
+frm <- as.formula(paste("Eij ~ ", paste(vars, collapse = " + ")))
+
+df.Bindex <- df %>% ungroup() %>% select(DSID, vars)
+
 reps <- 10
 
 
 seed <- runif(1,0,1)*10^8
 set.seed(42987117)
 
-# undebug(testRun)
-# undebug(getBindex)
-
-
-test <- testRun(df.select %>% filter(sch.RR %in% c(25)), pop.PS = sch.PS)
-
-head(test)
-
-df.test <- df %>% ungroup() %>% select(DSID, vars)
-
-s.test <- test %>%
-  group_by(sample, dist.RR, sch.RR) %>%
-  select(DSID, Eij, vars) %>%
-  nest() %>%
-  mutate(data = map(data, full_join, df.test))
-
-s.test %>%
-  unnest()
+# # undebug(testRun)
+# # undebug(getBindex)
+# 
+# 
+# test <- testRun(df.select %>% filter(sch.RR %in% c(25)), pop.PS = df %>% ungroup() %>% select(DSID, vars))
 
 
 runtimeFile <- "Data/2018-5-16/runtime r10.rdata"
 resultsFile <- "Data/2018-5-16/results r10.rdata"
 
 
-runtime <- system.time(results <- replicate(reps, testRun(df.select,  pop.PS = sch.PS)))
+runtime <- system.time(results <- replicate(reps, testRun(df.select,  pop.PS = df.Bindex, frm = frm, vars = vars)))
 save(runtime, file = runtimeFile)
 
 
