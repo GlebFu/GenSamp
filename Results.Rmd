@@ -62,13 +62,16 @@ df.sch %>%
 
 ## B Index
 
-```{R}
+
+```{r}
+
 
 df_Bindex$sch.RR.f <- ordered(df_Bindex$sch.RR)
 
 levels(df_Bindex$sch.RR.f) <- paste(c("\n", "School Rate\n", "\n"), levels(df_Bindex$sch.RR.f))
 
 df_Bindex$dist.RR.f <- ordered(df_Bindex$dist.RR)
+
 
 levels(df_Bindex$dist.RR.f) <- paste(c("\n", "District Rate\n", "\n"), levels(df_Bindex$dist.RR.f))
 
@@ -88,6 +91,24 @@ df_Bindex %>%
   
 if(savePlot) ggsave("Figs/B-Index.jpg", dpi = 1000, width = 11, height = 8.5)
 ```
+
+
+```{r}
+df_Bindex %>%
+  ggplot(aes(x = sample, y = Bs, fill = sample)) +
+  stat_summary(fun.data = boxErrors, geom = "boxplot", position = position_dodge(width=1)) +
+  theme_apa(box = T) +
+  scale_fill_brewer(type = "seq", palette = 4, guide=FALSE) +
+  scale_color_brewer(type = "qual", palette = 5)  +
+  theme(legend.position = "none",
+        panel.spacing = unit(2, "lines"),
+        text = element_text(size=20),
+        legend.title = element_text(size=15),
+        axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(x = "Sampling Method", y = "B-Index")
+  
+```
+
 
 ## Standardized mean differences
 

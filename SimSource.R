@@ -1,7 +1,4 @@
-library(dplyr)
-library(tidyr)
-library(ggplot2)
-library(stringr)
+library(tidyverse)
 
 rm(list = ls())
 
