@@ -294,6 +294,8 @@ cls_f <- bind_cols(lapply(clusters_f, function(x) data.frame(x$cluster)))
 ratio_data <- rbind(data.frame(k = 1:K, subs = "F", vrat = unlist(lapply(clusters_f, function(x) x$betweenss / x$totss))),
                     data.frame(k = 1:K, subs = "OV", vrat = unlist(lapply(clusters_ov, function(x) x$betweenss / x$totss))))
 
+levels(ratio_data$subs) <- c("Full", "Omitted Variable")
+
 ratio_data %>%
   group_by(subs) %>%
   mutate(min80 = sum(vrat < .8) + .5) %>%
@@ -304,10 +306,18 @@ ratio_data %>%
        x = "Number of Strata (k)") +
   geom_line() +
   geom_vline(aes(xintercept = min80), linetype = "dashed") +
-  theme_apa() +
+  theme_apa(box = F) +
   scale_x_discrete(limits = c(1:K)) +
-  scale_y_continuous(breaks = seq(0, 1, .1)) +
-  facet_grid(subs ~ .)
+  scale_y_continuous(breaks = seq(0, 1, .1)) + 
+  # facet_grid(subs ~ ., , scales = "free") + 
+  facet_wrap( ~ subs, , scales = "free", ncol = 1) +
+  theme(legend.position = "none",
+        panel.spacing = unit(2, "lines"),
+        text = element_text(size=20),
+        legend.title = element_text(size=15))
+
+ggsave("Figs/Elbow.jpg", dpi = 1000, width = 10, height = 8.5)
+
 ```
 
 ```{r k-size-full, fig.cap="Sampling requirements for each cluster"}

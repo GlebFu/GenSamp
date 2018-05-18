@@ -86,7 +86,8 @@ df_Bindex %>%
 ```{r}
 df_Bindex %>%
   ggplot(aes(x = sample, y = Bs, fill = sample)) +
-  stat_summary(fun.data = boxErrors, geom = "boxplot", position = position_dodge(width=1)) +
+  # stat_summary(fun.data = boxErrors, geom = "boxplot", position = position_dodge(width=1)) +
+  geom_boxplot() +
   facet_grid(dist.RR.f ~ sch.RR.f, scales = "free_y") +
   theme_apa(box = T) +
   scale_fill_brewer(type = "seq", palette = 4, guide=FALSE) +
@@ -112,11 +113,11 @@ df_Bindex %>%
   theme(legend.position = "none",
         panel.spacing = unit(2, "lines"),
         text = element_text(size=20),
-        legend.title = element_text(size=15),
-        axis.text.x = element_text(angle = 45, hjust = 1)) +
+        legend.title = element_text(size=15)) +
   labs(x = "Sampling Method", y = "B-Index")
 
 if(savePlot) ggsave("Figs/B-Index.jpg", dpi = 1000, width = 11, height = 8.5)
+if(savePlot) ggsave("Figs/B-Index.jpg", dpi = 1000, width = 10, height = 4)
 ```
 
 
@@ -187,6 +188,7 @@ dSMDplot %>%
         legend.title = element_text(size=15))
 
 if(savePlot) ggsave("Figs/Dist SMDs.jpg", dpi = 1000, width = 11, height = 8.5)
+# if(savePlot) ggsave("Figs/Dist SMDs.jpg", dpi = 1000, width = 10, height = 4)
 
 
 ```
@@ -226,18 +228,18 @@ sSMDplot %>%
   geom_line() +
   geom_hline(yintercept = 0) +
   geom_hline(yintercept = .25, linetype = "dashed") +
-  facet_grid(dist.RR ~ sch.RR, scales = "free_y") +
+  # facet_grid(dist.RR ~ sch.RR, scales = "free_y") +
   theme_apa(box = T) +
   scale_fill_brewer(type = "seq", palette = 4, guide=FALSE) +
   scale_color_brewer(type = "qual", palette = 5)  +
   theme(legend.position = "none",
         panel.spacing = unit(2, "lines"),
         text = element_text(size=20),
-        legend.title = element_text(size=15),
-        axis.text.x = element_text(angle = 45, hjust = 1)) +
+        legend.title = element_text(size=15)) +
   labs(x = "Sampling Method", y = "Absolute SMD")
 
 if(savePlot)  ggsave("Figs/Sch SMDs.jpg", dpi = 1000, width = 11, height = 8.5)
+if(savePlot)  ggsave("Figs/Sch SMDs.jpg", dpi = 1000, width = 10, height = 4)
 ```
 
 ## Sampling Difficulty
