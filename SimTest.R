@@ -2,18 +2,19 @@ library(tidyverse)
 
 rm(list = ls())
 
-# source("SimSource.R")
-# 
+source("SimSource.R")
+
 # vars <- c("n", "urbanicity", "pELL", "pED", "pELA", "pMath", "pMin", "MEDINC")
 # 
 # frm <- as.formula(paste("Eij ~ ", paste(vars, collapse = " + ")))
 # 
 # df.Bindex <- df %>% ungroup() %>% select(DSID, vars)
 
-reps <- 1000
+# reps <- 1000
 
 runSim <- function(reps) {
   source("SimSource.R")
+  # debug(testRun)
   
   vars <- c("n", "urbanicity", "pELL", "pED", "pELA", "pMath", "pMin", "MEDINC")
   
@@ -21,28 +22,21 @@ runSim <- function(reps) {
   
   df.Bindex <- df %>% ungroup() %>% select(DSID, vars)
   
+  # replicate(reps, testRun(df.select %>% filter(sch.RR %in% c(50)),  pop.PS = df.Bindex, frm = frm, vars = vars))
   replicate(reps, testRun(df.select,  pop.PS = df.Bindex, frm = frm, vars = vars))
   
 }
 
-# seed <- runif(1,0,1)*10^8
-# set.seed(42987117)
-# 
-# # undebug(testRun)
-# # undebug(getBindex)
-#
-#
-# test <- testRun(df.select %>% filter(sch.RR %in% c(25)), pop.PS = df %>% ungroup() %>% select(DSID, vars))
+# runSim(1)
 
-
-runtimeFile <- "Data/2018-5-17/runtime r1000.rdata"
-resultsFile <- "Data/2018-5-17/results r1000.rdata"
+runtimeFile <- "Data/2018-07-11/runtime r1000.rdata"
+resultsFile <- "Data/2018-07-11/results r1000.rdata"
 
 library(parallel)
 
 no_cores <- detectCores() - 1
 
-minreps <- 10
+minreps <- 1000
 reps <- rep((minreps + (no_cores - minreps %% no_cores)) / no_cores, each = no_cores)
 
 # Initiate cluster
@@ -57,17 +51,27 @@ stopCluster(cl)
 
 save(runtime, file = runtimeFile)
 
-ind1 <- 1 + 4 * 0:(reps[1]-1)
-ind2 <- 2 + 4 * 0:(reps[1]-1)
-ind3 <- 3 + 4 * 0:(reps[1]-1)
-ind4 <- 4 + 4 * 0:(reps[1]-1)
+types = 4
+
+ind1 <- 1 + types * 0:(reps[1]-1)
+ind2 <- 2 + types * 0:(reps[1]-1)
+ind3 <- 3 + types * 0:(reps[1]-1)
+ind4 <- 4 + types * 0:(reps[1]-1)
 
 df_responses <- bind_rows(results[ind1,]) %>% data.frame
-df_dist_smd <- bind_rows(results[ind2,]) %>% data.frame
-df_sch_smd <- bind_rows(results[ind3,]) %>% data.frame
-df_Bindex <- bind_rows(results[ind4,]) %>% data.frame
+df_sch_smd <- bind_rows(results[ind2,]) %>% data.frame
+df_Bindex <- bind_rows(results[ind3,]) %>% data.frame
+df_counts <- bind_rows(results[ind4,]) %>% data.frame
 
-save(df_responses, df_dist_smd, df_sch_smd, df_Bindex, file = resultsFile)
+df_counts %>%
+  group_by(sample, sch.RR, DSID) %>%
+  summarise(n = sum(Eij),
+            perc = n/sum(reps)) %>%
+  ggplot(aes(x = perc)) +
+  geom_histogram() + 
+  facet_grid(sample ~ sch.RR)
+
+save(df_responses, df_sch_smd, df_Bindex, df_counts, file = resultsFile)
 
 load(runtimeFile)
 load(resultsFile)
