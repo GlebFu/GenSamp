@@ -39,7 +39,7 @@ boxErrors <- function(x) {
 
 ```
 
-
+Distribution of propensity scores by response rates
 ```{r}
 
 df.sch %>% 
@@ -55,6 +55,7 @@ df.sch %>%
 
 ## B Index
 
+Conditions where B Index is below .2
 
 ```{r}
 
@@ -65,10 +66,11 @@ df_Bindex$sch.RR.f <- ordered(df_Bindex$sch.RR)
 
 df_Bindex %>% 
   select(sample:Bs) %>% 
-  filter(Bs < .1) %>%
+  filter(Bs < .2) %>%
   as.tibble() %>%
   group_by(sample, sch.RR) %>%
-  summarise(n = n())
+  summarise(n = n()) %>%
+  spread(key = sch.RR, value = n)
 ```
 
 ```{r}
@@ -92,17 +94,36 @@ df_Bindex %>%
 
 ```{r}
 df_Bindex %>%
-  ggplot(aes(x = sample, y = Bs, fill = sample)) +
+  group_by(sample, sch.RR) %>%
+  summarise(All = mean(Bs),
+            Partial = mean(Bs[Bs > .2]),
+            All_sd = sd(Bs),
+            Partial_sd = sd(Bs[Bs > .2])) %>%
+  gather(key = Type, value = Bs, All, Partial, All_sd, Partial_sd) %>%
+  mutate(Var = ifelse(str_detect(Type, "sd"), "SD", "M"),
+         Type = ifelse(str_detect(Type, "All"), "All", "Partial")) %>%
+  spread(key = Var, value = Bs) %>%
+  group_by(sample, sch.RR, Type) %>%
+  summarise(M = mean(M),
+            SD = mean(SD)) %>%
+  mutate(LL = M - SD,
+         UL = M + SD) %>%
+  ggplot(aes(x = sch.RR, y = M, color = sample)) +
   # stat_summary(fun.data = boxErrors, geom = "boxplot", position = position_dodge(width=1)) +
-  geom_boxplot() +
+  geom_line() + 
+  # geom_errorbar(aes(ymin=LL, ymax=UL), colour="black", width=.1) +
+  facet_wrap(~ Type)
+
   theme_apa(box = T) +
   scale_fill_brewer(type = "seq", palette = 4, guide=FALSE) +
   scale_color_brewer(type = "qual", palette = 5)  +
   theme(legend.position = "none",
         panel.spacing = unit(2, "lines"),
-        text = element_text(size=20),
-        legend.title = element_text(size=15)) +
+        # text = element_text(size=20),
+        # legend.title = element_text(size=15),
+        axis.text.x = element_text(angle = 45, hjust = 1)) +
   labs(x = "Sampling Method", y = "B-Index")
+  
 
 if(savePlot) ggsave("Figs/B-Index.jpg", dpi = 1000, width = 11, height = 8.5)
 if(savePlot) ggsave("Figs/B-Index.jpg", dpi = 1000, width = 10, height = 4)
