@@ -149,10 +149,7 @@ sSMDplot <- df_sch_smd %>%
   group_by(sample, sch.RR, Variable, Group, variable, Rank, Clustering) %>%
   summarise(value = mean(abs(value), na.rm = F)) %>% 
   spread(key = variable, value = value) %>%
-  ungroup() %>%
-  mutate(sch.RR = factor(sch.RR)) %>%
-  mutate(Clustering = ifelse(str_detect(sample, "SUBS"), "SUBS", "None"),
-         Ranking = str_replace(sample, "SUBS_", ""))
+  ungroup()
 
 # levels(sSMDplot$dist.RR) <- paste("District: ", levels(sSMDplot$dist.RR), "%", sep = "")
 # levels(sSMDplot$sch.RR) <- paste("School: ", levels(sSMDplot$sch.RR), "%", sep = "")
@@ -200,10 +197,7 @@ samplot <- df_responses %>%
   filter(is.na(cluster)) %>%
   group_by(sample, sch.RR, variable, Rank, Clustering) %>%
   summarise(value = mean(value)) %>%
-  spread(key = variable, value = value) %>%
-  mutate(Clustering = ifelse(str_detect(sample, "SUBS"), "SUBS", "None"),
-         Ranking = str_replace(sample, "SUBS_", ""))
-
+  spread(key = variable, value = value)
 ```
 
 
