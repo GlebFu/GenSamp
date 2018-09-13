@@ -93,7 +93,7 @@ df_Bindex %>%
 ```
 
 ```{r}
-df_Bindex %>%
+B_plot <- df_Bindex %>%
   group_by(sample, sch.RR) %>%
   summarise(All = mean(Bs),
             Partial = mean(Bs[Bs > .2]),
@@ -106,18 +106,19 @@ df_Bindex %>%
   group_by(sample, sch.RR, Type) %>%
   summarise(M = mean(M),
             SD = mean(SD)) %>%
-  mutate(LL = M - SD,
-         UL = M + SD) %>%
-  ggplot(aes(x = sch.RR, y = M, color = sample)) +
+  mutate(Clustering = ifelse(str_detect(sample, "SUBS"), "SUBS", "None"),
+         Ranking = str_replace(sample, "SUBS_", ""))
+
+B_plot %>%
+  ggplot(aes(x = sch.RR, y = M, color = Ranking, linetype = Clustering)) +
   # stat_summary(fun.data = boxErrors, geom = "boxplot", position = position_dodge(width=1)) +
   geom_line() + 
   # geom_errorbar(aes(ymin=LL, ymax=UL), colour="black", width=.1) +
-  facet_wrap(~ Type)
-
+  facet_wrap(~ Type) +
   theme_apa(box = T) +
-  scale_fill_brewer(type = "seq", palette = 4, guide=FALSE) +
-  scale_color_brewer(type = "qual", palette = 5)  +
-  theme(legend.position = "none",
+  scale_fill_brewer(type = "seq", palette = 3, guide=FALSE) +
+  scale_color_brewer(type = "qual", palette = 2)  +
+  theme(legend.position = "right",
         panel.spacing = unit(2, "lines"),
         # text = element_text(size=20),
         # legend.title = element_text(size=15),
@@ -138,15 +139,17 @@ sSMDplot <- df_sch_smd %>%
   summarise(value = mean(abs(value), na.rm = F)) %>% 
   spread(key = variable, value = value) %>%
   ungroup() %>%
-  mutate(sch.RR = factor(sch.RR))
+  mutate(sch.RR = factor(sch.RR)) %>%
+  mutate(Clustering = ifelse(str_detect(sample, "SUBS"), "SUBS", "None"),
+         Ranking = str_replace(sample, "SUBS_", ""))
 
 # levels(sSMDplot$dist.RR) <- paste("District: ", levels(sSMDplot$dist.RR), "%", sep = "")
 # levels(sSMDplot$sch.RR) <- paste("School: ", levels(sSMDplot$sch.RR), "%", sep = "")
 
 sSMDplot %>%
   filter(Group == "sampled") %>%
-  ggplot(aes(x = sch.RR, y = sim_SMD, group = sample, color = sample)) +
-  geom_point() +
+  ggplot(aes(x = sch.RR, y = sim_SMD, group = sample, color = Ranking, linetype = Clustering)) +
+  # geom_point() +
   geom_line() +
   geom_hline(yintercept = 0) +
   geom_hline(yintercept = .25, linetype = "dashed") +
@@ -160,7 +163,7 @@ sSMDplot %>%
 ```{r}
 sSMDplot %>%
   filter(Group == "sampled") %>%
-  ggplot(aes(x = sample, y = sim_SMD, group = sample, fill = sample)) +
+  ggplot(aes(x = sample, y = sim_SMD, group = sample, fill = Ranking, linetype = Clustering)) +
   geom_boxplot() +
   geom_line() +
   geom_hline(yintercept = 0) +
@@ -184,20 +187,22 @@ if(savePlot)  ggsave("Figs/Sch SMDs.jpg", dpi = 1000, width = 10, height = 4)
 ```{r}
 samplot <- df_responses %>%
   filter(is.na(cluster)) %>%
-  group_by(sample, sch.RR, variable) %>%
+  group_by(sample, sch.RR, variable) %>% 
   summarise(value = mean(value)) %>%
-  spread(key = variable, value = value)
+  spread(key = variable, value = value) %>%
+  mutate(Clustering = ifelse(str_detect(sample, "SUBS"), "SUBS", "None"),
+         Ranking = str_replace(sample, "SUBS_", ""))
 
 ```
 
 
 ```{r}
 samplot %>%
-  gather(key = measure, value = value, -sample, -sch.RR) %>%
+  gather(key = measure, value = value, -sample, -sch.RR, -Clustering, -Ranking) %>%
   mutate(level = str_split(measure, "_", simplify = T)[,1],
          measure =  str_split(measure, "_", simplify = T)[,2]) %>%
   filter(level == "sch") %>%
-  ggplot(aes(x = sch.RR, y = value, group = sample, color = sample)) +
+  ggplot(aes(x = sch.RR, y = value, group = sample, color = Ranking, linetype = Clustering)) +
   geom_point() +
   geom_line() +
   facet_wrap( ~ measure, scales = "free_y") +
@@ -225,68 +230,5 @@ df_responses %>%
 
 ```
 
-```{r}
-samplot2 <- samplot %>%
-  gather(key = measure, value = value, -sample, -sch.RR) %>%
-  mutate(level = str_split(measure, "_", simplify = T)[,1],
-         measure =  str_split(measure, "_", simplify = T)[,2]) %>%
-  filter(measure == "contacted") %>%
-  mutate(level = ifelse(level == "sch", "Schools", "Districts"))
 
-samplot2 %>%
-  ggplot(aes(x = sch.RR, y = value, group = sample, color = sample)) +
-  geom_point() +
-  geom_line() +
-  facet_wrap( ~ level, scales = "free_y") +
-  expand_limits(y=0) +
-  theme_apa(box = T) +
-  scale_fill_brewer(type = "seq", palette = 4) +
-  scale_color_brewer(type = "qual", palette = 3)  +
-  theme(legend.position = "bottom",
-        panel.spacing = unit(2, "lines"),
-        # text = element_text(size=20),
-        # legend.title = element_text(size=15),
-        axis.text.x = element_text(angle = 45, hjust = 1)) +
-  labs(x = "District Rate", y = "Units Contacted")
 
-if(savePlot)  ggsave("Figs/Units Contacted.jpg", dpi = 1000, width = 11, height = 8.5)
-
-```
-
-```{r}
-df.rr <- df_responses %>%
-  filter(str_detect(variable, "sch_RR"), is.na(cluster)) %>%
-  group_by(sample, sch.RR) %>%
-  summarise(value = mean(value)) %>%
-  rename(RR = sch.RR) %>%
-  mutate(Unit = "School")
-
-df.rr <- df_responses %>%
-  filter(str_detect(variable, "dist_RR"), is.na(cluster)) %>%
-  group_by(sample, dist.RR) %>%
-  summarise(value = mean(value)) %>%
-  rename(RR = dist.RR) %>%
-  mutate(Unit = "District") %>%
-  rbind(df.rr) %>%
-  mutate(value = value * 100)
-
-df.rr %>%
-  ggplot(aes(x = RR, y = value, group = sample, color = sample)) +
-  geom_point() +
-  geom_line() +
-  facet_grid(~ Unit) +
-  expand_limits(y = 0) +
-  theme_apa(box = T) +
-  scale_fill_brewer(type = "seq", palette = 4) +
-  scale_color_brewer(type = "qual", palette = 3)  +
-  theme(legend.position = "bottom",
-        panel.spacing = unit(2, "lines"),
-        text = element_text(size=20),
-        legend.title = element_text(size=15),
-        axis.text.x = element_text(angle = 45, hjust = 1)) +
-  labs(x = "Generating Repsonse Rate", y = "Actual Response Rate") +
-  geom_abline(slope = 25, intercept = 1, linetype = "dashed")
-
-if(savePlot)  ggsave("Figs/response rates.jpg", dpi = 1000, width = 11, height = 8.5)
-
-```
