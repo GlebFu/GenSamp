@@ -1,10 +1,10 @@
 ---
-title: "Analysis"
+title: "Summary"
 output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = F, cache = F)
+knitr::opts_chunk$set(echo = F, cache = F, warnings = F)
 ```
 
 ```{r load.packages, include = FALSE}
@@ -58,6 +58,41 @@ boxErrors <- function(x) {
 }
 
 ```
+
+# Introduction
+The main purpose of this study is to set a groundwork for exploring effectiveness and feasibility of sampling methods in the educational field. Using real population data we compare simple random sampling (SRS), convenience sampling (CS), stratified balanced sampling (SBS), stratified simple random sampling (SSRS), and stratified convenience sampling (SCS). Our findings suggest that SBS and SSRS are extremely difficult to implement at low response rates, but result in highly generalizable samples. SRS and SCS are similar in both feasibility and effectiveness, however, stratification offers other advantages beyond generalizability (transparency). 
+
+We found several limitations in that we lack empricical precident for modeling both researcher behavior in recruiting sites, and site behavior in deciding to participate. This work underlines the importance of further research into answering (1) How do we model convenience smapling? and (2) How do schools and districts devide to participate in studies? We argue that reserachers should allocate more funding towards recruitment given the clear increaes in abilty to generalize a sample. 
+
+
+# Methods Summary
+
+## Recruimtent models (technical)
+
+### Simple Random Sampling
+1. Schools are randomly ranked. 
+2. Schools are approached in order of rank until 60 schools agree to participate.
+
+### Convenience Sampling
+1. Schools are ranked by sampling without replacement one school at a time. 
+2. Schools with higher propensity to participate are more likely to be ranked higher. 
+3. Schools are approached in order of rank until 60 schools agree to participate.
+
+### Stratified Balanced Sampling
+1. Schools are grouped by cluster. 
+2. Within each cluster, schools are ranked using distance metric. 
+3. Schools are approached in order of rank until number of schools as defined by proportional sampling allocation agree to participate.
+
+### Stratified Simple Random Sampling
+1. Schools are grouped by cluster. 
+2. Within each cluster, schools are randomly ranked. 
+3. Schools are approached in order of rank until number of schools as defined by proportional sampling allocation agree to participate.
+
+### Stratified Simple Random Sampling
+1. Schools are grouped by cluster. 
+2. Schools are ranked by sampling without replacement one school at a time. 
+3. Schools with higher propensity to participate are more likely to be ranked higher. 
+4. Schools are approached in order of rank until number of schools as defined by proportional sampling allocation agree to participate.
 
 Distribution of propensity scores by response rates
 ```{r}

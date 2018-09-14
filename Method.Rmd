@@ -13,7 +13,7 @@ author:
 
 affiliation:
   - id            : "1"
-    institution   : "School/Bakery"
+    institution   : "School"
 #   - id            : "2"
 #     institution   : "Konstanz Business School"
 
@@ -155,6 +155,7 @@ apa_table(tbl_desc,
 
 ## Population Frame
 The population frame is composed of data from three sources: (1) the Common Core of Data (CCD), (2) publicly available accountability data, and (3) the U.S. Census. The CCD is a comprehensive database housing annually collected national statistics of all public schools and districts. Accountability data was used to calculate the proportion of students within each school performing at or above proficiency in Math and ELA. Finally, local median income was obtained from the U.S. Census and was matched to each school by zip code. 
+
 ### Covariates
 Selection of covariates was driven by prior research on district and school participation behavior in RCTs (Stuart et al., 2017; Tipton et al., 2016a; Fellers, 2017). Districts and schools with higher proportions of students who are English language learners (ELL), economically disadvantaged (ED), non-White, and living in urban settings are more likely to participate, as are larger districts and schools. It is important to note, however, that some of these characteristics might also make it more likely that researchers would recruit these districts and schools in the first place. Anecdotal evidence from several research teams also suggests that schools are less willing to participate in experimental interventions for subjects in which their students are already excelling, therefore math and ELA achievement covariates were also included. Weighted means of school level variables were calculated using school size (number of students) to generate district level covariates. In this sense, district covariates describe the population of students rather than the population of schools. Descriptives of these covariates are reported in table \@ref(tab:tbl-desc)
 

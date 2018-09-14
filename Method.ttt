@@ -28,7 +28,7 @@ Indicators &  &  &  & \\
 \addlinespace
 \end{tabular}
 \begin{tablenotes}[para]
-\textit{Note.} District variables are derived as aggregate means of school variables
+\normalsize{\textit{Note.} District variables are derived as aggregate means of school variables}
 \end{tablenotes}
 \end{threeparttable}
 \end{center}
