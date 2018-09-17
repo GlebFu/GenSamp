@@ -67,7 +67,28 @@ We found several limitations in that we lack empricical precident for modeling b
 
 # Methods Summary
 
-## Recruimtent models (technical)
+## Participation Generating Model
+
+o	Take a look at coefficients
+	Add table comparing CS SMDs
+
+
+Distribution of propensity scores by response rates
+```{r}
+
+df.sch %>% 
+  select(PS90:PS10) %>% 
+  gather(key = RR, value = PS) %>% 
+  ggplot(aes(x = PS)) + 
+  geom_histogram() + 
+  facet_wrap(~RR) +
+  theme_apa()
+
+
+```
+
+## Sampling Method
+Recruitment is performed by rearanging the full list of schools and sampling from the list in order until 60 schools agree to participate. This enables the calculation of the total number of schools contacted for recruitment. Schools are arranged in order of rank, which is regenerated in each iteration. Rank generation depends on the sampling method being simulated. In SRS school ranks are randomly assigned. In CS, schools are sampled without replacement one at a time and assigned consecutive ranks. Sampling is weighed by the propensity to participate so that schools that are more likely to participate are also more likely to be sampled earlier. Stratified versions of these methods first group schools into clusters, then generate ranks within each cluster independantly. Schools are sampled until proportional sampling allocation is satisfied. Finally, in SBS schools are grouped into clusters and then ranked in order using a distance metric. These ranks do not vary across iterations in the same conditions. 
 
 ### Simple Random Sampling
 1. Schools are randomly ranked. 
@@ -88,25 +109,13 @@ We found several limitations in that we lack empricical precident for modeling b
 2. Within each cluster, schools are randomly ranked. 
 3. Schools are approached in order of rank until number of schools as defined by proportional sampling allocation agree to participate.
 
-### Stratified Simple Random Sampling
+### Stratified Balanced Sampling
 1. Schools are grouped by cluster. 
 2. Schools are ranked by sampling without replacement one school at a time. 
 3. Schools with higher propensity to participate are more likely to be ranked higher. 
 4. Schools are approached in order of rank until number of schools as defined by proportional sampling allocation agree to participate.
 
-Distribution of propensity scores by response rates
-```{r}
 
-df.sch %>% 
-  select(PS90:PS10) %>% 
-  gather(key = RR, value = PS) %>% 
-  ggplot(aes(x = PS)) + 
-  geom_histogram() + 
-  facet_wrap(~RR) +
-  theme_apa()
-
-
-```
 
 ## B Index
 
