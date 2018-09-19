@@ -28,26 +28,30 @@ load(runtimeFile)
 load(resultsFile)
 
 df_Bindex <- df_Bindex %>%
-  mutate(Rank = str_replace(sample, "SUBS_", ""),
-         Clustering = ifelse(str_detect(sample, "SUBS"), "SUBS", "None"),
-         Clustering = str_replace(Clustering, "F", "DIST"))
+  mutate(sample = str_replace(sample, "F", "BS"),
+         Rank = str_replace(sample, "SUBS_", ""),
+         Clustering = ifelse(str_detect(sample, "SUBS"), "Strat", "None"),
+         sample = str_replace(sample, "SUBS_", "S_"))
 
 df_counts <- df_counts %>%
-  mutate(Rank = str_replace(sample, "SUBS_", ""),
-         Clustering = ifelse(str_detect(sample, "SUBS"), "SUBS", "None"),
-         Clustering = str_replace(Clustering, "F", "DIST"))
+  mutate(sample = str_replace(sample, "F", "BS"),
+         Rank = str_replace(sample, "SUBS_", ""),
+         Clustering = ifelse(str_detect(sample, "SUBS"), "Strat", "None"),
+         sample = str_replace(sample, "SUBS_", "S_"))
 
 df_responses <- df_responses %>%
-  mutate(Rank = str_replace(sample, "SUBS_", ""),
-         Clustering = ifelse(str_detect(sample, "SUBS"), "SUBS", "None"),
-         Clustering = str_replace(Clustering, "F", "DIST"))
+  mutate(sample = str_replace(sample, "F", "BS"),
+         Rank = str_replace(sample, "SUBS_", ""),
+         Clustering = ifelse(str_detect(sample, "SUBS"), "Strat", "None"),
+         sample = str_replace(sample, "SUBS_", "S_"))
   
 df_sch_smd <- df_sch_smd %>%
-  mutate(Rank = str_replace(sample, "SUBS_", ""),
-         Clustering = ifelse(str_detect(sample, "SUBS"), "SUBS", "None"),
-         Clustering = str_replace(Clustering, "F", "DIST"))
+  mutate(sample = str_replace(sample, "F", "BS"),
+         Rank = str_replace(sample, "SUBS_", ""),
+         Clustering = ifelse(str_detect(sample, "SUBS"), "Strat", "None"),
+         sample = str_replace(sample, "SUBS_", "S_"))
 
-savePlot <- F
+savePlot <- T
 ```
 
 ```{r}
@@ -183,6 +187,31 @@ df_Bindex %>%
 
 if(savePlot) ggsave("Figs/B-Index.jpg", dpi = 1000, width = 11, height = 8.5)
 if(savePlot) ggsave("Figs/B-Index.jpg", dpi = 1000, width = 10, height = 4)
+```
+```{r}
+df_Bindex %>%
+  group_by(sample, sch.RR, Clustering, Rank) %>%
+  summarise(All = mean(Bs),
+            Partial = mean(Bs[Bs > .2]),
+            All_sd = sd(Bs),
+            Partial_sd = sd(Bs[Bs > .2])) %>%
+  gather(key = Type, value = Bs, All, Partial, All_sd, Partial_sd) %>%
+  mutate(Var = ifelse(str_detect(Type, "sd"), "SD", "M"),
+         Type = ifelse(str_detect(Type, "All"), "All", "Partial")) %>%
+  spread(key = Var, value = Bs) %>%
+  group_by(sample, sch.RR, Type, Clustering, Rank) %>%
+  summarise(M = mean(M),
+            SD = mean(SD)) %>%
+  mutate(LL = M - SD,
+         UL = M + SD) %>%
+  filter(Type == "Partial") %>%
+  ggplot(aes(x = sch.RR, y = M, color = Rank, linetype = Clustering)) +
+  geom_line() +
+  theme_apa() +
+  labs(y = "Mean B-index",
+       x = "Population Participation Rate")
+
+if(savePlot) ggsave("Figs/paper B-Index.jpg", dpi = 1000, width = 10, height = 4)
 ```
 
 
