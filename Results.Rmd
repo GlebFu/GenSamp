@@ -207,11 +207,11 @@ df_Bindex %>%
   filter(Type == "Partial") %>%
   ggplot(aes(x = sch.RR, y = M, color = Rank, linetype = Clustering)) +
   geom_line() +
-  theme_apa() +
   labs(y = "Mean B-index",
-       x = "Population Participation Rate")
+       x = "Population Participation Rate") +
+  theme_apa()
 
-if(savePlot) ggsave("Figs/paper B-Index.jpg", dpi = 1000, width = 10, height = 4)
+if(savePlot) ggsave("Figs/paper B-Index.jpg", dpi = 1000, width = 5, height = 4)
 ```
 
 
@@ -230,14 +230,16 @@ sSMDplot <- df_sch_smd %>%
 sSMDplot %>%
   filter(Group == "sampled") %>%
   ggplot(aes(x = sch.RR, y = sim_SMD, color = Rank, linetype = Clustering, group = sample)) +
-  geom_point() +
+  # geom_point() +
   geom_line() +
   geom_hline(yintercept = 0) +
   geom_hline(yintercept = .25, linetype = "dashed") +
   facet_wrap( ~ Variable, scales = "free_y") +
-  theme_apa(box = T)
+  theme_apa(box = F) +
+  labs(y = "Mean SMD",
+       x = "Population Participation Rate")
 
-
+if(savePlot)  ggsave("Figs/All SMDs.jpg", dpi = 1000, width = 6, height = 5)
 ```
 
 
@@ -259,7 +261,7 @@ sSMDplot %>%
         legend.title = element_text(size=15)) +
   labs(x = "Sampling Method", y = "Absolute SMD")
 
-if(savePlot)  ggsave("Figs/Sch SMDs.jpg", dpi = 1000, width = 11, height = 8.5)
+# if(savePlot)  ggsave("Figs/Sch SMDs.jpg", dpi = 1000, width = 11, height = 8.5)
 if(savePlot)  ggsave("Figs/Sch SMDs.jpg", dpi = 1000, width = 10, height = 4)
 ```
 
@@ -323,17 +325,18 @@ samplot2 %>%
   geom_line() +
   facet_wrap( ~ level, scales = "free_y") +
   expand_limits(y=0) +
-  theme_apa(box = T) +
-  scale_fill_brewer(type = "seq", palette = 4) +
-  scale_color_brewer(type = "qual", palette = 3)  +
+  # theme_apa(box = T) +
+  # scale_fill_brewer(type = "seq", palette = 4) +
+  # scale_color_brewer(type = "qual", palette = 3)  +
   theme(legend.position = "bottom",
         panel.spacing = unit(2, "lines"),
         # text = element_text(size=20),
         # legend.title = element_text(size=15),
         axis.text.x = element_text(angle = 45, hjust = 1)) +
-  labs(x = "District Rate", y = "Units Contacted")
+  labs(x = "Population Response Rate", y = "Units Contacted") +
+  theme_apa()
 
-if(savePlot)  ggsave("Figs/Units Contacted.jpg", dpi = 1000, width = 11, height = 8.5)
+if(savePlot)  ggsave("Figs/Units Contacted.jpg", dpi = 1000, width = 6, height = 5)
 
 ```
 
