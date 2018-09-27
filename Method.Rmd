@@ -96,71 +96,22 @@ df <- df[,vars] %>% na.omit %>% unique()
 subs_f_vars <- c("n", "urbanicity",
                 "pELL", "pED", "pELA", "pMath", "pMin", "MEDINC")
 
-subs_ov_vars <- c("n", "urbanicity",
-                "pELL", "pED", "pELA", "pMath", "pMin")
 
 # School Level Data
 df.sch <- df[,vars]
 
 
-# District Level Data About students
-df.dist <- list(.vars = lst("n", covariates[-1], "m"),
-     .funs = lst(mean, funs(weighted.mean(., w = n)), mean)) %>%
-  pmap(~ df.sch  %>%
-         group_by(DID) %>%
-         mutate(m = n()) %>%
-         summarise_at(.x, .y)) %>%
-  reduce(inner_join, by = "DID")
-
-save(df, df.sch, df.dist, subs_f_vars, subs_ov_vars, file = "data/base data.rdata")
+save(df, df.sch, subs_f_vars, file = "data/base data.rdata")
 
 ```
-
-```{r descriptives}
-tbl_desc <- df.dist %>%
-  gather(key = Variable, value = Value, n:MEDINC, m) %>%
-  group_by(Variable) %>%
-  summarise(M = mean(Value), SD = sd(Value))
-
-tbl_desc <- df.sch %>%
-  gather(key = Variable, value = Value, n:MEDINC) %>%
-  group_by(Variable) %>%
-  summarise(M = mean(Value), SD = sd(Value))  %>%
-  right_join(tbl_desc, by = "Variable")
-
-
-
-tbl_desc$Variable <- c("Number of Schools", "Median Income", "School Size", "Economically Disadvantaged", "ELA Proficiency", "English Language Learners", "Math Proficiency", "Minority Status", "Total/Free/Reduced Lunch", "Suburban", "Town or Rural", "Urban")
-
-tbl_desc <- tbl_desc[c(1,3,2,5,7,4,6,8,9,12,10,11),]
-
-
-```
-
-```{r tbl-desc, results = "asis"}
-
-apa_table(tbl_desc,
-          caption = "Descriptives of variables",
-          note = "District variables are derived as aggregate means of school variables",
-          stub_indents = list(`Average Proportions` = c(4:9), Indicators = c(10:12)),
-          col_spanners = list(`School` = c(2,3), `District Weighted` = c(4,5)),
-          align = "lcccc",
-          col.names = c("Variables","Mean", "SD", "Mean", "SD"))
-
-```
-
 
 # Cluster Analysis
-
 
 ## Population Frame
 The population frame is composed of data from three sources: (1) the Common Core of Data (CCD), (2) publicly available accountability data, and (3) the U.S. Census. The CCD is a comprehensive database housing annually collected national statistics of all public schools and districts. Accountability data was used to calculate the proportion of students within each school performing at or above proficiency in Math and ELA. Finally, local median income was obtained from the U.S. Census and was matched to each school by zip code. 
 
 ### Covariates
-Selection of covariates was driven by prior research on district and school participation behavior in RCTs (Stuart et al., 2017; Tipton et al., 2016a; Fellers, 2017). Districts and schools with higher proportions of students who are English language learners (ELL), economically disadvantaged (ED), non-White, and living in urban settings are more likely to participate, as are larger districts and schools. It is important to note, however, that some of these characteristics might also make it more likely that researchers would recruit these districts and schools in the first place. Anecdotal evidence from several research teams also suggests that schools are less willing to participate in experimental interventions for subjects in which their students are already excelling, therefore math and ELA achievement covariates were also included. Weighted means of school level variables were calculated using school size (number of students) to generate district level covariates. In this sense, district covariates describe the population of students rather than the population of schools. Descriptives of these covariates are reported in table \@ref(tab:tbl-desc)
-
-### Omitted Variable
-Neighborhood median income was selected to serve as the omitted variable for several reasons. First, it is related to several of the other variables and therefore likely predicts school or district participation. Second, because it comes from a non-educational data source (the census) and requires additional work to include in the population frame it is likely to be omitted in practice.
+Selection of covariates was driven by prior research on district and school participation behavior in RCTs (Stuart et al., 2017; Tipton et al., 2016a; Fellers, 2017). Districts and schools with higher proportions of students who are English language learners (ELL), economically disadvantaged (ED), non-White, and living in urban settings are more likely to participate, as are larger districts and schools. It is important to note, however, that some of these characteristics might also make it more likely that researchers would recruit these districts and schools in the first place. Anecdotal evidence from several research teams also suggests that schools are less willing to participate in experimental interventions for subjects in which their students are already excelling, therefore math and ELA achievement covariates were also included.
 
 ```{r dists, results = "asis", fig.cap="Comparison of covariate distributions and their log transformations."}
 to_z <- function(x) (x - mean(x))/sd(x)
@@ -177,31 +128,13 @@ dist_plots %>%
   facet_wrap(~ var, scales = "free") +
   theme_apa()
 
-# dist_plots %>%
-#   gather(key = var, value = value, n:MEDINC_log, -urbanicity) %>%
-#   ggplot(aes(x = value, color = urbanicity)) +
-#   geom_density() +
-#   facet_wrap(~ var, scales = c("free"))
-# 
-# dist_plots %>%
-#   ggplot(aes(x = pELA, y = pMath, color = n_log)) +
-#   geom_point(alpha = .5) +
-#   facet_wrap(~urbanicity)
-# 
-# dist_plots %>%
-#   ggplot(aes(x = pELL, y = pMin, color = n_log)) +
-#   geom_point(alpha = .5) +
-#   facet_wrap(~urbanicity)
-# 
-# dist_plots %>%
-#   ggplot(aes(x = MEDINC_log, y = pED, color = n_log)) +
-#   geom_point(alpha = .5) +
-#   facet_wrap(~urbanicity)
 ```
 
 ```{r dists2, fig.cap="Distributions of the remaining continuous covariates."}
 dist_plots %>%
   gather(key = var, value = value, pED:pMin) %>%
+  group_by(var) %>%
+  # mutate(value = value - mean(value)) %>%
   ggplot(aes(x = value)) +
   geom_histogram() +
   facet_wrap(~ var, scales = "free") +
@@ -213,13 +146,13 @@ dist_plots %>%
 Log-transformation was used on school size (number of students) and median income. This is done to allow proportional comparisons at the extremes of the distributions (Hennig and Liao - 2013). For instance, the difference between two schools with 4000 and 3000 students should be weighed as much as the difference between two schools with 400 and 300 students when generating clusters. Figure \@ref(fig:dists) displays a comparison of the distribution of these variables and their logs. Figure \@ref(fig:dists2) displays the distribution of the remaining continuous variables.
 
 
-## SUBS
+## SBS
 
-Stratification using balanced sampling (SUBS) was performed prior to simulation because the group of schools in each strata would be static across conditions except where the balancing model is manipulated by omitting median income. Per Tipton's (2013) original recommendation, we use k-means clustering to partition the population into strata. This requires selecting a distance metric, choosing the number of strata, and performing the actual analysis.
+Stratification was performed prior to simulation because the population is constant across iterations. Per Tipton's (2013) original recommendation, we use k-means clustering to partition the population into strata. This requires selecting a distance metric, choosing the number of strata, and performing the actual analysis.
 
 ### Distance Metric
 
-The set of covariates in both the full model (SUBS-F) and the omitted variable model (SUBS-OV) include continuous covariates as well as binary indicators for urbanicity (urban, suburban, and town/rural). Within this context it is generally recommended to use Gower's (1971) general dissimilarity distance (Everitt, 2011) which Tipton (2013) echos. This method relies on different calculations of distance depending on the type of covariates. Let $d_{ii'h}$ be the distance between observed values of covariate $X_{h}$ for unit $i$ and unit $i'$ where $i \ne i'$. For categorical or dummy coded variables, $d_{ii'h} = 1$ if $X_{ih} = X_{i'h}$ and $d_{ii'h} = 0$ otherwise. For continuous covariates, we use the following formula:
+The set of covariates include continuous variables as well as binary indicators for urbanicity (urban, suburban, and town/rural). Within this context it is generally recommended to use Gower's (1971) general dissimilarity distance (Everitt, 2011; Tipton, 2013). This method relies on different calculations of distance depending on the type of covariates. Let $d_{ii'h}$ be the distance between observed values of covariate $X_{h}$ for unit $i$ and unit $i'$ where $i \ne i'$. For categorical or dummy coded variables, $d_{ii'h} = 1$ if $X_{ih} = X_{i'h}$ and $d_{ii'h} = 0$ otherwise. For continuous covariates, we use the following formula:
 \begin{align}
   d_{ii'h} = 1 - \frac{|X_{ih} - X_{i'h}|}{R_h}
 \end{align}
@@ -247,13 +180,13 @@ Selecting the number of clusters, $k$, is one of the most difficult problems in 
   + Modern look
 
 ### Cluster Analysis
-Cluster analysis was performed using the _cluster_ package (Maechler et. al. 2017) in R. First, the _daisy_ function is used to compute an $n$ by $n$ pairwise distance matrix across all observations. This function requires two parameters: (1) the data set, and (2) the distance metric. For the full model, the data set included the full list of school level covariates presented in table \@ref(tab:tbl-desc). For the omitted variable model, median income was omitted from the data set. For both models, the metric was set to "gower". Next the _kmeans_ function is used to generate clusters. This method uses an optimization algorithm to classify units into $k$ clusters by minimizing the total within cluster sum of squares. This function also requires two parameters: (1) the distance matrix, and (2) the number of clusters to generate ($k$). For each $k$, it is recommended to run _kmeans_ at least 10 times, and select the clustering that results in the smallest total within-cluster sum of squares. [Get Citation]
+Cluster analysis was performed using the _cluster_ package (Maechler et. al. 2017) in R. First, the _daisy_ function is used to compute an $n$ by $n$ pairwise distance matrix across all observations. This function requires two parameters: (1) the data set, and (2) the distance metric. The data set included the full list of school level covariates. The metric was set to "gower". Next the _kmeans_ function is used to generate clusters. This method uses an optimization algorithm to classify units into $k$ clusters by minimizing the total within cluster sum of squares. This function also requires two parameters: (1) the distance matrix, and (2) the number of clusters to generate ($k$). For each $k$, it is recommended to run _kmeans_ at least 10 times, and select the clustering that results in the smallest total within-cluster sum of squares. [Get Citation]
 
-Figure \@ref(fig:ch-full) displays the Calinski-Harabasz (CH) index for each $k$ clusters generated for both the SUBS-F and SUBS-OV. The value of $k$ that maximizes the CH index should be selected. However we see several local maxima: $k = [2, 5, 8, 11]$ for SUBS-F, and $k = 2, 6, 10$ for SUBS-OV.
+Figure \@ref(fig:ch-full) displays the Calinski-Harabasz (CH) index for each $k$ clusters generated for both the SBS-F and SBS-OV. The value of $k$ that maximizes the CH index should be selected. However we see several local maxima: $k = [2, 5, 8, 11]$ for SBS-F, and $k = 2, 6, 10$ for SBS-OV.
 
-Taking the ratio of between-cluster SS to within-cluster SS and plotting it against number of clusters creates a chart similar to an upside down elbow graph. Figure \@ref(fig:ratio-full) displays this for both SUBS-F and SUBS-OV. Tipton (2013) recommends selecting the number of clusters such that at least 80% of the variability is between clusters, indicated by the figure as a dashed line. Given this criteria it seems that at least 10 clusters should be generated for SUBS-F, and 8 for SUBS-OV. However we also see that after a sharp initial increase, the slope of the graph begins to level out. This indicates that as we increase the number of clusters, the benefit of doing so decreases, while the difficulty of sampling from each cluster increases. In that case after 6 or 7 clusters the difficulty of sampling may not be worth such small increases in homogeneity within clusters.
+Taking the ratio of between-cluster SS to within-cluster SS and plotting it against number of clusters creates a chart similar to an upside down elbow graph. Figure \@ref(fig:ratio-full) displays this for both SBS-F and SBS-OV. Tipton (2013) recommends selecting the number of clusters such that at least 80% of the variability is between clusters, indicated by the figure as a dashed line. Given this criteria it seems that at least 10 clusters should be generated for SBS-F, and 8 for SBS-OV. However we also see that after a sharp initial increase, the slope of the graph begins to level out. This indicates that as we increase the number of clusters, the benefit of doing so decreases, while the difficulty of sampling from each cluster increases. In that case after 6 or 7 clusters the difficulty of sampling may not be worth such small increases in homogeneity within clusters.
 
-Figure \@ref(fig:k-size-full plots the sample size that needs to be selected from each cluster to fulfill the proportional allocation requirement such that the number of units sampled from each cluster is proportional to the size of the cluster in the population. The dashed line indicates the ideal allocation if all clusters were of equal size. We see that for SUBS-F when 8 or less clusters are generated, they are more equally sized, with the exception of 3 and 6 clusters where one is much larger than the others. For SUBS-OV this is less apparent. Instead a sensible cutoff may be determined by looking at the size of the smallest cluster. At $k > 7$ it seems that the smallest clusters would require less than 5 units being sampled, which may be very difficult in a practical setting.
+Figure \@ref(fig:k-size-full plots the sample size that needs to be selected from each cluster to fulfill the proportional allocation requirement such that the number of units sampled from each cluster is proportional to the size of the cluster in the population. The dashed line indicates the ideal allocation if all clusters were of equal size. We see that for SBS-F when 8 or less clusters are generated, they are more equally sized, with the exception of 3 and 6 clusters where one is much larger than the others. For SBS-OV this is less apparent. Instead a sensible cutoff may be determined by looking at the size of the smallest cluster. At $k > 7$ it seems that the smallest clusters would require less than 5 units being sampled, which may be very difficult in a practical setting.
 
 In order to maintain comparability between methods, it was determined that 6 clusters would be generated for both models, though in practice 7 clusters for the full model may be more prudent.
 

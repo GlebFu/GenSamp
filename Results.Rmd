@@ -28,27 +28,35 @@ load(runtimeFile)
 load(resultsFile)
 
 df_Bindex <- df_Bindex %>%
-  mutate(sample = str_replace(sample, "F", "BS"),
-         Rank = str_replace(sample, "SUBS_", ""),
-         Clustering = ifelse(str_detect(sample, "SUBS"), "Strat", "None"),
+  mutate(sample = str_replace(sample, "F", "Balanced Sampling"),
+         sample = str_replace(sample, "CS", "Convenience Sampling"),
+         sample = str_replace(sample, "SRS", "Simple Random Sampling"),
+         Sampling = str_replace(sample, "SUBS_", ""),
+         Clustering = ifelse(str_detect(sample, "SUBS"), "Stratified", "None"),
          sample = str_replace(sample, "SUBS_", "S_"))
 
 df_counts <- df_counts %>%
-  mutate(sample = str_replace(sample, "F", "BS"),
-         Rank = str_replace(sample, "SUBS_", ""),
-         Clustering = ifelse(str_detect(sample, "SUBS"), "Strat", "None"),
+  mutate(sample = str_replace(sample, "F", "Balanced Sampling"),
+         sample = str_replace(sample, "CS", "Convenience Sampling"),
+         sample = str_replace(sample, "SRS", "Simple Random Sampling"),
+         Sampling = str_replace(sample, "SUBS_", ""),
+         Clustering = ifelse(str_detect(sample, "SUBS"), "Stratified", "None"),
          sample = str_replace(sample, "SUBS_", "S_"))
 
 df_responses <- df_responses %>%
-  mutate(sample = str_replace(sample, "F", "BS"),
-         Rank = str_replace(sample, "SUBS_", ""),
-         Clustering = ifelse(str_detect(sample, "SUBS"), "Strat", "None"),
+  mutate(sample = str_replace(sample, "F", "Balanced Sampling"),
+         sample = str_replace(sample, "CS", "Convenience Sampling"),
+         sample = str_replace(sample, "SRS", "Simple Random Sampling"),
+         Sampling = str_replace(sample, "SUBS_", ""),
+         Clustering = ifelse(str_detect(sample, "SUBS"), "Stratified", "None"),
          sample = str_replace(sample, "SUBS_", "S_"))
   
 df_sch_smd <- df_sch_smd %>%
-  mutate(sample = str_replace(sample, "F", "BS"),
-         Rank = str_replace(sample, "SUBS_", ""),
-         Clustering = ifelse(str_detect(sample, "SUBS"), "Strat", "None"),
+  mutate(sample = str_replace(sample, "F", "Balanced Sampling"),
+         sample = str_replace(sample, "CS", "Convenience Sampling"),
+         sample = str_replace(sample, "SRS", "Simple Random Sampling"),
+         Sampling = str_replace(sample, "SUBS_", ""),
+         Clustering = ifelse(str_detect(sample, "SUBS"), "Stratified", "None"),
          sample = str_replace(sample, "SUBS_", "S_"))
 
 savePlot <- T
@@ -92,32 +100,32 @@ df.sch %>%
 ```
 
 ## Sampling Method
-Recruitment is performed by rearanging the full list of schools and sampling from the list in order until 60 schools agree to participate. This enables the calculation of the total number of schools contacted for recruitment. Schools are arranged in order of rank, which is regenerated in each iteration. Rank generation depends on the sampling method being simulated. In SRS school ranks are randomly assigned. In CS, schools are sampled without replacement one at a time and assigned consecutive ranks. Sampling is weighed by the propensity to participate so that schools that are more likely to participate are also more likely to be sampled earlier. Stratified versions of these methods first group schools into clusters, then generate ranks within each cluster independantly. Schools are sampled until proportional sampling allocation is satisfied. Finally, in SBS schools are grouped into clusters and then ranked in order using a distance metric. These ranks do not vary across iterations in the same conditions. 
+Recruitment is performed by rearanging the full list of schools and sampling from the list in order until 60 schools agree to participate. This enables the calculation of the total number of schools contacted for recruitment. Schools are arranged in order of Sampling, which is regenerated in each iteration. Sampling generation depends on the sampling method being simulated. In SRS school Samplings are randomly assigned. In CS, schools are sampled without replacement one at a time and assigned consecutive Samplings. Sampling is weighed by the propensity to participate so that schools that are more likely to participate are also more likely to be sampled earlier. Stratified versions of these methods first group schools into clusters, then generate Samplings within each cluster independantly. Schools are sampled until proportional sampling allocation is satisfied. Finally, in SBS schools are grouped into clusters and then Samplinged in order using a distance metric. These Samplings do not vary across iterations in the same conditions. 
 
 ### Simple Random Sampling
-1. Schools are randomly ranked. 
-2. Schools are approached in order of rank until 60 schools agree to participate.
+1. Schools are randomly Samplinged. 
+2. Schools are approached in order of Sampling until 60 schools agree to participate.
 
 ### Convenience Sampling
-1. Schools are ranked by sampling without replacement one school at a time. 
-2. Schools with higher propensity to participate are more likely to be ranked higher. 
-3. Schools are approached in order of rank until 60 schools agree to participate.
+1. Schools are Samplinged by sampling without replacement one school at a time. 
+2. Schools with higher propensity to participate are more likely to be Samplinged higher. 
+3. Schools are approached in order of Sampling until 60 schools agree to participate.
 
 ### Stratified Balanced Sampling
 1. Schools are grouped by cluster. 
-2. Within each cluster, schools are ranked using distance metric. 
-3. Schools are approached in order of rank until number of schools as defined by proportional sampling allocation agree to participate.
+2. Within each cluster, schools are Samplinged using distance metric. 
+3. Schools are approached in order of Sampling until number of schools as defined by proportional sampling allocation agree to participate.
 
 ### Stratified Simple Random Sampling
 1. Schools are grouped by cluster. 
-2. Within each cluster, schools are randomly ranked. 
-3. Schools are approached in order of rank until number of schools as defined by proportional sampling allocation agree to participate.
+2. Within each cluster, schools are randomly Samplinged. 
+3. Schools are approached in order of Sampling until number of schools as defined by proportional sampling allocation agree to participate.
 
 ### Stratified Balanced Sampling
 1. Schools are grouped by cluster. 
-2. Schools are ranked by sampling without replacement one school at a time. 
-3. Schools with higher propensity to participate are more likely to be ranked higher. 
-4. Schools are approached in order of rank until number of schools as defined by proportional sampling allocation agree to participate.
+2. Schools are Samplinged by sampling without replacement one school at a time. 
+3. Schools with higher propensity to participate are more likely to be Samplinged higher. 
+4. Schools are approached in order of Sampling until number of schools as defined by proportional sampling allocation agree to participate.
 
 
 
@@ -145,7 +153,7 @@ df_Bindex %>%
 ```{r}
 df_Bindex %>%
   filter(Bs > .25) %>%
-  ggplot(aes(x = sample, y = Bs, color = Rank, linetype = Clustering)) +
+  ggplot(aes(x = sample, y = Bs, color = Sampling, linetype = Clustering)) +
   # stat_summary(fun.data = boxErrors, geom = "boxplot", position = position_dodge(width=1)) +
   geom_boxplot() +
   facet_wrap(~ sch.RR.f) +
@@ -165,7 +173,7 @@ df_Bindex %>%
 ```{r}
 
 df_Bindex %>%
-  group_by(sample, sch.RR, Clustering, Rank) %>%
+  group_by(sample, sch.RR, Clustering, Sampling) %>%
   summarise(All = mean(Bs),
             Partial = mean(Bs[Bs > .2]),
             All_sd = sd(Bs),
@@ -174,12 +182,12 @@ df_Bindex %>%
   mutate(Var = ifelse(str_detect(Type, "sd"), "SD", "M"),
          Type = ifelse(str_detect(Type, "All"), "All", "Partial")) %>%
   spread(key = Var, value = Bs) %>%
-  group_by(sample, sch.RR, Type, Clustering, Rank) %>%
+  group_by(sample, sch.RR, Type, Clustering, Sampling) %>%
   summarise(M = mean(M),
             SD = mean(SD)) %>%
   mutate(LL = M - SD,
          UL = M + SD) %>%
-  ggplot(aes(x = sch.RR, y = M, color = Rank, linetype = Clustering)) +
+  ggplot(aes(x = sch.RR, y = M, color = Sampling, linetype = Clustering)) +
   # stat_summary(fun.data = boxErrors, geom = "boxplot", position = position_dodge(width=1)) +
   geom_line() +
   # geom_errorbar(aes(ymin=LL, ymax=UL), colour="black", width=.1) +
@@ -190,7 +198,7 @@ if(savePlot) ggsave("Figs/B-Index.jpg", dpi = 1000, width = 10, height = 4)
 ```
 ```{r}
 df_Bindex %>%
-  group_by(sample, sch.RR, Clustering, Rank) %>%
+  group_by(sample, sch.RR, Clustering, Sampling) %>%
   summarise(All = mean(Bs),
             Partial = mean(Bs[Bs > .2]),
             All_sd = sd(Bs),
@@ -199,19 +207,19 @@ df_Bindex %>%
   mutate(Var = ifelse(str_detect(Type, "sd"), "SD", "M"),
          Type = ifelse(str_detect(Type, "All"), "All", "Partial")) %>%
   spread(key = Var, value = Bs) %>%
-  group_by(sample, sch.RR, Type, Clustering, Rank) %>%
+  group_by(sample, sch.RR, Type, Clustering, Sampling) %>%
   summarise(M = mean(M),
             SD = mean(SD)) %>%
   mutate(LL = M - SD,
          UL = M + SD) %>%
   filter(Type == "Partial") %>%
-  ggplot(aes(x = sch.RR, y = M, color = Rank, linetype = Clustering)) +
+  ggplot(aes(x = sch.RR, y = M, color = Sampling, linetype = Clustering)) +
   geom_line() +
   labs(y = "Mean B-index",
        x = "Population Participation Rate") +
   theme_apa()
 
-if(savePlot) ggsave("Figs/paper B-Index.jpg", dpi = 1000, width = 5, height = 4)
+if(savePlot) ggsave("Figs/paper B-Index.jpg", dpi = 1000, width = 7•, height = 4)
 ```
 
 
@@ -219,7 +227,7 @@ if(savePlot) ggsave("Figs/paper B-Index.jpg", dpi = 1000, width = 5, height = 4)
 
 ```{r}
 sSMDplot <- df_sch_smd %>%
-  group_by(sample, sch.RR, Variable, Group, variable, Rank, Clustering) %>%
+  group_by(sample, sch.RR, Variable, Group, variable, Sampling, Clustering) %>%
   summarise(value = mean(abs(value), na.rm = F)) %>% 
   spread(key = variable, value = value) %>%
   ungroup()
@@ -229,7 +237,7 @@ sSMDplot <- df_sch_smd %>%
 
 sSMDplot %>%
   filter(Group == "sampled") %>%
-  ggplot(aes(x = sch.RR, y = sim_SMD, color = Rank, linetype = Clustering, group = sample)) +
+  ggplot(aes(x = sch.RR, y = sim_SMD, color = Sampling, linetype = Clustering, group = sample)) +
   # geom_point() +
   geom_line() +
   geom_hline(yintercept = 0) +
@@ -239,14 +247,14 @@ sSMDplot %>%
   labs(y = "Mean SMD",
        x = "Population Participation Rate")
 
-if(savePlot)  ggsave("Figs/All SMDs.jpg", dpi = 1000, width = 6, height = 5)
+if(savePlot)  ggsave("Figs/All SMDs.jpg", dpi = 1000, width = 7, height = 5)
 ```
 
 
 ```{r}
 sSMDplot %>%
   filter(Group == "sampled") %>%
-  ggplot(aes(x = sample, y = sim_SMD, group = sample, fill = Rank, linetype = Clustering)) +
+  ggplot(aes(x = sample, y = sim_SMD, group = sample, fill = Sampling, linetype = Clustering)) +
   geom_boxplot() +
   geom_line() +
   geom_hline(yintercept = 0) +
@@ -270,7 +278,7 @@ if(savePlot)  ggsave("Figs/Sch SMDs.jpg", dpi = 1000, width = 10, height = 4)
 ```{r}
 samplot <- df_responses %>%
   filter(is.na(cluster)) %>%
-  group_by(sample, sch.RR, variable, Rank, Clustering) %>%
+  group_by(sample, sch.RR, variable, Sampling, Clustering) %>%
   summarise(value = mean(value)) %>%
   spread(key = variable, value = value)
 ```
@@ -278,11 +286,11 @@ samplot <- df_responses %>%
 
 ```{r}
 samplot %>%
-  gather(key = measure, value = value, -sample, -sch.RR, -Rank, -Clustering) %>%
+  gather(key = measure, value = value, -sample, -sch.RR, -Sampling, -Clustering) %>%
   mutate(level = str_split(measure, "_", simplify = T)[,1],
          measure =  str_split(measure, "_", simplify = T)[,2]) %>%
   filter(level == "sch") %>%
-  ggplot(aes(x = sch.RR, y = value, group = sample, color = Rank, linetype = Clustering)) +
+  ggplot(aes(x = sch.RR, y = value, group = sample, color = Sampling, linetype = Clustering)) +
   geom_point() +
   geom_line() +
   facet_wrap( ~ measure, scales = "free_y") +
@@ -295,7 +303,7 @@ samplot %>%
 ```{r}
 df_responses %>%
   filter(is.na(cluster), str_detect(variable, "sch_contacted")) %>%
-  ggplot(aes(x = sample, y = value, color = Rank, linetype = Clustering)) +
+  ggplot(aes(x = sample, y = value, color = Sampling, linetype = Clustering)) +
   stat_summary(fun.data = boxErrors, geom = "boxplot", position = position_dodge(width=1)) +
   facet_wrap( ~ sch.RR, scales = "free_y") +
   theme_apa(box = T) +
@@ -313,14 +321,14 @@ df_responses %>%
 
 ```{r}
 samplot2 <- samplot %>%
-  gather(key = measure, value = value, -sample, -sch.RR, -Rank, -Clustering) %>%
+  gather(key = measure, value = value, -sample, -sch.RR, -Sampling, -Clustering) %>%
   mutate(level = str_split(measure, "_", simplify = T)[,1],
          measure =  str_split(measure, "_", simplify = T)[,2]) %>%
   filter(measure == "contacted") %>%
   mutate(level = ifelse(level == "sch", "Schools", "Districts"))
 
 samplot2 %>%
-  ggplot(aes(x = sch.RR, y = value, group = sample, color = Rank, linetype = Clustering)) +
+  ggplot(aes(x = sch.RR, y = value, group = sample, color = Sampling, linetype = Clustering)) +
   geom_point() +
   geom_line() +
   facet_wrap( ~ level, scales = "free_y") +
@@ -336,21 +344,21 @@ samplot2 %>%
   labs(x = "Population Response Rate", y = "Units Contacted") +
   theme_apa()
 
-if(savePlot)  ggsave("Figs/Units Contacted.jpg", dpi = 1000, width = 6, height = 5)
+if(savePlot)  ggsave("Figs/Units Contacted.jpg", dpi = 1000, width = 7, height = 5)
 
 ```
 
 ```{r}
 df.rr <- df_responses %>%
   filter(str_detect(variable, "sch_RR"), is.na(cluster)) %>%
-  group_by(sample, sch.RR, Rank, Clustering) %>%
+  group_by(sample, sch.RR, Sampling, Clustering) %>%
   summarise(value = mean(value)) %>%
   rename(RR = sch.RR) %>%
   mutate(Unit = "School")
 
 
 df.rr %>%
-  ggplot(aes(x = RR, y = value, group = sample, color = Rank, linetype = Clustering)) +
+  ggplot(aes(x = RR, y = value, group = sample, color = Sampling, linetype = Clustering)) +
   geom_point() +
   geom_line() +
   facet_grid(~ Unit) +
