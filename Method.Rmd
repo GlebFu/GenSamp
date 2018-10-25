@@ -146,9 +146,9 @@ dist_plots %>%
 Log-transformation was used on school size (number of students) and median income. This is done to allow proportional comparisons at the extremes of the distributions (Hennig and Liao - 2013). For instance, the difference between two schools with 4000 and 3000 students should be weighed as much as the difference between two schools with 400 and 300 students when generating clusters. Figure \@ref(fig:dists) displays a comparison of the distribution of these variables and their logs. Figure \@ref(fig:dists2) displays the distribution of the remaining continuous variables.
 
 
-## SBS
+## Stratified Balanced Sampling
 
-Stratification was performed prior to simulation because the population is constant across iterations. Per Tipton's (2013) original recommendation, we use k-means clustering to partition the population into strata. This requires selecting a distance metric, choosing the number of strata, and performing the actual analysis.
+Stratification was performed prior to simulation because the population is constant across iterations. Per Tipton's (2013) original recommendation, we use k-means clustering to partition the population into strata. This requires selecting a distance metric, choosing the number of strata, and generating the strata.
 
 ### Distance Metric
 
@@ -164,7 +164,7 @@ where |.| indicates absolute value, $X_{ih}$ and $X_{i'h}$ are values of the $h^
 where $w_{ii'h} = 0$ if $X_h$ is missing for either unit and $w_{ii'h} = 1$ otherwise. This produces an $n$ by $n$ distance (or dissimilarity) matrix.
 
 ### Number of Clusters
-Selecting the number of clusters, $k$, is one of the most difficult problems in cluster analysis (Steinley, 2006). To date, the most extensive investigation of methods for determining $k$ was conducted by Milligan and Cooper (1985) who analyzed 30 methods. However, aside from the limited generalizability of this study, many methods are also inappropriate in the context of non-hierarchical clustering and thus do not support k-means clustering. Tipton (2013) states that both statistical and practical criteria should be used in selecting the number of clusters. Specifically, a large number of clusters would result in more homogeneous strata and, in turn, a more robust sample. However as strata become smaller they also become more difficult to adequately sample from. Hennig and Liao (2013) also argue that the method of selecting $k$ should depend on the context of the clustering and frame the issue as one of obtaining an appropriate subject-matter-dependent definition of rather than a statistical estimation. Ultimately three considerations were used to select the number of clusters: the ratio of variability between clusters to the sum of within and between cluster variability as recommended by Tipton (2013), a generalized form of the Calinski-Harabasz index (Calinski and Harabasz, 1974) proposed by Hennig and Liao (2013), and the practicality of sampling from fewer clusters.
+Selecting the number of clusters, $k$, is one of the most difficult problems in cluster analysis (Steinley, 2006). To date, the most extensive investigation of methods for determining $k$ was conducted by Milligan and Cooper (1985) who analyzed 30 methods. However, aside from the limited generalizability of this study, many methods are also inappropriate in the context of non-hierarchical clustering and thus do not support k-means clustering. Tipton (2013) states that both statistical and practical criteria should be used in selecting the number of clusters. For instance, a large number of clusters would result in more homogeneous strata and, in turn, a more robust sample. However as strata become smaller, they also become more difficult to adequately sample from. Hennig and Liao (2013) argue that the method of selecting $k$ should depend on the context of the clustering and frame the issue as one of obtaining an appropriate subject-matter-dependent definition of rather than a statistical estimation. Ultimately three considerations were used to select the number of clusters: the ratio of variability between clusters to the sum of within and between cluster variability as recommended by Tipton (2013), a generalized form of the Calinski-Harabasz index (Calinski and Harabasz, 1974) proposed by Hennig and Liao (2013), and the practicality of sampling from fewer clusters.
 
 * Everitt (2011), p126
   * clusterSim
@@ -180,7 +180,7 @@ Selecting the number of clusters, $k$, is one of the most difficult problems in 
   + Modern look
 
 ### Cluster Analysis
-Cluster analysis was performed using the _cluster_ package (Maechler et. al. 2017) in R. First, the _daisy_ function is used to compute an $n$ by $n$ pairwise distance matrix across all observations. This function requires two parameters: (1) the data set, and (2) the distance metric. The data set included the full list of school level covariates. The metric was set to "gower". Next the _kmeans_ function is used to generate clusters. This method uses an optimization algorithm to classify units into $k$ clusters by minimizing the total within cluster sum of squares. This function also requires two parameters: (1) the distance matrix, and (2) the number of clusters to generate ($k$). For each $k$, it is recommended to run _kmeans_ at least 10 times, and select the clustering that results in the smallest total within-cluster sum of squares. [Get Citation]
+Cluster analysis was performed using the _cluster_ package (Maechler et. al. 2017) in R. First, the _daisy_ function is used to compute an $n$ by $n$ pairwise distance matrix across all observations. This function requires two parameters: (1) the data matrix, and (2) the distance metric. The data matrix included the full set of school level covariates. The metric was set to "gower". Next the _kmeans_ function was used to generate clusters. This method uses an optimization algorithm to classify units into $k$ clusters by minimizing the total within cluster sum of squares. This function also requires two parameters: (1) the distance matrix, and (2) the number of clusters to generate ($k$). For each $k$, it is recommended to run _kmeans_ at least 10 times, and select the clustering that results in the smallest total within-cluster sum of squares. [Get Citation]
 
 Figure \@ref(fig:ch-full) displays the Calinski-Harabasz (CH) index for each $k$ clusters generated for both the SBS-F and SBS-OV. The value of $k$ that maximizes the CH index should be selected. However we see several local maxima: $k = [2, 5, 8, 11]$ for SBS-F, and $k = 2, 6, 10$ for SBS-OV.
 
@@ -197,13 +197,13 @@ clusters_f <- clusters
 
 ch_f$subs <- "F"
 
-load("Paper Data/clusters-OV-logs.rdata")
-ch_ov <- chPlot
-clusters_ov <- clusters
-
-ch_ov$subs <- "OV"
-
-chPlot <- rbind(ch_f, ch_ov)
+# load("Paper Data/clusters-OV-logs.rdata")
+# ch_ov <- chPlot
+# clusters_ov <- clusters
+# 
+# ch_ov$subs <- "OV"
+# 
+# chPlot <- rbind(ch_f, ch_ov)
 ```
 
 ```{r ch-full, fig.cap="Generalizd Calinski-Harabasz index"}
@@ -213,8 +213,7 @@ chPlot %>%
   geom_point() +
   geom_line() +
   theme_apa() +
-  scale_x_discrete(limits = c(1:K)) +
-  facet_grid(subs ~ .)
+  scale_x_discrete(limits = c(1:K))
 
 
 ```
@@ -222,18 +221,20 @@ chPlot %>%
 
 
 ```{r ratio-full, fig.cap="Ratio of between cluster sum of squares to total cluster sum of squares"}
-cls_ov <- bind_cols(lapply(clusters_ov, function(x) data.frame(x$cluster)))
+# cls_ov <- bind_cols(lapply(clusters_ov, function(x) data.frame(x$cluster)))
 cls_f <- bind_cols(lapply(clusters_f, function(x) data.frame(x$cluster)))
 
-ratio_data <- rbind(data.frame(k = 1:K, subs = "F", vrat = unlist(lapply(clusters_f, function(x) x$betweenss / x$totss))),
-                    data.frame(k = 1:K, subs = "OV", vrat = unlist(lapply(clusters_ov, function(x) x$betweenss / x$totss))))
+# ratio_data <- rbind(data.frame(k = 1:K, subs = "F", vrat = unlist(lapply(clusters_f, function(x) x$betweenss / x$totss))),
+#                     data.frame(k = 1:K, subs = "OV", vrat = unlist(lapply(clusters_ov, function(x) x$betweenss / x$totss))))
 
-levels(ratio_data$subs) <- c("Full", "Omitted Variable")
+ratio_data <- data.frame(k = 1:K, subs = "F", vrat = unlist(lapply(clusters_f, function(x) x$betweenss / x$totss)))
+
+# levels(ratio_data$subs) <- c("Full", "Omitted Variable")
 
 ratio_data %>%
-  group_by(subs) %>%
+  # group_by(subs) %>%
   mutate(min80 = sum(vrat < .8) + .5) %>%
-  ungroup() %>%
+  # ungroup() %>%
   ggplot(aes(x = k, y = vrat)) +
   geom_point() +
   labs(y = "Between Cluster Variance",
@@ -244,7 +245,7 @@ ratio_data %>%
   scale_x_discrete(limits = c(1:K)) +
   scale_y_continuous(breaks = seq(0, 1, .1)) + 
   # facet_grid(subs ~ ., , scales = "free") + 
-  facet_wrap( ~ subs, , scales = "free", ncol = 1) +
+  # facet_wrap( ~ subs, , scales = "free", ncol = 1) +
   theme(legend.position = "none",
         panel.spacing = unit(2, "lines"),
         text = element_text(size=20),
@@ -255,12 +256,14 @@ ggsave("Figs/Elbow.jpg", dpi = 1000, width = 10, height = 8.5)
 ```
 
 ```{r k-size-full, fig.cap="Sampling requirements for each cluster"}
-names(cls_ov) <- names(cls_f) <- 1:K
-cls_ov$subs <- "OV"
+# names(cls_ov) <- names(cls_f) <- 1:K
+names(cls_f) <- 1:K
+# cls_ov$subs <- "OV"
 cls_f$subs <- "F"
 
 
-rbind(cls_f, cls_ov) %>%
+# rbind(cls_f, cls_ov) %>%
+cls_f %>%
   gather(key = k, value = cluster, -subs) %>%
   filter(k > 1) %>%
   mutate(k = as.numeric(k)) %>%
@@ -276,7 +279,7 @@ rbind(cls_f, cls_ov) %>%
   scale_x_discrete(limits = c(1:K)) +
   scale_y_continuous(breaks = seq(0, 30, 5)) +
   stat_function(fun = function(x) 60/x, geom = "line", linetype = "dashed") +
-  facet_grid(subs ~ .) +
+  # facet_grid(subs ~ .) +
   geom_hline(yintercept = 5, linetype = "dotted")
 
 ```

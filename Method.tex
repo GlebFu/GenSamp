@@ -121,40 +121,6 @@
 ## coercion
 \end{verbatim}
 
-\begin{table}[tbp]
-\begin{center}
-\begin{threeparttable}
-\caption{\label{tab:tbl-desc}Descriptives of variables}
-\begin{tabular}{lcccclcccclcccclcccclcccc}
-\toprule
- & \multicolumn{2}{c}{School} & \multicolumn{2}{c}{District Weighted} \\
-\cmidrule(r){2-3} \cmidrule(r){4-5}
-Variables & Mean & SD & Mean & SD\\
-\midrule
-Number of Schools & NA & NA & 4.84 & 12.72\\
-School Size & 579.10 & 203.16 & 534.72 & 225.31\\
-Median Income & 60,065.66 & 25,010.64 & 56,696.14 & 20,803.37\\
-Average Proportions &  &  &  & \\
-\ \ \ ELA Proficiency & 0.59 & 0.23 & 0.60 & 0.20\\
-\ \ \ Math Proficiency & 0.53 & 0.29 & 0.54 & 0.26\\
-\ \ \ Economically Disadvantaged & 0.59 & 0.29 & 0.54 & 0.24\\
-\ \ \ English Language Learners & 0.23 & 0.21 & 0.14 & 0.17\\
-\ \ \ Minority Status & 0.65 & 0.30 & 0.46 & 0.32\\
-\ \ \ Total/Free/Reduced Lunch & 0.59 & 0.29 & 0.53 & 0.24\\
-Indicators &  &  &  & \\
-\ \ \ Urban & 0.40 & 0.49 & 0.15 & 0.33\\
-\ \ \ Suburban & 0.41 & 0.49 & 0.33 & 0.44\\
-\ \ \ Town or Rural & 0.19 & 0.39 & 0.51 & 0.48\\
-\bottomrule
-\addlinespace
-\end{tabular}
-\begin{tablenotes}[para]
-\normalsize{\textit{Note.} District variables are derived as aggregate means of school variables}
-\end{tablenotes}
-\end{threeparttable}
-\end{center}
-\end{table}
-
 \hypertarget{cluster-analysis}{%
 \section{Cluster Analysis}\label{cluster-analysis}}
 
@@ -185,21 +151,7 @@ and schools in the first place. Anecdotal evidence from several research
 teams also suggests that schools are less willing to participate in
 experimental interventions for subjects in which their students are
 already excelling, therefore math and ELA achievement covariates were
-also included. Weighted means of school level variables were calculated
-using school size (number of students) to generate district level
-covariates. In this sense, district covariates describe the population
-of students rather than the population of schools. Descriptives of these
-covariates are reported in table \ref{tab:tbl-desc}
-
-\hypertarget{omitted-variable}{%
-\subsubsection{Omitted Variable}\label{omitted-variable}}
-
-Neighborhood median income was selected to serve as the omitted variable
-for several reasons. First, it is related to several of the other
-variables and therefore likely predicts school or district
-participation. Second, because it comes from a non-educational data
-source (the census) and requires additional work to include in the
-population frame it is likely to be omitted in practice.
+also included.
 
 \begin{figure}
 \centering
@@ -229,30 +181,28 @@ comparison of the distribution of these variables and their logs. Figure
 \ref{fig:dists2} displays the distribution of the remaining continuous
 variables.
 
-\hypertarget{subs}{%
-\subsection{SUBS}\label{subs}}
+\hypertarget{stratified-balanced-sampling}{%
+\subsection{Stratified Balanced
+Sampling}\label{stratified-balanced-sampling}}
 
-Stratification using balanced sampling (SUBS) was performed prior to
-simulation because the group of schools in each strata would be static
-across conditions except where the balancing model is manipulated by
-omitting median income. Per Tipton's (2013) original recommendation, we
-use k-means clustering to partition the population into strata. This
-requires selecting a distance metric, choosing the number of strata, and
-performing the actual analysis.
+Stratification was performed prior to simulation because the population
+is constant across iterations. Per Tipton's (2013) original
+recommendation, we use k-means clustering to partition the population
+into strata. This requires selecting a distance metric, choosing the
+number of strata, and generating the strata.
 
 \hypertarget{distance-metric}{%
 \subsubsection{Distance Metric}\label{distance-metric}}
 
-The set of covariates in both the full model (SUBS-F) and the omitted
-variable model (SUBS-OV) include continuous covariates as well as binary
+The set of covariates include continuous variables as well as binary
 indicators for urbanicity (urban, suburban, and town/rural). Within this
 context it is generally recommended to use Gower's (1971) general
-dissimilarity distance (Everitt, 2011) which Tipton (2013) echos. This
-method relies on different calculations of distance depending on the
-type of covariates. Let \(d_{ii'h}\) be the distance between observed
-values of covariate \(X_{h}\) for unit \(i\) and unit \(i'\) where
-\(i \ne i'\). For categorical or dummy coded variables, \(d_{ii'h} = 1\)
-if \(X_{ih} = X_{i'h}\) and \(d_{ii'h} = 0\) otherwise. For continuous
+dissimilarity distance (Everitt, 2011; Tipton, 2013). This method relies
+on different calculations of distance depending on the type of
+covariates. Let \(d_{ii'h}\) be the distance between observed values of
+covariate \(X_{h}\) for unit \(i\) and unit \(i'\) where \(i \ne i'\).
+For categorical or dummy coded variables, \(d_{ii'h} = 1\) if
+\(X_{ih} = X_{i'h}\) and \(d_{ii'h} = 0\) otherwise. For continuous
 covariates, we use the following formula: \begin{align}
   d_{ii'h} = 1 - \frac{|X_{ih} - X_{i'h}|}{R_h}
 \end{align} where \textbar{}.\textbar{} indicates absolute value,
@@ -281,19 +231,18 @@ from the limited generalizability of this study, many methods are also
 inappropriate in the context of non-hierarchical clustering and thus do
 not support k-means clustering. Tipton (2013) states that both
 statistical and practical criteria should be used in selecting the
-number of clusters. Specifically, a large number of clusters would
+number of clusters. For instance, a large number of clusters would
 result in more homogeneous strata and, in turn, a more robust sample.
-However as strata become smaller they also become more difficult to
-adequately sample from. Hennig and Liao (2013) also argue that the
-method of selecting \(k\) should depend on the context of the clustering
-and frame the issue as one of obtaining an appropriate
-subject-matter-dependent definition of rather than a statistical
-estimation. Ultimately three considerations were used to select the
-number of clusters: the ratio of variability between clusters to the sum
-of within and between cluster variability as recommended by Tipton
-(2013), a generalized form of the Calinski-Harabasz index (Calinski and
-Harabasz, 1974) proposed by Hennig and Liao (2013), and the practicality
-of sampling from fewer clusters.
+However as strata become smaller, they also become more difficult to
+adequately sample from. Hennig and Liao (2013) argue that the method of
+selecting \(k\) should depend on the context of the clustering and frame
+the issue as one of obtaining an appropriate subject-matter-dependent
+definition of rather than a statistical estimation. Ultimately three
+considerations were used to select the number of clusters: the ratio of
+variability between clusters to the sum of within and between cluster
+variability as recommended by Tipton (2013), a generalized form of the
+Calinski-Harabasz index (Calinski and Harabasz, 1974) proposed by Hennig
+and Liao (2013), and the practicality of sampling from fewer clusters.
 
 \begin{itemize}
 \tightlist
@@ -343,34 +292,32 @@ of sampling from fewer clusters.
 Cluster analysis was performed using the \emph{cluster} package
 (Maechler et. al.~2017) in R. First, the \emph{daisy} function is used
 to compute an \(n\) by \(n\) pairwise distance matrix across all
-observations. This function requires two parameters: (1) the data set,
-and (2) the distance metric. For the full model, the data set included
-the full list of school level covariates presented in table
-\ref{tab:tbl-desc}. For the omitted variable model, median income was
-omitted from the data set. For both models, the metric was set to
-\enquote{gower}. Next the \emph{kmeans} function is used to generate
-clusters. This method uses an optimization algorithm to classify units
-into \(k\) clusters by minimizing the total within cluster sum of
-squares. This function also requires two parameters: (1) the distance
-matrix, and (2) the number of clusters to generate (\(k\)). For each
-\(k\), it is recommended to run \emph{kmeans} at least 10 times, and
-select the clustering that results in the smallest total within-cluster
-sum of squares. {[}Get Citation{]}
+observations. This function requires two parameters: (1) the data
+matrix, and (2) the distance metric. The data matrix included the full
+set of school level covariates. The metric was set to \enquote{gower}.
+Next the \emph{kmeans} function was used to generate clusters. This
+method uses an optimization algorithm to classify units into \(k\)
+clusters by minimizing the total within cluster sum of squares. This
+function also requires two parameters: (1) the distance matrix, and (2)
+the number of clusters to generate (\(k\)). For each \(k\), it is
+recommended to run \emph{kmeans} at least 10 times, and select the
+clustering that results in the smallest total within-cluster sum of
+squares. {[}Get Citation{]}
 
 Figure \ref{fig:ch-full} displays the Calinski-Harabasz (CH) index for
-each \(k\) clusters generated for both the SUBS-F and SUBS-OV. The value
+each \(k\) clusters generated for both the SBS-F and SBS-OV. The value
 of \(k\) that maximizes the CH index should be selected. However we see
-several local maxima: \(k = [2, 5, 8, 11]\) for SUBS-F, and
-\(k = 2, 6, 10\) for SUBS-OV.
+several local maxima: \(k = [2, 5, 8, 11]\) for SBS-F, and
+\(k = 2, 6, 10\) for SBS-OV.
 
 Taking the ratio of between-cluster SS to within-cluster SS and plotting
 it against number of clusters creates a chart similar to an upside down
-elbow graph. Figure \ref{fig:ratio-full} displays this for both SUBS-F
-and SUBS-OV. Tipton (2013) recommends selecting the number of clusters
+elbow graph. Figure \ref{fig:ratio-full} displays this for both SBS-F
+and SBS-OV. Tipton (2013) recommends selecting the number of clusters
 such that at least 80\% of the variability is between clusters,
 indicated by the figure as a dashed line. Given this criteria it seems
-that at least 10 clusters should be generated for SUBS-F, and 8 for
-SUBS-OV. However we also see that after a sharp initial increase, the
+that at least 10 clusters should be generated for SBS-F, and 8 for
+SBS-OV. However we also see that after a sharp initial increase, the
 slope of the graph begins to level out. This indicates that as we
 increase the number of clusters, the benefit of doing so decreases,
 while the difficulty of sampling from each cluster increases. In that
@@ -382,13 +329,13 @@ selected from each cluster to fulfill the proportional allocation
 requirement such that the number of units sampled from each cluster is
 proportional to the size of the cluster in the population. The dashed
 line indicates the ideal allocation if all clusters were of equal size.
-We see that for SUBS-F when 8 or less clusters are generated, they are
+We see that for SBS-F when 8 or less clusters are generated, they are
 more equally sized, with the exception of 3 and 6 clusters where one is
-much larger than the others. For SUBS-OV this is less apparent. Instead
-a sensible cutoff may be determined by looking at the size of the
-smallest cluster. At \(k > 7\) it seems that the smallest clusters would
-require less than 5 units being sampled, which may be very difficult in
-a practical setting.
+much larger than the others. For SBS-OV this is less apparent. Instead a
+sensible cutoff may be determined by looking at the size of the smallest
+cluster. At \(k > 7\) it seems that the smallest clusters would require
+less than 5 units being sampled, which may be very difficult in a
+practical setting.
 
 In order to maintain comparability between methods, it was determined
 that 6 clusters would be generated for both models, though in practice 7
