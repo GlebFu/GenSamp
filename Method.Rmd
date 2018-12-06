@@ -1,4 +1,4 @@
----
+ ---
 title             : "Analysis Write-up"
 shorttitle        : "Analysis Write-up"
 
@@ -28,7 +28,9 @@ affiliation:
 # keywords          : "keywords"
 # wordcount         : "X"
 
-# bibliography      : ["r-references.bib"]
+
+# bibliography      : ["http://localhost:23119/better-bibtex/library?/1/library.bibtex"]
+bibliography      : ["r-references.bib", "references.bib"]
 
 figsintext        : no
 figurelist        : no
@@ -40,6 +42,8 @@ mask              : no
 class             : "man"
 output            : papaja::apa6_pdf
 ---
+
+
 
 
 ```{r setup, include=FALSE}
