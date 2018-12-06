@@ -61,49 +61,31 @@ rm(list = ls())
 
 ```{r data-prep}
 source("ParGenSource.R")
+load("Data/base data.rdata")
 # Read Data
-df <- read.csv("Data/final data.csv", stringsAsFactors = F)
-df$urbanicity <- factor(df$urbanicity)
-levels(df$urbanicity) <- c("ToRu", "Suburban", "ToRu", "Urban")
 
-# Create ELL and ED variable district data when school is unavailable
-# Create Minority variable
-# Create Town/Rural Variable
-df <- df %>% 
-  filter(n < 4000) %>%
-  unique() %>%
-  mutate(pELL = ifelse(is.na(pELL), pELL_D, pELL), 
-         pED = ifelse(is.na(pED), pTotfrl, pED),
-         pMin = 1-ethWhite,
-         ToRu = Town + Rural,
-         MEDINC = as.numeric(MEDINC),
-         DID = as.numeric(as.factor(LEAID)) + 1000) %>%
-  group_by(DID) %>%
-  mutate(SID = 1:n() + 10000) %>%
-  ungroup() %>%
-  mutate(DSID = paste(DID, SID, sep = "-"))
-
-vars <- c("LSTATE", "LEANM", "SCHNAM", "DID", "SID", "DSID", "n", "pTotfrl",
-          "Urban", "Suburban", "ToRu",
-          "pELL", "pED", "pELA", "pMath", "pMin", "MEDINC", "urbanicity")
-
-covariates <- c("n", "Urban", "Suburban", "ToRu", "pTotfrl",
-                "pELL", "pED", "pELA", "pMath", "pMin", "MEDINC")
-
-df <- df[,vars] %>% na.omit %>% unique()
-
-# Covarites 
-subs_f_vars <- c("n", "urbanicity",
-                "pELL", "pED", "pELA", "pMath", "pMin", "MEDINC")
-
-
-# School Level Data
-df.sch <- df[,vars]
-
-
-save(df, df.sch, subs_f_vars, file = "data/base data.rdata")
 
 ```
+
+# Introduciton
+  In education research, multisite randomized trials (MRTs) are frequently used to estimate the impact of education interventions on student outcomes. Randomized trials are generally considered the gold standard for evaluating causal effects. However, as the focus of policy research has shifted towards estimating population average treatment effects (PATE), the generalizability of such studies has come under scrutiny. Generalizability is limited if (1) sample units don’t represent the population and (2) treatment effects vary across population units. Both conditions are plausible in large-scale educational MRTs, where recruitment of schools is often driven by convenience and cost effectiveness rather than representation, potentially resulting in biased estimates of PATE from unrepresentative samples.
+  A series of recent papers advocates planning for generalizability at the recruitment stage (Tipton, 2013a; Tipton, 2013b), however limited methodological reserach has been performed to 
+## Generalizability
+
+  
+  
+  
+
+
+## Planning for Generalizability
+A series of recent papers advocates planning for generalizability at the recruitment stage (Tipton, 2013a; Tipton, 2013b). One method for doing so, Stratified Balance Sampling (SBS), has attracted attention from researchers. First, extant data is used to define a target population and create a sampling frame. Using cluster analysis, population units are then stratified on a set of observed covariates related to treatment heterogeneity. Units are ranked within each strata in order of similarity to the average unit in that strata. These rankings are then used to guide recruitment.
+
+  Potential advantages of SBS include reducing coverage errors and greater recruitment transparency. However, little methodological work has examined this method’s effectiveness. Furthermore, the additional resources required to recruit from all strata create concerns regarding practicality. Schools with certain characteristics are unlikely to participate in large-scale RCTs (Stuart et al., 2017; Tipton et al., 2016). If one or more strata are comprised of difficult schools, researchers may resort to convenience sampling within those strata.
+In this study, we aim to lay a groundwork for studying sampling methods in the context of educational RCTs by developing a model for the processes of sampling and recruitment. We use the model in a Monte Carlo simulation to investigate the effectiveness and feasibility of implementing Stratified Balanced Sampling (SBS) relative to Simple Random Sampling (SRS), Convenience Sampling (CS), and stratified versions of these models (SSRS, SCS). In both cases, SRS represents a theoretically ideal sampling technique while CS represents the baseline of current practice. Our study is guided by two primary questions:
+
+RQ1: How do samples recruited using various methods compare in terms of generalizability and feasibility?
+RQ2: How are generalizability and feasibility affected by the population’s overall willingness to participate?
+
 
 # Cluster Analysis
 
@@ -222,12 +204,12 @@ chPlot %>%
 
 ```{r ratio-full, fig.cap="Ratio of between cluster sum of squares to total cluster sum of squares"}
 # cls_ov <- bind_cols(lapply(clusters_ov, function(x) data.frame(x$cluster)))
-cls_f <- bind_cols(lapply(clusters_f, function(x) data.frame(x$cluster)))
+cls_f <- bind_cols(lapply(clusters, function(x) data.frame(x$cluster)))
 
 # ratio_data <- rbind(data.frame(k = 1:K, subs = "F", vrat = unlist(lapply(clusters_f, function(x) x$betweenss / x$totss))),
 #                     data.frame(k = 1:K, subs = "OV", vrat = unlist(lapply(clusters_ov, function(x) x$betweenss / x$totss))))
 
-ratio_data <- data.frame(k = 1:K, subs = "F", vrat = unlist(lapply(clusters_f, function(x) x$betweenss / x$totss)))
+ratio_data <- data.frame(k = 1:K, subs = "F", vrat = unlist(lapply(clusters, function(x) x$betweenss / x$totss)))
 
 # levels(ratio_data$subs) <- c("Full", "Omitted Variable")
 
