@@ -1,4 +1,4 @@
- ---
+---
 title             : "Analysis Write-up"
 shorttitle        : "Analysis Write-up"
 
@@ -30,7 +30,7 @@ affiliation:
 
 
 # bibliography      : ["http://localhost:23119/better-bibtex/library?/1/library.bibtex"]
-bibliography      : ["r-references.bib", "references.bib"]
+bibliography      : ["references.bib"]
 
 figsintext        : no
 figurelist        : no
@@ -73,7 +73,7 @@ load("Data/base data.rdata")
 
 # Introduciton
   In education research, multisite randomized trials (MRTs) are frequently used to estimate the impact of education interventions on student outcomes. Randomized trials are generally considered the gold standard for evaluating causal effects. However, as the focus of policy research has shifted towards estimating population average treatment effects (PATE), the generalizability of such studies has come under scrutiny. Generalizability is limited if (1) sample units don’t represent the population and (2) treatment effects vary across population units. Both conditions are plausible in large-scale educational MRTs, where recruitment of schools is often driven by convenience and cost effectiveness rather than representation, potentially resulting in biased estimates of PATE from unrepresentative samples.
-  A series of recent papers advocates planning for generalizability at the recruitment stage (Tipton, 2013a; Tipton, 2013b), however limited methodological reserach has been performed to 
+  A series of recent papers advocates planning for generalizability at the recruitment stage ([@tiptonImprovingGeneralizationsExperiments2013; @tiptonStratifiedSamplingUsing2013]), however limited methodological research has been performed to 
 ## Generalizability
 
   
@@ -313,8 +313,9 @@ cls_f %>%
 \newpage
 
 # References
+
 ```{r create_r-references}
-# r_refs(file = "r-references.bib")
+r_refs(file = "references.bib")
 ```
 
 \begingroup
