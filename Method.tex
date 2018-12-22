@@ -1,6 +1,6 @@
 
 
-\documentclass[,man]{apa6}
+\documentclass[man]{apa6}
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
 \usepackage{ifxetex,ifluatex}
@@ -25,8 +25,8 @@
 }{}
 \usepackage{hyperref}
 \hypersetup{unicode=true,
-            pdftitle={Analysis Write-up},
-            pdfauthor={Author},
+            pdftitle={Assessing sampling methods for generalization from RCTs: Modeling recruitment and participation},
+            pdfauthor={Gleb Furman~\& James E. Pustejovsky},
             pdfborder={0 0 0},
             breaklinks=true}
 \urlstyle{same}  % don't use monospace font for urls
@@ -64,14 +64,14 @@
 \def\footnote{\protect\rmarkdownfootnote}
 
 
-  \title{Analysis Write-up}
-    \author{Author\textsuperscript{1}}
+  \title{Assessing sampling methods for generalization from RCTs: Modeling recruitment and participation}
+    \author{Gleb Furman\textsuperscript{1}~\& James E. Pustejovsky\textsuperscript{1}}
     \date{}
   
-\shorttitle{Analysis Write-up}
+\shorttitle{Assessing sampling methods for generalization from RCTs}
 \affiliation{
 \vspace{0.5cm}
-\textsuperscript{1} School}
+\textsuperscript{1} University of Texas at Austin}
 \usepackage{csquotes}
 \usepackage{upgreek}
 \captionsetup{font=singlespacing,justification=justified}
@@ -105,7 +105,7 @@
 \hypertarget{introduciton}{%
 \section{Introduciton}\label{introduciton}}
 
-In education research, multisite randomized trials (MRTs) are frequently used to investigate the impact of interventions on student outcomes. Randomized trials are generally considered the gold standard for evaluating causal effects due to their high internal validity. However, as the focus of policy research shifted towards estimating population average treatment effects (PATE), the generalizability of such studies has come under scrutiny (Stuart, Cole, Bradshaw, \& Leaf, 2011). Treatment effect estimates in a sample may not \enquote{generalize} to a population if (1) sample units do not represent the population, and (2) treatment effects vary across population units. Treatment effect heterogeneity is common in the education research literature. Since the goal of such research is to inform policy decisions, it is therefore desirable to design sampling methods that focus on population representation.
+In education research, multisite randomized trials (MRTs) are commonly used to investigate the impact of interventions on student outcomes. Randomized trials in general are considered the gold standard for evaluating causal effects due to their high internal validity. However, as the focus of policy research shifted towards estimating treatment effects in populations outside of the sample, the generalizability of such studies has come under scrutiny (Stuart, Cole, Bradshaw, \& Leaf, 2011). Treatment effect estimates in a sample may not \enquote{generalize} to a population if two conditions are met: (1) treatment effects vary across population units, and (2) the sample units do not represent all population units. Treatment effect heterogeneity is common in the education research literature. Since the goal of such research is to inform policy decisions, it is therefore desirable to design sampling methods that focus on population representation.
 
 Probability sampling is commonly used to make unbiased estimate of population characteristics. When probability sampling is used along with randomized treatment assignment, estimates of average treatment effects are unbiased in both the sample and the population. However, probability sampling is rarely used in educational MRTs (Olsen, Orr, Bell, \& Stuart, 2013; Shadish, Cook, \& Campbell, 2002). Instead, recruitment of schools is often driven by convenience and cost effectiveness rather than representation, potentially resulting in biased estimates of PATE from unrepresentative samples. Though several methods have been proposed to statistically adjust for biased estimates, they invoke strong assumptions and are subject to coverage errors (Tipton, 2014).
 
@@ -118,10 +118,10 @@ The goal of the current paper is two-part. First, we propose several methods for
 \hypertarget{planning-for-generalizability}{%
 \subsection{Planning for Generalizability}\label{planning-for-generalizability}}
 
-\hypertarget{cluster-analysis-stratified-sampling}{%
-\subsection{Cluster Analysis Stratified Sampling}\label{cluster-analysis-stratified-sampling}}
+\hypertarget{stratification-using-balanced-sampling}{%
+\subsection{Stratification Using Balanced Sampling}\label{stratification-using-balanced-sampling}}
 
-Cluster analysis stratified sampling \nocite{tipton2013CA}(CASS; Tipton, 2013b) applies cluster analysis in order to implement bias robust balanced sampling. The goal of CASS is to select a sample that is representative of a population along a set of covariates related to treatment heterogeneity. This process requires the availability of a rich data set of observed covariate for each unit in the population. The population is first divided into heterogeneous strata comprised of homogeneous units given the set of observed covariates. This is done using k-means clustering which assigns units to strata such that similarity within strata is maximized. Units most representative of each strata are prioritized by recruiters. This supports the selection of units from subsections of the population which may otherwise not have been included in the sample.
+Stratification Using Balanced Sampling \nocite{tipton2013CA}(SBS; Tipton, 2013b) applies cluster analysis in order to implement bias robust balanced sampling. The goal of SBS is to select a sample that is representative of a population along a set of covariates related to treatment heterogeneity. This process requires the availability of a rich data set of observed covariate for each unit in the population. The population is first divided into heterogeneous strata comprised of homogeneous units given the set of observed covariates. This is done using k-means clustering which assigns units to strata such that similarity within strata is maximized. Units most representative of each strata are prioritized by recruiters. This supports the selection of units from subsections of the population which may otherwise not have been included in the sample.
 
 \hypertarget{distance-metric}{%
 \subsubsection{Distance Metric}\label{distance-metric}}
@@ -134,7 +134,7 @@ The first step is to select a distance metric, which summarizes the distance bet
 
 Setting the weights to \(w_h = 1\) gives the most weight to covariate with the largest variances. Setting the weights to \(w_h = 1/V(X_h)\) allows each covariate to contribute equally to calculating the distance measure. This latter approach is useful when the importance of predictors of treatment effect heterogeneity is unknown.
 
-If \(X\) contains both continuous and categorical variables, the general similarity measure may be used \citep{gower1971}. This method relies on different calculations of distance depending on the type of covariates. Let \(d_{ii'h}\) be the distance between observed values of covariate \(X_{h}\) for unit \(i\) and unit \(i'\) where \(i \ne i'\). For categorical or dummy coded variables, \(d_{ii'h} = 1\) if \(X_{ih} = X_{i'h}\) and \(d_{ii'h} = 0\) otherwise. For continuous covariates, we use the following formula:
+If \(X\) contains both continuous and categorical variables, the general similarity measure may be used (Gower, 1971). This method relies on different calculations of distance depending on the type of covariates. Let \(d_{ii'h}\) be the distance between observed values of covariate \(X_{h}\) for unit \(i\) and unit \(i'\) where \(i \ne i'\). For categorical or dummy coded variables, \(d_{ii'h} = 1\) if \(X_{ih} = X_{i'h}\) and \(d_{ii'h} = 0\) otherwise. For continuous covariates, we use the following formula:
 
 \begin{align}
   d_{ii'h} = 1 - \frac{|X_{ih} - X_{i'h}|}{R_h}
@@ -162,14 +162,16 @@ One solution is to perform the analysis several times generating different numbe
 As \(p_k\) approaches 1, most of the variation is between strata, indicating homogeneity within strata. This increases the possibility of selecting a more balanced sample. Plotting \(p_k\) against \(k\) allows visual comparison of the results. The \(k\) for which the rate of change \(p_k\) slows is then selected.
 
 \hypertarget{sample-selection}{%
-\paragraph{Sample Selection}\label{sample-selection}}
+\subsubsection{Sample Selection}\label{sample-selection}}
 
-Finally, the sample must be selected and evaluated. \citet{tipton2013CA} recommends selecting a balanced sample of order 1 within each stratum, then testing for robustness to model failure by comparing the selected sample on higher orders. First the number of units to be sampled from each strata must be identified using proportional sample allocation. Each strata contains \(N_j\) units where \(N_1 + N_2 ... + N_k = N\). From each stratum \(j\), \(n_j\) units must be sampled such that \(n_j = [(N_j/N)n]\), where {[}.{]} indicates that each value must be rounded to the nearest integer.
+Finally, the sample must be selected and evaluated. Tipton (2013b) recommends selecting a balanced sample of order 1 within each stratum, then testing for robustness to model failure by comparing the selected sample on higher orders. First the number of units to be sampled from each strata must be identified using proportional sample allocation. Each strata contains \(N_j\) units where \(N_1 + N_2 ... + N_k = N\). From each stratum \(j\), \(n_j\) units must be sampled such that \(n_j = [(N_j/N)n]\), where {[}.{]} indicates that each value must be rounded to the nearest integer.
 
 Next a method must be chosen for selecting units within each strata such that a balanced sample is achieved. Ideally this means that the expected value of covariate \(X_h\) across units in stratum \(j\) is equal to the expected value of covariate \(X_h\) across all units sampled from stratum \(j\):
+
 \begin{align} \label{eq:euclid}
   E(X_h|Z = 1, j) = E(X_h|j)
 \end{align}
+
 One method is to perform a simple random sample of \(n_j\) units. This is ideal as it results in a balanced sample on both observed and unobserved covariates over repeated samples in stratum \(j\). This method is limited when \(n_j\) is small which may not result in balance for any particular sample. Another approach is to rank each unit within a strata using a distance measure, with units closer to the ``center" of the strata ranked higher. Once again, the weighted Euclidean distance can be used, this time measuring the distance to the mean of each covariate:
 
 \begin{align}
@@ -186,10 +188,10 @@ Once the sample has been recruited, it is necessary to evaluate the extent to wh
 
 As this equation approaches 0 for all covariates, the sample become more balanced and robust against model failure. Comparisons can be made using standardized mean differences or t-tests, though substantive criteria should also be considered.
 
-If there is a high degree of homogeneity within strata, this sampling procedure should be fairly robust to moderate non-participation rate. However a very large non-participation rate may result in a lack of balance, especially in higher orders \citep{tipton2013CA}. If large differences are detected, post hoc methods described previously can be used to make further adjustments.
+If there is a high degree of homogeneity within strata, this sampling procedure should be fairly robust to moderate non-participation rate. However a very large non-participation rate may result in a lack of balance, especially in higher orders (Tipton, 2013b). If large differences are detected, post hoc methods described previously can be used to make further adjustments.
 
 \hypertarget{outcome-analysis}{%
-\paragraph{Outcome Analysis}\label{outcome-analysis}}
+\subsubsection{Outcome Analysis}\label{outcome-analysis}}
 
 If proportional allocation is performed during the stratified sampling process, then the proportion of the sample in each strata is equal to the proportion of the population that is in each strata, \(\frac{n_j}{n} = \frac{N_j}{N}\). Furthermore, if a bias-robust balanced sample is selected within each strata, then the expected value of \(X\) in the sample will equal to the expected value of \(X\) in the population within each stratum, \(E(X|Z=1,j) = E(X|j)\). When both of these conditions are satisfied, no additional adjustments need to be made to the outcome analysis. This is because the resulting sample will be self-weighing:
 
@@ -204,15 +206,15 @@ If proportional allocation is performed during the stratified sampling process, 
 Given this, whatever random effects model which would ordinarily be applied may be use to estimate treatment effect. Furthermore, because the standard estimator is used, any power analysis used to estimate the original sample size is unaffected. If proportional allocation is not achieved, the the sample needs to be reweighed to resemble the population, in which case the previously described retrospective methods can be applied to estimate treatment effects and make generalizations.
 
 \hypertarget{advantages-and-limitations}{%
-\paragraph{Advantages and Limitations}\label{advantages-and-limitations}}
+\subsubsection{Advantages and Limitations}\label{advantages-and-limitations}}
 
-CASS has only recently proposed and there have not been any large scale implementations of this method reported. Also, beyond the original proposal article, there have not been any methodological investigation into the method. \citet{tipton2013CA} illustrated CASS by comparing it to a previous study which did not use a formal sampling method \citep{roschelle2010}. Data from the previous study was used to generate two hypothetical samples. The first sample was the ideal in which the highest ranked schools in each stratum agreed to participate. The second sample was the non-response sample where the first 50 highest ranked schools in each stratum refused to participate, resulting in a non-response rate of at least 83\% in each stratum. These two samples were then compared to the original sample on the first 3 moments of 26 covariates. Both samples achieved with CASS resulted in better balance than the original sample on at least 19 of the 26 covariates in the first two moments, and 14 out of 26 in the third moments. The samples were then compared on how well they would generalize using the method proposed by \citet{stuart2011}. This final test showed that the samples achieved with CASS resulted in less coverage errors than the original sample and would thus be easier to generalize using the retrospective methods.
+SBS has only recently proposed and there have not been any large scale implementations of this method reported. Also, beyond the original proposal article, there have not been any methodological investigation into the method. Tipton (2013b) illustrated SBS by comparing it to a previous study which did not use a formal sampling method (Roschelle et al., 2010). Data from the previous study was used to generate two hypothetical samples. The first sample was the ideal in which the highest ranked schools in each stratum agreed to participate. The second sample was the non-response sample where the first 50 highest ranked schools in each stratum refused to participate, resulting in a non-response rate of at least 83\% in each stratum. These two samples were then compared to the original sample on the first 3 moments of 26 covariates. Both samples achieved with SBS resulted in better balance than the original sample on at least 19 of the 26 covariates in the first two moments, and 14 out of 26 in the third moments. The samples were then compared on how well they would generalize using the method proposed by Stuart et al. (2011). This final test showed that the samples achieved with SBS resulted in less coverage errors than the original sample and would thus be easier to generalize using the retrospective methods.
 
-\citet{tipton2013CA, tipton2014PS} showed that stratified sampling methods offer three key advantages: transparency, non-response analysis, and integration with and improvement of post hoc adjustments. Perhaps the most appealing advantage of this method is the transparency it grants to the recruitment process. Clear documentation and reasoning for targeting units for recruitment is provided. This allows for a more careful critique of the study and a better justification of the recruitment process for funders and other stakeholders. It also allows for a better analysis of non-responders, often a large source of bias. By identifying a set of observed covariates which may predict treatment heterogeneity prior to conducting the study, non-responders or refusals can be tracked and later analyzed for any systematic differences from the inference population or study participants. Finally, implementing this method does not preclude the use of the retrospective methods previously discussed. CASS may not alleviate all balancing issues, and additional statistical adjustments may need to be made. Even if balance is only partially improved at the sampling stage, coverage errors will still be reduced and less of the inference population will need to be discarded.
+Stratified sampling methods offer three key advantages: transparency, non-response analysis, and integration with and improvement of post hoc adjustments. Perhaps the most appealing advantage of this method is the transparency it grants to the recruitment process. Clear documentation and reasoning for targeting units for recruitment is provided. This allows for a more careful critique of the study and a better justification of the recruitment process for funders and other stakeholders. It also allows for a better analysis of non-responders, often a large source of bias. By identifying a set of observed covariates which may predict treatment heterogeneity prior to conducting the study, non-responders or refusals can be tracked and later analyzed for any systematic differences from the inference population or study participants. Finally, implementing this method does not preclude the use of the retrospective methods previously discussed. SBS may not alleviate all balancing issues, and additional statistical adjustments may need to be made. Even if balance is only partially improved at the sampling stage, coverage errors will still be reduced and less of the inference population will need to be discarded.
 
-There are, of course, several limitations as well. As with the other retrospective methods, CASS depends on the existence of a rich set of observed covariates related to treatment heterogeneity and sample selection for each unit in the population. Most readily available data sets primarily consist of demographics and may not contain all of the covariates related to variation in treatment effect, which can result in omitted variable bias \citep{tipton2013CA}. Such data is typically in aggregate form, as is the case with school/district censuses, which does not allow stratification at the individual level. Additionally, CASS requires more resources to implement than a simple convenience sample. Implementation of stratified sampling, both with propensity scores and cluster analysis, can be challenging. Depending on the context, developing a sample frame isn't always straightforward and must be thought out carefully \citep{tipton2016a}. Furthermore, recruiting ranked units from multiple strata requires a coordinated effort between recruiters \citep{tipton2016b}. This means that recruiters cannot work independently and must rely on a partnership with methodologists implementing this method.
+There are, of course, several limitations as well. As with the other retrospective methods, SBS depends on the existence of a rich set of observed covariates related to treatment heterogeneity and sample selection for each unit in the population. Most readily available data sets primarily consist of demographics and may not contain all of the covariates related to variation in treatment effect, which can result in omitted variable bias (Tipton, 2013b). Such data is typically in aggregate form, as is the case with school/district censuses, which does not allow stratification at the individual level. Additionally, SBS requires more resources to implement than a simple convenience sample. Implementation of stratified sampling, both with propensity scores and cluster analysis, can be challenging. Depending on the context, developing a sample frame isn't always straightforward and must be thought out carefully (Tipton et al., 2016). Furthermore, recruiting ranked units from multiple strata requires a coordinated effort between recruiters (Tipton, Hallberg, Hedges, \& Chan, 2017). This means that recruiters cannot work independently and must rely on a partnership with methodologists implementing this method.
 
-Finally, although the findings in \citet{tipton2013CA} were positive, it is unclear how generalizable they are to other potential studies. The inference population consisted of 1,713 non-charter schools serving seventh graders in Texas. Of these schools, 73 (4.3\%) were selected into the sample across nine strata. In practice, the inference population may be much larger and more heterogeneous, requiring more strata to be created. Sampling from too many strata is difficult when sample sizes are restricted. Would this method be beneficial to researchers making inferences on a national scale? In order to create a non-response condition, \citet{tipton2013CA} selected the first 50 units in each strata to be refusals, resulting in smaller strata having higher non response rates.
+Finally, although the findings in Tipton (2013b) were positive, it is unclear how generalizable they are to other potential studies. The inference population consisted of 1,713 non-charter schools serving seventh graders in Texas. Of these schools, 73 (4.3\%) were selected into the sample across nine strata. In practice, the inference population may be much larger and more heterogeneous, requiring more strata to be created. Sampling from too many strata is difficult when sample sizes are restricted. Would this method be beneficial to researchers making inferences on a national scale? In order to create a non-response condition, Tipton (2013b) selected the first 50 units in each strata to be refusals, resulting in smaller strata having higher non response rates.
 
 Furthermore, what if schools in larger strata had higher non-response rates? How many schools would recruiters have to contact before collecting a full sample? School recruitment is a time consuming and complicated process which requires approval at several levels. Researchers may not want to invest in recruiting schools from strata with particularly high non response rates. Finally the data came from a single state which happened to provide information on 26 covariates. If a national population was of interest, more states would need to be included, but data reporting is not uniform across all states. What if other states report fewer characteristics? How robust is this method to omitted variables?
 
@@ -325,8 +327,14 @@ In order to maintain comparability between methods, it was determined that 6 clu
 \leavevmode\hypertarget{ref-fellersDevelopingApproachDetermine2017}{}%
 Fellers, L. (2017). \emph{Developing an approach to determine generalizability: A review of efficacy and effectiveness trials funded by the Institute of Education Sciences} (Ph.D.). Columbia University, United States -- New York. Retrieved from \url{https://search.proquest.com/docview/1865595768/abstract/40FD82F4A0C24535PQ/1}
 
+\leavevmode\hypertarget{ref-gowerGeneralCoefficientSimilarity1971}{}%
+Gower, J. C. (1971). A General Coefficient of Similarity and Some of Its Properties. \emph{Biometrics}, \emph{27}(4), 857--871. doi:\href{https://doi.org/10.2307/2528823}{10.2307/2528823}
+
 \leavevmode\hypertarget{ref-olsenExternalValidityPolicy2013}{}%
 Olsen, R. B., Orr, L. L., Bell, S. H., \& Stuart, E. A. (2013). External Validity in Policy Evaluations That Choose Sites Purposively. \emph{Journal of Policy Analysis and Management}, \emph{32}(1), 107--121. doi:\href{https://doi.org/10.1002/pam.21660}{10.1002/pam.21660}
+
+\leavevmode\hypertarget{ref-roschelleIntegrationTechnologyCurriculum2010}{}%
+Roschelle, J., Shechtman, N., Tatar, D., Hegedus, S., Hopkins, B., Empson, S., \ldots{} Gallagher, L. P. (2010). Integration of Technology, Curriculum, and Professional Development for Advancing Middle School Mathematics: Three Large-Scale Studies. \emph{American Educational Research Journal}, \emph{47}(4), 833--878.
 
 \leavevmode\hypertarget{ref-shadishExperimentalQuasiexperimentalDesigns2002}{}%
 Shadish, W. R., Cook, T. D., \& Campbell, D. T. (2002). \emph{Experimental and quasi-experimental designs for generalized causal inference}. Boston, MA, US: Houghton, Mifflin and Company.
@@ -348,6 +356,9 @@ Tipton, E. (2014). How Generalizable Is Your Experiment? An Index for Comparing 
 
 \leavevmode\hypertarget{ref-tiptonSiteSelectionExperiments2016}{}%
 Tipton, E., Fellers, L., Caverly, S., Vaden-Kiernan, M., Borman, G., Sullivan, K., \& de Castilla, V. R. (2016). Site Selection in Experiments: An Assessment of Site Recruitment and Generalizability in Two Scale-up Studies. \emph{Journal of Research on Educational Effectiveness}, \emph{9}(sup1), 209--228. doi:\href{https://doi.org/10.1080/19345747.2015.1105895}{10.1080/19345747.2015.1105895}
+
+\leavevmode\hypertarget{ref-tiptonImplicationsSmallSamples2017}{}%
+Tipton, E., Hallberg, K., Hedges, L. V., \& Chan, W. (2017). Implications of Small Samples for Generalization: Adjustments and Rules of Thumb. \emph{Evaluation Review}, \emph{41}(5), 472--505. doi:\href{https://doi.org/10.1177/0193841X16655665}{10.1177/0193841X16655665}
 
 \endgroup
 
