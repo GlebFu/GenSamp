@@ -225,7 +225,8 @@ Furthermore, what if schools in larger strata had higher non-response rates? How
 \hypertarget{simulation-study}{%
 \section{Simulation Study}\label{simulation-study}}
 
-In this section we describe the simulation study developed to assess the generalizability of the samples selected by SBS relative to several other sampling methods, and the feasibility with which the sampling methods can be employed.
+In this section we describe the simulation study developed to assess the generalizability of the samples selected by SBS relative to several other sampling methods, and the feasibility with which the sampling methods can be employed. Real data was used to inform the population frame.
+Selection bias was generated to account for both self selection as well as researcher bias.
 
 \hypertarget{data}{%
 \subsection{Data}\label{data}}
@@ -240,6 +241,49 @@ The population frame is composed of data from three sources: (1) the Common Core
 Selection of covariates was driven by prior research on district and school participation behavior in RCTs (Stuart et al., 2017; Tipton et al., 2016a; Fellers, 2017). Districts and schools with higher proportions of students who are English language learners (ELL), economically disadvantaged (ED), non-White, and living in urban settings are more likely to participate, as are larger districts and schools. It is important to note, however, that some of these characteristics might also make it more likely that researchers would recruit these districts and schools in the first place. Anecdotal evidence from several research teams also suggests that schools are less willing to participate in experimental interventions for subjects in which their students are already excelling, therefore math and ELA achievement covariates were also included.
 
 Log-transformation was used on school size (number of students) and median income. This is done to allow proportional comparisons at the extremes of the distributions (Hennig and Liao - 2013). For instance, the difference between two schools with 4000 and 3000 students should be weighed as much as the difference between two schools with 400 and 300 students when generating clusters. Figure \ref{fig:dists} displays a comparison of the distribution of these variables and their logs. Figure \ref{fig:dists2} displays the distribution of the remaining continuous variables.
+
+\hypertarget{participation-propenity-score}{%
+\subsubsection{Participation Propenity Score}\label{participation-propenity-score}}
+
+A response generating model (RGM) was developed to simulate self selection. The RGM creates a propensity score for each school that indicates the probability of the school agreeing to participate if targeted by any of the sampling method. This model assumes that schools can be recruited directly by researchers.
+
+Let and \(\pi^S\) be the participation propensity score. The following base model will be used for the RGM:
+
+\begin{align} \label{eq:sRGM}
+  \log\bigg(\frac{\pi^S}{1-\pi^S}\bigg) = \gamma_{0} &+ \gamma_{1}X_{Suburban} + \gamma_{2}X_{Town/Rural} + \gamma_{3}X_{pELL} + \gamma_{4}X_{pED} 
+  \\
+  &+ \gamma_{5}X_{pMin} + \gamma_{6}X_{MedInc} + \gamma_{7}X_{ELA} + \gamma_{8}X_{Math} \nonumber
+\end{align}
+
+Where \(X_{Suburban}\) indicates if the school is suburban, \(X_{Town/Rural}\) indicates if the school is in a town or is rural, \(X_{pELL}\) is the percentage of ELL students in the school, \(X_{pED}\) is the percentage of ED students in the school, \(X_{pMin}\) is the percentage of minority students in the school, and \(X_{MedInc}\) is the average median household income in the school community, \(X_{ELA}\) is the percentage of students in a school scoring at or above proficiency on English language arts exams, and \(X_{Math}\) is the percentage of students in a school scoring at or above proficiency on math exams.
+
+Parameters for the RGM were selected by iterating across values until the model produced samples with desired covariate characteristics.
+
+\begin{tabular}{l|r|r|r|r|r|r|r|r|r}
+\hline
+Var & RR = 10\% & RR = 20\% & RR = 30\% & RR = 40\% & RR = 50\% & RR = 60\% & RR = 70\% & RR = 80\% & RR = 90\%\\
+\hline
+Intercept & -2.99 & -1.83 & -1.09 & -0.27 & 0.77 & 1.52 & 4.61 & 3.62 & 7.49\\
+\hline
+n & -0.17 & -0.16 & -0.20 & -0.20 & -0.21 & -0.24 & -0.21 & -0.42 & -0.40\\
+\hline
+pED & 0.74 & 0.91 & 0.89 & 0.75 & 1.09 & 1.05 & 1.28 & 1.67 & 1.95\\
+\hline
+pELA & 0.17 & 0.30 & 0.41 & -0.70 & 0.25 & -0.86 & 0.11 & -0.40 & 0.53\\
+\hline
+pELL & -0.17 & -0.15 & -0.20 & -0.19 & -0.20 & -0.21 & 0.10 & -0.93 & -1.10\\
+\hline
+pMath & 0.15 & 0.06 & -0.06 & 0.96 & 0.16 & 1.19 & 0.19 & 1.23 & 0.20\\
+\hline
+pMin & -0.95 & -1.24 & -1.16 & -1.35 & -1.75 & -2.39 & -5.57 & -2.12 & -3.47\\
+\hline
+Suburban & -0.18 & -0.07 & -0.28 & -0.64 & -0.50 & -0.19 & -0.51 & -0.02 & 1.40\\
+\hline
+ToRu & 0.55 & 0.34 & 0.73 & 0.81 & 1.64 & 1.49 & 2.00 & 2.27 & 2.12\\
+\hline
+Urban & -0.33 & -0.22 & -0.44 & -0.84 & -0.67 & -0.43 & -0.62 & -0.39 & -1.37\\
+\hline
+\end{tabular}
 
 \hypertarget{stratified-balanced-sampling}{%
 \subsection{Stratified Balanced Sampling}\label{stratified-balanced-sampling}}

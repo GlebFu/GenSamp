@@ -172,7 +172,8 @@ Furthermore, what if schools in larger strata had higher non-response rates? How
 
 
 # Simulation Study
-In this section we describe the simulation study developed to assess the generalizability of the samples selected by SBS relative to several other sampling methods, and the feasibility with which the sampling methods can be employed.
+In this section we describe the simulation study developed to assess the generalizability of the samples selected by SBS relative to several other sampling methods, and the feasibility with which the sampling methods can be employed. Real data was used to inform the population frame.
+Selection bias was generated to account for both self selection as well as researcher bias.
 
 
 ## Data
@@ -183,37 +184,38 @@ The population frame is composed of data from three sources: (1) the Common Core
 
 Selection of covariates was driven by prior research on district and school participation behavior in RCTs (Stuart et al., 2017; Tipton et al., 2016a; Fellers, 2017). Districts and schools with higher proportions of students who are English language learners (ELL), economically disadvantaged (ED), non-White, and living in urban settings are more likely to participate, as are larger districts and schools. It is important to note, however, that some of these characteristics might also make it more likely that researchers would recruit these districts and schools in the first place. Anecdotal evidence from several research teams also suggests that schools are less willing to participate in experimental interventions for subjects in which their students are already excelling, therefore math and ELA achievement covariates were also included.
 
-```{r dists, results = "asis", fig.cap="Comparison of covariate distributions and their log transformations."}
-to_z <- function(x) (x - mean(x))/sd(x)
-
-dist_plots <- df[, c("DSID",subs_f_vars)] %>%
-  mutate(n_log = log(n),
-         MEDINC_log = log(MEDINC/1000),
-         MEDINC = MEDINC / 1000)
-
-dist_plots %>%
-  gather(key = var, value = value, n, n_log, MEDINC, MEDINC_log) %>%
-  ggplot(aes(x = value)) +
-  geom_histogram() +
-  facet_wrap(~ var, scales = "free") +
-  theme_apa()
-
-```
-
-```{r dists2, fig.cap="Distributions of the remaining continuous covariates."}
-dist_plots %>%
-  gather(key = var, value = value, pED:pMin) %>%
-  group_by(var) %>%
-  # mutate(value = value - mean(value)) %>%
-  ggplot(aes(x = value)) +
-  geom_histogram() +
-  facet_wrap(~ var, scales = "free") +
-  theme_apa()
-
-```
-
 Log-transformation was used on school size (number of students) and median income. This is done to allow proportional comparisons at the extremes of the distributions (Hennig and Liao - 2013). For instance, the difference between two schools with 4000 and 3000 students should be weighed as much as the difference between two schools with 400 and 300 students when generating clusters. Figure \@ref(fig:dists) displays a comparison of the distribution of these variables and their logs. Figure \@ref(fig:dists2) displays the distribution of the remaining continuous variables.
 
+### Participation Propenity Score
+A response generating model (RGM) was developed to simulate self selection. The RGM creates a propensity score for each school that indicates the probability of the school agreeing to participate if targeted by any of the sampling method. This model assumes that schools can be recruited directly by researchers. 
+
+Let and $\pi^S$ be the participation propensity score. The following base model will be used for the RGM:
+
+\begin{align} \label{eq:sRGM}
+  \log\bigg(\frac{\pi^S}{1-\pi^S}\bigg) = \gamma_{0} &+ \gamma_{1}X_{Suburban} + \gamma_{2}X_{Town/Rural} + \gamma_{3}X_{pELL} + \gamma_{4}X_{pED} 
+  \\
+  &+ \gamma_{5}X_{pMin} + \gamma_{6}X_{MedInc} + \gamma_{7}X_{ELA} + \gamma_{8}X_{Math} \nonumber
+\end{align}
+
+Where $X_{Suburban}$ indicates if the school is suburban, $X_{Town/Rural}$ indicates if the school is in a town or is rural, $X_{pELL}$ is the percentage of ELL students in the school, $X_{pED}$ is the percentage of ED students in the school, $X_{pMin}$ is the percentage of minority students in the school, and $X_{MedInc}$ is the average median household income in the school community, $X_{ELA}$ is the percentage of students in a school scoring at or above proficiency on English language arts exams, and $X_{Math}$ is the percentage of students in a school scoring at or above proficiency on math exams. 
+
+Parameters for the RGM were selected by iterating across values until the model produced samples with desired covariate characteristics. 
+
+
+```{r, eval = T}
+library(tidyverse)
+library(kableExtra)
+
+load("Data/RGM Vars.Rdata")
+
+tab.RGM.pars <- schVals %>%
+  select(Var, pars, RR) %>%
+  mutate(RR = paste("RR = ", RR*100, "%", sep = ""),
+         pars = round(pars, 2)) %>%
+  spread(key = RR, value = pars) 
+
+kable(tab.RGM.pars)
+```
 
 ## Stratified Balanced Sampling
 
