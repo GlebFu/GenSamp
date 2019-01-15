@@ -1,4 +1,4 @@
-\documentclass[man]{apa6}
+\documentclass[man,floatsintext]{apa6}
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
 \usepackage{ifxetex,ifluatex}
@@ -90,14 +90,6 @@
 \newcommand{\getlongtablewidth}{\begingroup \ifcsname LT@\roman{LT@tables}\endcsname \global\longtablewidth=0pt \renewcommand{\LT@entry}[2]{\global\advance\longtablewidth by ##2\relax\gdef\LastLTentrywidth{##2}}\@nameuse{LT@\roman{LT@tables}} \fi \endgroup}
 
 
-\DeclareDelayedFloatFlavor{ThreePartTable}{table}
-\DeclareDelayedFloatFlavor{lltable}{table}
-\DeclareDelayedFloatFlavor*{longtable}{table}
-\makeatletter
-\renewcommand{\efloat@iwrite}[1]{\immediate\expandafter\protected@write\csname efloat@post#1\endcsname{}}
-\makeatother
-
-
 
 \abstract{
 In order for educational research to be informative to policy makers, studies must be designed to make robust estimates of causal effects at the population level. Large scale multi-site randomized trials (MRT) often rely on vague convenience sampling methodology when recruiting districts and schools, resulting in relatively homogeneous samples that may differ greatly from the intended population of interest. Retrospective methods that quantify and statistically adjust for those differences are prosmising but have limited effect when the sample differs greatly from the population. Designing sampling methods that focus on generalizability may be a more ffective but costly solution, but limited methodological research has been performed to examine their effectiveness in the eduational context. This paper examines one promising method, stratified balanced sampling (SBS), in the context of recruiting a representative sample of schools for a large scale MRT. Using simulations based on real data, we compare SBS to stratified and unstratified versions of convenince sampling and probability sampling. Several models for generating school participation and emulating convenience sampling are proposed. Results indicate that SBS and stratified random sampling (SRS) result in highly generalizable samples. These methods are extremely costly to implement, however, especially when the population average willingness to participate is low. Stratified convenience sampling (SCS) is a potential compromise.
@@ -119,13 +111,10 @@ Potential advantages of SBS include reducing coverage errors and greater recruit
 
 The goal of the current paper is two-part. First, we propose several methods for modeling two major sources of sampling bias: recruitment and participation. Recruitment refers to how likely a sampling unit is to be approached by researchers, and participation refers to how likely the sampling unit is to participate if recruited. This step will lay the groundwork for testing sampling methods in the educational context. Second, using the models proposed in the first step, we will compare SBS to several other recruitment models on it's ability to select a generalizable sample, and the ease with which a full sample can be recruited.
 
-\hypertarget{planning-for-generalizability}{%
-\subsection{Planning for Generalizability}\label{planning-for-generalizability}}
+\hypertarget{stratified-balanced-sampling}{%
+\subsection{Stratified Balanced Sampling}\label{stratified-balanced-sampling}}
 
-\hypertarget{stratification-using-balanced-sampling}{%
-\subsection{Stratification Using Balanced Sampling}\label{stratification-using-balanced-sampling}}
-
-Stratification Using Balanced Sampling \nocite{tipton2013CA}(SBS; Tipton, 2013b) applies cluster analysis in order to implement bias robust balanced sampling. The goal of SBS is to select a sample that is representative of a population along a set of covariates related to treatment heterogeneity. This process requires the availability of a rich data set of observed covariate for each unit in the population. The population is first divided into heterogeneous strata comprised of homogeneous units given the set of observed covariates. This is done using k-means clustering which assigns units to strata such that similarity within strata is maximized. Units most representative of each strata are prioritized by recruiters. This supports the selection of units from subsections of the population which may otherwise not have been included in the sample.
+Stratified Balanced Sampling \nocite{tipton2013CA}(SBS; Tipton, 2013b) applies cluster analysis in order to implement bias robust balanced sampling. The goal of SBS is to select a sample that is representative of a population along a set of covariates related to treatment heterogeneity. This process requires the availability of a rich data set of observed covariate for each unit in the population. The population is first divided into heterogeneous strata comprised of homogeneous units given the set of observed covariates. This is done using k-means clustering which assigns units to strata such that similarity within strata is maximized. Units most representative of each strata are prioritized by recruiters. This encourages the selection of units from subsections of the population which may otherwise not have been included in the sample.
 
 \hypertarget{distance-metric}{%
 \subsubsection{Distance Metric}\label{distance-metric}}
@@ -231,7 +220,7 @@ Selection bias was generated to account for both self selection as well as resea
 \hypertarget{data}{%
 \subsection{Data}\label{data}}
 
-In order to develop realistic sampling scenarios, extant school data were used to develop the population frame. School characteristics were then used to generate a \enquote{participation propensity score} which indicated the probability of a school agreeing to participate if asked. Because the overall participation rate for the population is unknown, this score was generated under severall assumed participation rates.
+In order to model realistic sampling scenarios, extant school data were used to develop the population frame. School characteristics were then used to generate a \enquote{participation propensity score} which indicated the probability of a school agreeing to participate if asked. Because the overall participation rate for the population is unknown, this score was generated under severall assumed participation rates.
 
 \hypertarget{population-frame}{%
 \subsubsection{Population Frame}\label{population-frame}}
@@ -240,7 +229,19 @@ The population frame is composed of data from three sources: (1) the Common Core
 
 Selection of covariates was driven by prior research on district and school participation behavior in RCTs (Stuart et al., 2017; Tipton et al., 2016a; Fellers, 2017). Districts and schools with higher proportions of students who are English language learners (ELL), economically disadvantaged (ED), non-White, and living in urban settings are more likely to participate, as are larger districts and schools. It is important to note, however, that some of these characteristics might also make it more likely that researchers would recruit these districts and schools in the first place. Anecdotal evidence from several research teams also suggests that schools are less willing to participate in experimental interventions for subjects in which their students are already excelling, therefore math and ELA achievement covariates were also included.
 
-Log-transformation was used on school size (number of students) and median income. This is done to allow proportional comparisons at the extremes of the distributions (Hennig and Liao - 2013). For instance, the difference between two schools with 4000 and 3000 students should be weighed as much as the difference between two schools with 400 and 300 students when generating clusters. Figure \ref{fig:dists} displays a comparison of the distribution of these variables and their logs. Figure \ref{fig:dists2} displays the distribution of the remaining continuous variables.
+Log-transformation was used on school size (number of students) and median income. This is done to allow proportional comparisons at the extremes of the distributions (Hennig \& Liao, 2013). For instance, the difference between two schools with 4000 and 3000 students should be weighed as much as the difference between two schools with 400 and 300 students when generating clusters. Figure \ref{fig:plot-dist1} displays a comparison of the distribution of these variables and their logs. Figure \ref{fig:plot-dist2} displays the distribution of the remaining continuous variables.
+
+\begin{figure}
+\centering
+\includegraphics{GenSamp_Paper_files/figure-latex/plot-dist1-1.pdf}
+\caption{\label{fig:plot-dist1}Comparison of covariate distributions and their log transformations.}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics{GenSamp_Paper_files/figure-latex/plot-dist2-1.pdf}
+\caption{\label{fig:plot-dist2}Distributions of the remaining continuous covariates.}
+\end{figure}
 
 \hypertarget{participation-propenity-score}{%
 \subsubsection{Participation Propenity Score}\label{participation-propenity-score}}
@@ -259,34 +260,32 @@ Where \(X_{Suburban}\) indicates if the school is suburban, \(X_{Town/Rural}\) i
 
 Parameters for the RGM were selected by iterating across values until the model produced samples with desired covariate characteristics.
 
-\begin{tabular}{l|r|r|r|r|r|r|r|r|r}
-\hline
-Var & RR = 10\% & RR = 20\% & RR = 30\% & RR = 40\% & RR = 50\% & RR = 60\% & RR = 70\% & RR = 80\% & RR = 90\%\\
-\hline
+\begin{table}[tbp]
+\begin{center}
+\begin{threeparttable}
+\caption{\label{tab:tab-RGM-Pars}}
+\begin{tabular}{llllllllll}
+\toprule
+Var & \multicolumn{1}{c}{RR = 10\%} & \multicolumn{1}{c}{RR = 20\%} & \multicolumn{1}{c}{RR = 30\%} & \multicolumn{1}{c}{RR = 40\%} & \multicolumn{1}{c}{RR = 50\%} & \multicolumn{1}{c}{RR = 60\%} & \multicolumn{1}{c}{RR = 70\%} & \multicolumn{1}{c}{RR = 80\%} & \multicolumn{1}{c}{RR = 90\%}\\
+\midrule
 Intercept & -2.99 & -1.83 & -1.09 & -0.27 & 0.77 & 1.52 & 4.61 & 3.62 & 7.49\\
-\hline
 n & -0.17 & -0.16 & -0.20 & -0.20 & -0.21 & -0.24 & -0.21 & -0.42 & -0.40\\
-\hline
 pED & 0.74 & 0.91 & 0.89 & 0.75 & 1.09 & 1.05 & 1.28 & 1.67 & 1.95\\
-\hline
 pELA & 0.17 & 0.30 & 0.41 & -0.70 & 0.25 & -0.86 & 0.11 & -0.40 & 0.53\\
-\hline
 pELL & -0.17 & -0.15 & -0.20 & -0.19 & -0.20 & -0.21 & 0.10 & -0.93 & -1.10\\
-\hline
 pMath & 0.15 & 0.06 & -0.06 & 0.96 & 0.16 & 1.19 & 0.19 & 1.23 & 0.20\\
-\hline
 pMin & -0.95 & -1.24 & -1.16 & -1.35 & -1.75 & -2.39 & -5.57 & -2.12 & -3.47\\
-\hline
 Suburban & -0.18 & -0.07 & -0.28 & -0.64 & -0.50 & -0.19 & -0.51 & -0.02 & 1.40\\
-\hline
 ToRu & 0.55 & 0.34 & 0.73 & 0.81 & 1.64 & 1.49 & 2.00 & 2.27 & 2.12\\
-\hline
 Urban & -0.33 & -0.22 & -0.44 & -0.84 & -0.67 & -0.43 & -0.62 & -0.39 & -1.37\\
-\hline
+\bottomrule
 \end{tabular}
+\end{threeparttable}
+\end{center}
+\end{table}
 
-\hypertarget{stratified-balanced-sampling}{%
-\subsection{Stratified Balanced Sampling}\label{stratified-balanced-sampling}}
+\hypertarget{stratified-balanced-sampling-1}{%
+\subsection{Stratified Balanced Sampling}\label{stratified-balanced-sampling-1}}
 
 Stratification was performed prior to simulation because the population is constant across iterations. Per Tipton's (2013) original recommendation, we use k-means clustering to partition the population into strata. This requires selecting a distance metric, choosing the number of strata, and generating the strata.
 
@@ -363,6 +362,24 @@ Figure @ref(fig:k-size-full plots the sample size that needs to be selected from
 
 In order to maintain comparability between methods, it was determined that 6 clusters would be generated for both models, though in practice 7 clusters for the full model may be more prudent.
 
+\begin{figure}
+\centering
+\includegraphics{GenSamp_Paper_files/figure-latex/ch-full-1.pdf}
+\caption{\label{fig:ch-full}Generalizd Calinski-Harabasz index}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics{GenSamp_Paper_files/figure-latex/ratio-full-1.pdf}
+\caption{\label{fig:ratio-full}Ratio of between cluster sum of squares to total cluster sum of squares}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics{GenSamp_Paper_files/figure-latex/k-size-full-1.pdf}
+\caption{\label{fig:k-size-full}Sampling requirements for each cluster}
+\end{figure}
+
 \newpage
 
 \hypertarget{references}{%
@@ -378,6 +395,9 @@ Fellers, L. (2017). \emph{Developing an approach to determine generalizability: 
 
 \leavevmode\hypertarget{ref-gowerGeneralCoefficientSimilarity1971}{}%
 Gower, J. C. (1971). A General Coefficient of Similarity and Some of Its Properties. \emph{Biometrics}, \emph{27}(4), 857--871. doi:\href{https://doi.org/10.2307/2528823}{10.2307/2528823}
+
+\leavevmode\hypertarget{ref-hennigHowFindAppropriate2013}{}%
+Hennig, C., \& Liao, T. F. (2013). How to find an appropriate clustering for mixed-type variables with application to socio-economic stratification: How to Find an Appropriate Clustering. \emph{Journal of the Royal Statistical Society: Series C (Applied Statistics)}, \emph{62}(3), 309--369. doi:\href{https://doi.org/10.1111/j.1467-9876.2012.01066.x}{10.1111/j.1467-9876.2012.01066.x}
 
 \leavevmode\hypertarget{ref-olsenExternalValidityPolicy2013}{}%
 Olsen, R. B., Orr, L. L., Bell, S. H., \& Stuart, E. A. (2013). External Validity in Policy Evaluations That Choose Sites Purposively. \emph{Journal of Policy Analysis and Management}, \emph{32}(1), 107--121. doi:\href{https://doi.org/10.1002/pam.21660}{10.1002/pam.21660}
