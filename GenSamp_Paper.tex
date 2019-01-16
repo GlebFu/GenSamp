@@ -1,3 +1,5 @@
+
+
 \documentclass[man,floatsintext]{apa6}
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -88,12 +90,6 @@
 \newlength\longtablewidth
 \setlength{\longtablewidth}{1in}
 \newcommand{\getlongtablewidth}{\begingroup \ifcsname LT@\roman{LT@tables}\endcsname \global\longtablewidth=0pt \renewcommand{\LT@entry}[2]{\global\advance\longtablewidth by ##2\relax\gdef\LastLTentrywidth{##2}}\@nameuse{LT@\roman{LT@tables}} \fi \endgroup}
-
-
-
-\abstract{
-In order for educational research to be informative to policy makers, studies must be designed to make robust estimates of causal effects at the population level. Large scale multi-site randomized trials (MRT) often rely on vague convenience sampling methodology when recruiting districts and schools, resulting in relatively homogeneous samples that may differ greatly from the intended population of interest. Retrospective methods that quantify and statistically adjust for those differences are prosmising but have limited effect when the sample differs greatly from the population. Designing sampling methods that focus on generalizability may be a more ffective but costly solution, but limited methodological research has been performed to examine their effectiveness in the eduational context. This paper examines one promising method, stratified balanced sampling (SBS), in the context of recruiting a representative sample of schools for a large scale MRT. Using simulations based on real data, we compare SBS to stratified and unstratified versions of convenince sampling and probability sampling. Several models for generating school participation and emulating convenience sampling are proposed. Results indicate that SBS and stratified random sampling (SRS) result in highly generalizable samples. These methods are extremely costly to implement, however, especially when the population average willingness to participate is low. Stratified convenience sampling (SCS) is a potential compromise.
-}
 
 \begin{document}
 \maketitle
@@ -256,33 +252,29 @@ Let and \(\pi^S\) be the participation propensity score. The following base mode
   &+ \gamma_{5}X_{pMin} + \gamma_{6}X_{MedInc} + \gamma_{7}X_{ELA} + \gamma_{8}X_{Math} \nonumber
 \end{align}
 
-Where \(X_{Suburban}\) indicates if the school is suburban, \(X_{Town/Rural}\) indicates if the school is in a town or is rural, \(X_{pELL}\) is the percentage of ELL students in the school, \(X_{pED}\) is the percentage of ED students in the school, \(X_{pMin}\) is the percentage of minority students in the school, and \(X_{MedInc}\) is the average median household income in the school community, \(X_{ELA}\) is the percentage of students in a school scoring at or above proficiency on English language arts exams, and \(X_{Math}\) is the percentage of students in a school scoring at or above proficiency on math exams.
+where \(X_{Suburban}\) indicates if the school is suburban, \(X_{Town/Rural}\) indicates if the school is in a town or is rural, \(X_{pELL}\) is the percentage of ELL students in the school, \(X_{pED}\) is the percentage of ED students in the school, \(X_{pMin}\) is the percentage of minority students in the school, and \(X_{MedInc}\) is the average median household income in the school community, \(X_{ELA}\) is the percentage of students in a school scoring at or above proficiency on English language arts exams, and \(X_{Math}\) is the percentage of students in a school scoring at or above proficiency on math exams.
 
-Parameters for the RGM were selected by iterating across values until the model produced samples with desired covariate characteristics.
+To select parameters for the RGM we first identified desireable sample characteristics. Fellers (2017) compared 571 elementary schools that participated in IES funded studies to the full population of U.S. elementary schools on a set of similar covariates, and reported the absolute standardized mean differences (SMD) between the schools that participated and the population. Iterating across parameter values, we generated \(\pi^S\) and computed the weighted mean as
 
-\begin{table}[tbp]
-\begin{center}
-\begin{threeparttable}
-\caption{\label{tab:tab-RGM-Pars}}
-\begin{tabular}{llllllllll}
-\toprule
-Var & \multicolumn{1}{c}{RR = 10\%} & \multicolumn{1}{c}{RR = 20\%} & \multicolumn{1}{c}{RR = 30\%} & \multicolumn{1}{c}{RR = 40\%} & \multicolumn{1}{c}{RR = 50\%} & \multicolumn{1}{c}{RR = 60\%} & \multicolumn{1}{c}{RR = 70\%} & \multicolumn{1}{c}{RR = 80\%} & \multicolumn{1}{c}{RR = 90\%}\\
-\midrule
-Intercept & -2.99 & -1.83 & -1.09 & -0.27 & 0.77 & 1.52 & 4.61 & 3.62 & 7.49\\
-n & -0.17 & -0.16 & -0.20 & -0.20 & -0.21 & -0.24 & -0.21 & -0.42 & -0.40\\
-pED & 0.74 & 0.91 & 0.89 & 0.75 & 1.09 & 1.05 & 1.28 & 1.67 & 1.95\\
-pELA & 0.17 & 0.30 & 0.41 & -0.70 & 0.25 & -0.86 & 0.11 & -0.40 & 0.53\\
-pELL & -0.17 & -0.15 & -0.20 & -0.19 & -0.20 & -0.21 & 0.10 & -0.93 & -1.10\\
-pMath & 0.15 & 0.06 & -0.06 & 0.96 & 0.16 & 1.19 & 0.19 & 1.23 & 0.20\\
-pMin & -0.95 & -1.24 & -1.16 & -1.35 & -1.75 & -2.39 & -5.57 & -2.12 & -3.47\\
-Suburban & -0.18 & -0.07 & -0.28 & -0.64 & -0.50 & -0.19 & -0.51 & -0.02 & 1.40\\
-ToRu & 0.55 & 0.34 & 0.73 & 0.81 & 1.64 & 1.49 & 2.00 & 2.27 & 2.12\\
-Urban & -0.33 & -0.22 & -0.44 & -0.84 & -0.67 & -0.43 & -0.62 & -0.39 & -1.37\\
-\bottomrule
-\end{tabular}
-\end{threeparttable}
-\end{center}
-\end{table}
+\begin{align}
+  m = \frac{\sum{\frac{1}{\pi^S} X}}{\sum{\frac{1}{\pi^S}}}
+\end{align}
+
+where \(m\) represents the expected sample mean of a random sample for covariate \(X\).
+
+We then calculated SMDs between our expected sample mean and our population as \(\frac{m - \mu}{\sigma}\) and compared them to the SMDs reported by Fellers (2017), selecting parameter values that resulted in the closest match. SMDs were not reported for academic outcomes (ELA, Math) and neighborhood median income. However, anecdotal evidence suggests that schools with higher academic performance are less likely to participate in studies. We therefore selected .25 as the goal SMDs for ELA and Math. Indicators of low SES ahve been shown to be predictive at the district level {[}(Stuart et al., 2017; Tipton et al., 2016){]} though percentage of students receiving free/reduced lunch were shown to not be predictive of school participation (Fellers, 2017). We therefore also set .25 as the goal SMD for median income. In conjunction with iterating across parameter values, intercept values were manipulated to generate different levels of population participation rates. Since these rates are unknown, we selected parameters for 9 levels of participation rates. \ref{fig:fig-SMD-goal} reports the difference between our generated SMDs and the goal SMDs for each covariate and each participation rate. \ref{fig:fig-RGM-Pars} reports the parameter values we ultimately selected for each covaraite and each participation rate.
+
+\begin{figure}
+\centering
+\includegraphics{GenSamp_Paper_files/figure-latex/fig-SMD-goal-1.pdf}
+\caption{\label{fig:fig-SMD-goal}Difference between generated SMDs and reported SMDs}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics{GenSamp_Paper_files/figure-latex/fig-RGM-Pars-1.pdf}
+\caption{\label{fig:fig-RGM-Pars}Odds ratio coeficients for Response Generating Model}
+\end{figure}
 
 \hypertarget{stratified-balanced-sampling-1}{%
 \subsection{Stratified Balanced Sampling}\label{stratified-balanced-sampling-1}}
@@ -308,47 +300,6 @@ where \(w_{ii'h} = 0\) if \(X_h\) is missing for either unit and \(w_{ii'h} = 1\
 
 Selecting the number of clusters, \(k\), is one of the most difficult problems in cluster analysis (Steinley, 2006). To date, the most extensive investigation of methods for determining \(k\) was conducted by Milligan and Cooper (1985) who analyzed 30 methods. However, aside from the limited generalizability of this study, many methods are also inappropriate in the context of non-hierarchical clustering and thus do not support k-means clustering. Tipton (2013) states that both statistical and practical criteria should be used in selecting the number of clusters. For instance, a large number of clusters would result in more homogeneous strata and, in turn, a more robust sample. However as strata become smaller, they also become more difficult to adequately sample from. Hennig and Liao (2013) argue that the method of selecting \(k\) should depend on the context of the clustering and frame the issue as one of obtaining an appropriate subject-matter-dependent definition of rather than a statistical estimation. Ultimately three considerations were used to select the number of clusters: the ratio of variability between clusters to the sum of within and between cluster variability as recommended by Tipton (2013), a generalized form of the Calinski-Harabasz index (Calinski and Harabasz, 1974) proposed by Hennig and Liao (2013), and the practicality of sampling from fewer clusters.
 
-\begin{itemize}
-\tightlist
-\item
-  Everitt (2011), p126
-
-  \begin{itemize}
-  \tightlist
-  \item
-    clusterSim
-  \item
-    Continuous data?
-
-    \begin{itemize}
-    \tightlist
-    \item
-      Calinski and Harabasz (1974)
-    \item
-      Duda and Hart (1973)
-    \end{itemize}
-  \item
-    Steinley, D. (2006) K-means clustering: a half-century synthesis. British Journal of Mathematical
-    \& Statistical Psychology, 59, 1--34.
-  \end{itemize}
-\item
-  Milligan and Cooper (1984)
-
-  \begin{itemize}
-  \tightlist
-  \item
-    list 30
-  \end{itemize}
-\item
-  Sugar and James (2003) via Hennig \& Liao 2013 p 314
-
-  \begin{itemize}
-  \tightlist
-  \item
-    Modern look
-  \end{itemize}
-\end{itemize}
-
 \hypertarget{cluster-analysis}{%
 \subsubsection{Cluster Analysis}\label{cluster-analysis}}
 
@@ -361,24 +312,6 @@ Taking the ratio of between-cluster SS to within-cluster SS and plotting it agai
 Figure @ref(fig:k-size-full plots the sample size that needs to be selected from each cluster to fulfill the proportional allocation requirement such that the number of units sampled from each cluster is proportional to the size of the cluster in the population. The dashed line indicates the ideal allocation if all clusters were of equal size. We see that for SBS-F when 8 or less clusters are generated, they are more equally sized, with the exception of 3 and 6 clusters where one is much larger than the others. For SBS-OV this is less apparent. Instead a sensible cutoff may be determined by looking at the size of the smallest cluster. At \(k > 7\) it seems that the smallest clusters would require less than 5 units being sampled, which may be very difficult in a practical setting.
 
 In order to maintain comparability between methods, it was determined that 6 clusters would be generated for both models, though in practice 7 clusters for the full model may be more prudent.
-
-\begin{figure}
-\centering
-\includegraphics{GenSamp_Paper_files/figure-latex/ch-full-1.pdf}
-\caption{\label{fig:ch-full}Generalizd Calinski-Harabasz index}
-\end{figure}
-
-\begin{figure}
-\centering
-\includegraphics{GenSamp_Paper_files/figure-latex/ratio-full-1.pdf}
-\caption{\label{fig:ratio-full}Ratio of between cluster sum of squares to total cluster sum of squares}
-\end{figure}
-
-\begin{figure}
-\centering
-\includegraphics{GenSamp_Paper_files/figure-latex/k-size-full-1.pdf}
-\caption{\label{fig:k-size-full}Sampling requirements for each cluster}
-\end{figure}
 
 \newpage
 

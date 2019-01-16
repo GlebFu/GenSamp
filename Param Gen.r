@@ -20,7 +20,7 @@ df %>%
 # Schools
 #-----------------------
 # Set School SMD Goals
-schGoal <- c(.374, .433, -.007, -.403, .081, .538, .412, -.25, -.25)
+schGoal <- c(.374, .433, .007, -.403, .081, .538, .412, -.25, -.25)
 schVars <- c("n", "Urban", "Suburban", "ToRu", "pED", "pMin", "pELL", "pELA", "pMath")
 names(schGoal) <- schVars
 

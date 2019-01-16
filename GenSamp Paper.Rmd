@@ -23,7 +23,7 @@ affiliation:
 #   Enter author note here.
 
 abstract: |
-    In order for educational research to be informative to policy makers, studies must be designed to make robust estimates of causal effects at the population level. Large scale multi-site randomized trials (MRT) often rely on vague convenience sampling methodology when recruiting districts and schools, resulting in relatively homogeneous samples that may differ greatly from the intended population of interest. Retrospective methods that quantify and statistically adjust for those differences are prosmising but have limited effect when the sample differs greatly from the population. Designing sampling methods that focus on generalizability may be a more ffective but costly solution, but limited methodological research has been performed to examine their effectiveness in the eduational context. This paper examines one promising method, stratified balanced sampling (SBS), in the context of recruiting a representative sample of schools for a large scale MRT. Using simulations based on real data, we compare SBS to stratified and unstratified versions of convenince sampling and probability sampling. Several models for generating school participation and emulating convenience sampling are proposed. Results indicate that SBS and stratified random sampling (SRS) result in highly generalizable samples. These methods are extremely costly to implement, however, especially when the population average willingness to participate is low. Stratified convenience sampling (SCS) is a potential compromise.
+    <!-- In order for educational research to be informative to policy makers, studies must be designed to make robust estimates of causal effects at the population level. Large scale multi-site randomized trials (MRT) often rely on vague convenience sampling methodology when recruiting districts and schools, resulting in relatively homogeneous samples that may differ greatly from the intended population of interest. Retrospective methods that quantify and statistically adjust for those differences are prosmising but have limited effect when the sample differs greatly from the population. Designing sampling methods that focus on generalizability may be a more ffective but costly solution, but limited methodological research has been performed to examine their effectiveness in the eduational context. This paper examines one promising method, stratified balanced sampling (SBS), in the context of recruiting a representative sample of schools for a large scale MRT. Using simulations based on real data, we compare SBS to stratified and unstratified versions of convenince sampling and probability sampling. Several models for generating school participation and emulating convenience sampling are proposed. Results indicate that SBS and stratified random sampling (SRS) result in highly generalizable samples. These methods are extremely costly to implement, however, especially when the population average willingness to participate is low. Stratified convenience sampling (SCS) is a potential compromise. -->
 
 # keywords          : "keywords"
 # wordcount         : "X"
@@ -201,12 +201,18 @@ Let and $\pi^S$ be the participation propensity score. The following base model 
   &+ \gamma_{5}X_{pMin} + \gamma_{6}X_{MedInc} + \gamma_{7}X_{ELA} + \gamma_{8}X_{Math} \nonumber
 \end{align}
 
-Where $X_{Suburban}$ indicates if the school is suburban, $X_{Town/Rural}$ indicates if the school is in a town or is rural, $X_{pELL}$ is the percentage of ELL students in the school, $X_{pED}$ is the percentage of ED students in the school, $X_{pMin}$ is the percentage of minority students in the school, and $X_{MedInc}$ is the average median household income in the school community, $X_{ELA}$ is the percentage of students in a school scoring at or above proficiency on English language arts exams, and $X_{Math}$ is the percentage of students in a school scoring at or above proficiency on math exams. 
+where $X_{Suburban}$ indicates if the school is suburban, $X_{Town/Rural}$ indicates if the school is in a town or is rural, $X_{pELL}$ is the percentage of ELL students in the school, $X_{pED}$ is the percentage of ED students in the school, $X_{pMin}$ is the percentage of minority students in the school, and $X_{MedInc}$ is the average median household income in the school community, $X_{ELA}$ is the percentage of students in a school scoring at or above proficiency on English language arts exams, and $X_{Math}$ is the percentage of students in a school scoring at or above proficiency on math exams. 
 
-To select parameters for the RGM we first defined desireable sample characteristics. @tiptonSiteSelectionExperiments2016 reported as those that resembleed, on average, characteristics 
+To select parameters for the RGM we first identified desireable sample characteristics. @fellersDevelopingApproachDetermine2017 compared 571 elementary schools that participated in IES funded studies to the full population of U.S. elementary schools on a set of similar covariates, and reported the absolute standardized mean differences (SMD) between the schools that participated and the population. Iterating across parameter values, we generated $\pi^S$ and computed the weighted mean as 
 
+\begin{align}
+  m = \frac{\sum{\frac{1}{\pi^S} X}}{\sum{\frac{1}{\pi^S}}}
+\end{align}
 
-Parameters for the RGM were selected by iterating across values until the model produced samples with desired covariate characteristics. 
+where $m$ represents the expected sample mean of a random sample for covariate $X$. 
+
+  We then calculated SMDs between our expected sample mean and our population as $\frac{m - \mu}{\sigma}$ and compared them to the SMDs reported by @fellersDevelopingApproachDetermine2017, selecting parameter values that resulted in the closest match. SMDs were not reported for academic outcomes (ELA, Math) and neighborhood median income. However, anecdotal evidence suggests that schools with higher academic performance are less likely to participate in studies. We therefore selected .25 as the goal SMDs for ELA and Math. Indicators of low SES have been shown to be predictive at the district level [@stuartCharacteristicsSchoolDistricts2017; @tiptonSiteSelectionExperiments2016] though percentage of students receiving free/reduced lunch were shown to not be predictive of school participation [@fellersDevelopingApproachDetermine2017]. We therefore also set .25 as the goal SMD for median income. In conjunction with iterating across parameter values, intercept values were manipulated to generate different levels of population participation rates. Since these rates are unknown, we selected parameters for 9 levels of participation rates. \@ref(fig:fig-SMD-goal) reports the difference between our generated SMDs and the goal SMDs for each covariate and each participation rate. \@ref(fig:fig-RGM-Pars) reports the parameter values we ultimately selected for each covaraite and each participation rate.
+
 
 
 ```{r tab-RGM-Pars, results = "asis", fig.cap="Odds ratio coeficients for Response Generating Model", eval = F}
@@ -216,16 +222,6 @@ tab_RGM_Pars %>%
 
 ```
 
-```{r fig-RGM-Pars, results = "asis", fig.cap="Odds ratio coeficients for Response Generating Model"}
-
-schVals %>%
-  select(Var, pars, RR) %>%
-  mutate(RR = paste(RR*100, "%", sep = "")) %>%
-  ggplot(aes(x = RR, y = pars, group = Var, color = Var)) +
-  geom_point() +
-  geom_line()
-```
-
 ```{r fig-SMD-goal, results = "asis", fig.cap = "Difference between generated SMDs and reported SMDs"}
 schVals %>%
   select(Var, dif, RR) %>%
@@ -233,10 +229,22 @@ schVals %>%
   na.omit() %>%
   ggplot(aes(x = RR, y = dif, group = Var, color = Var)) +
   geom_point() +
-  geom_line() 
+  geom_line() +
+  theme_apa()
 ```
 
-## Stratified Balanced Sampling
+```{r fig-RGM-Pars, results = "asis", fig.cap="Odds ratio coeficients for Response Generating Model"}
+
+schVals %>%
+  select(Var, pars, RR) %>%
+  mutate(RR = paste(RR*100, "%", sep = "")) %>%
+  ggplot(aes(x = RR, y = pars, group = Var, color = Var)) +
+  geom_point() +
+  geom_line() +
+  theme_apa()
+```
+
+## Stratification
 
 Stratification was performed prior to simulation because the population is constant across iterations. Per Tipton's (2013) original recommendation, we use k-means clustering to partition the population into strata. This requires selecting a distance metric, choosing the number of strata, and generating the strata.
 
@@ -256,163 +264,43 @@ where $w_{ii'h} = 0$ if $X_h$ is missing for either unit and $w_{ii'h} = 1$ othe
 ### Number of Clusters
 Selecting the number of clusters, $k$, is one of the most difficult problems in cluster analysis (Steinley, 2006). To date, the most extensive investigation of methods for determining $k$ was conducted by Milligan and Cooper (1985) who analyzed 30 methods. However, aside from the limited generalizability of this study, many methods are also inappropriate in the context of non-hierarchical clustering and thus do not support k-means clustering. Tipton (2013) states that both statistical and practical criteria should be used in selecting the number of clusters. For instance, a large number of clusters would result in more homogeneous strata and, in turn, a more robust sample. However as strata become smaller, they also become more difficult to adequately sample from. Hennig and Liao (2013) argue that the method of selecting $k$ should depend on the context of the clustering and frame the issue as one of obtaining an appropriate subject-matter-dependent definition of rather than a statistical estimation. Ultimately three considerations were used to select the number of clusters: the ratio of variability between clusters to the sum of within and between cluster variability as recommended by Tipton (2013), a generalized form of the Calinski-Harabasz index (Calinski and Harabasz, 1974) proposed by Hennig and Liao (2013), and the practicality of sampling from fewer clusters.
 
-* Everitt (2011), p126
-  * clusterSim
-  * Continuous data?
-    * Calinski and Harabasz (1974)
-    * Duda and Hart (1973)
-  * Steinley, D. (2006) K-means clustering: a half-century synthesis. British Journal of Mathematical
-& Statistical Psychology, 59, 1–34.  
-  
-* Milligan and Cooper (1984)
-  + list 30
-* Sugar and James (2003) via Hennig & Liao 2013 p 314
-  + Modern look
-
 ### Cluster Analysis
 Cluster analysis was performed using the _cluster_ package (Maechler et. al. 2017) in R. First, the _daisy_ function is used to compute an $n$ by $n$ pairwise distance matrix across all observations. This function requires two parameters: (1) the data matrix, and (2) the distance metric. The data matrix included the full set of school level covariates. The metric was set to "gower". Next the _kmeans_ function was used to generate clusters. This method uses an optimization algorithm to classify units into $k$ clusters by minimizing the total within cluster sum of squares. This function also requires two parameters: (1) the distance matrix, and (2) the number of clusters to generate ($k$). For each $k$, it is recommended to run _kmeans_ at least 10 times, and select the clustering that results in the smallest total within-cluster sum of squares. [Get Citation]
 
-Figure \@ref(fig:ch-full) displays the Calinski-Harabasz (CH) index for each $k$ clusters generated for both the SBS-F and SBS-OV. The value of $k$ that maximizes the CH index should be selected. However we see several local maxima: $k = [2, 5, 8, 11]$ for SBS-F, and $k = 2, 6, 10$ for SBS-OV.
+Figure \@ref(fig:ch-full) displays the Calinski-Harabasz (CH) index for each $k$ clusters generated. The value of $k$ that maximizes the CH index should be selected. However we see several local maxima: $k = [2, 5, 8, 11]$ Taking the ratio of between-cluster SS to within-cluster SS and plotting it against number of clusters creates a chart similar to an upside down elbow graph (\@ref(fig:ratio-full)). Tipton (2013) recommends selecting the number of clusters such that at least 80% of the variability is between clusters, indicated by the figure as a dashed line. Given this criteria it seems that at least 10 clusters should be generated. However we also see that after a sharp initial increase, the slope of the graph begins to level out. This indicates that as we increase the number of clusters, the benefit of doing so decreases, while the difficulty of sampling from each cluster increases. In that case after 6 or 7 clusters the difficulty of sampling may not be worth such small increases in homogeneity within clusters.
 
-Taking the ratio of between-cluster SS to within-cluster SS and plotting it against number of clusters creates a chart similar to an upside down elbow graph. Figure \@ref(fig:ratio-full) displays this for both SBS-F and SBS-OV. Tipton (2013) recommends selecting the number of clusters such that at least 80% of the variability is between clusters, indicated by the figure as a dashed line. Given this criteria it seems that at least 10 clusters should be generated for SBS-F, and 8 for SBS-OV. However we also see that after a sharp initial increase, the slope of the graph begins to level out. This indicates that as we increase the number of clusters, the benefit of doing so decreases, while the difficulty of sampling from each cluster increases. In that case after 6 or 7 clusters the difficulty of sampling may not be worth such small increases in homogeneity within clusters.
+Figure \@ref(fig:k-size-full) plots the sample size that needs to be selected from each cluster to fulfill the proportional allocation requirement such that the number of units sampled from each cluster is proportional to the size of the cluster in the population. The dashed line indicates the ideal allocation if all clusters were of equal size. We see that when 8 or less clusters are generated, they are more equally sized, with the exception of 3 and 6 clusters where one is much larger than the others. A sensible cutoff may be determined by looking at the size of the smallest cluster. At $k > 7$ it seems that the smallest clusters would require less than 5 units being sampled, which may be very difficult in a practical setting. Ultimately 6 clusters were genereated.
 
-Figure \@ref(fig:k-size-full plots the sample size that needs to be selected from each cluster to fulfill the proportional allocation requirement such that the number of units sampled from each cluster is proportional to the size of the cluster in the population. The dashed line indicates the ideal allocation if all clusters were of equal size. We see that for SBS-F when 8 or less clusters are generated, they are more equally sized, with the exception of 3 and 6 clusters where one is much larger than the others. For SBS-OV this is less apparent. Instead a sensible cutoff may be determined by looking at the size of the smallest cluster. At $k > 7$ it seems that the smallest clusters would require less than 5 units being sampled, which may be very difficult in a practical setting.
+## Sampling Methods
+Five sampling methods will be compared: stratified and unstratified random sampling (SRS, URS), stratified and unstratified convenience sampling (SCS, UCS), and stratified balanced sampling (SBS). For all five methods, the decision of whether or not a school agrees to participate will be the same and will be generated at the start of every iteration. Let $J$ be the total number of schools in the population, and let schools be indexed by $j = 1, ..., J$. We define $E_j$ as a binary indicator that school $j$ will agree to participate if contacted by recruiters, where $E_j = 1$ if the school agrees, and $E_j = 0$ if the school refuses. Each school will be checked for approval by sampling from a Bernoulli distribution with probability equal to $\pi^S_j$ for each school $j$
 
-In order to maintain comparability between methods, it was determined that 6 clusters would be generated for both models, though in practice 7 clusters for the full model may be more prudent.
+\begin{align} \label{eq:Ej}
+  E_j \sim B(\pi^D_j)
+\end{align}
 
-```{r load_clusterData}
-load("Paper Data/clusters-full-logs.rdata")
-ch_f <- chPlot
-clusters_f <- clusters
+To select a sample, ranks will be generated for each school representing the order in which they are approached for recruitment. Schools will be sorted by rank, with the all schools up to and including the 60th school where $E_j = 1$ will be considered "sampled". Ranks will be determined by the sampling method implemented.
 
-ch_f$subs <- "F"
+### Random Sampling
 
-# load("Paper Data/clusters-OV-logs.rdata")
-# ch_ov <- chPlot
-# clusters_ov <- clusters
-# 
-# ch_ov$subs <- "OV"
-# 
-# chPlot <- rbind(ch_f, ch_ov)
-```
+In random sampling, a simple random sample will be taken of all the schools in the population. In real world settings a simple random sample is not practical. With smaller samples some subsets of schools may be overlooked, and schools that were sampled would be randomly scattered throughout the state making data collection and treatment implementation logistically difficult. More likely methods would be clustered randomization, stratified random sampling, or some combination of both. However, the goal is to have a standard as a comparison across multiple iterations, which in this case is simple random sampling. To achieve this, the order in which schools are approached will be indexed by rank, $r$, where $r = 1$ if a school is approached first. Rank will be randomized such that each school has an equal probability of being approached. Once schools are ranked, each school will be approached until 60 schools agree to be in the sample:
+\begin{align} \label{eq:rankRS}
+  \sum_{r=1}^R{Z^S_r} = 60
+\end{align}
+where $R$ is the total number of schools approached. This method will allow tracking of the number of schools that declined to participate, $R - 60$.
 
-```{r ch-full, fig.cap="Generalizd Calinski-Harabasz index"}
-chPlot %>%
-  gather(key = method, value = value, ch2) %>%
-  ggplot(aes(x = k, y = value)) +
-  geom_point() +
-  geom_line() +
-  theme_apa() +
-  scale_x_discrete(limits = c(1:K))
+In convenience sampling we will assume that recruiters have some knowledge the schools' and districts' likelihoods of participating, and will prioritize recruitment based on that knowledge in order to minimize effort. To achieve this, districts will be ranked in order of $\pi^D$ overall such that $r^D = 1$ for the district with the highest participation propensity (most likely to participate). Schools will then be ranked within districts in order of of $\pi^S$ such that $r^S = 1$ for the school with the highest participation propensity within the district with the highest participation propensity. In this way, ranking will be nested within districts, and all schools in higher ranked districts will be approached prior to schools in a lower ranked district, regardless of the schools' participation propensities. Once again districts and schools will be approached until 60 schools agree to be in the sample:
 
+\begin{align} \label{eq:rankCS}
+  \sum_{r^S=1}^R{Z^S_{r^S} = 60}
+\end{align}
 
-```
+Sampling using CASS-F and CASS-OV will follow the procedure outlined in the section on CASS. The two methods will vary in the model used for generating strata, and ranking schools within strata, with CASS-F using the full RGM, and CASS-OV omitting a variable. This may result in differences in the number of strata generated, school membership of the strata, and school rankings within strata. Schools will be ranked within strata such that $r_k= 1$ for the school that is most representative of strata $k$. The percent of the total sample recruited from each strata should be proportional to the percentage the population of schools that are in the strata (proportional sample allocation). Therefore, schools will be approached independently within each strata in order of rank until the proportional sample allocation requirements are met:
+\begin{align} \label{eq:rankCASS}
+  \sum_{r_{k}=1}^{R_k}{Z_{r_k} = [\frac{n_k}{N}60}]
+\end{align}
+where $n_k$ is the total number of schools in the strata, $N$ is the total number of schools in the population, and $R_k$ is the total number of schools approached in strata $k$ with brackets indicating rounding to the nearest whole number.
 
-
-
-```{r ratio-full, fig.cap="Ratio of between cluster sum of squares to total cluster sum of squares"}
-# cls_ov <- bind_cols(lapply(clusters_ov, function(x) data.frame(x$cluster)))
-cls_f <- bind_cols(lapply(clusters, function(x) data.frame(x$cluster)))
-
-# ratio_data <- rbind(data.frame(k = 1:K, subs = "F", vrat = unlist(lapply(clusters_f, function(x) x$betweenss / x$totss))),
-#                     data.frame(k = 1:K, subs = "OV", vrat = unlist(lapply(clusters_ov, function(x) x$betweenss / x$totss))))
-
-ratio_data <- data.frame(k = 1:K, subs = "F", vrat = unlist(lapply(clusters, function(x) x$betweenss / x$totss)))
-
-# levels(ratio_data$subs) <- c("Full", "Omitted Variable")
-
-ratio_data %>%
-  # group_by(subs) %>%
-  mutate(min80 = sum(vrat < .8) + .5) %>%
-  # ungroup() %>%
-  ggplot(aes(x = k, y = vrat)) +
-  geom_point() +
-  labs(y = "Between Cluster Variance",
-       x = "Number of Strata (k)") +
-  geom_line() +
-  geom_vline(aes(xintercept = min80), linetype = "dashed") +
-  theme_apa(box = F) +
-  scale_x_discrete(limits = c(1:K)) +
-  scale_y_continuous(breaks = seq(0, 1, .1)) + 
-  # facet_grid(subs ~ ., , scales = "free") + 
-  # facet_wrap( ~ subs, , scales = "free", ncol = 1) +
-  theme(legend.position = "none",
-        panel.spacing = unit(2, "lines"),
-        text = element_text(size=20),
-        legend.title = element_text(size=15))
-
-ggsave("Figs/Elbow.jpg", dpi = 1000, width = 10, height = 8.5)
-
-```
-
-```{r k-size-full, fig.cap="Sampling requirements for each cluster"}
-# names(cls_ov) <- names(cls_f) <- 1:K
-names(cls_f) <- 1:K
-# cls_ov$subs <- "OV"
-cls_f$subs <- "F"
-
-
-# rbind(cls_f, cls_ov) %>%
-cls_f %>%
-  gather(key = k, value = cluster, -subs) %>%
-  filter(k > 1) %>%
-  mutate(k = as.numeric(k)) %>%
-  group_by(k, cluster, subs) %>%
-  summarise(n = n()) %>%
-  group_by(k, subs) %>%
-  mutate(sample = (n / sum(n)) * 60) %>%
-  ggplot(aes(x = k, y = sample)) +
-  geom_point() +
-  theme_apa() +
-  labs(y = "Allocated Sample Size",
-       x = "Number of Strata (k)") +
-  scale_x_discrete(limits = c(1:K)) +
-  scale_y_continuous(breaks = seq(0, 30, 5)) +
-  stat_function(fun = function(x) 60/x, geom = "line", linetype = "dashed") +
-  # facet_grid(subs ~ .) +
-  geom_hline(yintercept = 5, linetype = "dotted")
-
-```
-
-```{r k-plots}
-# multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
-#   library(grid)
-# 
-#   # Make a list from the ... arguments and plotlist
-#   plots <- c(list(...), plotlist)
-# 
-#   numPlots = length(plots)
-# 
-#   # If layout is NULL, then use 'cols' to determine layout
-#   if (is.null(layout)) {
-#     # Make the panel
-#     # ncol: Number of columns of plots
-#     # nrow: Number of rows needed, calculated from # of cols
-#     layout <- matrix(seq(1, cols * ceiling(numPlots/cols)),
-#                     ncol = cols, nrow = ceiling(numPlots/cols))
-#   }
-# 
-#  if (numPlots==1) {
-#     print(plots[[1]])
-# 
-#   } else {
-#     # Set up the page
-#     grid.newpage()
-#     pushViewport(viewport(layout = grid.layout(nrow(layout), ncol(layout))))
-# 
-#     # Make each plot, in the correct location
-#     for (i in 1:numPlots) {
-#       # Get the i,j matrix positions of the regions that contain this subplot
-#       matchidx <- as.data.frame(which(layout == i, arr.ind = TRUE))
-# 
-#       print(plots[[i]], vp = viewport(layout.pos.row = matchidx$row,
-#                                       layout.pos.col = matchidx$col))
-#     }
-#   }
-# }
-# 
-# multiplot(ch_full, ratio_full, k_size_full, cols = 1)
-```
+Though extremely unlikely, in the case of the CS and both CASS conditions, several schools and/or districts may have the same rank. In such cases, schools with equal rank will be ordered randomly.
 
 \newpage
 
