@@ -118,13 +118,13 @@ Finally, the sample must be selected and evaluated. @tiptonStratifiedSamplingUsi
 
 Next a method must be chosen for selecting units within each strata such that a balanced sample is achieved. Ideally this means that the expected value of covariate $X_h$ across units in stratum $j$ is equal to the expected value of covariate $X_h$ across all units sampled from stratum $j$:
 
-\begin{align} \label{eq:euclid}
+\begin{align}
   E(X_h|Z = 1, j) = E(X_h|j)
 \end{align}
 
 One method is to perform a simple random sample of $n_j$ units. This is ideal as it results in a balanced sample on both observed and unobserved covariates over repeated samples in stratum $j$. This method is limited when $n_j$ is small which may not result in balance for any particular sample. Another approach is to rank each unit within a strata using a distance measure, with units closer to the ``center" of the strata ranked higher. Once again, the weighted Euclidean distance can be used, this time measuring the distance to the mean of each covariate:
 
-\begin{align}
+\begin{align} \label{eq:euclid}
   d_{ij} = \sqrt{\sum^p_{h=1}w_h[X_{ijh} - E(X_h|j)]^2}
 \end{align}
 
@@ -272,35 +272,38 @@ Figure \@ref(fig:ch-full) displays the Calinski-Harabasz (CH) index for each $k$
 Figure \@ref(fig:k-size-full) plots the sample size that needs to be selected from each cluster to fulfill the proportional allocation requirement such that the number of units sampled from each cluster is proportional to the size of the cluster in the population. The dashed line indicates the ideal allocation if all clusters were of equal size. We see that when 8 or less clusters are generated, they are more equally sized, with the exception of 3 and 6 clusters where one is much larger than the others. A sensible cutoff may be determined by looking at the size of the smallest cluster. At $k > 7$ it seems that the smallest clusters would require less than 5 units being sampled, which may be very difficult in a practical setting. Ultimately 6 clusters were genereated.
 
 ## Sampling Methods
-Five sampling methods will be compared: stratified and unstratified random sampling (SRS, URS), stratified and unstratified convenience sampling (SCS, UCS), and stratified balanced sampling (SBS). For all five methods, the decision of whether or not a school agrees to participate will be the same and will be generated at the start of every iteration. Let $J$ be the total number of schools in the population, and let schools be indexed by $j = 1, ..., J$. We define $E_j$ as a binary indicator that school $j$ will agree to participate if contacted by recruiters, where $E_j = 1$ if the school agrees, and $E_j = 0$ if the school refuses. Each school will be checked for approval by sampling from a Bernoulli distribution with probability equal to $\pi^S_j$ for each school $j$
+Five sampling methods were compared: stratified and unstratified random sampling (SRS, URS), stratified and unstratified convenience sampling (SCS, UCS), and stratified balanced sampling (SBS). For all five methods, the decision of whether or not a school agrees to participate is the same and was generated at the start of every iteration. Let $J$ be the total number of schools in the population, and let schools be indexed by $j = 1, ..., J$. We define $E_j$ as a binary indicator that school $j$ will agree to participate if contacted by recruiters, where $E_j = 1$ if the school agrees, and $E_j = 0$ if the school refuses. Each school was checked for approval by sampling from a Bernoulli distribution with probability equal to $\pi^S_j$ for each school $j$
 
 \begin{align} \label{eq:Ej}
   E_j \sim B(\pi^D_j)
 \end{align}
 
-To select a sample, ranks will be generated for each school representing the order in which they are approached for recruitment. Schools will be sorted by rank, with the all schools up to and including the 60th school where $E_j = 1$ will be considered "sampled". Ranks will be determined by the sampling method implemented.
+To select a sample, ranks were generated for each school representing the order in which they are approached for recruitment. Schools were sorted by rank, with the all schools up to and including the 60th school where $E_j = 1$ were considered "sampled".  Ranks were determined by the sampling method implemented.
+
+### Balanced Sampling
+SBS is unique in that rankings are directly related to school characteristics and do not change across iterations. Ranks within strata are based on equation \@ref(eq:euclid), where schools that are closer to the "center" of the strata are more representative of it. Schools will be ranked within strata such that $r_k= 1$ for the school that is most representative of strata $k$. The percent of the total sample recruited from each strata should be proportional to the percentage the population of schools that are in the strata (proportional sample allocation). Therefore, schools will be approached independently within each strata in order of rank until the proportional sample allocation requirements are met:
+\begin{align} \label{eq:rankCASS}
+  \sum_{r_{k}=1}^{R_k}{Z_{r_k} = [\frac{n_k}{N}60}]
+\end{align}
+where $n_k$ is the total number of schools in the strata, $N$ is the total number of schools in the population, and $R_k$ is the total number of schools approached in strata $k$ with brackets indicating rounding to the nearest whole number. Though extremely unlikely, several schools and/or districts may have the same rank. In such cases, schools with equal rank will be ordered randomly.
 
 ### Random Sampling
-
-In random sampling, a simple random sample will be taken of all the schools in the population. In real world settings a simple random sample is not practical. With smaller samples some subsets of schools may be overlooked, and schools that were sampled would be randomly scattered throughout the state making data collection and treatment implementation logistically difficult. More likely methods would be clustered randomization, stratified random sampling, or some combination of both. However, the goal is to have a standard as a comparison across multiple iterations, which in this case is simple random sampling. To achieve this, the order in which schools are approached will be indexed by rank, $r$, where $r = 1$ if a school is approached first. Rank will be randomized such that each school has an equal probability of being approached. Once schools are ranked, each school will be approached until 60 schools agree to be in the sample:
+In URS, a simple random sample was taken of all the schools in the population. In the context of educational MRTs, this sampling method is impractical. Large subsets of schools are likely to be overlooked if samples are too small, while schools that are sampeld would be randomly scattered throughout the state making data collection and treatment implementation logistically difficult. More effective methods would be clustered randomization, stratified random sampling, or some combination of both. However, the goal here is to uses URS as a high standard for comparison purposes. To achieve this, the order in which schools are approached was indexed by rank, $r$, where $r = 1$ if a school is approached first. Rank was randomized such that each school has an equal probability of being approached. Once schools are ranked, each school was approached until 60 schools agree to be in the sample:
 \begin{align} \label{eq:rankRS}
   \sum_{r=1}^R{Z^S_r} = 60
 \end{align}
-where $R$ is the total number of schools approached. This method will allow tracking of the number of schools that declined to participate, $R - 60$.
+where $R$ is the total number of schools approached. This method allowed tracking of the number of schools that declined to participate, $R - 60$. For SRS, the same procedure was repeated independantly within strata generated by the cluster analysis. Proportional allocation was used to determine the number of schools to select from each strata.
 
-In convenience sampling we will assume that recruiters have some knowledge the schools' and districts' likelihoods of participating, and will prioritize recruitment based on that knowledge in order to minimize effort. To achieve this, districts will be ranked in order of $\pi^D$ overall such that $r^D = 1$ for the district with the highest participation propensity (most likely to participate). Schools will then be ranked within districts in order of of $\pi^S$ such that $r^S = 1$ for the school with the highest participation propensity within the district with the highest participation propensity. In this way, ranking will be nested within districts, and all schools in higher ranked districts will be approached prior to schools in a lower ranked district, regardless of the schools' participation propensities. Once again districts and schools will be approached until 60 schools agree to be in the sample:
+### Convenience Sampling
+In UCS we assume that recruiters have some knowledge of the schools' likelihoods of participating, and prioritize recruitment based on that knowledge in order to minimize effort. To achieve this, schools were selected one at a time, without replacement, and assigned sequential ranks. Schools were selected with a probability equal to $\frac{\pi^S}{\sum\pi^S}$ such that schools with a higher $\pi^S$ were more likely to receive a higher rank. Once a school was selected and assigned a rank, the next school was selected with a probability proportional to the weights of the remaining schools. Once all ranks were assigned, schools were again approached until 60 schools agreed to be in the sample:
 
 \begin{align} \label{eq:rankCS}
   \sum_{r^S=1}^R{Z^S_{r^S} = 60}
 \end{align}
 
-Sampling using CASS-F and CASS-OV will follow the procedure outlined in the section on CASS. The two methods will vary in the model used for generating strata, and ranking schools within strata, with CASS-F using the full RGM, and CASS-OV omitting a variable. This may result in differences in the number of strata generated, school membership of the strata, and school rankings within strata. Schools will be ranked within strata such that $r_k= 1$ for the school that is most representative of strata $k$. The percent of the total sample recruited from each strata should be proportional to the percentage the population of schools that are in the strata (proportional sample allocation). Therefore, schools will be approached independently within each strata in order of rank until the proportional sample allocation requirements are met:
-\begin{align} \label{eq:rankCASS}
-  \sum_{r_{k}=1}^{R_k}{Z_{r_k} = [\frac{n_k}{N}60}]
-\end{align}
-where $n_k$ is the total number of schools in the strata, $N$ is the total number of schools in the population, and $R_k$ is the total number of schools approached in strata $k$ with brackets indicating rounding to the nearest whole number.
+As with SRS, in SCS this was performed independantly within strata, and proportional allocation was used to set the target strata sample size.
 
-Though extremely unlikely, in the case of the CS and both CASS conditions, several schools and/or districts may have the same rank. In such cases, schools with equal rank will be ordered randomly.
+
 
 \newpage
 
