@@ -110,7 +110,7 @@ The goal of the current paper is two-part. First, we propose several methods for
 \hypertarget{stratified-balanced-sampling}{%
 \subsection{Stratified Balanced Sampling}\label{stratified-balanced-sampling}}
 
-Stratified Balanced Sampling \nocite{tipton2013CA}(SBS; Tipton, 2013b) applies cluster analysis in order to implement bias robust balanced sampling. The goal of SBS is to select a sample that is representative of a population along a set of covariates related to treatment heterogeneity. This process requires the availability of a rich data set of observed covariate for each unit in the population. The population is first divided into heterogeneous strata comprised of homogeneous units given the set of observed covariates. This is done using k-means clustering which assigns units to strata such that similarity within strata is maximized. Units most representative of each strata are prioritized by recruiters. This encourages the selection of units from subsections of the population which may otherwise not have been included in the sample.
+Stratified Balanced Sampling {[}\href{mailto:SBS;@tiptonStratifiedSamplingUsing2013}{\nolinkurl{SBS;@tiptonStratifiedSamplingUsing2013}}{]} applies cluster analysis in order to implement bias robust balanced sampling. The goal of SBS is to select a sample that is representative of a population along a set of covariates related to treatment heterogeneity. This process requires the availability of a rich data set of observed covariate for each unit in the population. The population is first divided into heterogeneous strata comprised of homogeneous units given the set of observed covariates. This is done using k-means clustering which assigns units to strata such that similarity within strata is maximized. Units most representative of each strata are prioritized by recruiters. This encourages the selection of units from subsections of the population which may otherwise not have been included in the sample.
 
 \hypertarget{distance-metric}{%
 \subsubsection{Distance Metric}\label{distance-metric}}
@@ -348,6 +348,38 @@ In UCS we assume that recruiters have some knowledge of the schools' likelihoods
 \end{align}
 
 As with SRS, in SCS this was performed independantly within strata, and proportional allocation was used to set the target strata sample size.
+
+\hypertarget{analysis}{%
+\subsection{Analysis}\label{analysis}}
+
+\hypertarget{generalizability}{%
+\subsubsection{Generalizability}\label{generalizability}}
+
+There are several methods to determine how generalizable a sample is to a target population. One common method is to compare the sample to the population on a range of covariates by examining SMDs. Let \(X^r_j\) be the full set of covariates identified in Table \ref{tab:desc} indexed by \(j = 1,...,9\) to the order of \(r\) where \(r = 1,..,3\) if \(X_j\) is continuous and \(r = 1\) if \(X_j\) is binary. Let \(\bar{X^r_j}\) and \(M^r_j\) be the mean of covariate \(X^r_j\) in the sample and population respectively. Finally, let \(\sigma^r_j\) be the standard deviation of \(X^r_j\) in the population. We will calculated the \(SMD\) of each covariate as
+\begin{align}
+  SMD^r_{j} = \frac{\bar{X}^{r}_{j}-M^{r}_{j}}{\sigma_{j}}
+\end{align}
+
+This method is limited as it only provides us with a measure of how close the sample means are to the population means. To have true generalizability, sample variance must also be representative of the population variance. Therefore, in addition to SMDs we also estimated the generalizability index (\(B\); Tipton, 2014). The generalizability index is bounded between 0 and 1, with 0 indicating no overlap between the sample and the population, and 1 indicating the sample is representative of the population. First all units in the population are divided into \(k\) bins. For bins \(j = 1,...,k\), let \(w_{pj} = N_j/N\) be the proportion of the population and \(w_{sj} = n_j/n\) be the proportion of the sample in each bin. We will calculate \(B\) as:
+\begin{align}
+  B = \sum^k_{j=1}\sqrt{w_{pj}w_{sj}}
+\end{align}
+Bins must be defined such that \(\sum{w_{pj}} = \sum{w_{sj}} = 1\). Selecting the correct number of bins is important, as too many bins will underestimate the similarity between distributions, and too few will overestimate. Tipton (2014) recommends generating equal bins of size \(h\) calculated as
+\begin{align}
+  h = 1.06s(N+n)^{-1/5}
+\end{align}
+where \(s^2\) is the pooled variance across the sample and population:
+\begin{align}
+  s^2 = \frac{(n - 1)s^2_s + (N + 1)s^2_p}{(N + n - 2)}
+\end{align}
+
+\hypertarget{feasibility}{%
+\subsubsection{Feasibility}\label{feasibility}}
+
+In order to assess feasibility, the total number of schools approached to achieve a full sample was tracked. The average number of refusals each sample method resulted in prior to selecting the full sample was calculated across replications. Recruiters expend a lot of resources contacting districts and schools, scheduling meetings and traveling between interested locations. A project with limited resources may not be able to afford to go through a large list of potentially uninterested units. This measure allows us to compare the difficulty with which a full sample is recruited using each method.
+
+\hypertarget{results}{%
+\section{Results}\label{results}}
 
 \newpage
 

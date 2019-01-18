@@ -59,7 +59,7 @@ df_sch_smd <- df_sch_smd %>%
          Clustering = ifelse(str_detect(sample, "SUBS"), "Stratified", "None"),
          sample = str_replace(sample, "SUBS_", "S_"))
 
-savePlot <- T
+savePlot <- F
 ```
 
 ```{r}
