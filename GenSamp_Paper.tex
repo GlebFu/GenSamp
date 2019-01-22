@@ -300,14 +300,32 @@ where \(w_{ii'h} = 0\) if \(X_h\) is missing for either unit and \(w_{ii'h} = 1\
 
 Selecting the number of clusters, \(k\), is one of the most difficult problems in cluster analysis (Steinley, 2006). To date, the most extensive investigation of methods for determining \(k\) was conducted by Milligan and Cooper (1985) who analyzed 30 methods. However, aside from the limited generalizability of this study, many methods are also inappropriate in the context of non-hierarchical clustering and thus do not support k-means clustering. Tipton (2013) states that both statistical and practical criteria should be used in selecting the number of clusters. For instance, a large number of clusters would result in more homogeneous strata and, in turn, a more robust sample. However as strata become smaller, they also become more difficult to adequately sample from. Hennig and Liao (2013) argue that the method of selecting \(k\) should depend on the context of the clustering and frame the issue as one of obtaining an appropriate subject-matter-dependent definition of rather than a statistical estimation. Ultimately three considerations were used to select the number of clusters: the ratio of variability between clusters to the sum of within and between cluster variability as recommended by Tipton (2013), a generalized form of the Calinski-Harabasz index (Calinski and Harabasz, 1974) proposed by Hennig and Liao (2013), and the practicality of sampling from fewer clusters.
 
+\begin{figure}
+\centering
+\includegraphics{GenSamp_Paper_files/figure-latex/fig-ch-1.pdf}
+\caption{\label{fig:fig-ch}Generalized Calinski-Harabasz index}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics{GenSamp_Paper_files/figure-latex/fig-ratio-1.pdf}
+\caption{\label{fig:fig-ratio}Ratio of between cluster sum of squares to total cluster sum of squares}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics{GenSamp_Paper_files/figure-latex/fig-k-size-1.pdf}
+\caption{\label{fig:fig-k-size}Sampling requirements for each cluster}
+\end{figure}
+
 \hypertarget{cluster-analysis}{%
 \subsubsection{Cluster Analysis}\label{cluster-analysis}}
 
 Cluster analysis was performed using the \emph{cluster} package (Maechler et. al.~2017) in R. First, the \emph{daisy} function is used to compute an \(n\) by \(n\) pairwise distance matrix across all observations. This function requires two parameters: (1) the data matrix, and (2) the distance metric. The data matrix included the full set of school level covariates. The metric was set to \enquote{gower}. Next the \emph{kmeans} function was used to generate clusters. This method uses an optimization algorithm to classify units into \(k\) clusters by minimizing the total within cluster sum of squares. This function also requires two parameters: (1) the distance matrix, and (2) the number of clusters to generate (\(k\)). For each \(k\), it is recommended to run \emph{kmeans} at least 10 times, and select the clustering that results in the smallest total within-cluster sum of squares. {[}Get Citation{]}
 
-Figure \ref{fig:ch-full} displays the Calinski-Harabasz (CH) index for each \(k\) clusters generated. The value of \(k\) that maximizes the CH index should be selected. However we see several local maxima: \(k = [2, 5, 8, 11]\) Taking the ratio of between-cluster SS to within-cluster SS and plotting it against number of clusters creates a chart similar to an upside down elbow graph (\ref{fig:ratio-full}). Tipton (2013) recommends selecting the number of clusters such that at least 80\% of the variability is between clusters, indicated by the figure as a dashed line. Given this criteria it seems that at least 10 clusters should be generated. However we also see that after a sharp initial increase, the slope of the graph begins to level out. This indicates that as we increase the number of clusters, the benefit of doing so decreases, while the difficulty of sampling from each cluster increases. In that case after 6 or 7 clusters the difficulty of sampling may not be worth such small increases in homogeneity within clusters.
+Several methods were used to determine \(k\). Figure \ref{fig:fig-ch} displays the Calinski-Harabasz (CH) index for each \(k\) clusters generated. The value of \(k\) that maximizes the CH index should be selected. However we see several local maxima: \(k = [2, 6, 10, 13]\). Figure \ref{fig:fig-ratio} displays the ration of between-cluster SS to within-cluster SS and plots it against \(k\). Tipton (2013) recommends selecting the number of clusters such that at least 80\% of the variability is between clusters, indicated by the figure as a dashed line. Given this criteria it seems that at least 10 clusters should be generated. However we also see that after a sharp initial increase, the slope of the graph begins to level out. This indicates that as we increase the number of clusters, the benefit of doing so decreases, while the difficulty of sampling from each cluster increases. In that case after 6 or 7 clusters the difficulty of sampling may not be worth such small increases in homogeneity within clusters.
 
-Figure \ref{fig:k-size-full} plots the sample size that needs to be selected from each cluster to fulfill the proportional allocation requirement such that the number of units sampled from each cluster is proportional to the size of the cluster in the population. The dashed line indicates the ideal allocation if all clusters were of equal size. We see that when 8 or less clusters are generated, they are more equally sized, with the exception of 3 and 6 clusters where one is much larger than the others. A sensible cutoff may be determined by looking at the size of the smallest cluster. At \(k > 7\) it seems that the smallest clusters would require less than 5 units being sampled, which may be very difficult in a practical setting. Ultimately 6 clusters were genereated.
+Figure \ref{fig:fig-k-size} plots the sample size that needs to be selected from each cluster to fulfill the proportional allocation requirement such that the number of units sampled from each cluster is proportional to the size of the cluster in the population. The dashed line indicates the ideal allocation if all clusters were of equal size. We see that when 8 or less clusters are generated, they are more equally sized, with the exception of 3 and 6 clusters where one is much larger than the others. A sensible cutoff may be determined by looking at the size of the smallest cluster. At \(k > 7\) it seems that the smallest clusters would require less than 5 units being sampled, which may be very difficult in a practical setting. Ultimately 6 clusters were genereated.
 
 \hypertarget{sampling-methods}{%
 \subsection{Sampling Methods}\label{sampling-methods}}

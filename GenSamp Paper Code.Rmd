@@ -143,7 +143,7 @@ ch_f$subs <- "F"
 # chPlot <- rbind(ch_f, ch_ov)
 ```
 
-```{r ch-full, fig.cap="Generalizd Calinski-Harabasz index"}
+```{r fig-ch, results = "asis", fig.cap="Generalized Calinski-Harabasz index"}
 chPlot %>%
   gather(key = method, value = value, ch2) %>%
   ggplot(aes(x = k, y = value)) +
@@ -157,7 +157,7 @@ chPlot %>%
 
 
 
-```{r ratio-full, fig.cap="Ratio of between cluster sum of squares to total cluster sum of squares"}
+```{r fig-ratio, fig.cap="Ratio of between cluster sum of squares to total cluster sum of squares"}
 # cls_ov <- bind_cols(lapply(clusters_ov, function(x) data.frame(x$cluster)))
 cls_f <- bind_cols(lapply(clusters, function(x) data.frame(x$cluster)))
 
@@ -192,7 +192,7 @@ ggsave("Figs/Elbow.jpg", dpi = 1000, width = 10, height = 8.5)
 
 ```
 
-```{r k-size-full, fig.cap="Sampling requirements for each cluster"}
+```{r fig-k-size, fig.cap="Sampling requirements for each cluster"}
 # names(cls_ov) <- names(cls_f) <- 1:K
 names(cls_f) <- 1:K
 # cls_ov$subs <- "OV"
@@ -219,6 +219,7 @@ cls_f %>%
   # facet_grid(subs ~ .) +
   geom_hline(yintercept = 5, linetype = "dotted")
 
+save(chPlot, ratio_data, cls_f, file = "Paper Data/Cluster data.rdata")
 ```
 
 ```{r k-plots}
