@@ -166,24 +166,14 @@
          \DataTypeTok{MEDINC_log =} \KeywordTok{log}\NormalTok{(MEDINC}\OperatorTok{/}\DecValTok{1000}\NormalTok{),}
          \DataTypeTok{MEDINC =}\NormalTok{ MEDINC }\OperatorTok{/}\StringTok{ }\DecValTok{1000}\NormalTok{)}
 
-\NormalTok{dist_plots }\OperatorTok{%>%}
+\NormalTok{plot_dist1 <-}\StringTok{ }\NormalTok{dist_plots }\OperatorTok{%>%}
 \StringTok{  }\KeywordTok{gather}\NormalTok{(}\DataTypeTok{key =}\NormalTok{ var, }\DataTypeTok{value =}\NormalTok{ value, n, n_log, MEDINC, MEDINC_log) }\OperatorTok{%>%}
 \StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ value)) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{geom_histogram}\NormalTok{() }\OperatorTok{+}
 \StringTok{  }\KeywordTok{facet_wrap}\NormalTok{(}\OperatorTok{~}\StringTok{ }\NormalTok{var, }\DataTypeTok{scales =} \StringTok{"free"}\NormalTok{) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{theme_apa}\NormalTok{()}
-\end{Highlighting}
-\end{Shaded}
 
-\begin{figure}
-\centering
-\includegraphics{GenSamp_Paper_Code_files/figure-latex/dists-1.pdf}
-\caption{\label{fig:dists}Comparison of covariate distributions and their log transformations.}
-\end{figure}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{dist_plots }\OperatorTok{%>%}
+\NormalTok{plot_dist2 <-}\StringTok{ }\NormalTok{dist_plots }\OperatorTok{%>%}
 \StringTok{  }\KeywordTok{gather}\NormalTok{(}\DataTypeTok{key =}\NormalTok{ var, }\DataTypeTok{value =}\NormalTok{ value, pED}\OperatorTok{:}\NormalTok{pMin) }\OperatorTok{%>%}
 \StringTok{  }\KeywordTok{group_by}\NormalTok{(var) }\OperatorTok{%>%}
 \StringTok{  }\CommentTok{# mutate(value = value - mean(value)) %>%}
@@ -194,11 +184,88 @@
 \end{Highlighting}
 \end{Shaded}
 
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{plot_dist1}
+\end{Highlighting}
+\end{Shaded}
+
 \begin{figure}
 \centering
-\includegraphics{GenSamp_Paper_Code_files/figure-latex/dists2-1.pdf}
-\caption{\label{fig:dists2}Distributions of the remaining continuous covariates.}
+\includegraphics{GenSamp_Paper_Code_files/figure-latex/plot_dist1-1.pdf}
+\caption{(\#fig:plot\_dist1)Comparison of covariate distributions and their log transformations.}
 \end{figure}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{plot_dist2}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}
+\centering
+\includegraphics{GenSamp_Paper_Code_files/figure-latex/plot_dist2-1.pdf}
+\caption{(\#fig:plot\_dist2)Distributions of the remaining continuous covariates.}
+\end{figure}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{library}\NormalTok{(tidyverse)}
+\KeywordTok{library}\NormalTok{(kableExtra)}
+
+\KeywordTok{load}\NormalTok{(}\StringTok{"Data/RGM Vars.Rdata"}\NormalTok{)}
+
+\NormalTok{tab_RGM_Pars <-}\StringTok{ }\NormalTok{schVals }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{select}\NormalTok{(Var, pars, RR) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{mutate}\NormalTok{(}\DataTypeTok{RR =} \KeywordTok{paste}\NormalTok{(}\StringTok{"RR = "}\NormalTok{, RR}\OperatorTok{*}\DecValTok{100}\NormalTok{, }\StringTok{"%"}\NormalTok{, }\DataTypeTok{sep =} \StringTok{""}\NormalTok{),}
+         \DataTypeTok{pars =} \KeywordTok{round}\NormalTok{(pars, }\DecValTok{2}\NormalTok{)) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{spread}\NormalTok{(}\DataTypeTok{key =}\NormalTok{ RR, }\DataTypeTok{value =}\NormalTok{ pars) }
+
+\CommentTok{# tab_RGM_Pars <- tab_RGM_Pars %>%}
+\CommentTok{#   papaja::apa_table()}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{tab_RGM_Pars }\OperatorTok{%>%}
+\StringTok{  }\NormalTok{papaja}\OperatorTok{::}\KeywordTok{apa_table}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+## 
+## \begin{table}[tbp]
+## \begin{center}
+## \begin{threeparttable}
+## \caption{\label{tab:tab-RGM-Pars}}
+## \begin{tabular}{llllllllll}
+## \toprule
+## Var & \multicolumn{1}{c}{RR = 10\%} & \multicolumn{1}{c}{RR = 20\%} & \multicolumn{1}{c}{RR = 30\%} & \multicolumn{1}{c}{RR = 40\%} & \multicolumn{1}{c}{RR = 50\%} & \multicolumn{1}{c}{RR = 60\%} & \multicolumn{1}{c}{RR = 70\%} & \multicolumn{1}{c}{RR = 80\%} & \multicolumn{1}{c}{RR = 90\%}\\
+## \midrule
+## Intercept & -2.99 & -1.83 & -1.09 & -0.27 & 0.77 & 1.52 & 4.61 & 3.62 & 7.49\\
+## n & -0.17 & -0.16 & -0.20 & -0.20 & -0.21 & -0.24 & -0.21 & -0.42 & -0.40\\
+## pED & 0.74 & 0.91 & 0.89 & 0.75 & 1.09 & 1.05 & 1.28 & 1.67 & 1.95\\
+## pELA & 0.17 & 0.30 & 0.41 & -0.70 & 0.25 & -0.86 & 0.11 & -0.40 & 0.53\\
+## pELL & -0.17 & -0.15 & -0.20 & -0.19 & -0.20 & -0.21 & 0.10 & -0.93 & -1.10\\
+## pMath & 0.15 & 0.06 & -0.06 & 0.96 & 0.16 & 1.19 & 0.19 & 1.23 & 0.20\\
+## pMin & -0.95 & -1.24 & -1.16 & -1.35 & -1.75 & -2.39 & -5.57 & -2.12 & -3.47\\
+## Suburban & -0.18 & -0.07 & -0.28 & -0.64 & -0.50 & -0.19 & -0.51 & -0.02 & 1.40\\
+## ToRu & 0.55 & 0.34 & 0.73 & 0.81 & 1.64 & 1.49 & 2.00 & 2.27 & 2.12\\
+## Urban & -0.33 & -0.22 & -0.44 & -0.84 & -0.67 & -0.43 & -0.62 & -0.39 & -1.37\\
+## \bottomrule
+## \end{tabular}
+## \end{threeparttable}
+## \end{center}
+## \end{table}
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{save.image}\NormalTok{(}\StringTok{"Paper Data/PaperData.rdata"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -232,8 +299,8 @@
 
 \begin{figure}
 \centering
-\includegraphics{GenSamp_Paper_Code_files/figure-latex/ch-full-1.pdf}
-\caption{\label{fig:ch-full}Generalizd Calinski-Harabasz index}
+\includegraphics{GenSamp_Paper_Code_files/figure-latex/fig-ch-1.pdf}
+\caption{\label{fig:fig-ch}Generalized Calinski-Harabasz index}
 \end{figure}
 
 \begin{Shaded}
@@ -272,8 +339,8 @@
 
 \begin{figure}
 \centering
-\includegraphics{GenSamp_Paper_Code_files/figure-latex/ratio-full-1.pdf}
-\caption{\label{fig:ratio-full}Ratio of between cluster sum of squares to total cluster sum of squares}
+\includegraphics{GenSamp_Paper_Code_files/figure-latex/fig-ratio-1.pdf}
+\caption{\label{fig:fig-ratio}Ratio of between cluster sum of squares to total cluster sum of squares}
 \end{figure}
 
 \begin{Shaded}
@@ -314,9 +381,15 @@
 
 \begin{figure}
 \centering
-\includegraphics{GenSamp_Paper_Code_files/figure-latex/k-size-full-1.pdf}
-\caption{\label{fig:k-size-full}Sampling requirements for each cluster}
+\includegraphics{GenSamp_Paper_Code_files/figure-latex/fig-k-size-1.pdf}
+\caption{\label{fig:fig-k-size}Sampling requirements for each cluster}
 \end{figure}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{save}\NormalTok{(chPlot, ratio_data, cls_f, }\DataTypeTok{file =} \StringTok{"Paper Data/Cluster data.rdata"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
 
 \begin{Shaded}
 \begin{Highlighting}[]

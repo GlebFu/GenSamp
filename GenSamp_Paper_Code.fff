@@ -2,8 +2,8 @@
 \ifnextchar[{\eatarg}{}
 
 \centering
-\includegraphics{GenSamp_Paper_Code_files/figure-latex/dists-1.pdf}
-\caption{\label{fig:dists}Comparison of covariate distributions and their log transformations.}
+\includegraphics{GenSamp_Paper_Code_files/figure-latex/plot_dist1-1.pdf}
+\caption{(\#fig:plot\_dist1)Comparison of covariate distributions and their log transformations.}
 \end{figure*}
 \efloatseparator
  
@@ -11,8 +11,8 @@
 \ifnextchar[{\eatarg}{}
 
 \centering
-\includegraphics{GenSamp_Paper_Code_files/figure-latex/dists2-1.pdf}
-\caption{\label{fig:dists2}Distributions of the remaining continuous covariates.}
+\includegraphics{GenSamp_Paper_Code_files/figure-latex/plot_dist2-1.pdf}
+\caption{(\#fig:plot\_dist2)Distributions of the remaining continuous covariates.}
 \end{figure*}
 \efloatseparator
  
@@ -20,8 +20,8 @@
 \ifnextchar[{\eatarg}{}
 
 \centering
-\includegraphics{GenSamp_Paper_Code_files/figure-latex/ch-full-1.pdf}
-\caption{\label{fig:ch-full}Generalizd Calinski-Harabasz index}
+\includegraphics{GenSamp_Paper_Code_files/figure-latex/fig-ch-1.pdf}
+\caption{\label{fig:fig-ch}Generalized Calinski-Harabasz index}
 \end{figure*}
 \efloatseparator
  
@@ -29,8 +29,8 @@
 \ifnextchar[{\eatarg}{}
 
 \centering
-\includegraphics{GenSamp_Paper_Code_files/figure-latex/ratio-full-1.pdf}
-\caption{\label{fig:ratio-full}Ratio of between cluster sum of squares to total cluster sum of squares}
+\includegraphics{GenSamp_Paper_Code_files/figure-latex/fig-ratio-1.pdf}
+\caption{\label{fig:fig-ratio}Ratio of between cluster sum of squares to total cluster sum of squares}
 \end{figure*}
 \efloatseparator
  
@@ -38,8 +38,8 @@
 \ifnextchar[{\eatarg}{}
 
 \centering
-\includegraphics{GenSamp_Paper_Code_files/figure-latex/k-size-full-1.pdf}
-\caption{\label{fig:k-size-full}Sampling requirements for each cluster}
+\includegraphics{GenSamp_Paper_Code_files/figure-latex/fig-k-size-1.pdf}
+\caption{\label{fig:fig-k-size}Sampling requirements for each cluster}
 \end{figure*}
 \efloatseparator
  
