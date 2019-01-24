@@ -27,37 +27,24 @@ load("Data/RGM Vars.Rdata")
 load(runtimeFile)
 load(resultsFile)
 
-df_Bindex <- df_Bindex %>%
-  mutate(sample = str_replace(sample, "F", "Balanced Sampling"),
-         sample = str_replace(sample, "CS", "Convenience Sampling"),
-         sample = str_replace(sample, "SRS", "Simple Random Sampling"),
+rename_conditions <- function(orig.data) {
+  orig.data %>%
+  mutate(sample = str_replace(sample, "F", "BS"),
+         sample = str_replace(sample, "CS", "CS"),
+         sample = str_replace(sample, "SRS", "RS"),
          Sampling = str_replace(sample, "SUBS_", ""),
-         Clustering = ifelse(str_detect(sample, "SUBS"), "Stratified", "None"),
-         sample = str_replace(sample, "SUBS_", "S_"))
+         Clustering = ifelse(str_detect(sample, "S_"), "Stratified", "Unstratified"),
+         sample = paste("U_", sample, sep = ""),
+         sample = str_replace(sample, "U_SUBS_", "S_"))
+}
 
-df_counts <- df_counts %>%
-  mutate(sample = str_replace(sample, "F", "Balanced Sampling"),
-         sample = str_replace(sample, "CS", "Convenience Sampling"),
-         sample = str_replace(sample, "SRS", "Simple Random Sampling"),
-         Sampling = str_replace(sample, "SUBS_", ""),
-         Clustering = ifelse(str_detect(sample, "SUBS"), "Stratified", "None"),
-         sample = str_replace(sample, "SUBS_", "S_"))
+df_Bindex <- df_Bindex %>% rename_conditions()
 
-df_responses <- df_responses %>%
-  mutate(sample = str_replace(sample, "F", "Balanced Sampling"),
-         sample = str_replace(sample, "CS", "Convenience Sampling"),
-         sample = str_replace(sample, "SRS", "Simple Random Sampling"),
-         Sampling = str_replace(sample, "SUBS_", ""),
-         Clustering = ifelse(str_detect(sample, "SUBS"), "Stratified", "None"),
-         sample = str_replace(sample, "SUBS_", "S_"))
+df_counts <- df_counts %>% rename_conditions()
+
+df_responses <- df_responses %>% rename_conditions()
   
-df_sch_smd <- df_sch_smd %>%
-  mutate(sample = str_replace(sample, "F", "Balanced Sampling"),
-         sample = str_replace(sample, "CS", "Convenience Sampling"),
-         sample = str_replace(sample, "SRS", "Simple Random Sampling"),
-         Sampling = str_replace(sample, "SUBS_", ""),
-         Clustering = ifelse(str_detect(sample, "SUBS"), "Stratified", "None"),
-         sample = str_replace(sample, "SUBS_", "S_"))
+df_sch_smd <- df_sch_smd %>% rename_conditions()
 
 savePlot <- F
 ```
@@ -80,10 +67,6 @@ We found several limitations in that we lack empricical precident for modeling b
 # Methods Summary
 
 ## Participation Generating Model
-
-o	Take a look at coefficients
-	Add table comparing CS SMDs
-
 
 Distribution of propensity scores by response rates
 ```{r}
@@ -219,7 +202,7 @@ df_Bindex %>%
        x = "Population Participation Rate") +
   theme_apa()
 
-if(savePlot) ggsave("Figs/paper B-Index.jpg", dpi = 1000, width = 7•, height = 4)
+if(savePlot) ggsave("Figs/paper B-Index.jpg", dpi = 1000, width = 7, height = 4)
 ```
 
 
