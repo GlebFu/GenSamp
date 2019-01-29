@@ -29,9 +29,9 @@ load(resultsFile)
 
 rename_conditions <- function(orig.data) {
   orig.data %>%
-  mutate(sample = str_replace(sample, "F", "BS"),
-         sample = str_replace(sample, "CS", "CS"),
-         sample = str_replace(sample, "SRS", "RS"),
+  mutate(sample = str_replace(sample, "F", "Balanced"),
+         sample = str_replace(sample, "CS", "Convenience"),
+         sample = str_replace(sample, "SRS", "Random"),
          Sampling = str_replace(sample, "SUBS_", ""),
          Clustering = ifelse(str_detect(sample, "S_"), "Stratified", "Unstratified"),
          sample = paste("U_", sample, sep = ""),
@@ -180,7 +180,7 @@ if(savePlot) ggsave("Figs/B-Index.jpg", dpi = 1000, width = 11, height = 8.5)
 if(savePlot) ggsave("Figs/B-Index.jpg", dpi = 1000, width = 10, height = 4)
 ```
 ```{r}
-df_Bindex %>%
+avg_Bindex <- df_Bindex %>%
   group_by(sample, sch.RR, Clustering, Sampling) %>%
   summarise(All = mean(Bs),
             Partial = mean(Bs[Bs > .2]),
@@ -195,12 +195,16 @@ df_Bindex %>%
             SD = mean(SD)) %>%
   mutate(LL = M - SD,
          UL = M + SD) %>%
-  filter(Type == "Partial") %>%
+  filter(Type == "Partial")
+
+avg_Bindex %>%
   ggplot(aes(x = sch.RR, y = M, color = Sampling, linetype = Clustering)) +
   geom_line() +
   labs(y = "Mean B-index",
        x = "Population Participation Rate") +
   theme_apa()
+
+
 
 if(savePlot) ggsave("Figs/paper B-Index.jpg", dpi = 1000, width = 7, height = 4)
 ```
@@ -229,6 +233,8 @@ sSMDplot %>%
   theme_apa(box = F) +
   labs(y = "Mean SMD",
        x = "Population Participation Rate")
+
+
 
 if(savePlot)  ggsave("Figs/All SMDs.jpg", dpi = 1000, width = 7, height = 5)
 ```
@@ -264,6 +270,8 @@ samplot <- df_responses %>%
   group_by(sample, sch.RR, variable, Sampling, Clustering) %>%
   summarise(value = mean(value)) %>%
   spread(key = variable, value = value)
+
+
 ```
 
 
@@ -327,6 +335,8 @@ samplot2 %>%
   labs(x = "Population Response Rate", y = "Units Contacted") +
   theme_apa()
 
+
+
 if(savePlot)  ggsave("Figs/Units Contacted.jpg", dpi = 1000, width = 7, height = 5)
 
 ```
@@ -346,7 +356,6 @@ df.rr %>%
   geom_line() +
   facet_grid(~ Unit) +
   expand_limits(y = 0) +
-  theme_apa(box = T) +
   # scale_fill_brewer(type = "seq", palette = 4) +
   # scale_color_brewer(type = "qual", palette = 3)  +
   theme(legend.position = "bottom",
@@ -355,5 +364,10 @@ df.rr %>%
         legend.title = element_text(size=15),
         axis.text.x = element_text(angle = 45, hjust = 1)) +
   labs(x = "Generating Repsonse Rate", y = "Actual Response Rate") +
-  geom_abline(slope = 25, intercept = 1, linetype = "dashed")
+  geom_abline(slope = 25, intercept = 1, linetype = "dashed") +
+  theme_apa(box = T)
+
+save(avg_Bindex, df_Bindex, sSMDplot, df_responses, samplot, df_sch_smd, file = "Paper Data/Result Data.rdata")
+```
+
 
