@@ -54,35 +54,21 @@ library(tidyverse)
 rm(list = ls())
 ```
 
-```{r analysis_preferences}
-# Seed for random number generation
-# set.seed(42)
-```
-
 
 # Results
 
 
 ## Generalizability
+
 ```{r results-data, cache = F}
 
 load("Paper Data/Result Data.rdata")
 
 ```
 
-```{r fig-avg-Bindex, results = "asis", fig.cap = "Averge B-index across participation rates by sampling method", eval = T}
+Figure \@ref(fig:fig-SMD-by-Var) displays the average SMD between the samples and the population for each covariate and at each population participation rate resulting from each sampling method. The dotted horizontal line indicates a cutoff of .25, where SMDs above that indicate large differences between the sample and population for that covariate. Stratified methods consistently performed better than unstratified methods. SBS generally performed as well as or better than SRS. URS often resulted in highly unrepresenative samples except in cases where population participation rates were extremely high.
 
-avg_Bindex %>%
-  ggplot(aes(x = sch.RR, y = M, color = Sampling, linetype = Clustering)) +
-  geom_line() +
-  labs(y = "Mean B-index",
-       x = "Population Participation Rate") +
-  theme_apa()
-
-
-```
-
-
+Figure \@ref(fig:fig-avg-Bindex) displays the average $B$-index for each method across participation rates. At population participation rates of 60% and higher, all methods resulted in similarly generalizable samples. However, at lower rates only SBS and SRS consistantly generated highly generalizable samples. SCS and URS performed equally, while UCS resulted in relatively less generalizable samples.
 
 ```{r fig-SMD-by-Var, results = "asis", fig.cap = "Averge Standardized Mean Differences between sample and population", eval = T}
 sSMDplot %>%
@@ -98,6 +84,22 @@ sSMDplot %>%
        x = "Population Participation Rate")
 
 ```
+
+
+```{r fig-avg-Bindex, results = "asis", fig.cap = "Averge $B$-index across participation rates by sampling method", eval = T}
+
+avg_Bindex %>%
+  ggplot(aes(x = sch.RR, y = M, color = Sampling, linetype = Clustering)) +
+  geom_line() +
+  labs(y = "Mean B-index",
+       x = "Population Participation Rate") +
+  theme_apa()
+
+
+```
+
+
+
 
 ```{r fig-avg-SMD, results = "asis", fig.cap = "Average absolute SMD across covariates", eval = F}
 
@@ -121,6 +123,7 @@ sSMDplot %>%
 
 ## Feasibility
 
+Figure \@ref(fig:fig-units-contacted) reports the average number of schools that needed to be contacted before a full sample of $N = 60$ schools was selected. At higher participation rates differences between methods were negligibile. However, as participation rates decreased the disparity between the methods became more apparent. Overall, UCS required the least "effort" to recruit a full sample, followed by URS and SCS, SRS, and finally SBS. Figure \@ref(fig:fig-response-rates) plots the participation rates of schools approached for recruitment against the population participation rates. As expected, URS participation rates reflected those in the population. Both UCS and SCS resulted in higher participation rates, while SRS and SBS resulted in lower participation rates. 
 ```{r fig-responses, results = "asis", fig.cap = "Sampling statistics", eval = F}
 samplot %>%
   gather(key = measure, value = value, -sample, -sch.RR, -Sampling, -Clustering) %>%
@@ -157,6 +160,7 @@ contact_data %>%
         # legend.title = element_text(size=15),
         axis.text.x = element_text(angle = 45, hjust = 1)) +
   labs(x = "Population Response Rate", y = "Units Contacted") +
+  # scale_y_log10() +◙
   theme_apa()
 ```
 
@@ -187,6 +191,11 @@ response_rate_data %>%
 
 
 \newpage
+
+# Discussion
+The main goal of this study was to lay a groundwork for exploring the effectiveness and feasibility of sampling methods in the educational context. Our work uncovered several limitations in designing sampling and participation models. Our sampling method made several assumptions about researcher and recruiter behavior in selecting sample. First, that recruiters always prioritize schools that are most likely to participate. In fact, many other factors play a role such as proximity of sample units to the researcher and to each other, existing relationships between the recruiters and the sample units, and other researcher sampling biases. Second, that recruiters have approximiate knowledge of how likely a sampled unit is to participate. Though researchers may speculate about units that are more willing to participate (schools in larger urban distrits) and prioritize those, it is not likely that estimate willingness as well as we have simulated. Given this, it is possible that the "feasibility" of the convenience methods is overestimated.
+That said, our participation model is also probably highly innacurate. The parameters in our response generating model are based off of a study that examined the difference between schools participating in large-scale randomized control trials (RCT) and the population of schools. However, these RCTs themsevles typically typically rely on some form of convenience sampling. In that sense our parameters reflect participation rates of schools that are likely to participate in RCTs, rather than the full population of schools. Furthermore, the decision of whether a school participates in such a study is multi-leveled. Generally, districts serve as gatekeepers and require research requests to be submitted and approved before recruitment can begin. If the request is denied, no schools within that district may be recruited. If approved, schools may be contacted individually, however the decision to participate may rest with administrators, or they may be passed on to teachers most affected by the stuydy.
+
 
 # References
 
