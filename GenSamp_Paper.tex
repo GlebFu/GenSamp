@@ -132,7 +132,7 @@ for their limited generalizability due to inadequate sampling strategies
 internal validity as they demonstrate the causality of the impact being
 estimated. In education research, multisite RCTs, or multisite
 randomized trials (MRTs), are used to inform policy decisions by
-examining intervention impacts on a larger scale. Recruitment and
+evaluating intervention impacts on a larger scale. Recruitment and
 randomization occurs at the organizational level (e.g.~schools),
 ostensibly increasing the diversity of settings in which the study takes
 place. In practice, however, the generalizability of MRTs is greatly
@@ -140,14 +140,14 @@ limited by the sampling method being implemented. This is a major
 drawback for policymakers who are interested in generalizing treatment
 effects beyond the sample.
 
-RCTs are commonly used in social sciences, education, and medicine to
-study intervention impacts. Randomized treatment assignment ensures that
-estimated effects are causal, thus affording a higher level of internal
-validity. However, these effect estimates may be sample specific. If
-treatment effects are heterogeneous, then the impact of an intervention
-cannot be extrapolated beyond the study sample. This is a limiting
-feature of RCTs as policymakers seeking to implement interventions will
-have no way of gaguing effectivenes in their populaton of interest.
+RCTs are commonly used in impact evaluations across many fields.
+Randomized treatment assignment ensures that estimated effects are
+causal, thus affording a higher level of internal validity. However,
+these effect estimates may be sample specific. If treatment effects are
+heterogeneous, then the impact of an intervention cannot be extrapolated
+beyond the study sample. This is a limiting feature of RCTs since
+policymakers seeking to implement interventions will have no way of
+gaguing effectivenes in their populaton of interest.
 
 MRTs attempt to remedy this by studying the intervention on a larger
 scale. In educational research, for instance, multiple schools may be
@@ -157,32 +157,33 @@ design offers greater external validity relative to the single-site
 variant because it enables the study of site-by-treatment interaction
 and formal tests of generaliability (Raudenbush \& Liu, 2000). Treatment
 effect estimates are said to be generalizable to schools that are
-\enquote{similar} to those in the study, however, \enquote{similarity}
-isn't usually formally defined. Furthermore, if the sample of sites is
-too small or homogeneous, the scope of the generalization is greatly
-diminished.
+\enquote{similar} to those in the study, however, the similarity can be
+difficult to define. Furthermore, if the sample of sites is too small or
+homogeneous, the scope of the generalization is greatly diminished.
 
-Random sampling overcomes this limitation by selecting units from a
-well-defined population with some known probability. Assuming there are
-no refusals or attrition, the resulting sample is representative of the
-population from which it was selected.
+Random sampling overcomes this limitation by selecting sites from a
+well-defined population with some known probability. When used in
+conjunction with randomized treatment assignment, this is known as dual
+randomization. Assuming no refusals during recruitment, and full
+compliance without attrition after assignment, this design enables
+unbiased estimation of the sample average treatment effect (SATE). Using
+the known sampling probabilities, the SATE can then be used to estimate
+the population average treatment effect (PATE).
 
-In practice, however, researchers often rely on samples of convenience
-potentially biasing treatment effect estimates in the population.
-
-Probability sampling is commonly used in the survey literature to make
-unbiased estimates of population characteristics. When probability
-sampling is used along with randomized treatment assignment, also known
-as dual randomization, average treatment effect (ATE) estimates are
-unbiased in both the sample (SATE) and the population (PATE). However,
-probability sampling is rarely used in educational MRTs (Olsen, Orr,
-Bell, \& Stuart, 2013; Shadish, Cook, \& Campbell, 2002). Instead,
-recruitment of schools is often driven by convenience and cost
-effectiveness rather than representation, potentially resulting in
-biased estimates of PATE from unrepresentative samples. Though several
-methods have been proposed to statistically adjust for biased estimates,
-they are subject to coverage errors and may shrink the population of
-interest (Tipton, 2014).
+In absence of random sampling, PATE can still be estimated by using
+propensity score techniques, provided there is sufficent overlap between
+the sample and the population (O'Muircheartaigh \& Hedges, 2014; Tipton,
+2013a). This is especially usefull in impact evaluation as probability
+sampling is rarely used in this context (Olsen, Orr, Bell, \& Stuart,
+2013; Shadish, Cook, \& Campbell, 2002). Instead, researchers often opt
+for convenience or purposive samples. These methods much less expensive
+to implement, but are not usually designed for representative sampling.
+This makes them susceptible to undercoverage, or substantial differencs
+between the sample and target population (Groves, 2004). Undercoverage
+can be assessed using similar propensity score techniques (Stuart et
+al., 2011; Tipton, 2014). When undercoverage is too great, the full PATE
+cannot be recovered with the given sample, and the population needs to
+be trimmed by removing subsets of sites that are not represented.
 
 A series of recent papers instead advocate planning for generalizability
 at the recruitment stage (Tipton, 2013a, 2013b). These methods require a
@@ -966,6 +967,10 @@ Gower, J. C. (1971). A General Coefficient of Similarity and Some of Its
 Properties. \emph{Biometrics}, \emph{27}(4), 857--871.
 doi:\href{https://doi.org/10.2307/2528823}{10.2307/2528823}
 
+\leavevmode\hypertarget{ref-grovesSurveyMethodology2004}{}%
+Groves, R. M. (Ed.). (2004). \emph{Survey methodology}. Hoboken, N.J:
+Wiley-Interscience.
+
 \leavevmode\hypertarget{ref-hennigHowFindAppropriate2013}{}%
 Hennig, C., \& Liao, T. F. (2013). How to find an appropriate clustering
 for mixed-type variables with application to socio-economic
@@ -980,6 +985,13 @@ Validity in Policy Evaluations That Choose Sites Purposively.
 \emph{Journal of Policy Analysis and Management}, \emph{32}(1),
 107--121.
 doi:\href{https://doi.org/10.1002/pam.21660}{10.1002/pam.21660}
+
+\leavevmode\hypertarget{ref-omuircheartaighGeneralizingUnrepresentativeExperiments2014}{}%
+O'Muircheartaigh, C., \& Hedges, L. V. (2014). Generalizing from
+unrepresentative experiments: A stratified propensity score approach.
+\emph{Journal of the Royal Statistical Society: Series C (Applied
+Statistics)}, \emph{63}(2), 195--210.
+doi:\href{https://doi.org/10.1111/rssc.12037}{10.1111/rssc.12037}
 
 \leavevmode\hypertarget{ref-raudenbushStatisticalPowerOptimal2000}{}%
 Raudenbush, S. W., \& Liu, X. (2000). Statistical power and optimal
