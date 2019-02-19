@@ -1,0 +1,95 @@
+---
+title             : "Assessing sampling methods for generalization from RCTs: Modeling recruitment and participation"
+shorttitle        : "Assessing sampling methods for generalization from RCTs"
+
+author:
+  - name          : "Gleb Furman"
+    affiliation   : "1"
+    # corresponding : yes    # Define only one corresponding author
+    # address       : "Postal address"
+    # email         : "Gleb.Furman@gmail.com"
+  - name          : "James E. Pustejovsky"
+    affiliation   : "1"
+
+affiliation:
+  - id            : "1"
+    institution   : "University of Texas at Austin"
+#   - id            : "2"
+#     institution   : "Konstanz Business School"
+
+# author_note: |
+#   Add complete departmental affiliations for each author here. Each new line herein must be indented, like this line.
+
+#   Enter author note here.
+
+abstract: |
+    <!-- In order for educational research to be informative to policy makers, studies must be designed to make robust estimates of causal effects at the population level. Large scale multi-site randomized trials (MRT) often rely on vague convenience sampling methodology when recruiting districts and schools, resulting in relatively homogeneous samples that may differ greatly from the intended population of interest. Retrospective methods that quantify and statistically adjust for those differences are prosmising but have limited effect when the sample differs greatly from the population. Designing sampling methods that focus on generalizability may be a more ffective but costly solution, but limited methodological research has been performed to examine their effectiveness in the eduational context. This paper examines one promising method, stratified balanced sampling (SBS), in the context of recruiting a representative sample of schools for a large scale MRT. Using simulations based on real data, we compare SBS to stratified and unstratified versions of convenince sampling and probability sampling. Several models for generating school participation and emulating convenience sampling are proposed. Results indicate that SBS and stratified random sampling (SRS) result in highly generalizable samples. These methods are extremely costly to implement, however, especially when the population average willingness to participate is low. Stratified convenience sampling (SCS) is a potential compromise. -->
+
+# keywords          : "keywords"
+# wordcount         : "X"
+
+bibliography      : ["references.bib"]
+
+figsintext        : yes
+figurelist        : no
+tablelist         : no
+footnotelist      : no
+lineno            : no
+mask              : no
+
+documentclass     : "apa6"
+classoption       : "man"
+output            : papaja::apa6_pdf
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = F, cache = T, eval = T)
+
+```
+
+```{r load.packages, include = FALSE}
+library(papaja)
+library(tidyverse)
+
+rm(list = ls())
+```
+
+```{r analysis_preferences}
+# Seed for random number generation
+# set.seed(42)
+```
+
+```{r data-prep}
+source("ParGenSource.R")
+load("Data/base data.rdata")
+load("Paper Data/PaperData.rdata")
+```
+
+# Notation
+
+## Counts
+$N$ - # of units in population
+$n$ - # of units in sample
+$P$ - # of covariates in cluster analysis
+
+## Indices
+$i$ - Site/unit index
+$p$ - Covariate index
+
+## Measures
+$SMD$ - Standardized mean difference
+
+\newpage
+
+# References
+
+```{r create_r-references}
+r_refs(file = "references.bib")
+```
+
+\begingroup
+\setlength{\parindent}{-0.5in}
+\setlength{\leftskip}{0.5in}
+
+<div id = "refs"></div>
+\endgroup
