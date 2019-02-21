@@ -77,6 +77,7 @@ $k$ - # of strata generated
 ## Indices
 $_i$ - Site/unit index
 $_h$ - Covariate index
+$_j$ - Stratum index
 
 ## Characteristics
 $X_i$ - Vector of covariates for school $i$

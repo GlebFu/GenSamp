@@ -128,13 +128,13 @@ Potential advantages of SBS include reducing undercoverage and greater recruitme
 
 The goal of the current paper is two-part. First, we propose several methods for modeling two major sources of sampling bias: recruitment and participation. Recruitment refers to how likely a sampling unit is to be approached by researchers, and participation refers to how likely the sampling unit is to participate if recruited. This step will lay the groundwork for testing sampling methods in the educational context. Second, using the models proposed in the first step, we will compare SBS to several other recruitment models on it's ability to select a generalizable sample, and the ease with which a full sample can be recruited.
 
-\hypertarget{stratified-balanced-sampling}{%
-\subsection{Stratified Balanced Sampling}\label{stratified-balanced-sampling}}
+\hypertarget{context-and-notation}{%
+\subsection{Context and Notation}\label{context-and-notation}}
 
-In this section we outline Stratified Balanced Sampling (SBS) as implemented in this study in the context of selecting schools for a large scale MRT. For a more complete overview, see Tipton (2013b). SBS applies cluster analysis in order to implement bias robust balanced sampling. The goal of SBS is to select a sample that is representative of a population along a set of covariates related to treatment heterogeneity and site selection. This process requires the availability of a rich data set of observed covariates for each unit in the population. The population is first divided into heterogeneous strata comprised of homogeneous units given the set of observed covariates. This is done using k-means clustering which assigns units to strata such that similarity within strata is maximized. A second distance metric is then used to rank units within strata in order of most representative of that strata. These ranks can then be used by researchers to prioritize recruitment. This encourages the selection of units from subsections of the population which may otherwise not have been included in the sample.
+In this section we outline SBS as implemented in this study in the context of selecting schools for a large scale MRT. For a more complete overview, see Tipton (2013b). SBS applies cluster analysis in order to implement bias robust balanced sampling. The goal of SBS is to select a sample that is representative of a population along a set of covariates related to treatment heterogeneity and site selection. This process requires the availability of a rich data set of observed covariates for each unit in the population. The population is first divided into heterogeneous strata comprised of homogeneous units given the set of observed covariates. This is done using k-means clustering which assigns units to strata such that similarity within strata is maximized. A second distance metric is then used to rank units within strata in order of most representative of that strata. These ranks can then be used by researchers to prioritize recruitment. This encourages the selection of units from subsections of the population which may otherwise not have been included in the sample.
 
-\hypertarget{context-and-population}{%
-\subsubsection{Context and Population}\label{context-and-population}}
+\hypertarget{population-frame}{%
+\subsubsection{Population Frame}\label{population-frame}}
 
 We assume a data set enumerating a population of \(N\) sites (schools), indexed as \(i = 1 ... N\). Each site has some unobserved probability of participating if recruited represented by the participation propensity score \(\pi_i\). Each site also has a vector of observed characteristics \(X_i\) of length \(P\). This is a set of pre-treatment covariates that predict \(\pi_i\). The covariates are a mixture of continuous, binary, and catagorical data.
 
@@ -151,13 +151,13 @@ where \(\bar{X}\) is a vector of covariate means in the sample, \(\mu\) is the v
 
 Once data is identified, a distance metric must be selected to summarizes the difference between two sites on a set of covariates. It is then used to maximize the similarity of sites within clusters. Determining which metric to use largely depends on the type of covariates included in \(X\) and their relative importance.
 
-The general similarity measure was used (Gower, 1971) because \(X\) contains both continuous and categorical variables. This method relies on different calculations of distance depending on the type of covariates. Let \(X_{ih}\) and \(X_{i'h}\) be the observed value of covariate \(h = {1, ..., P}\) for sites \(i\) and \(i'\) respectively, where \(i \ne i'\). Let \(d_{ii'h}\) be the distance between observed values of covariate \(X_{h}\) for site \(i\) and site \(i'\). For categorical or dummy coded variables, \(d_{ii'h} = 1\) if \(X_{ih} = X_{i'h}\) and \(d_{ii'h} = 0\) otherwise. For continuous covariates, we use the following formula:
+The general similarity measure (Gower, 1971) was usedbecause \(X\) contains both continuous and categorical variables. This method relies on different calculations of distance depending on the type of covariates. Let \(X_{ih}\) and \(X_{i'h}\) be the observed value of covariate \(h = {1, ..., P}\) for sites \(i\) and \(i'\) respectively, where \(i \ne i'\). Let \(d_{ii'h}\) be the distance between observed values of covariate \(X_{h}\) for site \(i\) and site \(i'\). For categorical or dummy coded variables, \(d_{ii'h} = 1\) if \(X_{ih} = X_{i'h}\) and \(d_{ii'h} = 0\) otherwise. For continuous covariates, we use the following formula:
 
 \begin{align}
   d_{ii'h} = 1 - \frac{|X_{ih} - X_{i'h}|}{R_h}
 \end{align}
 
-where \textbar{}.\textbar{} indicates absolute value, \(X_{ih}\) and \(X_{i'h}\) are values of the \(h^{th}\) covariate for sites \(i\) and \(i'\), and \(R_h\) is the range of observations for covariate \(X_h\). This method restricts the range of \(d_{ii'h}\) to \([0,1]\). Finally, we calculate the general similarity between each site pair by taking the weighted average of the distances between all covariates. Let \(d^{g}_{ii'}\) be the general similarity between site \(i\) and site \(i'\) where \(i \ne i'\).
+where \textbar{}.\textbar{} indicates absolute value, \(X_{ih}\) and \(X_{i'h}\) are values of the \(h^{th}\) covariate for sites \(i\) and \(i'\), and \(R_h\) is the range of observations for covariate \(X_h\). This method restricts the range of \(d_{ii'h}\) to \([0,1]\). Finally, we calculate the general similarity between each site pair by taking the weighted average of the distances between all covariates. Let \(d^{g}_{ii'}\) be the general similarity between site \(i\) and site \(i'\).
 
 \begin{align}
   d^{g}_{ii'} = \frac{\sum^p_{h = 1}w_{ii'h}d_{ii'h}}{\sum^p_{h = 1}w_{ii'h}}
@@ -170,7 +170,7 @@ where \(w_{ii'h} = 0\) if \(X_h\) is missing for either site and \(w_{ii'h} = 1\
 
 Before applying the clustering method, the number of strata to be generated must be determined. Generating more strata results in more homogeneity within strata, however in practical applications this may be more difficult to manage. For instance, if refusal and non-response rates are fairly high, having fewer spread across more strata may make it difficult to adequately recruit from all strata. Resource constraints (e.g.~time, funding, recruiters) may also be a factor in the number of strata selected.
 
-One solution is to perform the analysis several times generating different numbers of strata, and comparing the proportion of variability between strata. Let \(k\) be the number of strata generated where \(k = 1, 2, ..., q\) for some maximum allowable number of \(q\) strata. Let \(\sigma_{wk}^2\) be the total variability within each strata, and \(\sigma_{bk}^2\) be the total variability between each strata, for all covariates in \(X\) and for each set of \(k\) strata generated. Let \(p_k\) be the proportion of variability that is between strata for each set of \(k\) strata generated be defined as follows:
+Our strategy was to perform the analysis several times generating different numbers of strata, and comparing the proportion of variability between strata. Let \(k\) be the number of strata generated where \(k = 1, 2, ..., q\) for some maximum allowable number of \(q\) strata. Let \(\sigma_{wk}^2\) be the total variability within each strata, and \(\sigma_{bk}^2\) be the total variability between each strata, for all covariates in \(X\) and for each set of \(k\) strata generated. Let \(p_k\) be the proportion of variability that is between strata for each set of \(k\) strata generated be defined as follows:
 
 \begin{align} \label{eq:pk}
   p_k = \sigma_{bk}^2/(\sigma_{wk}^2 + \sigma_{bk}^2)
@@ -181,15 +181,15 @@ As \(p_k\) approaches 1, most of the variation is between strata, indicating hom
 \hypertarget{sample-selection}{%
 \subsubsection{Sample Selection}\label{sample-selection}}
 
-Finally, the sample must be selected and evaluated. Tipton (2013b) recommends selecting a balanced sample of order 1 within each stratum, then testing for robustness to model failure by comparing the selected sample on higher orders. First the number of units to be sampled from each strata must be identified using proportional sample allocation. Each strata contains \(N_j\) units where \(N_1 + N_2 ... + N_k = N\). From each stratum \(j\), \(n_j\) units must be sampled such that \(n_j = [(N_j/N)n]\), where {[}.{]} indicates that each value must be rounded to the nearest integer.
-
-Next a method must be chosen for selecting units within each strata such that a balanced sample is achieved. Ideally this means that the expected value of covariate \(X_h\) across units in stratum \(j\) is equal to the expected value of covariate \(X_h\) across all units sampled from stratum \(j\):
+The goal of balanced sampling is to recruit in such a way that the expected value of covariate \(X_h\) across units in stratum \(j\) is equal to the expected value of covariate \(X_h\) across all units sampled from stratum \(j\):
 
 \begin{align}
-  E(X_h|Z = 1, j) = E(X_h|j)
+  E(X_ih|Z_i = 1, j) = E(X_h|j)
 \end{align}
 
-One method is to perform a simple random sample of \(n_j\) units. This is ideal as it results in a balanced sample on both observed and unobserved covariates over repeated samples in stratum \(j\). This method is limited when \(n_j\) is small which may not result in balance for any particular sample. Another aproach is to rank each unit within a strata using a distance measure, with units closer to the ``center" of the strata ranked higher. Once again, the weighted Euclidean distance can be used, this time measuring the distance to the mean of each covariate:
+where \(Z_i = 1\) if site \(i\) is recruited into the sample and \(Z_i = 0\) otherwise. We implemented balanced sampling by prioritizing the recruitment of sites based on their similarity to the \enquote{average} site in each stratum. First the number of units to be sampled from each strata must be identified using proportional sample allocation. Each strata contains \(N_j\) units where \(N_1 + N_2 ... + N_k = N\). From each stratum \(j\), \(n_j\) units must be sampled such that \(n_j = [(N_j/N)n]\), where {[}.{]} indicates that each value is rounded to the nearest integer.
+
+Next we ranked each unit within a stratum using a distance measure, with units closer to the \enquote{center} of the strata ranked higher. Once again, the weighted Euclidean distance can be used, this time measuring the distance to the mean of each covariate:
 
 \begin{align} \label{eq:euclid}
   d_{ij} = \sqrt{\sum^p_{h=1}w_h[X_{ijh} - E(X_h|j)]^2}
@@ -206,21 +206,6 @@ Once the sample has been recruited, it is necessary to evaluate the extent to wh
 As this equation approaches 0 for all covariates, the sample become more balanced and robust against model failure. Comparisons can be made using standardized mean differences or t-tests, though substantive criteria should also be considered.
 
 If there is a high degree of homogeneity within strata, this sampling procedure should be fairly robust to moderate non-participation rate. However a very large non-participation rate may result in a lack of balance, especially in higher orders (Tipton, 2013b). If large differences are detected, post hoc methods described previously can be used to make further adjustments.
-
-\hypertarget{outcome-analysis}{%
-\subsubsection{Outcome Analysis}\label{outcome-analysis}}
-
-If proportional allocation is performed during the stratified sampling process, then the proportion of the sample in each strata is equal to the proportion of the population that is in each strata, \(\frac{n_j}{n} = \frac{N_j}{N}\). Furthermore, if a bias-robust balanced sample is selected within each strata, then the expected value of \(X\) in the sample will equal to the expected value of \(X\) in the population within each stratum, \(E(X|Z=1,j) = E(X|j)\). When both of these conditions are satisfied, no additional adjustments need to be made to the outcome analysis. This is because the resulting sample will be self-weighing:
-
-\begin{align}
-  \begin{split}
-    E(X | Z = 1) &= \sum{(n_j/n)E(X | Z = 1, j)} \\
-      &= \sum{(N_j/N)E(X | j)} \\
-      &= E(X)
-  \end{split}
-\end{align}
-
-Given this, whatever random effects model which would ordinarily be applied may be use to estimate treatment effect. Furthermore, because the standard estimator is used, any power analysis used to estimate the original sample size is unaffected. If proportional allocation is not achieved, the the sample needs to be reweighed to resemble the population, in which case the previously described retrospective methods can be applied to estimate treatment effects and make generalizations.
 
 \hypertarget{advantages-and-limitations}{%
 \subsubsection{Advantages and Limitations}\label{advantages-and-limitations}}
@@ -246,8 +231,8 @@ Selection bias was generated to account for both self selection as well as resea
 
 In order to model realistic sampling scenarios, extant school data were used to develop the population frame. School characteristics were then used to generate a \enquote{participation propensity score} which indicated the probability of a school agreeing to participate if asked. Because the overall participation rate for the population is unknown, this score was generated under several assumed participation rates.
 
-\hypertarget{population-frame}{%
-\subsubsection{Population Frame}\label{population-frame}}
+\hypertarget{population-frame-1}{%
+\subsubsection{Population Frame}\label{population-frame-1}}
 
 The population frame is composed of data from three sources: (1) the Common Core of Data (CCD), (2) publicly available accountability data, and (3) the U.S. Census. The CCD is a comprehensive database housing annually collected national statistics of all public schools and districts. Accountability data was used to calculate the proportion of students within each school performing at or above proficiency in Math and ELA. Finally, local median income was obtained from the U.S. Census and was matched to each school by zip code.
 
@@ -428,7 +413,54 @@ In order to assess feasibility, the total number of schools approached to achiev
 \hypertarget{results}{%
 \section{Results}\label{results}}
 
+\hypertarget{generalizability-1}{%
+\subsection{Generalizability}\label{generalizability-1}}
+
+Figure \ref{fig:fig-SMD-by-Var} displays the average SMD between the samples and the population for each covariate and at each population participation rate resulting from each sampling method. The dotted horizontal line indicates a cutoff of .25, where SMDs above that indicate large differences between the sample and population for that covariate. Stratified methods consistently performed better than unstratified methods. SBS generally performed as well as or better than SRS. URS often resulted in highly unrepresenative samples except in cases where population participation rates were extremely high.
+
+Figure \ref{fig:fig-avg-Bindex} displays the average \(B\)-index for each method across participation rates. At population participation rates of 60\% and higher, all methods resulted in similarly generalizable samples. However, at lower rates only SBS and SRS consistantly generated highly generalizable samples. SCS and URS performed equally, while UCS resulted in relatively less generalizable samples.
+
+\begin{figure}
+\centering
+\includegraphics{GenSamp_Paper_files/figure-latex/fig-SMD-by-Var-1.pdf}
+\caption{\label{fig:fig-SMD-by-Var}Averge Standardized Mean Differences between sample and population}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics{GenSamp_Paper_files/figure-latex/fig-avg-Bindex-1.pdf}
+\caption{\label{fig:fig-avg-Bindex}Averge \(B\)-index across participation rates by sampling method}
+\end{figure}
+
+\hypertarget{feasibility-1}{%
+\subsection{Feasibility}\label{feasibility-1}}
+
+Figure \ref{fig:fig-units-contacted} reports the average number of schools that needed to be contacted before a full sample of \(N = 60\) schools was selected. At higher participation rates differences between methods were negligibile. However, as participation rates decreased the disparity between the methods became more apparent. Overall, UCS required the least \enquote{effort} to recruit a full sample, followed by URS and SCS, SRS, and finally SBS. Figure \ref{fig:fig-response-rates} plots the participation rates of schools approached for recruitment against the population participation rates. As expected, URS participation rates reflected those in the population. Both UCS and SCS resulted in higher participation rates, while SRS and SBS resulted in lower participation rates.
+
+\begin{figure}
+\centering
+\includegraphics{GenSamp_Paper_files/figure-latex/fig-units-contacted-1.pdf}
+\caption{\label{fig:fig-units-contacted}Averge number of schools contacted to achieve N = 60}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics{GenSamp_Paper_files/figure-latex/fig-response-rates-1.pdf}
+\caption{\label{fig:fig-response-rates}Recruitment response rates for each sampling method}
+\end{figure}
+
 \newpage
+
+\hypertarget{discussion}{%
+\section{Discussion}\label{discussion}}
+
+The main goal of this study was to lay a groundwork for exploring the effectiveness and feasibility of sampling methods in the educational context. Our work uncovered several limitations in designing sampling and participation models. The sampling methods we developed made several assumptions about researcher and recruiter behavior in selecting a sample. First, that recruiters always prioritize schools that are most likely to participate. In truth, many other factors play a role such as proximity of sample units to the researcher and to each other, existing relationships between the recruiters and the sample units, and other researcher assumptions about the sample unit's characteristics. Second, that recruiters have approximiate knowledge of how likely a sampled unit is to participate. Though researchers may speculate about units that are more willing to participate (schools in larger urban distrits) and prioritize recruiting such units, it is not likely that they would estimate willingness as well as we have simulated. Given this, it is possible that the \enquote{feasibility} of the convenience methods is overestimated.
+
+That said, our participation model is also likely innacurate. The parameters in our response generating model are based on values from a study that examined the difference between schools participating in large-scale randomized control trials (RCT) and the overall population of schools. However, these RCTs themselves typically rely on some form of convenience sampling. In that sense our parameters reflect participation rates of schools that are likely to participate in RCTs, rather than the full population of schools. Furthermore, the decision of whether a school participates in such a study is multi-leveled. Generally, districts serve as gatekeepers, requiring research requests to be submitted and approved before recruitment can begin. If the request is denied, no schools within that district may be recruited. If approved, schools may be contacted individually. The ultimate decision may then rest with administrators, or they may be passed on to teachers most affected by the study.
+
+Despite these limitations, we believe that our findings reasonably represent the relative performance of the various sampling methods we tested in the context of educational research. In terms of selecting a generalizable sample, SBS results in a considerable improvement compared to UCS. However, given the difficulty with which those samples are recruited, SBS is unlikely to be fully implemented in the ideal form. Instead, SCS may be a reasonable compromise. Our findings indicate that any sampling method is greatly improved by first stratifying the population. We show that performing a convenience sample within strata (SCS) is comparable to simple random sampling (URS) both in terms of generalizability and feasibility. URS is considered the gold standard for generalizabilty, however it is not typically implemented due to it requiring substantial resources and other concerns of practicality. The advantage of SCS here is that it enables researchers to mitigate recruitment costs by targeting schools from the same strata that are in close proximity to each other. Beyond generalizability, stratifying in this manner also offers the additional advantage of transparency by forcing the researcher to make sampling decisions in the study design phase, and to keep track of sampling decisions as recruitment is implemented.
+
+Finally, we hope to make clear the disadvantages of convenience sampling in this context. Large scale MRTs are expensive to implement, however by not investing in robust recruitment strategies researchers severly limit the impact and relevance of of their work. We believe that the increased cost of a sampling method designed for generalizability is greatly outweighed by the benefit of an intervention whose impacts we can estimate more accurately and for a wider population.
 
 \hypertarget{references}{%
 \section{References}\label{references}}

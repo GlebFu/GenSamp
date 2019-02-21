@@ -83,8 +83,8 @@ load("Paper Data/PaperData.rdata")
   
   The goal of the current paper is two-part. First, we propose several methods for modeling two major sources of sampling bias: recruitment and participation. Recruitment refers to how likely a sampling unit is to be approached by researchers, and participation refers to how likely the sampling unit is to participate if recruited. This step will lay the groundwork for testing sampling methods in the educational context. Second, using the models proposed in the first step, we will compare SBS to several other recruitment models on it's ability to select a generalizable sample, and the ease with which a full sample can be recruited.
 
-## SBS Context and Notation
-  In this section we outline Stratified Balanced Sampling (SBS) as implemented in this study in the context of selecting schools for a large scale MRT. For a more complete overview, see @tiptonStratifiedSamplingUsing2013. SBS applies cluster analysis in order to implement bias robust balanced sampling. The goal of SBS is to select a sample that is representative of a population along a set of covariates related to treatment heterogeneity and site selection. This process requires the availability of a rich data set of observed covariates for each unit in the population. The population is first divided into heterogeneous strata comprised of homogeneous units given the set of observed covariates. This is done using k-means clustering which assigns units to strata such that similarity within strata is maximized. A second distance metric is then used to rank units within strata in order of most representative of that strata. These ranks can then be used by researchers to prioritize recruitment. This encourages the selection of units from subsections of the population which may otherwise not have been included in the sample.
+## Context and Notation
+  In this section we outline SBS as implemented in this study in the context of selecting schools for a large scale MRT. For a more complete overview, see @tiptonStratifiedSamplingUsing2013. SBS applies cluster analysis in order to implement bias robust balanced sampling. The goal of SBS is to select a sample that is representative of a population along a set of covariates related to treatment heterogeneity and site selection. This process requires the availability of a rich data set of observed covariates for each unit in the population. The population is first divided into heterogeneous strata comprised of homogeneous units given the set of observed covariates. This is done using k-means clustering which assigns units to strata such that similarity within strata is maximized. A second distance metric is then used to rank units within strata in order of most representative of that strata. These ranks can then be used by researchers to prioritize recruitment. This encourages the selection of units from subsections of the population which may otherwise not have been included in the sample.
 
 ### Population Frame
 
@@ -130,15 +130,15 @@ As $p_k$ approaches 1, most of the variation is between strata, indicating homog
 <!-- Go into CH and n distribution across strata here? -->
 
 ### Sample Selection
-Finally, the sample must be selected and evaluated. @tiptonStratifiedSamplingUsing2013 recommends selecting a balanced sample of order 1 within each stratum, then testing for robustness to model failure by comparing the selected sample on higher orders. First the number of units to be sampled from each strata must be identified using proportional sample allocation. Each strata contains $N_j$ units where $N_1 + N_2 ... + N_k = N$. From each stratum $j$, $n_j$ units must be sampled such that $n_j = [(N_j/N)n]$, where [.] indicates that each value must be rounded to the nearest integer.
-
-Next a method must be chosen for selecting units within each strata such that a balanced sample is achieved. Ideally this means that the expected value of covariate $X_h$ across units in stratum $j$ is equal to the expected value of covariate $X_h$ across all units sampled from stratum $j$:
+The goal of balanced sampling is to recruit in such a way that the expected value of covariate $X_h$ across units in stratum $j$ is equal to the expected value of covariate $X_h$ across all units sampled from stratum $j$:
 
 \begin{align}
-  E(X_h|Z = 1, j) = E(X_h|j)
+  E(X_ih|Z_i = 1, j) = E(X_h|j)
 \end{align}
 
-One method is to perform a simple random sample of $n_j$ units. This is ideal as it results in a balanced sample on both observed and unobserved covariates over repeated samples in stratum $j$. This method is limited when $n_j$ is small which may not result in balance for any particular sample. Another aproach is to rank each unit within a strata using a distance measure, with units closer to the ``center" of the strata ranked higher. Once again, the weighted Euclidean distance can be used, this time measuring the distance to the mean of each covariate:
+where $Z_i = 1$ if site $i$ is recruited into the sample and $Z_i = 0$ otherwise. We implemented balanced sampling by prioritizing the recruitment of sites based on their similarity to the "average" site in each stratum. First the number of units to be sampled from each strata must be identified using proportional sample allocation. Each strata contains $N_j$ units where $N_1 + N_2 ... + N_k = N$. From each stratum $j$, $n_j$ units must be sampled such that $n_j = [(N_j/N)n]$, where [.] indicates that each value is rounded to the nearest integer. 
+
+  Next we ranked each unit within a stratum using a distance measure, with units closer to the "center" of the strata ranked higher. Once again, the weighted Euclidean distance can be used, this time measuring the distance to the mean of each covariate:
 
 \begin{align} \label{eq:euclid}
   d_{ij} = \sqrt{\sum^p_{h=1}w_h[X_{ijh} - E(X_h|j)]^2}
@@ -393,7 +393,149 @@ In order to assess feasibility, the total number of schools approached to achiev
 # Results
 
 
+## Generalizability
+
+```{r results-data, cache = F}
+
+load("Paper Data/Result Data.rdata")
+
+```
+
+Figure \@ref(fig:fig-SMD-by-Var) displays the average SMD between the samples and the population for each covariate and at each population participation rate resulting from each sampling method. The dotted horizontal line indicates a cutoff of .25, where SMDs above that indicate large differences between the sample and population for that covariate. Stratified methods consistently performed better than unstratified methods. SBS generally performed as well as or better than SRS. URS often resulted in highly unrepresenative samples except in cases where population participation rates were extremely high.
+
+Figure \@ref(fig:fig-avg-Bindex) displays the average $B$-index for each method across participation rates. At population participation rates of 60% and higher, all methods resulted in similarly generalizable samples. However, at lower rates only SBS and SRS consistantly generated highly generalizable samples. SCS and URS performed equally, while UCS resulted in relatively less generalizable samples.
+
+```{r fig-SMD-by-Var, results = "asis", fig.cap = "Averge Standardized Mean Differences between sample and population", eval = T}
+sSMDplot %>%
+  filter(Group == "sampled") %>%
+  ggplot(aes(x = sch.RR, y = sim_SMD, color = Sampling, linetype = Clustering, group = sample)) +
+  # geom_point() +
+  geom_line() +
+  geom_hline(yintercept = 0) +
+  geom_hline(yintercept = .25, linetype = "dashed") +
+  facet_wrap( ~ Variable, scales = "free_y") +
+  theme_apa(box = F) +
+  labs(y = "Mean SMD",
+       x = "Population Participation Rate")
+
+```
+
+
+```{r fig-avg-Bindex, results = "asis", fig.cap = "Averge $B$-index across participation rates by sampling method", eval = T}
+
+avg_Bindex %>%
+  ggplot(aes(x = sch.RR, y = M, color = Sampling, linetype = Clustering)) +
+  geom_line() +
+  labs(y = "Mean B-index",
+       x = "Population Participation Rate") +
+  theme_apa()
+
+
+```
+
+
+
+
+```{r fig-avg-SMD, results = "asis", fig.cap = "Average absolute SMD across covariates", eval = F}
+
+sSMDplot %>%
+  filter(Group == "sampled") %>%
+  ggplot(aes(x = sample, y = sim_SMD, group = sample, fill = Sampling, linetype = Clustering)) +
+  geom_boxplot() +
+  geom_line() +
+  geom_hline(yintercept = 0) +
+  geom_hline(yintercept = .25, linetype = "dashed") +
+  # facet_grid(dist.RR ~ sch.RR, scales = "free_y") +
+  theme_apa(box = T) +
+  # scale_fill_brewer(type = "seq", palette = 4, guide=FALSE) +
+  # scale_color_brewer(type = "qual", palette = 5)  +
+  theme(legend.position = "none",
+        panel.spacing = unit(2, "lines"),
+        text = element_text(size=20),
+        legend.title = element_text(size=15)) +
+  labs(x = "Sampling Method", y = "Absolute SMD")
+```
+
+## Feasibility
+
+Figure \@ref(fig:fig-units-contacted) reports the average number of schools that needed to be contacted before a full sample of $N = 60$ schools was selected. At higher participation rates differences between methods were negligibile. However, as participation rates decreased the disparity between the methods became more apparent. Overall, UCS required the least "effort" to recruit a full sample, followed by URS and SCS, SRS, and finally SBS. Figure \@ref(fig:fig-response-rates) plots the participation rates of schools approached for recruitment against the population participation rates. As expected, URS participation rates reflected those in the population. Both UCS and SCS resulted in higher participation rates, while SRS and SBS resulted in lower participation rates. 
+```{r fig-responses, results = "asis", fig.cap = "Sampling statistics", eval = F}
+samplot %>%
+  gather(key = measure, value = value, -sample, -sch.RR, -Sampling, -Clustering) %>%
+  mutate(level = str_split(measure, "_", simplify = T)[,1],
+         measure =  str_split(measure, "_", simplify = T)[,2]) %>%
+  filter(level == "sch") %>%
+  ggplot(aes(x = sch.RR, y = value, group = sample, color = Sampling, linetype = Clustering)) +
+  geom_point() +
+  geom_line() +
+  facet_wrap( ~ measure, scales = "free_y") +
+  expand_limits(y=0) +
+  theme_apa(box = T)
+```
+
+```{r fig-units-contacted, results = "asis", fig.cap = "Averge number of schools contacted to achieve N = 60", eval = T}
+contact_data <- samplot %>%
+  gather(key = measure, value = value, -sample, -sch.RR, -Sampling, -Clustering) %>%
+  mutate(level = str_split(measure, "_", simplify = T)[,1],
+         measure =  str_split(measure, "_", simplify = T)[,2]) %>%
+  filter(measure == "contacted") %>%
+  mutate(level = ifelse(level == "sch", "Schools", "Districts"))
+
+contact_data %>%
+  ggplot(aes(x = sch.RR, y = value, group = sample, color = Sampling, linetype = Clustering)) +
+  geom_point() +
+  geom_line() +
+  expand_limits(y=0) +
+  # theme_apa(box = T) +
+  # scale_fill_brewer(type = "seq", palette = 4) +
+  # scale_color_brewer(type = "qual", palette = 3)  +
+  theme(legend.position = "bottom",
+        panel.spacing = unit(2, "lines"),
+        # text = element_text(size=20),
+        # legend.title = element_text(size=15),
+        axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(x = "Population Response Rate", y = "Units Contacted") +
+  # scale_y_log10() +◙
+  theme_apa()
+```
+
+```{r fig-response-rates, results = "asis", fig.cap = "Recruitment response rates for each sampling method", eval = T}
+response_rate_data <- samplot %>%
+  gather(key = measure, value = value, -sample, -sch.RR, -Sampling, -Clustering) %>%
+  mutate(level = str_split(measure, "_", simplify = T)[,1],
+         measure =  str_split(measure, "_", simplify = T)[,2]) %>%
+  filter(measure == "RR") %>%
+  mutate(level = ifelse(level == "sch", "Schools", "Districts"))
+
+response_rate_data %>%
+  ggplot(aes(x = sch.RR, y = value, group = sample, color = Sampling, linetype = Clustering)) +
+  geom_point() +
+  geom_line() +
+  expand_limits(y=0) +
+  # theme_apa(box = T) +
+  # scale_fill_brewer(type = "seq", palette = 4) +
+  # scale_color_brewer(type = "qual", palette = 3)  +
+  theme(legend.position = "bottom",
+        panel.spacing = unit(2, "lines"),
+        # text = element_text(size=20),
+        # legend.title = element_text(size=15),
+        axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(x = "Population Response Rate", y = "Recruitment Response Rate") +
+  theme_apa()
+```
+
+
 \newpage
+
+# Discussion
+The main goal of this study was to lay a groundwork for exploring the effectiveness and feasibility of sampling methods in the educational context. Our work uncovered several limitations in designing sampling and participation models. The sampling methods we developed made several assumptions about researcher and recruiter behavior in selecting a sample. First, that recruiters always prioritize schools that are most likely to participate. In truth, many other factors play a role such as proximity of sample units to the researcher and to each other, existing relationships between the recruiters and the sample units, and other researcher assumptions about the sample unit's characteristics. Second, that recruiters have approximiate knowledge of how likely a sampled unit is to participate. Though researchers may speculate about units that are more willing to participate (schools in larger urban distrits) and prioritize recruiting such units, it is not likely that they would estimate willingness as well as we have simulated. Given this, it is possible that the "feasibility" of the convenience methods is overestimated.
+
+That said, our participation model is also likely innacurate. The parameters in our response generating model are based on values from a study that examined the difference between schools participating in large-scale randomized control trials (RCT) and the overall population of schools. However, these RCTs themselves typically rely on some form of convenience sampling. In that sense our parameters reflect participation rates of schools that are likely to participate in RCTs, rather than the full population of schools. Furthermore, the decision of whether a school participates in such a study is multi-leveled. Generally, districts serve as gatekeepers, requiring research requests to be submitted and approved before recruitment can begin. If the request is denied, no schools within that district may be recruited. If approved, schools may be contacted individually. The ultimate decision may then rest with administrators, or they may be passed on to teachers most affected by the study.
+
+Despite these limitations, we believe that our findings reasonably represent the relative performance of the various sampling methods we tested in the context of educational research. In terms of selecting a generalizable sample, SBS results in a considerable improvement compared to UCS. However, given the difficulty with which those samples are recruited, SBS is unlikely to be fully implemented in the ideal form. Instead, SCS may be a reasonable compromise. Our findings indicate that any sampling method is greatly improved by first stratifying the population. We show that performing a convenience sample within strata (SCS) is comparable to simple random sampling (URS) both in terms of generalizability and feasibility. URS is considered the gold standard for generalizabilty, however it is not typically implemented due to it requiring substantial resources and other concerns of practicality. The advantage of SCS here is that it enables researchers to mitigate recruitment costs by targeting schools from the same strata that are in close proximity to each other. Beyond generalizability, stratifying in this manner also offers the additional advantage of transparency by forcing the researcher to make sampling decisions in the study design phase, and to keep track of sampling decisions as recruitment is implemented. 
+
+Finally, we hope to make clear the disadvantages of convenience sampling in this context. Large scale MRTs are expensive to implement, however by not investing in robust recruitment strategies researchers severly limit the impact and relevance of of their work. We believe that the increased cost of a sampling method designed for generalizability is greatly outweighed by the benefit of an intervention whose impacts we can estimate more accurately and for a wider population. 
+
 
 # References
 
