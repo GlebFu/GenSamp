@@ -71,10 +71,16 @@ load("Paper Data/PaperData.rdata")
 $N$ - # of units in population
 $n$ - # of units in sample
 $P$ - # of covariates in cluster analysis
+$q$ - maximum number of strata
+$k$ - # of strata generated
 
 ## Indices
-$i$ - Site/unit index
-$p$ - Covariate index
+$_i$ - Site/unit index
+$_h$ - Covariate index
+
+## Characteristics
+$X_i$ - Vector of covariates for school $i$
+$\pi$ - participation propenstiy score for school $i$
 
 ## Measures
 $SMD$ - Standardized mean difference

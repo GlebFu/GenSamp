@@ -83,53 +83,51 @@ load("Paper Data/PaperData.rdata")
   
   The goal of the current paper is two-part. First, we propose several methods for modeling two major sources of sampling bias: recruitment and participation. Recruitment refers to how likely a sampling unit is to be approached by researchers, and participation refers to how likely the sampling unit is to participate if recruited. This step will lay the groundwork for testing sampling methods in the educational context. Second, using the models proposed in the first step, we will compare SBS to several other recruitment models on it's ability to select a generalizable sample, and the ease with which a full sample can be recruited.
 
-## Stratified Balanced Sampling
+## SBS Context and Notation
   In this section we outline Stratified Balanced Sampling (SBS) as implemented in this study in the context of selecting schools for a large scale MRT. For a more complete overview, see @tiptonStratifiedSamplingUsing2013. SBS applies cluster analysis in order to implement bias robust balanced sampling. The goal of SBS is to select a sample that is representative of a population along a set of covariates related to treatment heterogeneity and site selection. This process requires the availability of a rich data set of observed covariates for each unit in the population. The population is first divided into heterogeneous strata comprised of homogeneous units given the set of observed covariates. This is done using k-means clustering which assigns units to strata such that similarity within strata is maximized. A second distance metric is then used to rank units within strata in order of most representative of that strata. These ranks can then be used by researchers to prioritize recruitment. This encourages the selection of units from subsections of the population which may otherwise not have been included in the sample.
 
-### Population of Interest
+### Population Frame
 
-  We assume a data set enumerating a population of $N$ sites (schools) indexed as $i = 1 ... N$. We also assume that the data set provides information on $P$ covariates indexed as $p = 1 ... P$ and that these covariates predict both site selection and treatment effect heterogeneity. 
+  We assume a data set enumerating a population of $N$ sites (schools), indexed as $i = 1 ... N$. Each site has some unobserved probability of participating if recruited represented by the participation propensity score $\pi_i$. Each site also has  a vector of observed characteristics $X_i$ of length $P$. This is a set of pre-treatment covariates that predict $\pi_i$. The covariates are a mixture of continuous, binary, and catagorical data.
   
-  and $P$ covariates. Our goal is to select a sample of $n$ sites that is representative of the population in that it is similar along the set of $p$ covariates. We opperationalize similarity as the standardized mean difference ($SMD_p$) between the sample and population on a covariate, where a smaller SMD indicates greater similarity. 
+  Our goal is to select a sample of $n$ sites that is representative of the population in that it is similar along the set of $P$ covariates. We opperationalize similarity as the standardized mean difference ($SMD$) between the sample and population for a given covariate. $SMD$ is calculated as 
 
-Layout goal is to obtain sample representative of population, define similarity/representative
+\begin{align}
+  SMD = \frac{\bar{X}-\mu}{\sigma}
+\end{align}
 
-  The first step is to identify a data set that fully enumerates all units in the population of interest, and provides information on a large set of characteristics for each unit. The data needs to supply covariates that are related to site selection as well as treatment heterogeneity. The Common Core of Data provides demographic information about all schools in the US and is updated yearly. While this is a good first step additional data may be necessary. For instance, if the intervention is in reading or math, school level academic data would be useful. This can be found on most State Eduation Agency (SEA) websites where accountabilty data is reported. Additional demographic information can also be found in the US Census. 
+where $\bar{X}$ is a vector of covariate means in the sample, $\mu$ is the vector of covariate means in the population, and $\sigma$ is the vector of covariate standard deviations in the population. $SMD$ values closer to zero indicate greter similarity between the sample and the population. 
 
   
 ### Distance Metric
-Once data is identified, a distance metric must be selected to summarizes the difference between two units on a set of covariates. It is then used to maximize the similarity of units within clusters. Determining which metric to use largely depends on the type of covariates included in $X$ and their relative importance. If all covariates are continuous, the weighted Euclidean distance can be used. Let $d^{e}_{ii'}$ be the Euclidean distance between unit $i$ and unit $i'$ where $i \ne i'$. Let $X_{ih}$ and $X_{i'h}$ be the observed value of covariate $h = {1, ..., p}$ for units $i$ and $i'$ respectively. Finally, let $w_h$ be the weight associated with covariates $X_{ih}$ and $X_{i'h}$. We calculate $d^{e}_{ii'}$ as:
+Once data is identified, a distance metric must be selected to summarizes the difference between two sites on a set of covariates. It is then used to maximize the similarity of sites within clusters. Determining which metric to use largely depends on the type of covariates included in $X$ and their relative importance. 
 
-\begin{align}
-  d^{e}_{ii'} = \sqrt{\sum^{p}_{h=1} w_h (X_{ih} - X_{i'h})^2}
-\end{align}
-
-Setting the weights to $w_h = 1$ gives the most weight to covariate with the largest variances. Setting the weights to $w_h = 1/V(X_h)$ allows each covariate to contribute equally to calculating the distance measure. This latter approach is useful when the importance of predictors of treatment effect heterogeneity is unknown.
-
-If $X$ contains both continuous and categorical variables, the general similarity measure may be used [@gowerGeneralCoefficientSimilarity1971]. This method relies on different calculations of distance depending on the type of covariates. Let $d_{ii'h}$ be the distance between observed values of covariate $X_{h}$ for unit $i$ and unit $i'$ where $i \ne i'$. For categorical or dummy coded variables, $d_{ii'h} = 1$ if $X_{ih} = X_{i'h}$ and $d_{ii'h} = 0$ otherwise. For continuous covariates, we use the following formula:
+The general similarity measure [@gowerGeneralCoefficientSimilarity1971] was usedbecause $X$ contains both continuous and categorical variables. This method relies on different calculations of distance depending on the type of covariates. Let $X_{ih}$ and $X_{i'h}$ be the observed value of covariate $h = {1, ..., P}$ for sites $i$ and $i'$ respectively, where $i \ne i'$. Let $d_{ii'h}$ be the distance between observed values of covariate $X_{h}$ for site $i$ and site $i'$. For categorical or dummy coded variables, $d_{ii'h} = 1$ if $X_{ih} = X_{i'h}$ and $d_{ii'h} = 0$ otherwise. For continuous covariates, we use the following formula:
 
 \begin{align}
   d_{ii'h} = 1 - \frac{|X_{ih} - X_{i'h}|}{R_h}
 \end{align}
 
-where |.| indicates absolute value, $X_{ih}$ and $X_{i'h}$ are values of the $h^{th}$ covariate for units $i$ and $i'$, and $R_h$ is the range of observations for covariate $X_h$. This method restricts the range of $d_{ii'h}$ to [0,1]. Finally, we calculate the general similarity between each unit pair by taking the weighted average of the distances between all covariates. Let $d^{g}_{ii'}$ be the general similarity between unit $i$ and unit $i'$ where $i \ne i'$.  
+where |.| indicates absolute value, $X_{ih}$ and $X_{i'h}$ are values of the $h^{th}$ covariate for sites $i$ and $i'$, and $R_h$ is the range of observations for covariate $X_h$. This method restricts the range of $d_{ii'h}$ to $[0,1]$. Finally, we calculate the general similarity between each site pair by taking the weighted average of the distances between all covariates. Let $d^{g}_{ii'}$ be the general similarity between site $i$ and site $i'$.  
 
 \begin{align}
   d^{g}_{ii'} = \frac{\sum^p_{h = 1}w_{ii'h}d_{ii'h}}{\sum^p_{h = 1}w_{ii'h}}
 \end{align}
 
-where $w_{ii'h} = 0$ if $X_h$ is missing for either unit and $w_{ii'h} = 1$ otherwise.
+where $w_{ii'h} = 0$ if $X_h$ is missing for either site and $w_{ii'h} = 1$ otherwise.
 
 ### Selecting k Strata
 Before applying the clustering method, the number of strata to be generated must be determined. Generating more strata results in more homogeneity within strata, however in practical applications this may be more difficult to manage. For instance, if refusal and non-response rates are fairly high, having fewer spread across more strata may make it difficult to adequately recruit from all strata. Resource constraints (e.g. time, funding, recruiters) may also be a factor in the number of strata selected.
 
-One solution is to perform the analysis several times generating different numbers of strata, and comparing the proportion of variability between strata. Let $k$ be the number of strata generated where $k = 1, 2, ..., q$ for some maximum allowable number of $q$ strata. Let $\sigma_{wk}^2$ be the total variability within each strata, and $\sigma_{bk}^2$ be the total variability between each strata, for all covariates in $X$ and for each set of $k$ strata generated. Let $p_k$ be the proportion of variability that is between strata for each set of $k$ strata generated be defined as follows:
+Our strategy was to perform the analysis several times generating different numbers of strata, and comparing the proportion of variability between strata. Let $k$ be the number of strata generated where $k = 1, 2, ..., q$ for some maximum allowable number of $q$ strata. Let $\sigma_{wk}^2$ be the total variability within each strata, and $\sigma_{bk}^2$ be the total variability between each strata, for all covariates in $X$ and for each set of $k$ strata generated. Let $p_k$ be the proportion of variability that is between strata for each set of $k$ strata generated be defined as follows:
 
 \begin{align} \label{eq:pk}
   p_k = \sigma_{bk}^2/(\sigma_{wk}^2 + \sigma_{bk}^2)
 \end{align}
 
 As $p_k$ approaches 1, most of the variation is between strata, indicating homogeneity within strata. This increases the possibility of selecting a more balanced sample. Plotting $p_k$ against $k$ allows visual comparison of the results. The $k$ for which the rate of change $p_k$ slows is then selected.
+
+<!-- Go into CH and n distribution across strata here? -->
 
 ### Sample Selection
 Finally, the sample must be selected and evaluated. @tiptonStratifiedSamplingUsing2013 recommends selecting a balanced sample of order 1 within each stratum, then testing for robustness to model failure by comparing the selected sample on higher orders. First the number of units to be sampled from each strata must be identified using proportional sample allocation. Each strata contains $N_j$ units where $N_1 + N_2 ... + N_k = N$. From each stratum $j$, $n_j$ units must be sampled such that $n_j = [(N_j/N)n]$, where [.] indicates that each value must be rounded to the nearest integer.
@@ -157,20 +155,6 @@ where $w_h$ is the weight assigned to covariate $X_h$, $E(X_h|j)$ is the mean of
 As this equation approaches 0 for all covariates, the sample become more balanced and robust against model failure.  Comparisons can be made using standardized mean differences or t-tests, though substantive criteria should also be considered.
 
   If there is a high degree of homogeneity within strata, this sampling procedure should be fairly robust to moderate non-participation rate. However a very large non-participation rate may result in a lack of balance, especially in higher orders [@tiptonStratifiedSamplingUsing2013]. If large differences are detected, post hoc methods described previously can be used to make further adjustments.
-
-### Outcome Analysis
-If proportional allocation is performed during the stratified sampling process, then the proportion of the sample in each strata is equal to the proportion of the population that is in each strata, $\frac{n_j}{n} = \frac{N_j}{N}$. Furthermore, if a bias-robust balanced sample is selected within each strata, then the expected value of $X$ in the sample will equal to the expected value of $X$ in the population within each stratum, $E(X|Z=1,j) = E(X|j)$. When both of these conditions are satisfied, no additional adjustments need to be made to the outcome analysis. This is because the resulting sample will be self-weighing:
-
-\begin{align}
-  \begin{split}
-    E(X | Z = 1) &= \sum{(n_j/n)E(X | Z = 1, j)} \\
-      &= \sum{(N_j/N)E(X | j)} \\
-      &= E(X)
-  \end{split}
-\end{align}
-
-Given this, whatever random effects model which would ordinarily be applied may be use to estimate treatment effect. Furthermore, because the standard estimator is used, any power analysis used to estimate the original sample size is unaffected. If proportional allocation is not achieved, the the sample needs to be reweighed to resemble the population, in which case the previously described retrospective methods can be applied to estimate treatment effects and make generalizations.
-
 
 ### Advantages and Limitations
 SBS has only recently proposed and there have not been any large scale implementations of this method reported. Also, beyond the original proposal article, there have not been any methodological investigation into the method. @tiptonStratifiedSamplingUsing2013 illustrated SBS by comparing it to a previous study which did not use a formal sampling method [@roschelleIntegrationTechnologyCurriculum2010]. Data from the previous study was used to generate two hypothetical samples. The first sample was the ideal in which the highest ranked schools in each stratum agreed to participate. The second sample was the non-response sample where the first 50 highest ranked schools in each stratum refused to participate, resulting in a non-response rate of at least 83\% in each stratum. These two samples were then compared to the original sample on the first 3 moments of 26 covariates. Both samples achieved with SBS resulted in better balance than the original sample on at least 19 of the 26 covariates in the first two moments, and 14 out of 26 in the third moments. The samples were then compared on how well they would generalize using the method proposed by @stuartUsePropensityScores2011. This final test showed that the samples achieved with SBS resulted in less coverage errors than the original sample and would thus be easier to generalize using the retrospective methods.
