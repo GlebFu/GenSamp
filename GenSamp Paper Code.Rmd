@@ -74,15 +74,15 @@ dist_plots <- df[, c("DSID",subs_f_vars)] %>%
          MEDINC_log = log(MEDINC/1000),
          MEDINC = MEDINC / 1000)
 
-plot_dist1 <- dist_plots %>%
-  gather(key = var, value = value, n, n_log, MEDINC, MEDINC_log) %>%
-  ggplot(aes(x = value)) +
-  geom_histogram() +
-  facet_wrap(~ var, scales = "free") +
-  theme_apa()
+# plot_dist1 <- dist_plots %>%
+#   gather(key = var, value = value, n, n_log, MEDINC, MEDINC_log) %>%
+#   ggplot(aes(x = value)) +
+#   geom_histogram() +
+#   facet_wrap(~ var, scales = "free") +
+#   theme_apa()
 
-plot_dist2 <- dist_plots %>%
-  gather(key = var, value = value, pED:pMin) %>%
+plot_dist1 <- dist_plots %>%
+  gather(key = var, value = value, pED:pMin, n_log, MEDINC_log) %>%
   group_by(var) %>%
   # mutate(value = value - mean(value)) %>%
   ggplot(aes(x = value)) +
@@ -98,9 +98,9 @@ plot_dist1
 
 ```
 
-```{r plot_dist2, fig.cap="Distributions of the remaining continuous covariates."}
-plot_dist2
-```
+<!-- ```{r plot_dist2, fig.cap="Distributions of the remaining continuous covariates."} -->
+<!-- plot_dist2 -->
+<!-- ``` -->
 
 
 ```{r, eval = T}
