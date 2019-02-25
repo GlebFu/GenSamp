@@ -94,22 +94,6 @@
 \begin{document}
 \maketitle
 
-\begin{verbatim}
-## Warning: package 'stargazer' was built under R version 3.5.2
-\end{verbatim}
-
-\begin{verbatim}
-## Warning: package 'htmlTable' was built under R version 3.5.2
-\end{verbatim}
-
-\begin{verbatim}
-## Warning: package 'Hmisc' was built under R version 3.5.2
-\end{verbatim}
-
-\begin{verbatim}
-## Warning: package 'Formula' was built under R version 3.5.2
-\end{verbatim}
-
 Recently, randomized controlled trials (RCTs) have come under scrutiny for their limited generalizability due to inadequate sampling strategies (Stuart, Cole, Bradshaw, \& Leaf, 2011). RCTs provide a high level of internal validity as they demonstrate the causality of the impact being estimated. In education research, multisite RCTs, or multisite randomized trials (MRTs), are used to inform policy decisions by evaluating intervention impacts on a larger scale. Recruitment and randomization occurs at the organizational level (e.g.~schools), ostensibly increasing the diversity of settings in which the study takes place. In practice, however, the generalizability of MRTs is greatly limited by the sampling method being implemented. This is a major drawback for policymakers who are interested in generalizing treatment effects beyond the sample.
 
 RCTs are commonly used in impact evaluations across many fields. Randomized treatment assignment ensures that estimated effects are causal, thus affording a higher level of internal validity. However, these effect estimates may be sample specific. If treatment effects are heterogeneous, then the impact of an intervention cannot be extrapolated beyond the study sample. This is a limiting feature of RCTs since policymakers seeking to implement interventions will have no way of gaguing effectivenes in their populaton of interest.
@@ -237,9 +221,6 @@ Log-transformation was used on school size (number of students) and median incom
 \includegraphics{GenSamp_Paper_files/figure-latex/plot-dist1-1.pdf}
 \caption{\label{fig:plot-dist1}Comparison of covariate distributions and their log transformations.}
 \end{figure}
-
-\hypertarget{r-plot-dist2-results-asis-fig.capdistributions-of-the-remaining-continuous-covariates.-plot_dist2}{%
-\section{\texorpdfstring{\texttt{\{r\ plot-dist2,\ results\ =\ "asis",\ fig.cap="Distributions\ of\ the\ remaining\ continuous\ covariates."\}\ \#\ plot\_dist2\ \#}}{\{r plot-dist2, results = "asis", fig.cap="Distributions of the remaining continuous covariates."\} \# plot\_dist2 \#}}\label{r-plot-dist2-results-asis-fig.capdistributions-of-the-remaining-continuous-covariates.-plot_dist2}}
 
 \hypertarget{participation-propensity-score}{%
 \subsubsection{Participation Propensity Score}\label{participation-propensity-score}}
@@ -391,22 +372,30 @@ Figure \ref{fig:fig-SMD-by-Var} displays the average SMD between the samples and
 
 Figure \ref{fig:fig-avg-Bindex} displays the average \(B\)-index for each method across participation rates. At population participation rates of 60\% and higher, all methods resulted in similarly generalizable samples. However, at lower rates only SBS and SRS consistantly generated highly generalizable samples. SCS and URS performed equally, while UCS resulted in relatively less generalizable samples.
 
-\begin{figure}
-\centering
-\includegraphics{GenSamp_Paper_files/figure-latex/fig-SMD-by-Var-1.pdf}
-\caption{\label{fig:fig-SMD-by-Var}Averge Standardized Mean Differences between sample and population}
-\end{figure}
+\begin{sidewaysfigure}
+\includegraphics{GenSamp_Paper_files/figure-latex/fig-SMD-by-Var-1} \caption{Averge Standardized Mean Differences between sample and population}\label{fig:fig-SMD-by-Var}
+\end{sidewaysfigure}
+
+\begin{verbatim}
+## Warning: Detecting old grouped_df format, replacing `vars` attribute by
+## `groups`
+\end{verbatim}
 
 \begin{figure}
 \centering
 \includegraphics{GenSamp_Paper_files/figure-latex/fig-avg-Bindex-1.pdf}
-\caption{\label{fig:fig-avg-Bindex}Averge \(B\)-index across participation rates by sampling method}
+\caption{\label{fig:fig-avg-Bindex}Averge \(B\)-index for varying participation rates, by sampling method}
 \end{figure}
 
 \hypertarget{feasibility-1}{%
 \subsection{Feasibility}\label{feasibility-1}}
 
 Figure \ref{fig:fig-units-contacted} reports the average number of schools that needed to be contacted before a full sample of \(N = 60\) schools was selected. At higher participation rates differences between methods were negligibile. However, as participation rates decreased the disparity between the methods became more apparent. Overall, UCS required the least \enquote{effort} to recruit a full sample, followed by URS and SCS, SRS, and finally SBS. Figure \ref{fig:fig-response-rates} plots the participation rates of schools approached for recruitment against the population participation rates. As expected, URS participation rates reflected those in the population. Both UCS and SCS resulted in higher participation rates, while SRS and SBS resulted in lower participation rates.
+
+\begin{verbatim}
+## Warning: Detecting old grouped_df format, replacing `vars` attribute by
+## `groups`
+\end{verbatim}
 
 \begin{figure}
 \centering
