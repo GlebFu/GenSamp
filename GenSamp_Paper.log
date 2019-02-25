@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.19 (MiKTeX 2.9.6930 64-bit) (preloaded format=pdflatex 2019.2.19)  25 FEB 2019 10:28
+This is pdfTeX, Version 3.14159265-2.6-1.40.19 (MiKTeX 2.9.6930 64-bit) (preloaded format=pdflatex 2019.2.19)  25 FEB 2019 14:51
 entering extended mode
 **./GenSamp_Paper.tex
 (GenSamp_Paper.tex
@@ -756,7 +756,7 @@ Package: trimspaces 2009/09/17 v1.1 Trim spaces around a token list
 \longtablewidth=\skip79
 Package csquotes Info: Checking for multilingual support...
 Package csquotes Info: ... none found.
-No file GenSamp_Paper.aux.
+(GenSamp_Paper.aux)
 \openout1 = `GenSamp_Paper.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 94.
@@ -896,6 +896,7 @@ Package: gettitlestring 2016/05/16 v1.5 Cleanup title references (HO)
 LaTeX Info: Redefining \ref on input line 94.
 LaTeX Info: Redefining \pageref on input line 94.
 LaTeX Info: Redefining \nameref on input line 94.
+(GenSamp_Paper.out) (GenSamp_Paper.out)
 \@outlinefile=\write5
 \openout5 = `GenSamp_Paper.out'.
 
@@ -958,85 +959,85 @@ This may cause the page layout to be inconsistent, however.
 ] [2] [3]
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
-[4] [5] [6] [7] [8] [9] [10] [11]
+[4] [5] [6] [7] [8] [9]
+Underfull \vbox (badness 4752) has occurred while \output is active []
 
-LaTeX Warning: Reference `fig:plot-dist1' on page 12 undefined on input line 21
-7.
-
-<GenSamp_Paper_files/figure-latex/plot-dist1-1.pdf, id=85, 469.755pt x 325.215p
-t>
+[10] [11]
+<GenSamp_Paper_files/figure-latex/plot-dist1-1.pdf, id=184, 469.755pt x 325.215
+pt>
 File: GenSamp_Paper_files/figure-latex/plot-dist1-1.pdf Graphic file (type pdf)
 
 <use GenSamp_Paper_files/figure-latex/plot-dist1-1.pdf>
 Package pdftex.def Info: GenSamp_Paper_files/figure-latex/plot-dist1-1.pdf  use
-d on input line 221.
+d on input line 230.
 (pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
+
+Underfull \vbox (badness 5331) has occurred while \output is active []
+
 [12] [13 <./GenSamp_Paper_files/figure-latex/plot-dist1-1.pdf>]
 
 LaTeX Warning: Reference `fig:fig-SMD-goal' on page 14 undefined on input line 
-253.
+262.
 
 
 LaTeX Warning: Reference `fig:fig-RGM-Pars' on page 14 undefined on input line 
-253.
+262.
 
-<GenSamp_Paper_files/figure-latex/fig-SMD-goal-1.pdf, id=105, 469.755pt x 325.2
+[14]
+<GenSamp_Paper_files/figure-latex/fig-SMD-goal-1.pdf, id=210, 469.755pt x 325.2
 15pt>
 File: GenSamp_Paper_files/figure-latex/fig-SMD-goal-1.pdf Graphic file (type pd
 f)
 <use GenSamp_Paper_files/figure-latex/fig-SMD-goal-1.pdf>
 Package pdftex.def Info: GenSamp_Paper_files/figure-latex/fig-SMD-goal-1.pdf  u
-sed on input line 255.
+sed on input line 264.
 (pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
-<GenSamp_Paper_files/figure-latex/fig-SMD-goal-2.pdf, id=106, 469.755pt x 325.2
+<GenSamp_Paper_files/figure-latex/fig-SMD-goal-2.pdf, id=211, 469.755pt x 325.2
 15pt>
 File: GenSamp_Paper_files/figure-latex/fig-SMD-goal-2.pdf Graphic file (type pd
 f)
 <use GenSamp_Paper_files/figure-latex/fig-SMD-goal-2.pdf>
 Package pdftex.def Info: GenSamp_Paper_files/figure-latex/fig-SMD-goal-2.pdf  u
-sed on input line 255.
+sed on input line 264.
 (pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
-<GenSamp_Paper_files/figure-latex/fig-SMD-goal-3.pdf, id=107, 469.755pt x 325.2
+<GenSamp_Paper_files/figure-latex/fig-SMD-goal-3.pdf, id=212, 469.755pt x 325.2
 15pt>
 File: GenSamp_Paper_files/figure-latex/fig-SMD-goal-3.pdf Graphic file (type pd
 f)
 <use GenSamp_Paper_files/figure-latex/fig-SMD-goal-3.pdf>
 Package pdftex.def Info: GenSamp_Paper_files/figure-latex/fig-SMD-goal-3.pdf  u
-sed on input line 255.
+sed on input line 264.
 (pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
 
-Overfull \hbox (28.90639pt too wide) in paragraph at lines 255--256
+Overfull \hbox (28.90639pt too wide) in paragraph at lines 264--265
 [][] 
  []
 
 
-Underfull \vbox (badness 3039) has occurred while \output is active []
-
-[14]
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
 [15 <./GenSamp_Paper_files/figure-latex/fig-SMD-goal-1.pdf>]
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
 [16 <./GenSamp_Paper_files/figure-latex/fig-SMD-goal-2.pdf>]
-<GenSamp_Paper_files/figure-latex/fig-RGM-Pars-1.pdf, id=135, 469.755pt x 325.2
+<GenSamp_Paper_files/figure-latex/fig-RGM-Pars-1.pdf, id=233, 469.755pt x 325.2
 15pt>
 File: GenSamp_Paper_files/figure-latex/fig-RGM-Pars-1.pdf Graphic file (type pd
 f)
 <use GenSamp_Paper_files/figure-latex/fig-RGM-Pars-1.pdf>
 Package pdftex.def Info: GenSamp_Paper_files/figure-latex/fig-RGM-Pars-1.pdf  u
-sed on input line 257.
+sed on input line 266.
 (pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
-<GenSamp_Paper_files/figure-latex/fig-RGM-Pars-2.pdf, id=136, 469.755pt x 325.2
+<GenSamp_Paper_files/figure-latex/fig-RGM-Pars-2.pdf, id=234, 469.755pt x 325.2
 15pt>
 File: GenSamp_Paper_files/figure-latex/fig-RGM-Pars-2.pdf Graphic file (type pd
 f)
 <use GenSamp_Paper_files/figure-latex/fig-RGM-Pars-2.pdf>
 Package pdftex.def Info: GenSamp_Paper_files/figure-latex/fig-RGM-Pars-2.pdf  u
-sed on input line 257.
+sed on input line 266.
 (pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
 
-Overfull \hbox (28.90639pt too wide) in paragraph at lines 257--258
+Overfull \hbox (28.90639pt too wide) in paragraph at lines 266--267
 [][] 
  []
 
@@ -1048,74 +1049,127 @@ Underfull \vbox (badness 10000) has occurred while \output is active []
 
 [18 <./GenSamp_Paper_files/figure-latex/fig-RGM-Pars-1.pdf>] [19 <./GenSamp_Pap
 er_files/figure-latex/fig-RGM-Pars-2.pdf>]
-<GenSamp_Paper_files/figure-latex/fig-ch-1.pdf, id=172, 469.755pt x 325.215pt>
+<GenSamp_Paper_files/figure-latex/fig-ch-1.pdf, id=268, 469.755pt x 325.215pt>
 File: GenSamp_Paper_files/figure-latex/fig-ch-1.pdf Graphic file (type pdf)
 <use GenSamp_Paper_files/figure-latex/fig-ch-1.pdf>
 Package pdftex.def Info: GenSamp_Paper_files/figure-latex/fig-ch-1.pdf  used on
- input line 271.
+ input line 280.
 (pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
-<GenSamp_Paper_files/figure-latex/fig-ratio-1.pdf, id=173, 469.755pt x 325.215p
+<GenSamp_Paper_files/figure-latex/fig-ratio-1.pdf, id=269, 469.755pt x 325.215p
 t>
 File: GenSamp_Paper_files/figure-latex/fig-ratio-1.pdf Graphic file (type pdf)
 <use GenSamp_Paper_files/figure-latex/fig-ratio-1.pdf>
 Package pdftex.def Info: GenSamp_Paper_files/figure-latex/fig-ratio-1.pdf  used
- on input line 277.
+ on input line 286.
 (pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
-<GenSamp_Paper_files/figure-latex/fig-k-size-1.pdf, id=174, 469.755pt x 325.215
+<GenSamp_Paper_files/figure-latex/fig-k-size-1.pdf, id=270, 469.755pt x 325.215
 pt>
 File: GenSamp_Paper_files/figure-latex/fig-k-size-1.pdf Graphic file (type pdf)
 
 <use GenSamp_Paper_files/figure-latex/fig-k-size-1.pdf>
 Package pdftex.def Info: GenSamp_Paper_files/figure-latex/fig-k-size-1.pdf  use
-d on input line 283.
+d on input line 292.
 (pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
-[20 <./GenSamp_Paper_files/figure-latex/fig-ch-1.pdf>]
+[20 <./GenSamp_Paper_files/figure-latex/fig-ch-1.pdf>] [21 <./GenSamp_Paper_fil
+es/figure-latex/fig-ratio-1.pdf>] [22 <./GenSamp_Paper_files/figure-latex/fig-k
+-size-1.pdf>] [23] [24]
 
-LaTeX Warning: Reference `fig:fig-ch' on page 21 undefined on input line 292.
+LaTeX Warning: Reference `tab:desc' on page 25 undefined on input line 351.
 
+[25] [26]
+<GenSamp_Paper_files/figure-latex/fig-SMD-by-Var-1.pdf, id=343, 469.755pt x 325
+.215pt>
+File: GenSamp_Paper_files/figure-latex/fig-SMD-by-Var-1.pdf Graphic file (type 
+pdf)
+<use GenSamp_Paper_files/figure-latex/fig-SMD-by-Var-1.pdf>
+Package pdftex.def Info: GenSamp_Paper_files/figure-latex/fig-SMD-by-Var-1.pdf 
+ used on input line 386.
+(pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
+LaTeX Font Info:    Try loading font information for T1+lmtt on input line 390.
 
-LaTeX Warning: Reference `fig:fig-ratio' on page 21 undefined on input line 292
+("C:\Users\gf4929\AppData\Local\Programs\MiKTeX 2.9\tex/latex/lm\t1lmtt.fd"
+File: t1lmtt.fd 2009/10/30 v1.6 Font defs for Latin Modern
+)
+LaTeX Font Info:    Try loading font information for TS1+lmtt on input line 393
 .
+("C:\Users\gf4929\AppData\Local\Programs\MiKTeX 2.9\tex/latex/lm\ts1lmtt.fd"
+File: ts1lmtt.fd 2009/10/30 v1.6 Font defs for Latin Modern
+)
+<GenSamp_Paper_files/figure-latex/fig-avg-Bindex-1.pdf, id=344, 469.755pt x 325
+.215pt>
+File: GenSamp_Paper_files/figure-latex/fig-avg-Bindex-1.pdf Graphic file (type 
+pdf)
+<use GenSamp_Paper_files/figure-latex/fig-avg-Bindex-1.pdf>
+Package pdftex.def Info: GenSamp_Paper_files/figure-latex/fig-avg-Bindex-1.pdf 
+ used on input line 397.
+(pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
+<GenSamp_Paper_files/figure-latex/fig-units-contacted-1.pdf, id=347, 469.755pt 
+x 325.215pt>
+File: GenSamp_Paper_files/figure-latex/fig-units-contacted-1.pdf Graphic file (
+type pdf)
+<use GenSamp_Paper_files/figure-latex/fig-units-contacted-1.pdf>
+Package pdftex.def Info: GenSamp_Paper_files/figure-latex/fig-units-contacted-1
+.pdf  used on input line 413.
+(pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
+<GenSamp_Paper_files/figure-latex/fig-response-rates-1.pdf, id=348, 469.755pt x
+ 325.215pt>
+File: GenSamp_Paper_files/figure-latex/fig-response-rates-1.pdf Graphic file (t
+ype pdf)
+<use GenSamp_Paper_files/figure-latex/fig-response-rates-1.pdf>
+Package pdftex.def Info: GenSamp_Paper_files/figure-latex/fig-response-rates-1.
+pdf  used on input line 419.
+(pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
+[27]
+Underfull \vbox (badness 1142) has occurred while \output is active []
 
-[21 <./GenSamp_Paper_files/figure-latex/fig-ratio-1.pdf>]
+[28 <./GenSamp_Paper_files/figure-latex/fig-SMD-by-Var-1.pdf>] [29 <./GenSamp_P
+aper_files/figure-latex/fig-avg-Bindex-1.pdf>] [30 <./GenSamp_Paper_files/figur
+e-latex/fig-units-contacted-1.pdf>] [31 <./GenSamp_Paper_files/figure-latex/fig
+-response-rates-1.pdf>] [32] [33] AED endfloat: Processing end Figures and Tabl
+es [34]
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 498.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 498.
+(GenSamp_Paper.aux)
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 498.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 498.
+Package rerunfilecheck Info: File `GenSamp_Paper.out' has not changed.
+(rerunfilecheck)             Checksum: 1680F8DD0322334323E9C78DE07FAA75;3682.
 
-LaTeX Warning: Reference `fig:fig-k-size' on page 22 undefined on input line 29
-4.
+LaTeX Warning: There were undefined references.
 
-[22 <./GenSamp_Paper_files/figure-latex/fig-k-size-1.pdf>]
-
-LaTeX Warning: Reference `eq:euclid' on page 23 undefined on input line 310.
-
-[23] [24]
-
-LaTeX Warning: Reference `tab:desc' on page 25 undefined on input line 342.
-
-[25]
-
-LaTeX Warning: Reference `fig:fig-SMD-by-Var' on page 26 undefined on input lin
-e 371.
-
-[26]
-
-LaTeX Warning: Reference `fig:fig-avg-Bindex' on page 27 undefined on input lin
-e 373.
-
-
-! LaTeX Error: Environment sidewaysfigure undefined.
-
-See the LaTeX manual or LaTeX Companion for explanation.
-Type  H <return>  for immediate help.
- ...                                              
-                                                  
-l.375 \begin{sidewaysfigure}
-                             
+ ) 
 Here is how much of TeX's memory you used:
- 15254 strings out of 492946
- 231189 string characters out of 3125822
- 343369 words of memory out of 3000000
- 18764 multiletter control sequences out of 15000+200000
- 44771 words of font info for 79 fonts, out of 3000000 for 9000
+ 15472 strings out of 492946
+ 235789 string characters out of 3125822
+ 345614 words of memory out of 3000000
+ 18915 multiletter control sequences out of 15000+200000
+ 50098 words of font info for 86 fonts, out of 3000000 for 9000
  1141 hyphenation exceptions out of 8191
- 43i,12n,47p,1441b,414s stack positions out of 5000i,500n,10000p,200000b,50000s
+ 43i,12n,47p,1441b,425s stack positions out of 5000i,500n,10000p,200000b,50000s
+{C:/Users/gf4929/AppData/Local/Programs/MiKTeX 2.9/fonts/enc/dvips/lm/lm-ts1.
+enc}{C:/Users/gf4929/AppData/Local/Programs/MiKTeX 2.9/fonts/enc/dvips/lm/lm-ec
+.enc}{C:/Users/gf4929/AppData/Local/Programs/MiKTeX 2.9/fonts/enc/dvips/lm/lm-m
+athit.enc}{C:/Users/gf4929/AppData/Local/Programs/MiKTeX 2.9/fonts/enc/dvips/lm
+/lm-rm.enc}{C:/Users/gf4929/AppData/Local/Programs/MiKTeX 2.9/fonts/enc/dvips/l
+m/lm-mathex.enc}{C:/Users/gf4929/AppData/Local/Programs/MiKTeX 2.9/fonts/enc/dv
+ips/lm/lm-mathsy.enc}<C:/Users/gf4929/AppData/Local/Programs/MiKTeX 2.9/fonts/t
+ype1/public/lm/lmbx12.pfb><C:/Users/gf4929/AppData/Local/Programs/MiKTeX 2.9/fo
+nts/type1/public/lm/lmbxi10.pfb><C:/Users/gf4929/AppData/Local/Programs/MiKTeX 
+2.9/fonts/type1/public/lm/lmex10.pfb><C:/Users/gf4929/AppData/Local/Programs/Mi
+KTeX 2.9/fonts/type1/public/lm/lmmi12.pfb><C:/Users/gf4929/AppData/Local/Progra
+ms/MiKTeX 2.9/fonts/type1/public/lm/lmmi6.pfb><C:/Users/gf4929/AppData/Local/Pr
+ograms/MiKTeX 2.9/fonts/type1/public/lm/lmmi8.pfb><C:/Users/gf4929/AppData/Loca
+l/Programs/MiKTeX 2.9/fonts/type1/public/lm/lmr12.pfb><C:/Users/gf4929/AppData/
+Local/Programs/MiKTeX 2.9/fonts/type1/public/lm/lmr8.pfb><C:/Users/gf4929/AppDa
+ta/Local/Programs/MiKTeX 2.9/fonts/type1/public/lm/lmri12.pfb><C:/Users/gf4929/
+AppData/Local/Programs/MiKTeX 2.9/fonts/type1/public/lm/lmsy10.pfb><C:/Users/gf
+4929/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/public/lm/lmsy6.pfb><C:/User
+s/gf4929/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/public/lm/lmsy8.pfb><C:/
+Users/gf4929/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/public/lm/lmtt12.pfb
+>
+Output written on GenSamp_Paper.pdf (34 pages, 386366 bytes).
+PDF statistics:
+ 522 PDF objects out of 1000 (max. 8388607)
+ 135 named destinations out of 1000 (max. 500000)
+ 6410 words of extra memory for PDF output out of 10000 (max. 10000000)
 
-!  ==> Fatal error occurred, no output PDF file produced!
