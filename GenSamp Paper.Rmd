@@ -63,6 +63,10 @@ rm(list = ls())
 source("ParGenSource.R")
 load("Data/base data.rdata")
 load("Paper Data/PaperData.rdata")
+
+saveFigs <- T
+save.figures <- function(x, w = 10, h = 6) ggsave(paste("Figs/Paper/", x, ".jpg", sep = ""), width = w, height = h)
+
 ```
 
   Recently, randomized controlled trials (RCTs) have come under scrutiny for their limited generalizability due to inadequate sampling strategies [@stuartUsePropensityScores2011]. RCTs provide a high level of internal validity as they demonstrate the causality of the impact being estimated. In education research, multisite RCTs, or multisite randomized trials (MRTs), are used to inform policy decisions by evaluating intervention impacts on a larger scale. Recruitment and randomization occurs at the organizational level (e.g. schools), ostensibly increasing the diversity of settings in which the study takes place. In practice, however, the generalizability of MRTs is greatly limited by the sampling method being implemented. This is a major drawback for policymakers who are interested in generalizing treatment effects beyond the sample.
@@ -193,6 +197,8 @@ dist_plots %>%
   facet_wrap(~ var, scales = "free") +
   theme_apa()
 
+
+if(saveFigs) save.figures("Intro - Covariate Distribution")
 ```
 
 ### Participation Propensity Score
@@ -278,8 +284,10 @@ schVals %>%
                            segment.size = .1,
                            vjust = 1) +
   theme(legend.position="none",
-       plot.margin=unit(c(0,1,0,0),"cm")) +
+       plot.margin=unit(c(0,2,0,0),"cm")) +
   coord_cartesian(clip = 'off')
+
+if(saveFigs) save.figures("Intro - Differences in SMDs")
 
 schVals %>%
   select(Var, dif, RR) %>%
@@ -313,7 +321,7 @@ schVals %>%
                            segment.size = .1,
                            vjust = 1) +
   theme(legend.position="none",
-       plot.margin=unit(c(0,1,0,0),"cm")) +
+       plot.margin=unit(c(0,2,0,0),"cm")) +
   coord_cartesian(clip = 'off')
 
 schVals %>%
@@ -334,8 +342,10 @@ schVals %>%
                            segment.size = .1,
                            vjust = 1) +
   theme(legend.position="none",
-       plot.margin=unit(c(0,1,0,0),"cm")) +
+       plot.margin=unit(c(0,2,0,0),"cm")) +
   coord_cartesian(clip = 'off')
+
+if(saveFigs) save.figures("Intro - Parameter Values")
 ```
 
 ## Stratification
@@ -359,6 +369,8 @@ chPlot %>%
   labs(y = "Calinski-Harabasz index",
        x = "Number of Strat (k)")
 
+if(saveFigs) save.figures("Intro - Calinski-Harabasz")
+
 ```
 
 ```{r fig-ratio, fig.cap="Ratio of between cluster sum of squares to total cluster sum of squares"}
@@ -377,6 +389,8 @@ ratio_data %>%
   scale_x_discrete(limits = c(1:20)) +
   scale_y_continuous(breaks = seq(0, 1, .1)) + 
   theme(legend.position = "none")
+
+if(saveFigs) save.figures("Intro - SS Ratio")
 
 ```
 
@@ -399,6 +413,8 @@ cls_f %>%
   stat_function(fun = function(x) 60/x, geom = "line", linetype = "dashed", size = .5) +
   # facet_grid(subs ~ .) +
   geom_hline(yintercept = 5, linetype = "dotted", size = .5)
+
+if(saveFigs) save.figures("Intro - Cluster Size")
 ```
 
 ### Cluster Analysis
@@ -497,6 +513,8 @@ sSMDplot %>%
   theme(legend.position = "bottom") +
   colorspace::scale_color_discrete_qualitative("dark 2")
 
+if(saveFigs) save.figures("Results - SMD")
+
 ```
 
 ```{r fig-avg-Bindex, results = "asis", fig.cap = "Averge $B$-index for varying participation rates, by sampling method", eval = T}
@@ -508,6 +526,7 @@ avg_Bindex %>%
        x = "Population Participation Rate") +
   theme_apa()
 
+if(saveFigs) save.figures("Results - B Index")
 
 ```
 
@@ -532,6 +551,8 @@ sSMDplot %>%
         text = element_text(size=20),
         legend.title = element_text(size=15)) +
   labs(x = "Sampling Method", y = "Absolute SMD")
+
+
 ```
 
 ## Feasibility
@@ -576,6 +597,8 @@ contact_data %>%
   labs(x = "Population Participation Rate", y = "Units Contacted") +
   # scale_y_log10() +◙
   theme_apa()
+
+if(saveFigs) save.figures("Results - Response Counts")
 ```
 
 ```{r fig-response-rates, results = "asis", fig.cap = "Recruitment response rates for each sampling method", eval = T}
@@ -601,6 +624,8 @@ response_rate_data %>%
         axis.text.x = element_text(angle = 45, hjust = 1)) +
   labs(x = "Population Participation Rate", y = "Recruitment Response Rate") +
   theme_apa()
+
+if(saveFigs) save.figures("Results - Response Rates")
 ```
 
 
