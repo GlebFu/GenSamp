@@ -1,6 +1,6 @@
 library(tidyverse)
 
-rm(list = ls())
+# rm(list = ls())
 
 #-----------------
 # Fixed data
@@ -8,10 +8,10 @@ rm(list = ls())
 #tets
 
 # Base data set
-load("Data/simData.Rdata")
+load(paste("Data/", file_date, "/simData.Rdata", sep = ""))
 
 # Response generating variables and goal SMD
-load("Data/RGM Vars.Rdata")
+load(paste("Data/", file_date, "/RGM Vars.Rdata", sep = ""))
 
 
 

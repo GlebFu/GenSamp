@@ -1,5 +1,9 @@
 library(tidyverse)
 
+file_date <- "2019-02-28"
+file_dir <- paste("data/", file_date, "/", sep = "")
+
+
 df <- read.csv("Data/final data.csv", stringsAsFactors = F)
 df$urbanicity <- factor(df$urbanicity)
 levels(df$urbanicity) <- c("ToRu", "Suburban", "ToRu", "Urban")
@@ -31,13 +35,14 @@ covariates <- c("n", "Urban", "Suburban", "ToRu", "pTotfrl",
 df <- df[,vars] %>% na.omit %>% unique()
 
 # Covarites 
+# subs_f_vars <- c("n", "urbanicity",
+#                  "pELL", "pED", "pELA", "pMath", "pMin", "MEDINC")
 subs_f_vars <- c("n", "urbanicity",
-                 "pELL", "pED", "pELA", "pMath", "pMin", "MEDINC")
-
+                 "pELL", "pED", "pELA", "pMath", "pMin")
  
 # School Level Data
 df.sch <- df[,vars]
 
 
-save(df, df.sch, subs_f_vars, file = "data/base data.rdata")
+save(df, df.sch, subs_f_vars, file_date, file = paste(file_dir, "base data.rdata", sep = ""))
 

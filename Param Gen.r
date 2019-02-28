@@ -2,9 +2,10 @@ rm(list = ls())
 
 source("ParGenSource.r")
 
+file_date <- "2019-02-28"
 
+load(paste("data/", file_date, "/base data.rdata", sep = ""))
 
-load("data/base data.rdata")
 
 
 #-----------------------
@@ -92,9 +93,9 @@ schPS %>%
   geom_histogram() +
   facet_wrap(~RR)
 
-save(schPars, schVals, df.sch, sch.respNames, sch.resps, file = "Params/2018-07-11/schPars.rdata")
+save(schPars, schVals, df.sch, sch.respNames, sch.resps, schGoal, file = paste("Params/", file_date, "/schPars.rdata", sep = ""))
 
-load("Params/2018-07-11/schPars.rdata")
+load(paste("Params/", file_date, "/schPars.rdata", sep = ""))
 
 schVals %>%
   select(Var, RR, smdS1:goal) %>%
@@ -125,15 +126,14 @@ schVals %>%
 #-----------------------
 # Generate Within Cluster Ranks
 #-----------------------
-load("data/base data.rdata")
+load(paste("data/", file_date, "/base data.rdata", sep = ""))
 
-load("Params/Clusters.rdata")
-load("Params/2018-07-11/schPars.rdata")
+load(paste("Paper Data/", file_date, "/Clusters.rdata", sep = ""))
+load(paste("Paper Data/", file_date, "/clusters-full-logs.rdata", sep = ""))
+load(paste("Params/", file_date, "/schPars.rdata", sep = ""))
 
 df <- df %>%
-  left_join(df.clusts) %>%
-  rename(cluster_full = cluster_full_6,
-         cluster_ov = cluster_OV_6)
+  mutate(cluster_full = cls[,6])
 
 to_matrix <- function(data, vars, add.vars = NA) {
   frm <- as.formula(paste("~", paste(vars, collapse = " + ")))
@@ -160,34 +160,21 @@ df <- to_matrix(data = df, vars = subs_f_vars, add.vars = c("DSID", "cluster_ful
   select(-value) %>%
   left_join(df)
 
-df <- to_matrix(data = df, vars = subs_ov_vars, add.vars = c("DSID", "cluster_ov")) %>%
-  gather(key = var, value = value, -one_of(c("DSID", "cluster_ov"))) %>%
-  group_by(var) %>%
-  mutate(w = 1/var(value)) %>%
-  group_by(cluster_ov, var) %>%
-  mutate(value = w * (value - mean(value))^2) %>%
-  group_by(DSID, cluster_ov) %>%
-  summarise(value = sqrt(sum(value))) %>%
-  group_by(cluster_ov) %>%
-  arrange(cluster_ov, value) %>%
-  mutate(rank_ov = 1:n(),
-         rankp_ov = rank_ov/n() * 100) %>%
-  select(-value) %>%
-  left_join(df)
+
 
 df$cluster_full <- as.factor(df$cluster_full)
-df$cluster_ov <- as.factor(df$cluster_ov)
+
 
 df %>%
   mutate(urbanicity = ifelse(urbanicity == "Rural" | urbanicity == "Town", "ToRu", as.character(urbanicity))) %>%
-  ggplot(aes(x = pED, y = pMin, color = cluster_ov, alpha = (1 - rankp_ov)/100)) +
+  ggplot(aes(x = pED, y = pMin, color = cluster_full, alpha = (1 - rankp_full)/100)) +
   facet_wrap(~urbanicity) +
   geom_point()
 
 df %>%
   mutate(urbanicity = ifelse(urbanicity == "Rural" | urbanicity == "Town", "ToRu", as.character(urbanicity))) %>%
-  ggplot(aes(x = pMin, y = pELL, color = pED, alpha = (1 - rankp_ov)/100)) +
-  facet_grid(urbanicity~cluster_ov) +
+  ggplot(aes(x = pMin, y = pELL, color = pED, alpha = (1 - rankp_full)/100)) +
+  facet_grid(urbanicity~cluster_full) +
   geom_point()
 
 df %>%
@@ -218,13 +205,13 @@ df %>%
 # Export Data
 #-----------------------
 
-# save.image(file = "Params/2018-07-11/image.rdata")
-load("Params/2018-07-11/image.rdata")
+# save.image(file = paste("Params/", file_date, "/schPars.rdata", sep = ""))
+load(paste("Params/", file_date, "/schPars.rdata", sep = ""))
 
 schVals %>%
   select(Var, pars, RR) %>%
   mutate(pars = round(pars,2)) %>%
-  write.csv("Params/School Parameters.csv")
+  write.csv(paste("Params/", file_date, "/School Parameters.csv", sep = ""))
 
 
 head(df.sch)
@@ -234,7 +221,7 @@ sch.PS <- df.sch %>%
 df.PS <- sch.PS
 
 # Pull out necesary variables for generating selections
-df.select <- select(df, DSID, DID, SID, cluster_ov, cluster_full, rank_ov, rank_full)
+df.select <- select(df, DSID, DID, SID, cluster_full, rank_full)
 
 df.select <- left_join(df.select, df.PS) %>%
   gather(key = sch.RR, value = sch.PS, PS10:PS90) %>%
@@ -257,5 +244,5 @@ sch_stats <- df[,c("DSID", names(schGoal))] %>%
             pop_sd = sd(Value)) %>%
   left_join(data.frame(Variable = names(schGoal), goal_SMD = schGoal, row.names = NULL, stringsAsFactors = F))
 
-save(df, df.select, df.dist, df.sch, sch.PS, df.PS, sch_stats, file = "Data/simData.Rdata")
-save(schGoal, schVals, file = "Data/RGM Vars.Rdata")
+save(df, df.select, df.sch, sch.PS, df.PS, sch_stats, file = paste("Data/", file_date, "/simData.Rdata", sep = ""))
+save(schGoal, schVals, file = paste("Data/", file_date, "/RGM Vars.Rdata", sep = ""))

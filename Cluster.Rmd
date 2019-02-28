@@ -8,7 +8,10 @@ library(tidyverse)
 
 rm(list = ls())
 
-load("data/base data.rdata")
+file_date <- "2019-02-28"
+
+load(paste("data/", file_date, "/base data.rdata", sep = ""))
+
 ```
 
 ## SUBS
@@ -103,9 +106,14 @@ get_CH <- function(K, distance, clusters) {
 ```{r SUBS_FULL, eval = F}
 # K <- 20
 # 
+# # distance <- df[, subs_f_vars] %>%
+# #   mutate(MEDINC = log(MEDINC),
+# #          n = log(n)) %>%
+# #   # sample_n(500) %>%
+# #   daisy(metric = "gower")
+# 
 # distance <- df[, subs_f_vars] %>%
-#   mutate(MEDINC = log(MEDINC),
-#          n = log(n)) %>%
+#   mutate(n = log(n)) %>%
 #   # sample_n(500) %>%
 #   daisy(metric = "gower")
 # 
@@ -120,12 +128,12 @@ get_CH <- function(K, distance, clusters) {
 # 
 # # undebug(get_CH)
 # 
-# save(clusters, chPlot, clust_time, ch_time, K, distance, file =  "Paper Data/clusters-full-logs.rdata")
+# save(clusters, chPlot, clust_time, ch_time, K, distance, file =  paste("Paper Data/", file_date, "/clusters-full-logs.rdata", sep = ""))
 ```
 
 ```{r SUBS_FULL_CH}
 # load("clusters-full.rdata")
-load("Paper Data/clusters-full-logs.rdata")
+load(paste("Paper Data/", file_date, "/clusters-full-logs.rdata", sep = ""))
 
 
 chPlot %>%
@@ -158,207 +166,36 @@ data.frame(k = 1:K, var = vrat, min80 = sum(vrat < .8) + .5) %>%
 
 df$cluster_full_6 <- cls[,6]
 df$cluster_full_10 <- cls[,10]
-# dist_full <- distance
+
+save(cls, file =  paste("Paper Data/", file_date, "/Clusters.rdata", sep = ""))
 
 ```
 
-### Subs-OV
+```{r}
+
+# names(cls_ov) <- names(cls_f) <- 1:K
+names(cls) <- 1:K
+# cls_ov$subs <- "OV"
+cls$subs <- "F"
 
 
-```{r SUBS_OV, eval = F}
-
-# K <- 20
-# 
-# distance <- df[, subs_ov_vars] %>%
-#   mutate(n = log(n)) %>%
-#   daisy(metric = "gower")
-# 
-# 
-# clust_time <- system.time(
-#   clusters <- run_clusters(K, distance)
-# )
-# 
-# ch_time <- system.time(
-#   chPlot <- get_CH(K, distance, clusters)
-# )
-# 
-# 
-# save(clusters, chPlot, clust_time, ch_time, K, distance, file =  "Paper Data/clusters-OV-logs.rdata")
-
-```
-
-```{r SUBS_OV_CH}
-# load("clusters-OV.rdata")
-load("Paper Data/clusters-OV-logs.rdata")
-
-
-chPlot %>%
-  gather(key = method, value = value, ch1:dif) %>%
-  ggplot(aes(x = k, y = value, color = method)) +
+# rbind(cls_f, cls_ov) %>%
+cls %>%
+  gather(key = k, value = cluster, -subs) %>%
+  filter(k > 1) %>%
+  mutate(k = as.numeric(k)) %>%
+  group_by(k, cluster, subs) %>%
+  summarise(n = n()) %>%
+  group_by(k, subs) %>%
+  mutate(sample = (n / sum(n)) * 60) %>%
+  ggplot(aes(x = k, y = sample)) +
   geom_point() +
-  geom_line()
-
-
-
-```
-
-```{r SUBS_OV_SSB/SST}
-cls <- bind_cols(lapply(clusters, function(x) data.frame(x$cluster)))
-vrat <- unlist(lapply(clusters, function(x) x$betweenss / x$totss))
-
-data.frame(k = 1:K, var = vrat, min80 = sum(vrat < .8) + .5) %>%
-  ggplot(aes(x = k, y = var)) +
-  geom_point() +
-  ggtitle("Between cluster variance by number of strata") +
-  labs(y = "Between Cluster Variance",
+  theme_apa() +
+  labs(y = "Allocated Sample Size",
        x = "Number of Strata (k)") +
-  geom_line() +
-  geom_vline(aes(xintercept = min80), linetype = "dashed") +
-  theme_minimal() +
   scale_x_discrete(limits = c(1:K)) +
-  scale_y_continuous(breaks = seq(0, 1, .1))
-
-df$cluster_OV_6 <- cls[,6]
-df$cluster_OV_10 <- cls[,10]
-
-df.clusts <- df %>% 
-  select(DSID, cluster_OV_6, cluster_full_6)
-
-save(df.clusts, file = "Params/Clusters.rdata")
+  scale_y_continuous(breaks = seq(0, 30, 5)) +
+  stat_function(fun = function(x) 60/x, geom = "line", linetype = "dashed") +
+  # facet_grid(subs ~ .) +
+  geom_hline(yintercept = 5, linetype = "dotted")
 ```
-
-```{r}
-orig <- df
-df <- orig
-```
-
-
-```{r class_full}
-df %>%
-  select(cluster_full_6:cluster_OV_10) %>%
-  rbind(rbind(mutate(., cluster_full_6 = 20),
-              mutate(., cluster_full_10 = 20))) %>%
-  group_by(cluster_full_6, cluster_full_10) %>%
-  summarise(n = n()) %>%
-  ungroup() %>%
-  # mutate(p = n/sum(n)) %>%
-  spread(key = cluster_full_6, value = n)
-
-```
-
-```{r class_OV}
-# df %>%
-#   select(cluster_full_6:cluster_OV_10) %>%
-#   rbind(rbind(mutate(., cluster_OV_6 = 20), 
-#               mutate(., cluster_OV_10 = 20))) %>%
-#   group_by(cluster_OV_6, cluster_OV_10) %>%
-#   summarise(n = n()) %>%
-#   ungroup() %>%
-#   # mutate(p = n/sum(n)) %>%
-#   spread(key = cluster_OV_6, value = n)
-
-```
-
-### 6 Clusters
-
-```{r class_k6}
-df %>%
-  select(cluster_full_6:cluster_OV_10) %>%
-  rbind(rbind(mutate(., cluster_full_6 = 20),
-  mutate(., cluster_OV_6 = 20))) %>%
-  group_by(cluster_full_6, cluster_OV_6) %>%
-  summarise(n = n()) %>%
-  ungroup() %>%
-  # mutate(p = n/sum(n)) %>%
-  spread(key = cluster_full_6, value = n)
-
-similar <- df %>%
-  select(cluster_full_6:cluster_OV_10) %>%
-  group_by(cluster_full_6, cluster_OV_6) %>%
-  summarise(n = n()) %>%
-  arrange(desc(n))
-
-similar
-
-similar <- rbind(similar[c(1:5),1:2], c(cluster_full_6 = 4, cluster_OV_6 = 4)) %>% arrange(cluster_full_6)
-
-df$cluster_OV_6 <- factor(df$cluster_OV_6)
-df$cluster_full_6 <- factor(df$cluster_full_6)
-
-levels(df$cluster_full_6) <- similar$cluster_OV_6
-```
-
-
-
-```{r}
-df %>%
-  select(urbanicity, pELA, pMath, cluster_full_6, cluster_OV_6) %>%
-  gather(key = full_ov, value = cluster, cluster_full_6:cluster_OV_6) %>%
-  ggplot(aes(x = pELA, y = pMath, color = as.factor(cluster))) +
-  geom_point() +
-  facet_grid(urbanicity ~ full_ov) +
-  scale_color_brewer(type = "div")
-
-```
-
-```{r}
-df %>%
-  select(urbanicity, pELL, pED, cluster_full_6, cluster_OV_6) %>%
-  gather(key = full_ov, value = cluster, cluster_full_6:cluster_OV_6) %>%
-  ggplot(aes(x = pELL, y = pED, color = cluster)) +
-  geom_point() +
-  facet_grid(urbanicity ~ full_ov) +
-  scale_color_brewer(type = "div")
-
-```
-
-### 10 Clusters
-
-```{r class_k10}
-df %>%
-  select(cluster_full_10:cluster_OV_10) %>%
-  rbind(rbind(mutate(., cluster_full_10 = 20), 
-              mutate(., cluster_OV_10 = 20))) %>%
-  group_by(cluster_full_10, cluster_OV_10) %>%
-  summarise(n = n()) %>%
-  ungroup() %>%
-  # mutate(p = n/sum(n)) %>%
-  spread(key = cluster_full_10, value = n)
-
-similar <- df %>%
-  select(cluster_full_6:cluster_OV_10) %>%
-  group_by(cluster_full_10, cluster_OV_10) %>%
-  summarise(n = n()) %>%
-  arrange(desc(n))
-
-similar <- similar[c(1:10),1:2]
-
-df$cluster_OV_10 <- factor(df$cluster_OV_10)
-df$cluster_full_10 <- factor(df$cluster_full_10)
-
-levels(df$cluster_full_10) <- similar$cluster_OV_10
-
-```
-
-```{r}
-df %>%
-  select(urbanicity, pELA, pMath, cluster_full_10, cluster_OV_10) %>%
-  gather(key = full_ov, value = cluster, cluster_full_10:cluster_OV_10) %>%
-  ggplot(aes(x = pELA, y = pMath, color = as.factor(cluster))) +
-  geom_point() +
-  facet_grid(urbanicity ~ full_ov) +
-  scale_color_brewer(type = "div")
-
-```
-
-```{r}
-df %>%
-  select(urbanicity, pELL, pED, cluster_full_10, cluster_OV_10) %>%
-  gather(key = full_ov, value = cluster, cluster_full_10:cluster_OV_10) %>%
-  ggplot(aes(x = pELL, y = pED, color = cluster)) +
-  geom_point() +
-  facet_grid(urbanicity ~ full_ov) +
-  scale_color_brewer(type = "div")
-
-```
-

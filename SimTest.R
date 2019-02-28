@@ -2,6 +2,8 @@ library(tidyverse)
 
 rm(list = ls())
 
+file_date <- "2019-02-28"
+
 source("SimSource.R")
 
 # vars <- c("n", "urbanicity", "pELL", "pED", "pELA", "pMath", "pMin", "MEDINC")
@@ -29,8 +31,8 @@ runSim <- function(reps) {
 
 # runSim(1)
 
-runtimeFile <- "Data/2018-07-11/runtime r1000.rdata"
-resultsFile <- "Data/2018-07-11/results r1000.rdata"
+runtimeFile <- paste("Data/", file_date, "/runtime r1000.rdata", sep = "")
+resultsFile <- paste("Data/", file_date, "/results r1000.rdata", sep = "")
 
 library(parallel)
 
