@@ -52,6 +52,7 @@ df_sch_smd <- df_sch_smd %>% rename_conditions()
 savePlot <- T
 ```
 
+
 ```{r}
 boxErrors <- function(x) {
   v <- c(min(x), mean(x) - sd(x), mean(x), mean(x) + sd(x), max(x))
@@ -142,7 +143,7 @@ df_Bindex %>%
   ggplot(aes(x = sample, y = Bs, color = Sampling, linetype = Clustering)) +
   # stat_summary(fun.data = boxErrors, geom = "boxplot", position = position_dodge(width=1)) +
   geom_boxplot() +
-  facet_wrap(~ sch.RR.f) +
+  facet_wrap(~ sch.RR) +
   theme_apa(box = T) +
   # scale_fill_brewer(type = "seq", palette = 4, guide=FALSE) +
   # scale_color_brewer(type = "qual", palette = 2)  +

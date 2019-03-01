@@ -35,9 +35,9 @@ schEx <- NULL
 
 #-----------------------
 # Gen District Params
-#-----------------------
-sch.resps <- 9:1/10
-# sch.resps <- c(.25, .5, .75)
+# -----------------------
+# sch.resps <- 9:1/10
+sch.resps <- c(.1, .2, .3)
 
 sch.respNames <- paste("PS", sch.resps*100, sep = "")
 
@@ -70,17 +70,17 @@ schVals <- lapply(schPars, getVals, vars = schVars, data = df.sch.sd, exclude = 
   data.frame
 schPS <- sapply(schPars, calcPS_RRs, data = df.sch.sd) %>% data.frame
 
-schPS %>%
-  ggplot(aes(x = X1, y = X2, color = abs(X1-X2))) +
-  geom_point()
-
-schPS %>%
-  ggplot(aes(x = X2, y = X3, color = abs(X2-X3))) +
-  geom_point()
-
-schPS %>%
-  ggplot(aes(x = X1, y = X3, color = abs(X1-X3))) +
-  geom_point()
+# schPS %>%
+#   ggplot(aes(x = X1, y = X2, color = abs(X1-X2))) +
+#   geom_point()
+# 
+# schPS %>%
+#   ggplot(aes(x = X2, y = X3, color = abs(X2-X3))) +
+#   geom_point()
+# 
+# schPS %>%
+#   ggplot(aes(x = X1, y = X3, color = abs(X1-X3))) +
+#   geom_point()
 
 names(schPS) <- sch.respNames
 df.sch <- cbind(df.sch, schPS)
@@ -92,6 +92,29 @@ schPS %>%
   ggplot(aes(x = PS)) +
   geom_histogram() +
   facet_wrap(~RR)
+
+schVals %>%
+  ggplot(aes(x = RR, y = pars, group = Var)) +
+  geom_point() +
+  geom_line() +
+  facet_wrap(~Var) +
+  geom_hline(yintercept = 0, linetype = "dotted")
+
+
+schPS$PS90
+
+df %>%
+  select(pELA) %>%
+  mutate(ps = schPS$PS50) %>%
+  summarise(m1 = weighted.mean(pELA, ps),
+         m2 = weighted.mean(pELA, 1/ps),
+         m = mean(pELA))
+
+df %>%
+  select(pELA) %>%
+  mutate(E = rbinom(n = length(schPS$PS50), size = 1, prob = schPS$PS50)) %>%
+  filter(E == 1) %>%
+  summarise(m = mean(pELA))
 
 save(schPars, schVals, df.sch, sch.respNames, sch.resps, schGoal, file = paste("Params/", file_date, "/schPars.rdata", sep = ""))
 
