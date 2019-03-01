@@ -1,6 +1,8 @@
 library(tidyverse)
 
-# rm(list = ls())
+rm(list = ls())
+
+file_date <- "2019-02-28"
 
 #-----------------
 # Fixed data

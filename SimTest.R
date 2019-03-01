@@ -18,7 +18,8 @@ runSim <- function(reps) {
   source("SimSource.R")
   # debug(testRun)
   
-  vars <- c("n", "urbanicity", "pELL", "pED", "pELA", "pMath", "pMin", "MEDINC")
+  # vars <- c("n", "urbanicity", "pELL", "pED", "pELA", "pMath", "pMin", "MEDINC")
+  vars <- c("n", "urbanicity", "pELL", "pED", "pELA", "pMath", "pMin")
   
   frm <- as.formula(paste("Eij ~ ", paste(vars, collapse = " + ")))
   
