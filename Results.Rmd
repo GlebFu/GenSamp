@@ -13,16 +13,19 @@ library(tidyverse)
 
 rm(list = ls())
 
-runtimeFile <- "Data/2018-07-11/runtime r1000.rdata"
-resultsFile <- "Data/2018-07-11/results r1000.rdata"
+file_date <- "2019-02-28"
 
-load("data/base data.rdata")
+
+runtimeFile <- paste("Data/", file_date, "/runtime r1000.rdata", sep = "")
+resultsFile <- paste("Data/", file_date, "/results r1000.rdata", sep = "")
+
+load(paste("data/", file_date, "/base data.rdata", sep = ""))
 
 # Base data set
-load("Data/simData.Rdata")
+load(paste("Data/", file_date, "/simData.Rdata", sep = ""))
 
 # Response generating variables and goal SMD
-load("Data/RGM Vars.Rdata")
+load(paste("Data/", file_date, "/RGM Vars.Rdata", sep = ""))
 
 load(runtimeFile)
 load(resultsFile)
@@ -46,7 +49,7 @@ df_responses <- df_responses %>% rename_conditions()
   
 df_sch_smd <- df_sch_smd %>% rename_conditions()
 
-savePlot <- F
+savePlot <- T
 ```
 
 ```{r}
@@ -176,8 +179,7 @@ df_Bindex %>%
   # geom_errorbar(aes(ymin=LL, ymax=UL), colour="black", width=.1) +
   facet_wrap(~ Type)
 
-if(savePlot) ggsave("Figs/B-Index.jpg", dpi = 1000, width = 11, height = 8.5)
-if(savePlot) ggsave("Figs/B-Index.jpg", dpi = 1000, width = 10, height = 4)
+if(savePlot) ggsave(file = paste("Figs/", file_date, "/B-Index.jpg", sep = ""), dpi = 1000, width = 11, height = 8.5)
 ```
 ```{r}
 df_Bindex %>%
@@ -202,7 +204,7 @@ df_Bindex %>%
        x = "Population Participation Rate") +
   theme_apa()
 
-if(savePlot) ggsave("Figs/paper B-Index.jpg", dpi = 1000, width = 7, height = 4)
+if(savePlot) ggsave(paste("Figs/", file_date, "/Paper B-Index.jpg", sep = ""), dpi = 1000, width = 7, height = 4)
 ```
 
 
@@ -230,7 +232,7 @@ sSMDplot %>%
   labs(y = "Mean SMD",
        x = "Population Participation Rate")
 
-if(savePlot)  ggsave("Figs/All SMDs.jpg", dpi = 1000, width = 7, height = 5)
+if(savePlot)  ggsave(paste("Figs/", file_date, "/All SMDs.jpg", sep = ""), dpi = 1000, width = 7, height = 5)
 ```
 
 
@@ -253,7 +255,7 @@ sSMDplot %>%
   labs(x = "Sampling Method", y = "Absolute SMD")
 
 # if(savePlot)  ggsave("Figs/Sch SMDs.jpg", dpi = 1000, width = 11, height = 8.5)
-if(savePlot)  ggsave("Figs/Sch SMDs.jpg", dpi = 1000, width = 10, height = 4)
+if(savePlot)  ggsave(paste("Figs/", file_date, "/SCH SMDs.jpg", sep = ""), dpi = 1000, width = 10, height = 4)
 ```
 
 ## Sampling Difficulty
@@ -327,7 +329,7 @@ samplot2 %>%
   labs(x = "Population Response Rate", y = "Units Contacted") +
   theme_apa()
 
-if(savePlot)  ggsave("Figs/Units Contacted.jpg", dpi = 1000, width = 7, height = 5)
+if(savePlot)  ggsave(paste("Figs/", file_date, "/Units Contacted.jpg", sep = ""), dpi = 1000, width = 7, height = 5)
 
 ```
 
