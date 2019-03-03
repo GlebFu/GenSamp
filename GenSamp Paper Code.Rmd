@@ -60,7 +60,11 @@ rm(list = ls())
 
 ```{r data-prep}
 source("ParGenSource.R")
-load("Data/base data.rdata")
+
+file_date <- "2019-02-28"
+
+load(paste("data/", file_date, "/base data.rdata", sep = ""))
+
 # Read Data
 
 
@@ -69,10 +73,13 @@ load("Data/base data.rdata")
 ```{r gen_dist_plots}
 to_z <- function(x) (x - mean(x))/sd(x)
 
+# dist_plots <- df[, c("DSID",subs_f_vars)] %>%
+#   mutate(n_log = log(n),
+#          MEDINC_log = log(MEDINC/1000),
+#          MEDINC = MEDINC / 1000)
+
 dist_plots <- df[, c("DSID",subs_f_vars)] %>%
-  mutate(n_log = log(n),
-         MEDINC_log = log(MEDINC/1000),
-         MEDINC = MEDINC / 1000)
+  mutate(n_log = log(n))
 
 # plot_dist1 <- dist_plots %>%
 #   gather(key = var, value = value, n, n_log, MEDINC, MEDINC_log) %>%
@@ -82,7 +89,7 @@ dist_plots <- df[, c("DSID",subs_f_vars)] %>%
 #   theme_apa()
 
 plot_dist1 <- dist_plots %>%
-  gather(key = var, value = value, pED:pMin, n_log, MEDINC_log) %>%
+  gather(key = var, value = value, pED:pMin, n_log) %>%
   group_by(var) %>%
   # mutate(value = value - mean(value)) %>%
   ggplot(aes(x = value)) +
@@ -107,7 +114,7 @@ plot_dist1
 library(tidyverse)
 library(kableExtra)
 
-load("Data/RGM Vars.Rdata")
+load(paste("Data/", file_date, "/RGM Vars.Rdata", sep = ""))
 
 tab_RGM_Pars <- schVals %>%
   select(Var, pars, RR) %>%
@@ -128,7 +135,7 @@ save.image("Paper Data/PaperData.rdata")
 ```
 
 ```{r load_clusterData}
-load("Paper Data/clusters-full-logs.rdata")
+load(paste("Paper Data/", file_date, "/clusters-full-logs.rdata", sep = ""))
 ch_f <- chPlot
 clusters_f <- clusters
 

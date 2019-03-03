@@ -118,6 +118,8 @@ get_CH <- function(K, distance, clusters) {
 #   daisy(metric = "gower")
 # 
 # 
+# 
+# 
 # clust_time <- system.time(
 #   clusters <- run_clusters(K, distance)
 # )

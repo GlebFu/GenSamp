@@ -21,7 +21,7 @@ df %>%
 # Schools
 #-----------------------
 # Set School SMD Goals
-schGoal <- c(.374, .433, .007, -.403, .081, .538, .412, -.25, -.25)
+schGoal <- c(.374, .433, .007, -.403, .081, .538, .412, -.3, -.3)
 schVars <- c("n", "Urban", "Suburban", "ToRu", "pED", "pMin", "pELL", "pELA", "pMath")
 names(schGoal) <- schVars
 
@@ -37,7 +37,8 @@ schEx <- NULL
 # Gen District Params
 # -----------------------
 # sch.resps <- 9:1/10
-sch.resps <- c(.1, .2, .3)
+sch.resps <- 10:2/20
+# sch.resps <- c(.1, .2, .3)
 
 sch.respNames <- paste("PS", sch.resps*100, sep = "")
 
@@ -103,18 +104,20 @@ schVals %>%
 
 schPS$PS90
 
-df %>%
-  select(pELA) %>%
-  mutate(ps = schPS$PS50) %>%
-  summarise(m1 = weighted.mean(pELA, ps),
-         m2 = weighted.mean(pELA, 1/ps),
-         m = mean(pELA))
+# df %>%
+#   select(Urban) %>%
+#   mutate(ps = schPS$PS10) %>%
+#   summarise(m1 = weighted.mean(Urban, ps),
+#          m2 = weighted.mean(Urban, 1/ps),
+#          m3 = sum((1/ps) * Urban)/sum(1/ps),
+#          m4 = sum((ps) * Urban)/sum(ps),
+#          m = mean(Urban))
 
 df %>%
-  select(pELA) %>%
-  mutate(E = rbinom(n = length(schPS$PS50), size = 1, prob = schPS$PS50)) %>%
+  select(Urban) %>%
+  mutate(E = rbinom(n = length(schPS$PS50), size = 1, prob = schPS$PS10)) %>%
   filter(E == 1) %>%
-  summarise(m = mean(pELA))
+  summarise(m = mean(Urban))
 
 save(schPars, schVals, df.sch, sch.respNames, sch.resps, schGoal, file = paste("Params/", file_date, "/schPars.rdata", sep = ""))
 
@@ -187,6 +190,21 @@ df <- to_matrix(data = df, vars = subs_f_vars, add.vars = c("DSID", "cluster_ful
 
 df$cluster_full <- as.factor(df$cluster_full)
 
+select(df, DSID, cluster_full) %>%
+  full_join(select(df.sch, DSID, PS50:PS10)) %>%
+  gather(key = rr, value = ps, -DSID, -cluster_full) %>%
+  group_by(cluster_full, rr) %>%
+  summarise(m = mean(ps)) %>%
+  spread(key = rr, value = m)
+
+select(df, DSID, cluster_full) %>%
+  full_join(select(df.sch, DSID, PS50:PS10)) %>%
+  gather(key = rr, value = ps, -DSID, -cluster_full) %>%
+  group_by(cluster_full, rr) %>%
+  summarise(m = mean(ps)) %>%
+  ggplot(aes(x = rr, y = m, color = cluster_full, group = cluster_full)) +
+  geom_line()
+
 
 df %>%
   mutate(urbanicity = ifelse(urbanicity == "Rural" | urbanicity == "Town", "ToRu", as.character(urbanicity))) %>%
@@ -247,7 +265,7 @@ df.PS <- sch.PS
 df.select <- select(df, DSID, DID, SID, cluster_full, rank_full)
 
 df.select <- left_join(df.select, df.PS) %>%
-  gather(key = sch.RR, value = sch.PS, PS10:PS90) %>%
+  gather(key = sch.RR, value = sch.PS, PS10:PS50) %>%
   mutate(sch.RR = as.numeric(str_sub(sch.RR, start = 3)))
 
 # # District statistics

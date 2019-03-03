@@ -49,7 +49,7 @@ df_responses <- df_responses %>% rename_conditions()
   
 df_sch_smd <- df_sch_smd %>% rename_conditions()
 
-savePlot <- T
+savePlot <- F
 ```
 
 
@@ -76,7 +76,7 @@ Distribution of propensity scores by response rates
 ```{r}
 
 df.sch %>% 
-  select(PS90:PS10) %>% 
+  select(PS50:PS10) %>% 
   gather(key = RR, value = PS) %>% 
   ggplot(aes(x = PS)) + 
   geom_histogram() + 
@@ -183,7 +183,7 @@ df_Bindex %>%
 if(savePlot) ggsave(file = paste("Figs/", file_date, "/B-Index.jpg", sep = ""), dpi = 1000, width = 11, height = 8.5)
 ```
 ```{r}
-df_Bindex %>%
+avg_Bindex <- df_Bindex %>%
   group_by(sample, sch.RR, Clustering, Sampling) %>%
   summarise(All = mean(Bs),
             Partial = mean(Bs[Bs > .2]),
@@ -198,7 +198,9 @@ df_Bindex %>%
             SD = mean(SD)) %>%
   mutate(LL = M - SD,
          UL = M + SD) %>%
-  filter(Type == "Partial") %>%
+  filter(Type == "Partial")
+
+avg_Bindex %>%
   ggplot(aes(x = sch.RR, y = M, color = Sampling, linetype = Clustering)) +
   geom_line() +
   labs(y = "Mean B-index",
@@ -360,3 +362,10 @@ df.rr %>%
   labs(x = "Generating Repsonse Rate", y = "Actual Response Rate") +
   geom_abline(slope = 25, intercept = 1, linetype = "dashed")
 
+```
+
+
+```{r}
+save(avg_Bindex, df_Bindex, df_responses, df_sch_smd, samplot, sSMDplot, file = paste("Paper Data/", file_date, "/Result Data.rdata", sep = ""))
+
+```

@@ -33,17 +33,17 @@ calcPS <- function(Bs, MRR, vars, data, exclude, getint = F, int = NULL) {
   
   # int = uniroot(function(b0) mean(expit(b0 + XB)) - MRR, c(-20,20))
   # tryCatch({
-    if(is.null(int)){
-      int = uniroot(function(b0) mean(expit(b0 + XB)) - MRR, interval = c(-30,30), tol = .1)
-      int <- int$root
-    }
+  if(is.null(int)){
+    int = uniroot(function(b0) mean(expit(b0 + XB)) - MRR, interval = c(-30,30))
+    int <- int$root
+  }
   # },
   # error = function(err) {
   #   print(err)
   #   print(Bs)
   # })
-
-
+  
+  
   dY <- as.numeric(X %*% Bs) + int
   
   PS <- expit(dY)
@@ -72,8 +72,8 @@ calcSMD <- function(Bs, MRR, vars, data, exclude, calcPS = T, goal = NULL) {
   
   # Calcualte IPSW
   data$dIPSW0 <- 1/(1-data$PS)
-  # data$dIPSW1 <- 1/data$PS
-  data$dIPSW1 <- data$PS
+  data$dIPSW1 <- 1/data$PS
+  # data$dIPSW1 <- data$PS
   
   
   dMeans <- data[,c(vars, "dIPSW1", "dIPSW0")] %>%

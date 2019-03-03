@@ -61,7 +61,10 @@ rm(list = ls())
 
 ```{r data-prep}
 source("ParGenSource.R")
-load("Data/base data.rdata")
+
+file_date <- "2019-02-28"
+
+load(paste("data/", file_date, "/base data.rdata", sep = ""))
 load("Paper Data/PaperData.rdata")
 
 saveFigs <- T
@@ -189,7 +192,7 @@ Log-transformation was used on school size (number of students) and median incom
 
 ```{r plot-dist1, results = "asis", fig.cap="Comparison of covariate distributions and their log transformations."}
 dist_plots %>%
-  gather(key = var, value = value, pED:pMin, n_log, MEDINC_log) %>%
+  gather(key = var, value = value, pED:pMin, n_log) %>%
   group_by(var) %>%
   # mutate(value = value - mean(value)) %>%
   ggplot(aes(x = value)) +
@@ -240,7 +243,7 @@ tab_RGM_Pars %>%
 
 ```{r fig-SMD-goal, results = "asis", fig.cap = "Difference between expected SMDs and goal SMDs"}
 schVals_lab <- schVals %>%
-  filter(RR == .9) %>%
+  filter(RR == .5) %>%
   mutate(RR = paste(RR*100, "%", sep = "")) %>%
   select(Var, dif, RR, pars) %>%
   na.omit()
@@ -488,8 +491,8 @@ In order to assess feasibility, the total number of schools approached to achiev
 ## Generalizability
 
 ```{r results-data, cache = F}
-
-load("Paper Data/Result Data.rdata")
+rm(list = ls())
+load(paste("Paper Data/", file_date, "/Result Data.rdata", sep = ""))
 
 ```
 
@@ -511,8 +514,7 @@ sSMDplot %>%
   labs(y = "Mean SMD",
        x = "Population Participation Rate") +
   theme(legend.position = "bottom") +
-  colorspace::scale_color_discrete_qualitative("dark 2") +
-  scale_x_continuous(breaks = seq(10, 90, 20))
+  scale_x_continuous(breaks = seq(10, 50, 10))
 
 if(saveFigs) save.figures("Results - SMD")
 
@@ -526,7 +528,7 @@ avg_Bindex %>%
   labs(y = "Mean B-index",
        x = "Population Participation Rate") +
   theme_apa() +
-  scale_x_continuous(breaks = seq(10, 90, 20))
+  scale_x_continuous(breaks = seq(10, 50, 10))
 
 if(saveFigs) save.figures("Results - B Index")
 
@@ -599,7 +601,7 @@ contact_data %>%
   labs(x = "Population Participation Rate", y = "Units Contacted") +
   # scale_y_log10() +◙
   theme_apa() +
-  scale_x_continuous(breaks = seq(10, 90, 20))
+  scale_x_continuous(breaks = seq(10, 50, 10))
 
 if(saveFigs) save.figures("Results - Response Counts")
 ```
@@ -627,7 +629,7 @@ response_rate_data %>%
         axis.text.x = element_text(angle = 45, hjust = 1)) +
   labs(x = "Population Participation Rate", y = "Recruitment Response Rate") +
   theme_apa() +
-  scale_x_continuous(breaks = seq(10, 90, 20))
+  scale_x_continuous(breaks = seq(10, 50, 10))
 
 if(saveFigs) save.figures("Results - Response Rates")
 ```
