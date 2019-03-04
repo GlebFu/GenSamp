@@ -81,7 +81,7 @@ $_j$ - Stratum index
 
 ## Characteristics
 $X_i$ - Vector of covariates for school $i$
-$\pi$ - participation propenstiy score for school $i$
+$\pi_i$ - participation propenstiy score for school $i$
 
 ## Measures
 $SMD$ - Standardized mean difference
