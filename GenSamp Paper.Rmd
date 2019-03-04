@@ -50,6 +50,8 @@ knitr::opts_chunk$set(echo = F, cache = F, eval = T)
 ```{r load.packages, include = FALSE}
 library(papaja)
 library(tidyverse)
+library(colorblindr)
+library(colorspace)
 
 rm(list = ls())
 ```
@@ -407,7 +409,7 @@ cls_f %>%
   group_by(k, subs) %>%
   mutate(sample = (n / sum(n)) * 60) %>%
   ggplot(aes(x = k, y = sample)) +
-  geom_point(shape = "-", size = 4) +
+  geom_point(shape = "-", size = 7) +
   theme_apa() +
   labs(y = "Allocated Sample Size",
        x = "Number of Strata (k)") +
@@ -415,9 +417,12 @@ cls_f %>%
   scale_y_continuous(breaks = seq(0, 30, 5)) +
   stat_function(fun = function(x) 60/x, geom = "line", linetype = "dashed", size = .5) +
   # facet_grid(subs ~ .) +
-  geom_hline(yintercept = 5, linetype = "dotted", size = .5)
+  geom_hline(yintercept = 5, linetype = "dotted", size = .5) +
+  theme(text = element_text(size=20))
 
 if(saveFigs) save.figures("Intro - Cluster Size")
+
+
 ```
 
 ### Cluster Analysis
@@ -491,7 +496,7 @@ In order to assess feasibility, the total number of schools approached to achiev
 ## Generalizability
 
 ```{r results-data, cache = F}
-rm(list = ls())
+
 load(paste("Paper Data/", file_date, "/Result Data.rdata", sep = ""))
 
 ```
@@ -502,19 +507,59 @@ Figure \@ref(fig:fig-avg-Bindex) displays the average $B$-index for each method 
 
 
 ```{r fig-SMD-by-Var, results = "asis", fig.cap = "Averge Standardized Mean Differences between sample and population", eval = T}
+sSMDplot$Variable <- as.factor(sSMDplot$Variable)
+levels(sSMDplot$Variable) <- c("School Size", "Free/Reduced Lunch", "English Proficient", "ELL", "Math Proficient", "Non-White", "Suburban", "Town/Rural", "Urban")
+
+
+sSMDplot %>%
+  filter(Group == "sampled",
+         Variable == "School Size") %>%
+  ggplot(aes(x = sch.RR, y = sim_SMD, color = Sampling, linetype = Clustering, group = sample)) +
+  # geom_point() +
+  geom_line(size = 1) +
+  geom_hline(yintercept = 0) +
+  geom_hline(yintercept = .25, linetype = "dashed") +
+  theme_apa(box = F) +
+  labs(y = "Mean SMD",
+       x = "Population Participation Rate") +
+  theme(legend.position = "bottom") +
+  scale_x_continuous(breaks = seq(10, 50, 10)) +
+  theme(text = element_text(size=20)) + 
+  scale_color_OkabeIto()
+
+if(saveFigs) save.figures("Results - SMD - School Size")
+
+scale_y_f <- function(x, y = 3) {
+  top <- max(.3, ceiling(round(max(x)*10,1))/10)
+  b <- ceiling(round((top/y)*10,1))/10
+  # print(paste(paste(round(x,2), collapse = " - "), paste(seq(0,b*y,b), collapse = "|"), sep = " : |"))
+  seq(0,b*y,b)
+  
+}
+
+# scale_y_f(c(0, .5))
+
+# debug(scale_y_f)
+
+
 sSMDplot %>%
   filter(Group == "sampled") %>%
   ggplot(aes(x = sch.RR, y = sim_SMD, color = Sampling, linetype = Clustering, group = sample)) +
   # geom_point() +
-  geom_line() +
-  geom_hline(yintercept = 0) +
+  geom_line(size = 1) +
   geom_hline(yintercept = .25, linetype = "dashed") +
+  geom_hline(yintercept = 0) +
   facet_wrap( ~ Variable, scales = "free_y") +
   theme_apa(box = F) +
   labs(y = "Mean SMD",
        x = "Population Participation Rate") +
   theme(legend.position = "bottom") +
-  scale_x_continuous(breaks = seq(10, 50, 10))
+  scale_y_continuous(breaks = scale_y_f,
+                     expand = expand_scale(mult = c(0, .6))) +
+  scale_x_continuous(breaks = seq(10, 50, 10)) +
+  theme(text = element_text(size=18)) + 
+  scale_color_OkabeIto()
+
 
 if(saveFigs) save.figures("Results - SMD")
 
@@ -524,11 +569,14 @@ if(saveFigs) save.figures("Results - SMD")
 
 avg_Bindex %>%
   ggplot(aes(x = sch.RR, y = M, color = Sampling, linetype = Clustering)) +
-  geom_line() +
+  geom_line(size = 2) +
+  scale_x_continuous(breaks = seq(10, 50, 10)) +
+  scale_y_continuous(limits = c(.5, 1)) +
   labs(y = "Mean B-index",
        x = "Population Participation Rate") +
-  theme_apa() +
-  scale_x_continuous(breaks = seq(10, 50, 10))
+  theme_apa()  +
+  theme(text = element_text(size=20)) + 
+  scale_color_OkabeIto()
 
 if(saveFigs) save.figures("Results - B Index")
 
@@ -587,8 +635,8 @@ contact_data <- samplot %>%
 
 contact_data %>%
   ggplot(aes(x = sch.RR, y = value, group = sample, color = Sampling, linetype = Clustering)) +
-  geom_point() +
-  geom_line() +
+  # geom_point() +
+  geom_line(size = 2) +
   expand_limits(y=0) +
   # theme_apa(box = T) +
   # scale_fill_brewer(type = "seq", palette = 4) +
@@ -601,7 +649,9 @@ contact_data %>%
   labs(x = "Population Participation Rate", y = "Units Contacted") +
   # scale_y_log10() +◙
   theme_apa() +
-  scale_x_continuous(breaks = seq(10, 50, 10))
+  scale_x_continuous(breaks = seq(10, 50, 10)) +
+  theme(text = element_text(size=20)) + 
+  scale_color_OkabeIto()
 
 if(saveFigs) save.figures("Results - Response Counts")
 ```
@@ -616,8 +666,8 @@ response_rate_data <- samplot %>%
 
 response_rate_data %>%
   ggplot(aes(x = sch.RR, y = value, group = sample, color = Sampling, linetype = Clustering)) +
-  geom_point() +
-  geom_line() +
+  # geom_point() +
+  geom_line(size = 2) +
   expand_limits(y=0) +
   # theme_apa(box = T) +
   # scale_fill_brewer(type = "seq", palette = 4) +
@@ -629,7 +679,9 @@ response_rate_data %>%
         axis.text.x = element_text(angle = 45, hjust = 1)) +
   labs(x = "Population Participation Rate", y = "Recruitment Response Rate") +
   theme_apa() +
-  scale_x_continuous(breaks = seq(10, 50, 10))
+  scale_x_continuous(breaks = seq(10, 50, 10))+
+  theme(text = element_text(size=20)) + 
+  scale_color_OkabeIto()
 
 if(saveFigs) save.figures("Results - Response Rates")
 ```
