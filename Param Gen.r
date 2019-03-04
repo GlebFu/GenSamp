@@ -36,8 +36,8 @@ schEx <- NULL
 #-----------------------
 # Gen District Params
 # -----------------------
-# sch.resps <- 9:1/10
-sch.resps <- 10:2/20
+sch.resps <- 9:1/10
+# sch.resps <- 10:2/20
 # sch.resps <- c(.1, .2, .3)
 
 sch.respNames <- paste("PS", sch.resps*100, sep = "")
@@ -115,7 +115,7 @@ schPS$PS90
 
 df %>%
   select(Urban) %>%
-  mutate(E = rbinom(n = length(schPS$PS50), size = 1, prob = schPS$PS10)) %>%
+  mutate(E = rbinom(n = length(schPS$PS90), size = 1, prob = schPS$PS10)) %>%
   filter(E == 1) %>%
   summarise(m = mean(Urban))
 
@@ -191,14 +191,14 @@ df <- to_matrix(data = df, vars = subs_f_vars, add.vars = c("DSID", "cluster_ful
 df$cluster_full <- as.factor(df$cluster_full)
 
 select(df, DSID, cluster_full) %>%
-  full_join(select(df.sch, DSID, PS50:PS10)) %>%
+  full_join(select(df.sch, DSID, PS90:PS10)) %>%
   gather(key = rr, value = ps, -DSID, -cluster_full) %>%
   group_by(cluster_full, rr) %>%
   summarise(m = mean(ps)) %>%
   spread(key = rr, value = m)
 
 select(df, DSID, cluster_full) %>%
-  full_join(select(df.sch, DSID, PS50:PS10)) %>%
+  full_join(select(df.sch, DSID, PS90:PS10)) %>%
   gather(key = rr, value = ps, -DSID, -cluster_full) %>%
   group_by(cluster_full, rr) %>%
   summarise(m = mean(ps)) %>%
@@ -265,7 +265,7 @@ df.PS <- sch.PS
 df.select <- select(df, DSID, DID, SID, cluster_full, rank_full)
 
 df.select <- left_join(df.select, df.PS) %>%
-  gather(key = sch.RR, value = sch.PS, PS10:PS50) %>%
+  gather(key = sch.RR, value = sch.PS, PS10:PS90) %>%
   mutate(sch.RR = as.numeric(str_sub(sch.RR, start = 3)))
 
 # # District statistics
