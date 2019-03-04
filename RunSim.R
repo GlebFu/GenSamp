@@ -16,7 +16,7 @@ source("SimSource.R")
 
 runSim <- function(reps) {
   source("SimSource.R")
-  # debug(testRun)
+  # debug(runSim)
   
   vars <- c("n", "urbanicity", "pELL", "pED", "pELA", "pMath", "pMin", "MEDINC")
   # vars <- c("n", "urbanicity", "pELL", "pED", "pELA", "pMath", "pMin")
@@ -25,8 +25,8 @@ runSim <- function(reps) {
   
   df.Bindex <- df %>% ungroup() %>% select(DSID, vars)
   
-  # replicate(reps, testRun(df.select %>% filter(sch.RR %in% c(50)),  pop.PS = df.Bindex, frm = frm, vars = vars))
-  replicate(reps, testRun(df.select,  pop.PS = df.Bindex, frm = frm, vars = vars))
+  # replicate(reps, runSim(df.select %>% filter(sch.RR %in% c(50)),  pop.PS = df.Bindex, frm = frm, vars = vars))
+  replicate(reps, runSim(df.select,  pop.PS = df.Bindex, frm = frm, vars = vars))
   
 }
 

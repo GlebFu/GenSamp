@@ -282,7 +282,7 @@ calcSchSMDs <- function(sample) {
 #   facet_grid(Group ~ Variable) +
 #   theme_bw()
 
-testRun <- function(data, pop.PS, frm, vars) {
+runSim <- function(data, pop.PS, frm, vars) {
   
   approached <- generateE(data)
   samp <- createSample(approached)
