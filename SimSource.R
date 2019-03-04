@@ -26,6 +26,35 @@ load(paste("Data/", file_date, "/RGM Vars.Rdata", sep = ""))
 
 sampleBinomial <- function(ps) rbinom(length(ps), 1, prob = ps)
 
+# This version is inaccurate!!!! Don't use it!!!
+# 
+# Bindex <- function(PS, Eij) {
+#   
+#   dat1B <- PS[Eij == 1]
+#   dat2B <- PS[Eij == 0]
+#   ##Baklizi and Eidous (2006) estimator
+#   # bandwidth
+#   h = function(x){
+#     n = length(x)
+#     return((4*sqrt(var(x))^5/(3*n))^(1/5)) 
+#   }
+#   
+#   # kernel estimators of the density and the distribution
+#   kg = function(x,data){
+#     hb = h(data) #bin width
+#     k = r = length(x)
+#     for(i in 1:k) r[i] = mean(dnorm((x[i]-data)/hb))/hb
+#     return(r )
+#   } 
+#   
+#   return( as.numeric(integrate(function(x) sqrt(kg(x,dat1B)*kg(x,dat2B)),-Inf,Inf)$value))
+#   
+# }
+
+h <- function(x){
+  n <- length(x)
+  (4 * sqrt(var(x))^5 / (3 * n))^(1/5) 
+}
 
 Bindex <- function(PS, Eij) {
   
@@ -33,21 +62,24 @@ Bindex <- function(PS, Eij) {
   dat2B <- PS[Eij == 0]
   ##Baklizi and Eidous (2006) estimator
   # bandwidth
-  h = function(x){
-    n = length(x)
-    return((4*sqrt(var(x))^5/(3*n))^(1/5)) 
-  }
+  h1 <- h(dat1B)
+  h2 <- h(dat2B)
   
   # kernel estimators of the density and the distribution
-  kg = function(x,data){
-    hb = h(data) #bin width
+  kg = function(x, data, hb = h(data)){
     k = r = length(x)
     for(i in 1:k) r[i] = mean(dnorm((x[i]-data)/hb))/hb
-    return(r )
+    return(r)
   } 
   
-  return( as.numeric(integrate(function(x) sqrt(kg(x,dat1B)*kg(x,dat2B)),-Inf,Inf)$value))
+  h_max <- max(h1, h2)
+  min_x <- min(PS) - 3 * h_max
+  max_x <- max(PS) + 3 * h_max
   
+  integrate(function(x) sqrt(kg(x, dat1B, h1) * kg(x, dat2B, h2)), min_x, max_x)$value %>%
+    as.numeric() %>%
+    return()
+
 }
 
 # getBindex <- function(sample, pop.PS) {

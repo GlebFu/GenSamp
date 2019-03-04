@@ -21,7 +21,7 @@ df.test <- filter(df.select, sch.RR == 50)
 #69590806 - SBS B-Index < .001
 #74069381 - SBS B-Index = .941
 # seed <- runif(1,0,1)*10^8
-seed <- 69590806
+seed <- 74069381
 set.seed(seed)
 
 results <- runSim(df.test,  pop.PS = df.Bindex, frm = frm, vars = vars)
@@ -107,7 +107,7 @@ test.df.glm <- glm(formula = frm, family = quasibinomial(), data = test.df)
 test.fitted <- fitted(test.df.glm) 
 hist(test.fitted) #distribution of propensity score for caluclating B-Index
 Bindex(test.fitted, test.df$Eij)
-
+Bindex2(test.fitted, test.df$Eij)
 
 
 #-----------------------
