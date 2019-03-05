@@ -16,8 +16,8 @@ rm(list = ls())
 file_date <- "2019-02-28"
 
 
-runtimeFile <- paste("Data/", file_date, "/runtime r100.rdata", sep = "")
-resultsFile <- paste("Data/", file_date, "/results r100.rdata", sep = "")
+runtimeFile <- paste("Data/", file_date, "/runtime r1000.rdata", sep = "")
+resultsFile <- paste("Data/", file_date, "/results r1000.rdata", sep = "")
 
 load(paste("data/", file_date, "/base data.rdata", sep = ""))
 
@@ -76,11 +76,11 @@ Distribution of propensity scores by response rates
 ```{r}
 
 df.sch %>% 
-  select(PS50:PS10) %>% 
+  select(PS90:PS10) %>% 
   gather(key = RR, value = PS) %>% 
   ggplot(aes(x = PS)) + 
   geom_histogram() + 
-  facet_wrap(~RR) +
+  facet_wrap(~RR, scales = "free") +
   theme_apa()
 
 
