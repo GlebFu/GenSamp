@@ -21,7 +21,8 @@ df %>%
 # Schools
 #-----------------------
 # Set School SMD Goals
-schGoal <- c(.374, .433, .007, -.403, .081, .538, .412, -.3, -.3)
+# schGoal <- c(.374, .433, .007, -.403, .081, .538, .412, -.3, -.3)
+schGoal <- c(.4, .4, 0, -.4, 0, .5, .4, -.3, -.3)
 schVars <- c("n", "Urban", "Suburban", "ToRu", "pED", "pMin", "pELL", "pELA", "pMath")
 names(schGoal) <- schVars
 
@@ -36,8 +37,8 @@ schEx <- NULL
 #-----------------------
 # Gen District Params
 # -----------------------
-sch.resps <- 9:1/10
-# sch.resps <- 10:2/20
+sch.resps <- 5:1/10
+# sch.resps <- 8:2/20
 # sch.resps <- c(.1, .2, .3)
 
 sch.respNames <- paste("PS", sch.resps*100, sep = "")
@@ -102,7 +103,7 @@ schVals %>%
   geom_hline(yintercept = 0, linetype = "dotted")
 
 
-schPS$PS90
+# schPS$PS90
 
 # df %>%
 #   select(Urban) %>%
