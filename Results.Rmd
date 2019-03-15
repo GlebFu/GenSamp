@@ -1,6 +1,45 @@
 ---
-title: "Summary"
-output: html_document
+title             : "GenSamp: RESULTS"
+shorttitle        : "RESULTS"
+
+author:
+  - name          : "Gleb Furman"
+    affiliation   : "1"
+    # corresponding : yes    # Define only one corresponding author
+    # address       : "Postal address"
+    # email         : "Gleb.Furman@gmail.com"
+  - name          : "James E. Pustejovsky"
+    affiliation   : "1"
+
+affiliation:
+  - id            : "1"
+    institution   : "University of Texas at Austin"
+#   - id            : "2"
+#     institution   : "Konstanz Business School"
+
+# author_note: |
+#   Add complete departmental affiliations for each author here. Each new line herein must be indented, like this line.
+
+#   Enter author note here.
+
+abstract: |
+    <!-- In order for educational research to be informative to policy makers, studies must be designed to make robust estimates of causal effects at the population level. Large scale multi-site randomized trials (MRT) often rely on vague convenience sampling methodology when recruiting districts and schools, resulting in relatively homogeneous samples that may differ greatly from the intended population of interest. Retrospective methods that quantify and statistically adjust for those differences are promising but have limited effect when the sample differs greatly from the population. Designing sampling methods that focus on generalizability may be a more effective but costly solution, but limited methodological research has been performed to examine their effectiveness in the educational context. This paper examines one promising method, stratified balanced sampling (SBS), in the context of recruiting a representative sample of schools for a large scale MRT. Using simulations based on real data, we compare SBS to stratified and unstratified versions of convenience sampling and probability sampling. Several models for generating school participation and emulating convenience sampling are proposed. Results indicate that SBS and stratified random sampling (SRS) result in highly generalizable samples. These methods are extremely costly to implement, however, especially when the population average willingness to participate is low. Stratified convenience sampling (SCS) is a potential compromise. -->
+
+# keywords          : "keywords"
+# wordcount         : "X"
+
+bibliography      : ["references.bib"]
+
+figsintext        : yes
+figurelist        : no
+tablelist         : no
+footnotelist      : no
+lineno            : no
+mask              : no
+
+documentclass     : "apa6"
+classoption       : "man"
+output            : papaja::apa6_pdf
 ---
 
 ```{r setup, include=FALSE}
@@ -68,11 +107,11 @@ boxErrors <- function(x) {
 
 ## Participation Generating Model
 
-Distribution of propensity scores by response rates
-```{r}
+```{r, fig.cap = "Distributions of Participation Propensity Scores"}
+
 
 df.sch %>% 
-  select(PS40:PS10) %>% 
+  select(contains("PS")) %>% 
   gather(key = RR, value = PS) %>% 
   ggplot(aes(x = PS)) + 
   geom_histogram() + 
@@ -82,54 +121,68 @@ df.sch %>%
 
 ```
 
-## Sampling Method
-Recruitment is performed by rearanging the full list of schools and sampling from the list in order until 60 schools agree to participate. This enables the calculation of the total number of schools contacted for recruitment. Schools are arranged in order of Sampling, which is regenerated in each iteration. Sampling generation depends on the sampling method being simulated. In SRS school Samplings are randomly assigned. In CS, schools are sampled without replacement one at a time and assigned consecutive Samplings. Sampling is weighed by the propensity to participate so that schools that are more likely to participate are also more likely to be sampled earlier. Stratified versions of these methods first group schools into clusters, then generate Samplings within each cluster independantly. Schools are sampled until proportional sampling allocation is satisfied. Finally, in SBS schools are grouped into clusters and then Samplinged in order using a distance metric. These Samplings do not vary across iterations in the same conditions. 
 
-### Simple Random Sampling
-1. Schools are randomly Samplinged. 
-2. Schools are approached in order of Sampling until 60 schools agree to participate.
+```{r, fig.cap = "Difference between expected SMDs and goal SMDs"}
+schVals_lab <- schVals %>%
+  filter(RR == max(RR)) %>%
+  mutate(RR = paste(RR*100, "%", sep = "")) %>%
+  select(Var, dif, RR, pars)
 
-### Convenience Sampling
-1. Schools are Samplinged by sampling without replacement one school at a time. 
-2. Schools with higher propensity to participate are more likely to be Samplinged higher. 
-3. Schools are approached in order of Sampling until 60 schools agree to participate.
-
-### Stratified Balanced Sampling
-1. Schools are grouped by cluster. 
-2. Within each cluster, schools are Samplinged using distance metric. 
-3. Schools are approached in order of Sampling until number of schools as defined by proportional sampling allocation agree to participate.
-
-### Stratified Simple Random Sampling
-1. Schools are grouped by cluster. 
-2. Within each cluster, schools are randomly Samplinged. 
-3. Schools are approached in order of Sampling until number of schools as defined by proportional sampling allocation agree to participate.
-
-### Stratified Balanced Sampling
-1. Schools are grouped by cluster. 
-2. Schools are Samplinged by sampling without replacement one school at a time. 
-3. Schools with higher propensity to participate are more likely to be Samplinged higher. 
-4. Schools are approached in order of Sampling until number of schools as defined by proportional sampling allocation agree to participate.
-
-
-## Parameters
-```{r}
 
 schVals %>%
-  ggplot(aes(x = RR, y = pars, group = Var, color = Var, linetype = Var)) +
+  filter(Var != "Intercept") %>%
+  select(Var, dif, RR) %>%
+  mutate(RR = ordered(paste(RR*100, "%", sep = ""),
+                      levels  = paste(sort(unique(RR))*100, "%", sep = ""))) %>%
+  na.omit() %>%
+  ggplot(aes(x = RR, y = dif, group = Var, linetype = Var, color = Var)) +
+  geom_point() +
   geom_line() +
-  geom_hline(yintercept = 0)
+  theme_apa() +
+  labs(x = "Population Response Rates",
+       y = expression(Delta*"SMD")) +
+  ggrepel::geom_text_repel(data = schVals_lab, 
+                           aes(x  = RR, y = dif, label = Var),
+                           direction = "y",
+                           nudge_x = 1,
+                           xlim = c(NA, 10.4),
+                           segment.size = .1,
+                           vjust = 1) +
+  theme(legend.position="none",
+       plot.margin=unit(c(0,2,0,0),"cm")) +
+  coord_cartesian(clip = 'off')
+```
+
+
+```{r, results = "asis", fig.cap="Odds ratio coeficients for Response Generating Model"}
+
 
 schVals %>%
-  ggplot(aes(x = RR, y = pars, group = Var, color = Var)) +
+  # filter(Var != "Intercept") %>%
+  select(Var, pars, RR) %>%
+  mutate(RR = ordered(paste(RR*100, "%", sep = ""),
+                      levels  = paste(sort(unique(RR))*100, "%", sep = ""))) %>%
+  ggplot(aes(x = RR, y = pars, group = Var, linetype = Var, color = Var)) +
+  geom_point() +
   geom_line() +
-  facet_wrap(~Var) +
-  geom_hline(yintercept = 0)
-
+  theme_apa() +
+  labs(x = "Population Response Rates",
+       y = expression(beta[h])) +
+  ggrepel::geom_text_repel(data = schVals_lab, 
+                           aes(x  = RR, y = pars, label = Var),
+                           direction = "y",
+                           nudge_x = 1,
+                           xlim = c(NA, 10.4),
+                           segment.size = .1,
+                           vjust = 1) +
+  theme(legend.position="none",
+       plot.margin=unit(c(0,2,0,0),"cm")) +
+  coord_cartesian(clip = 'off')
 ```
 
 ## B Index
 
-```{r}
+```{r, fig.cap = "Averge B-Index"}
 
 avg_Bindex <- df_Bindex %>%
   group_by(sample, sch.RR, Clustering, Sampling) %>%
@@ -156,7 +209,7 @@ if(savePlot) ggsave(paste("Figs/", file_date, "/Paper B-Index.jpg", sep = ""), d
 
 ## Standardized mean differences
 
-```{r}
+```{r, fig.cap = "Average SMDs"}
 sSMDplot <- df_sch_smd %>%
   group_by(sample, sch.RR, Variable, Group, variable, Sampling, Clustering) %>%
   summarise(value = mean(abs(value), na.rm = F)) %>% 
@@ -194,7 +247,7 @@ samplot <- df_responses %>%
 ```
 
 
-```{r}
+```{r, fig.cap = "Recruitment Counts"}
 samplot %>%
   gather(key = measure, value = value, -sample, -sch.RR, -Sampling, -Clustering) %>%
   mutate(level = str_split(measure, "_", simplify = T)[,1],
@@ -213,7 +266,7 @@ samplot %>%
 
 
 
-```{r}
+```{r, fig.cap = "Schools Contacted"}
 samplot2 <- samplot %>%
   gather(key = measure, value = value, -sample, -sch.RR, -Sampling, -Clustering) %>%
   mutate(level = str_split(measure, "_", simplify = T)[,1],
@@ -242,7 +295,7 @@ if(savePlot)  ggsave(paste("Figs/", file_date, "/Units Contacted.jpg", sep = "")
 
 ```
 
-```{r}
+```{r, fig.cap = "Sampling response rates"}
 df.rr <- df_responses %>%
   filter(str_detect(variable, "sch_RR"), is.na(cluster)) %>%
   group_by(sample, sch.RR, Sampling, Clustering) %>%
