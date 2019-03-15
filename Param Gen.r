@@ -21,7 +21,8 @@ df %>%
 # Schools
 #-----------------------
 # Set School SMD Goals
-schGoal <- c(.374, .433, .007, -.403, .081, .538, .412, -.25, -.25)
+# schGoal <- c(.374, .433, .007, -.403, .081, .538, .412, -.3, -.3)
+schGoal <- c(.4, .4, 0, -.4, 0, .5, .4, -.3, -.3)
 schVars <- c("n", "Urban", "Suburban", "ToRu", "pED", "pMin", "pELL", "pELA", "pMath")
 names(schGoal) <- schVars
 
@@ -35,9 +36,10 @@ schEx <- NULL
 
 #-----------------------
 # Gen District Params
-#-----------------------
-sch.resps <- 9:1/10
-# sch.resps <- c(.25, .5, .75)
+# -----------------------
+sch.resps <- 5:1/10
+# sch.resps <- 8:2/20
+# sch.resps <- c(.1, .2, .3)
 
 sch.respNames <- paste("PS", sch.resps*100, sep = "")
 
@@ -93,6 +95,32 @@ schPS %>%
   geom_histogram() +
   facet_wrap(~RR)
 
+schVals %>%
+  ggplot(aes(x = RR, y = pars, group = Var)) +
+  geom_point() +
+  geom_line() +
+  facet_wrap(~Var) +
+  geom_hline(yintercept = 0, linetype = "dotted")
+
+
+# schPS$PS90
+
+# df %>%
+#   select(Urban) %>%
+#   mutate(ps = schPS$PS10) %>%
+#   summarise(m1 = weighted.mean(Urban, ps),
+#          m2 = weighted.mean(Urban, 1/ps),
+#          m3 = sum((1/ps) * Urban)/sum(1/ps),
+#          m4 = sum((ps) * Urban)/sum(ps),
+#          m = mean(Urban))
+
+df %>%
+  select(Urban) %>%
+  mutate(E = rbinom(n = length(schPS$PS90), size = 1, prob = schPS$PS10)) %>%
+  filter(E == 1) %>%
+  summarise(m = mean(Urban))
+
+>>>>>>> d15c48cf5c41a067dd21a049d8e89b74f5c190ef
 save(schPars, schVals, df.sch, sch.respNames, sch.resps, schGoal, file = paste("Params/", file_date, "/schPars.rdata", sep = ""))
 
 load(paste("Params/", file_date, "/schPars.rdata", sep = ""))

@@ -62,10 +62,6 @@ boxErrors <- function(x) {
 
 ```
 
-# Introduction
-The main purpose of this study is to set a groundwork for exploring effectiveness and feasibility of sampling methods in the educational field. Using real population data we compare simple random sampling (SRS), convenience sampling (CS), stratified balanced sampling (SBS), stratified simple random sampling (SSRS), and stratified convenience sampling (SCS). Our findings suggest that SBS and SSRS are extremely difficult to implement at low response rates, but result in highly generalizable samples. SRS and SCS are similar in both feasibility and effectiveness, however, stratification offers other advantages beyond generalizability (transparency). 
-
-We found several limitations in that we lack empricical precident for modeling both researcher behavior in recruiting sites, and site behavior in deciding to participate. This work underlines the importance of further research into answering (1) How do we model convenience smapling? and (2) How do schools and districts devide to participate in studies? We argue that reserachers should allocate more funding towards recruitment given the clear increaes in abilty to generalize a sample. 
 
 
 # Methods Summary
@@ -76,7 +72,7 @@ Distribution of propensity scores by response rates
 ```{r}
 
 df.sch %>% 
-  select(PS30:PS10) %>% 
+  select(PS40:PS10) %>% 
   gather(key = RR, value = PS) %>% 
   ggplot(aes(x = PS)) + 
   geom_histogram() + 
@@ -115,90 +111,35 @@ Recruitment is performed by rearanging the full list of schools and sampling fro
 4. Schools are approached in order of Sampling until number of schools as defined by proportional sampling allocation agree to participate.
 
 
+## Parameters
+```{r}
+
+schVals %>%
+  ggplot(aes(x = RR, y = pars, group = Var, color = Var, linetype = Var)) +
+  geom_line() +
+  geom_hline(yintercept = 0)
+
+schVals %>%
+  ggplot(aes(x = RR, y = pars, group = Var, color = Var)) +
+  geom_line() +
+  facet_wrap(~Var) +
+  geom_hline(yintercept = 0)
+
+```
 
 ## B Index
 
-Conditions where B Index is below .2
-
 ```{r}
 
-
-df_Bindex$sch.RR.f <- ordered(df_Bindex$sch.RR)
-
-
-# levels(df_Bindex$sch.RR.f) <- paste(c("\n", "School Rate\n", "\n"), levels(df_Bindex$sch.RR.f))
-
-df_Bindex %>% 
-  select(sample:Bs) %>% 
-  filter(Bs < .2) %>%
-  as.tibble() %>%
-  group_by(sample, sch.RR) %>%
-  summarise(n = n()) %>%
-  spread(key = sch.RR, value = n)
-```
-
-```{r}
-df_Bindex %>%
-  filter(Bs > .25) %>%
-  ggplot(aes(x = sample, y = Bs, color = Sampling, linetype = Clustering)) +
-  # stat_summary(fun.data = boxErrors, geom = "boxplot", position = position_dodge(width=1)) +
-  geom_boxplot() +
-  facet_wrap(~ sch.RR) +
-  theme_apa(box = T) +
-  # scale_fill_brewer(type = "seq", palette = 4, guide=FALSE) +
-  # scale_color_brewer(type = "qual", palette = 2)  +
-  theme(legend.position = "none",
-        panel.spacing = unit(2, "lines"),
-        # text = element_text(size=20),
-        # legend.title = element_text(size=15),
-        axis.text.x = element_text(angle = 45, hjust = 1)) +
-  labs(x = "Sampling Method", y = "B-Index")
-  
-
-```
-
-```{r}
-
-df_Bindex %>%
-  group_by(sample, sch.RR, Clustering, Sampling) %>%
-  summarise(All = mean(Bs),
-            Partial = mean(Bs[Bs > .2]),
-            All_sd = sd(Bs),
-            Partial_sd = sd(Bs[Bs > .2])) %>%
-  gather(key = Type, value = Bs, All, Partial, All_sd, Partial_sd) %>%
-  mutate(Var = ifelse(str_detect(Type, "sd"), "SD", "M"),
-         Type = ifelse(str_detect(Type, "All"), "All", "Partial")) %>%
-  spread(key = Var, value = Bs) %>%
-  group_by(sample, sch.RR, Type, Clustering, Sampling) %>%
-  summarise(M = mean(M),
-            SD = mean(SD)) %>%
-  mutate(LL = M - SD,
-         UL = M + SD) %>%
-  ggplot(aes(x = sch.RR, y = M, color = Sampling, linetype = Clustering)) +
-  # stat_summary(fun.data = boxErrors, geom = "boxplot", position = position_dodge(width=1)) +
-  geom_line() +
-  # geom_errorbar(aes(ymin=LL, ymax=UL), colour="black", width=.1) +
-  facet_wrap(~ Type)
-
-if(savePlot) ggsave(file = paste("Figs/", file_date, "/B-Index.jpg", sep = ""), dpi = 1000, width = 11, height = 8.5)
-```
-```{r}
 avg_Bindex <- df_Bindex %>%
   group_by(sample, sch.RR, Clustering, Sampling) %>%
-  summarise(All = mean(Bs),
-            Partial = mean(Bs[Bs > .2]),
-            All_sd = sd(Bs),
-            Partial_sd = sd(Bs[Bs > .2])) %>%
-  gather(key = Type, value = Bs, All, Partial, All_sd, Partial_sd) %>%
-  mutate(Var = ifelse(str_detect(Type, "sd"), "SD", "M"),
-         Type = ifelse(str_detect(Type, "All"), "All", "Partial")) %>%
-  spread(key = Var, value = Bs) %>%
-  group_by(sample, sch.RR, Type, Clustering, Sampling) %>%
+  summarise(M = mean(Bs),
+            SD = sd(Bs)) %>%
+  group_by(sample, sch.RR, Clustering, Sampling) %>%
   summarise(M = mean(M),
             SD = mean(SD)) %>%
   mutate(LL = M - SD,
-         UL = M + SD) %>%
-  filter(Type == "Partial")
+         UL = M + SD)
 
 avg_Bindex %>%
   ggplot(aes(x = sch.RR, y = M, color = Sampling, linetype = Clustering)) +
@@ -206,9 +147,11 @@ avg_Bindex %>%
   labs(y = "Mean B-index",
        x = "Population Participation Rate") +
   theme_apa()
+  
 
 if(savePlot) ggsave(paste("Figs/", file_date, "/Paper B-Index.jpg", sep = ""), dpi = 1000, width = 7, height = 4)
 ```
+
 
 
 ## Standardized mean differences
@@ -239,27 +182,6 @@ if(savePlot)  ggsave(paste("Figs/", file_date, "/All SMDs.jpg", sep = ""), dpi =
 ```
 
 
-```{r}
-sSMDplot %>%
-  filter(Group == "sampled") %>%
-  ggplot(aes(x = sample, y = sim_SMD, group = sample, fill = Sampling, linetype = Clustering)) +
-  geom_boxplot() +
-  geom_line() +
-  geom_hline(yintercept = 0) +
-  geom_hline(yintercept = .25, linetype = "dashed") +
-  # facet_grid(dist.RR ~ sch.RR, scales = "free_y") +
-  theme_apa(box = T) +
-  # scale_fill_brewer(type = "seq", palette = 4, guide=FALSE) +
-  # scale_color_brewer(type = "qual", palette = 5)  +
-  theme(legend.position = "none",
-        panel.spacing = unit(2, "lines"),
-        text = element_text(size=20),
-        legend.title = element_text(size=15)) +
-  labs(x = "Sampling Method", y = "Absolute SMD")
-
-# if(savePlot)  ggsave("Figs/Sch SMDs.jpg", dpi = 1000, width = 11, height = 8.5)
-if(savePlot)  ggsave(paste("Figs/", file_date, "/SCH SMDs.jpg", sep = ""), dpi = 1000, width = 10, height = 4)
-```
 
 ## Sampling Difficulty
 
@@ -288,23 +210,7 @@ samplot %>%
 ```
 
 
-```{r}
-df_responses %>%
-  filter(is.na(cluster), str_detect(variable, "sch_contacted")) %>%
-  ggplot(aes(x = sample, y = value, color = Sampling, linetype = Clustering)) +
-  stat_summary(fun.data = boxErrors, geom = "boxplot", position = position_dodge(width=1)) +
-  facet_wrap( ~ sch.RR, scales = "free_y") +
-  theme_apa(box = T) +
-  # scale_fill_brewer(type = "seq", palette = 4, guide=FALSE) +
-  # scale_color_brewer(type = "qual", palette = 5)  +
-  theme(legend.position = "none",
-        panel.spacing = unit(2, "lines"),
-        # text = element_text(size=20),
-        # legend.title = element_text(size=15),
-        axis.text.x = element_text(angle = 45, hjust = 1)) +
-  labs(x = "Sampling Method", y = "Schools Contacted")
 
-```
 
 
 ```{r}
