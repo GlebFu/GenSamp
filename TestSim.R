@@ -15,7 +15,7 @@ df.Bindex <- df %>% ungroup() %>% select(DSID, vars)
 #----------------------
 # Run Single Iteration
 #----------------------
-df.test <- filter(df.select, sch.RR == 50)
+df.test <- filter(df.select, sch.RR == 40)
 
 
 #69590806 - SBS B-Index < .001

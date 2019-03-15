@@ -2,20 +2,13 @@ rm(list = ls())
 
 source("ParGenSource.r")
 
+library(Pusto)
+library(snow)
+
+
 file_date <- "2019-02-28"
 
 load(paste("data/", file_date, "/base data.rdata", sep = ""))
-
-
-
-#-----------------------
-# DESCRIPTIVES
-#-----------------------
-
-df %>%
-  group_by(LSTATE) %>%
-  summarise(nDists = length(unique(DID)), nSch = length(DSID), Students = sum(n, na.rm = T)) %>%
-  xtable(summary = F)
 
 #-----------------------
 # Schools
@@ -26,6 +19,8 @@ schGoal <- c(.4, .4, 0, -.4, 0, .5, .4, -.3, -.3)
 schVars <- c("n", "Urban", "Suburban", "ToRu", "pED", "pMin", "pELL", "pELA", "pMath")
 names(schGoal) <- schVars
 
+schGoal
+
 # Initial School Betas
 schBs <- c(0, 0, 0, 0, 0, 0, 0, 0, 0)
 
@@ -35,59 +30,55 @@ schEx <- NULL
 
 
 #-----------------------
-# Gen District Params
+# Generate Parameters
 # -----------------------
-sch.resps <- 5:1/10
-# sch.resps <- 8:2/20
+generate_parameters <- function(RR, data, Bs, vars, exclude = NULL, goal) {
+  source("ParGenSource.r")
+  
+  pars <- optim(par = Bs, fn = testGoal,
+              MRR = RR, vars = vars,
+              data = data, exclude = exclude, goal = goal) %>%
+          c(resp = RR)
+  
+  getVals(bs = pars, vars = vars, data = data, exclude = exclude, goal = goal)
+}
+
+
+sch.resps <- 8:1/20
+# sch.resps <- 9:1/10
 # sch.resps <- c(.1, .2, .3)
+sch.respNames <- paste("PS", formatC(sch.resps*100, width = 2, format = "d", flag = "0"), sep = "")
 
-sch.respNames <- paste("PS", sch.resps*100, sep = "")
-
-calcschParams <- function(resp, data) {
-  optim(par = schBs, fn = testGoal,
-        MRR = resp, vars = schVars,
-        data = data, exclude = schEx, goal = schGoal) %>%
-    c(resp = resp)
-}
-
-calcPS_RRs <- function(pars, data) {
-  calcPS(Bs = pars$par, MRR = pars$resp, vars = schVars, data = data, exclude = schEx)
-}
-
+# Standardize X matrix
 df.sch.sd <- df.sch[,schVars] %>% mutate_all(STAND)
 
-# schPars <- calcschParams(sch.resps[[2]], data = df.sch.sd)
-#
-# schPars <- lapply(sch.resps, function(x) {
-#   schPars$resp <- x
-#   return(schPars)
-#   })
+no_cores <- min(length(sch.resps), 7)
+cl <- start_parallel(no_cores, packages = c("tidyverse"))
 
-schPars <- lapply(sch.resps, calcschParams, data = df.sch.sd)
+seed <- runif(1,0,1)*10^8
+set.seed(seed)
 
-# undebug(calcPS)
+runtime <- system.time(schPars <- parSapply(cl, 
+                                            sch.resps, 
+                                            generate_parameters, 
+                                            data = df.sch.sd, 
+                                            Bs = schBs,
+                                            vars = schVars,
+                                            goal = schGoal))
 
-schVals <- lapply(schPars, getVals, vars = schVars, data = df.sch.sd, exclude = schEx, goal = schGoal) %>%
-  Reduce(function(dtf1,dtf2) rbind(dtf1,dtf2), .) %>%
+stop_parallel(cl)
+
+
+schPars <- apply(schPars, 2, bind_rows)
+
+schPS <- lapply(schPars, calcPS_RRs, x.data = df.sch.sd) %>% 
   data.frame
-schPS <- sapply(schPars, calcPS_RRs, data = df.sch.sd) %>% data.frame
 
-schPS %>%
-  ggplot(aes(x = X1, y = X2, color = abs(X1-X2))) +
-  geom_point()
+schVals <- bind_rows(schPars)
 
-schPS %>%
-  ggplot(aes(x = X2, y = X3, color = abs(X2-X3))) +
-  geom_point()
-
-schPS %>%
-  ggplot(aes(x = X1, y = X3, color = abs(X1-X3))) +
-  geom_point()
 
 names(schPS) <- sch.respNames
 df.sch <- cbind(df.sch, schPS)
-
-apply(schPS, 2, mean)
 
 schPS %>%
   gather(key = RR, value = PS) %>%
@@ -102,40 +93,11 @@ schVals %>%
   facet_wrap(~Var) +
   geom_hline(yintercept = 0, linetype = "dotted")
 
-
-# schPS$PS90
-
-# df %>%
-#   select(Urban) %>%
-#   mutate(ps = schPS$PS10) %>%
-#   summarise(m1 = weighted.mean(Urban, ps),
-#          m2 = weighted.mean(Urban, 1/ps),
-#          m3 = sum((1/ps) * Urban)/sum(1/ps),
-#          m4 = sum((ps) * Urban)/sum(ps),
-#          m = mean(Urban))
-
-df %>%
-  select(Urban) %>%
-  mutate(E = rbinom(n = length(schPS$PS90), size = 1, prob = schPS$PS10)) %>%
-  filter(E == 1) %>%
-  summarise(m = mean(Urban))
-
->>>>>>> d15c48cf5c41a067dd21a049d8e89b74f5c190ef
-save(schPars, schVals, df.sch, sch.respNames, sch.resps, schGoal, file = paste("Params/", file_date, "/schPars.rdata", sep = ""))
-
-load(paste("Params/", file_date, "/schPars.rdata", sep = ""))
-
 schVals %>%
-  select(Var, RR, smdS1:goal) %>%
-  gather(key = SMD, value = value, smdS1:goal) %>%
-  ggplot(aes(x = RR, y = value, color = SMD)) +
+  ggplot(aes(x = RR, y = pars, group = Var, color = Var)) +
   geom_point() +
-  facet_wrap(~Var)
-
-schVals %>%
-  filter(Var %in% c("ToRu", "Suburban")) %>%
-  ggplot(aes(x = RR, y = pars, color = Var)) +
-  geom_point()
+  geom_line() +
+  geom_hline(yintercept = 0, linetype = "dotted")
 
 schVals %>%
   ggplot(aes(x = RR, y = dif, color = Var)) +
@@ -143,6 +105,10 @@ schVals %>%
   geom_line() +
   geom_hline(yintercept = 0) +
   geom_hline(yintercept = c(-1, 1) * .25, linetype = "dashed")
+
+save(schVals, df.sch, sch.respNames, sch.resps, schGoal, file = paste("Params/", file_date, "/schPars.rdata", sep = ""))
+
+load(paste("Params/", file_date, "/schPars.rdata", sep = ""))
 
 
 #-----------------------
@@ -205,29 +171,6 @@ df %>%
   facet_grid(urbanicity~cluster_full) +
   geom_point()
 
-df %>%
-  mutate(urbanicity = ifelse(urbanicity == "Rural" | urbanicity == "Town", "ToRu", as.character(urbanicity))) %>%
-  ggplot(aes(x = pMin, y = pELL, color = pED, alpha = (1 - rankp_ov)/100)) +
-  facet_grid(urbanicity~cluster_full) +
-  geom_point()
-
-# df %>%
-#   select(cluster_full, cluster_ov) %>%
-#   table
-
-df %>%
-  filter(rankp_ov < 50) %>%
-  mutate(urbanicity = ifelse(urbanicity == "Rural" | urbanicity == "Town", "ToRu", as.character(urbanicity))) %>%
-  ggplot(aes(x = pED, y = pMin, color = cluster_ov)) +
-  facet_wrap(~urbanicity) +
-  geom_point()
-
-df %>%
-  filter(rankp_ov < 50) %>%
-  mutate(urbanicity = ifelse(urbanicity == "Rural" | urbanicity == "Town", "ToRu", as.character(urbanicity))) %>%
-  ggplot(aes(x = pMin, y = pELL, color = pED)) +
-  facet_grid(urbanicity~cluster_ov) +
-  geom_point()
 
 #-----------------------
 # Export Data
@@ -252,7 +195,7 @@ df.PS <- sch.PS
 df.select <- select(df, DSID, DID, SID, cluster_full, rank_full)
 
 df.select <- left_join(df.select, df.PS) %>%
-  gather(key = sch.RR, value = sch.PS, PS10:PS90) %>%
+  gather(key = sch.RR, value = sch.PS, sch.respNames) %>%
   mutate(sch.RR = as.numeric(str_sub(sch.RR, start = 3)))
 
 # # District statistics

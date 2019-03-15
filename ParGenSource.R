@@ -1,7 +1,4 @@
 library(tidyverse)
-library(stargazer)
-library(htmlTable)
-library(xtable)
 library(Hmisc)
 
 rm(list = ls())
@@ -21,9 +18,19 @@ expit <- function(x) exp(x) / (1 + exp(x))
 # Samples from binomial distribution
 genE <- function(ps) rbinom(length(ps), 1, prob = ps)
 
+
+
 ###################
 # SIM FUNCTIONS
 ###################
+calcPS_RRs <- function(value_data, x.data, exclude = NULL) {
+  calcPS(Bs = value_data$pars[-1], 
+         MRR = unique(value_data$RR), 
+         vars = value_data$Var[-1], 
+         data = x.data, 
+         exclude = exclude,
+         int = value_data$pars[1])
+}
 
 calcPS <- function(Bs, MRR, vars, data, exclude, getint = F, int = NULL) {
   vars <- vars[!(vars %in% exclude)]
