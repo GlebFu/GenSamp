@@ -32,14 +32,14 @@ runSim <- function(reps) {
 
 # runSim(1)
 
-runtimeFile <- paste("Data/", file_date, "/runtime r100.rdata", sep = "")
-resultsFile <- paste("Data/", file_date, "/results r100.rdata", sep = "")
+runtimeFile <- paste("Data/", file_date, "/runtime r1000.rdata", sep = "")
+resultsFile <- paste("Data/", file_date, "/results r1000.rdata", sep = "")
 
 library(parallel)
 
 no_cores <- detectCores() - 1
 
-minreps <- 100
+minreps <- 1000
 reps <- rep((minreps + (no_cores - minreps %% no_cores)) / no_cores, each = no_cores)
 
 # Initiate cluster

@@ -55,8 +55,8 @@ rm(list = ls())
 file_date <- "2019-02-28"
 
 
-runtimeFile <- paste("Data/", file_date, "/runtime r100.rdata", sep = "")
-resultsFile <- paste("Data/", file_date, "/results r100.rdata", sep = "")
+runtimeFile <- paste("Data/", file_date, "/runtime r1000.rdata", sep = "")
+resultsFile <- paste("Data/", file_date, "/results r1000.rdata", sep = "")
 
 load(paste("data/", file_date, "/base data.rdata", sep = ""))
 
