@@ -410,12 +410,13 @@ cls_f %>%
   group_by(k, subs) %>%
   mutate(sample = (n / sum(n)) * 60) %>%
   ggplot(aes(x = k, y = sample)) +
-  geom_point(shape = "-", size = 7) +
+  geom_point(shape = "-", size = 15, alpha = .5) +
   theme_apa() +
   labs(y = "Allocated Sample Size",
        x = "Number of Strata (k)") +
   scale_x_discrete(limits = c(2:20)) +
-  scale_y_continuous(breaks = seq(0, 30, 5)) +
+  scale_y_continuous(breaks = seq(0, 30, 5),
+                     sec.axis = sec_axis(~./60*9882, name = "Strata Size")) +
   stat_function(fun = function(x) 60/x, geom = "line", linetype = "dashed", size = .5) +
   # facet_grid(subs ~ .) +
   # theme(text = element_text(size=20)) +
@@ -517,25 +518,25 @@ levels(sSMDplot$Variable) <- c("School Size", "Free/Reduced Lunch", "English Pro
 #          Variable == "School Size") %>%
 #   ggplot(aes(x = sch.RR, y = sim_SMD, color = Sampling, linetype = Clustering, group = sample)) +
 #   # geom_point() +
-#   geom_line(size = 1) +
+#   geom_line(size = 2) +
 #   geom_hline(yintercept = 0) +
 #   geom_hline(yintercept = .25, linetype = "dashed") +
 #   theme_apa(box = F) +
 #   labs(y = "Mean SMD",
 #        x = "Population Participation Rate") +
 #   theme(legend.position = "bottom") +
-#   scale_x_continuous(breaks = seq(10, 50, 10)) +
-#   # theme(text = element_text(size=20)) + 
+#   scale_x_continuous(breaks = seq(10, 90, 10)) +
+#   theme(text = element_text(size=20)) +
 #   scale_color_OkabeIto()
 # 
 # if(saveFigs) save.figures("Results - SMD - School Size")
-
+# 
 scale_y_f <- function(x, y = 3) {
   top <- max(.3, ceiling(round(max(x)*10,1))/10)
   b <- ceiling(round((top/y)*10,1))/10
   # print(paste(paste(round(x,2), collapse = " - "), paste(seq(0,b*y,b), collapse = "|"), sep = " : |"))
   seq(0,b*y,b)
-  
+
 }
 
 # scale_y_f(c(0, .5))
@@ -557,8 +558,8 @@ sSMDplot %>%
   theme(legend.position = "bottom") +
   scale_y_continuous(breaks = scale_y_f,
                      expand = expand_scale(mult = c(0, .6))) +
-  scale_x_continuous(breaks = seq(10, 50, 10))
-  # theme(text = element_text(size=18)) + 
+  scale_x_continuous(breaks = seq(10, 90, 10)) 
+  # theme(text = element_text(size=15)) +
   # scale_color_OkabeIto()
 
 
@@ -571,12 +572,13 @@ if(saveFigs) save.figures("Results - SMD")
 avg_Bindex %>%
   ggplot(aes(x = sch.RR, y = M, color = Sampling, linetype = Clustering)) +
   geom_line(size = 1) +
-  scale_x_continuous(breaks = seq(10, 50, 10)) +
+  scale_x_continuous(breaks = seq(10, 90, 10)) +
   scale_y_continuous(limits = c(.5, 1)) +
   labs(y = "Mean B-index",
        x = "Population Participation Rate") +
-  theme_apa()  
-  # theme(text = element_text(size=20)) + 
+  theme_apa() +
+  theme(#text = element_text(size=20),
+        legend.position = "bottom") +
   # scale_color_OkabeIto()
 
 if(saveFigs) save.figures("Results - B Index")
@@ -642,16 +644,13 @@ contact_data %>%
   # theme_apa(box = T) +
   # scale_fill_brewer(type = "seq", palette = 4) +
   # scale_color_brewer(type = "qual", palette = 3)  +
-  theme(legend.position = "bottom",
-        panel.spacing = unit(2, "lines"),
-        # text = element_text(size=20),
-        # legend.title = element_text(size=15),
-        axis.text.x = element_text(angle = 45, hjust = 1)) +
   labs(x = "Population Participation Rate", y = "Units Contacted") +
   # scale_y_log10() +◙
   theme_apa() +
-  scale_x_continuous(breaks = seq(10, 50, 10)) 
-  # theme(text = element_text(size=20)) + 
+  theme(legend.position = "bottom",
+        # text = element_text(size=20),
+        panel.spacing = unit(2, "lines")) +
+  scale_x_continuous(breaks = seq(10, 90, 10))  
   # scale_color_OkabeIto()
 
 if(saveFigs) save.figures("Results - Response Counts")
@@ -672,16 +671,13 @@ response_rate_data %>%
   expand_limits(y=0) +
   # theme_apa(box = T) +
   # scale_fill_brewer(type = "seq", palette = 4) +
-  # scale_color_brewer(type = "qual", palette = 3)  +
-  theme(legend.position = "bottom",
-        panel.spacing = unit(2, "lines"),
-        # text = element_text(size=20),
-        # legend.title = element_text(size=15),
-        axis.text.x = element_text(angle = 45, hjust = 1)) +
+  # scale_color_brewer(type = "qual", palette = 3) 
   labs(x = "Population Participation Rate", y = "Recruitment Response Rate") +
   theme_apa() +
-  scale_x_continuous(breaks = seq(10, 50, 10))
-  # theme(text = element_text(size=20)) + 
+  scale_x_continuous(breaks = seq(10, 90, 10)) +
+  theme(legend.position = "bottom",
+        # text = element_text(size=20),
+        panel.spacing = unit(2, "lines")) 
   # scale_color_OkabeIto()
 
 if(saveFigs) save.figures("Results - Response Rates")

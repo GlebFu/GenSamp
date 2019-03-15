@@ -21,7 +21,7 @@ df %>%
 # Schools
 #-----------------------
 # Set School SMD Goals
-schGoal <- c(.374, .433, .007, -.403, .081, .538, .412, -.3, -.3)
+schGoal <- c(.374, .433, .007, -.403, .081, .538, .412, -.25, -.25)
 schVars <- c("n", "Urban", "Suburban", "ToRu", "pED", "pMin", "pELL", "pELA", "pMath")
 names(schGoal) <- schVars
 
@@ -35,10 +35,9 @@ schEx <- NULL
 
 #-----------------------
 # Gen District Params
-# -----------------------
+#-----------------------
 sch.resps <- 9:1/10
-# sch.resps <- 10:2/20
-# sch.resps <- c(.1, .2, .3)
+# sch.resps <- c(.25, .5, .75)
 
 sch.respNames <- paste("PS", sch.resps*100, sep = "")
 
@@ -71,17 +70,17 @@ schVals <- lapply(schPars, getVals, vars = schVars, data = df.sch.sd, exclude = 
   data.frame
 schPS <- sapply(schPars, calcPS_RRs, data = df.sch.sd) %>% data.frame
 
-# schPS %>%
-#   ggplot(aes(x = X1, y = X2, color = abs(X1-X2))) +
-#   geom_point()
-# 
-# schPS %>%
-#   ggplot(aes(x = X2, y = X3, color = abs(X2-X3))) +
-#   geom_point()
-# 
-# schPS %>%
-#   ggplot(aes(x = X1, y = X3, color = abs(X1-X3))) +
-#   geom_point()
+schPS %>%
+  ggplot(aes(x = X1, y = X2, color = abs(X1-X2))) +
+  geom_point()
+
+schPS %>%
+  ggplot(aes(x = X2, y = X3, color = abs(X2-X3))) +
+  geom_point()
+
+schPS %>%
+  ggplot(aes(x = X1, y = X3, color = abs(X1-X3))) +
+  geom_point()
 
 names(schPS) <- sch.respNames
 df.sch <- cbind(df.sch, schPS)
@@ -93,31 +92,6 @@ schPS %>%
   ggplot(aes(x = PS)) +
   geom_histogram() +
   facet_wrap(~RR)
-
-schVals %>%
-  ggplot(aes(x = RR, y = pars, group = Var)) +
-  geom_point() +
-  geom_line() +
-  facet_wrap(~Var) +
-  geom_hline(yintercept = 0, linetype = "dotted")
-
-
-schPS$PS90
-
-# df %>%
-#   select(Urban) %>%
-#   mutate(ps = schPS$PS10) %>%
-#   summarise(m1 = weighted.mean(Urban, ps),
-#          m2 = weighted.mean(Urban, 1/ps),
-#          m3 = sum((1/ps) * Urban)/sum(1/ps),
-#          m4 = sum((ps) * Urban)/sum(ps),
-#          m = mean(Urban))
-
-df %>%
-  select(Urban) %>%
-  mutate(E = rbinom(n = length(schPS$PS90), size = 1, prob = schPS$PS10)) %>%
-  filter(E == 1) %>%
-  summarise(m = mean(Urban))
 
 save(schPars, schVals, df.sch, sch.respNames, sch.resps, schGoal, file = paste("Params/", file_date, "/schPars.rdata", sep = ""))
 
@@ -189,21 +163,6 @@ df <- to_matrix(data = df, vars = subs_f_vars, add.vars = c("DSID", "cluster_ful
 
 
 df$cluster_full <- as.factor(df$cluster_full)
-
-select(df, DSID, cluster_full) %>%
-  full_join(select(df.sch, DSID, PS90:PS10)) %>%
-  gather(key = rr, value = ps, -DSID, -cluster_full) %>%
-  group_by(cluster_full, rr) %>%
-  summarise(m = mean(ps)) %>%
-  spread(key = rr, value = m)
-
-select(df, DSID, cluster_full) %>%
-  full_join(select(df.sch, DSID, PS90:PS10)) %>%
-  gather(key = rr, value = ps, -DSID, -cluster_full) %>%
-  group_by(cluster_full, rr) %>%
-  summarise(m = mean(ps)) %>%
-  ggplot(aes(x = rr, y = m, color = cluster_full, group = cluster_full)) +
-  geom_line()
 
 
 df %>%
