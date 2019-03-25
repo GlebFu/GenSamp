@@ -1,9 +1,11 @@
 rm(list = ls())
 
-source("ParGenSource.r")
-
+library(tidyverse)
+library(Hmisc)
 library(Pusto)
 library(snow)
+
+source("ParGenSource.r")
 
 
 file_date <- "2019-02-28"
@@ -13,9 +15,10 @@ load(paste("data/", file_date, "/base data.rdata", sep = ""))
 #-----------------------
 # Schools
 #-----------------------
+
 # Set School SMD Goals
 # schGoal <- c(.374, .433, .007, -.403, .081, .538, .412, -.3, -.3)
-schGoal <- c(.4, .4, 0, -.4, 0, .5, .4, -.3, -.3)
+schGoal <- c(.4, .4, 0, -.4, 0.1, .5, .4, -.3, -.3)
 schVars <- c("n", "Urban", "Suburban", "ToRu", "pED", "pMin", "pELL", "pELA", "pMath")
 names(schGoal) <- schVars
 
@@ -32,6 +35,7 @@ schEx <- NULL
 #-----------------------
 # Generate Parameters
 # -----------------------
+
 generate_parameters <- function(RR, data, Bs, vars, exclude = NULL, goal) {
   source("ParGenSource.r")
   
@@ -52,11 +56,17 @@ sch.respNames <- paste("PS", formatC(sch.resps*100, width = 2, format = "d", fla
 # Standardize X matrix
 df.sch.sd <- df.sch[,schVars] %>% mutate_all(STAND)
 
+
+generate_parameters(RR = 0.2, data = df.sch.sd, Bs = schBs, vars = schVars, goal = schGoal)
+
+# run in parallel
+
 no_cores <- min(length(sch.resps), 7)
 cl <- start_parallel(no_cores, packages = c("tidyverse"))
 
 seed <- runif(1,0,1)*10^8
 set.seed(seed)
+
 
 runtime <- system.time(schPars <- parSapply(cl, 
                                             sch.resps, 

@@ -1,7 +1,3 @@
-library(tidyverse)
-library(Hmisc)
-
-rm(list = ls())
 
 ######################
 # SUPPORT FUNCTIONS
@@ -23,6 +19,7 @@ genE <- function(ps) rbinom(length(ps), 1, prob = ps)
 ###################
 # SIM FUNCTIONS
 ###################
+
 calcPS_RRs <- function(value_data, x.data, exclude = NULL) {
   calcPS(Bs = value_data$pars[-1], 
          MRR = unique(value_data$RR), 
