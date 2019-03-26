@@ -1,6 +1,6 @@
 library(tidyverse)
 
-file_date <- "2019-02-28"
+file_date <- "2019-03-26"
 file_dir <- paste("data/", file_date, "/", sep = "")
 
 
@@ -19,7 +19,10 @@ df <- df %>%
          pMin = 1-ethWhite,
          ToRu = Town + Rural,
          MEDINC = as.numeric(MEDINC),
-         DID = as.numeric(as.factor(LEAID)) + 1000) %>%
+         DID = as.numeric(as.factor(LEAID)) + 1000,
+         T1 = TITLEI == 5,
+         ST.ratio = n/FTE,
+         pFem = genFemale/n) %>%
   group_by(DID) %>%
   mutate(SID = 1:n() + 10000) %>%
   ungroup() %>%
@@ -27,22 +30,16 @@ df <- df %>%
 
 vars <- c("LSTATE", "LEANM", "SCHNAM", "DID", "SID", "DSID", "n", "pTotfrl",
           "Urban", "Suburban", "ToRu",
-          "pELL", "pED", "pELA", "pMath", "pMin", "MEDINC", "urbanicity")
+          "pELL", "pED", "pELA", "pMath", "pMin", "MEDINC", "urbanicity", 
+          "T1", "ethBlack", "ethHisp", "ethWhite", "FTE", "ST.ratio", "pFem", "dSCH")
 
-covariates <- c("n", "Urban", "Suburban", "ToRu", "pTotfrl",
-                "pELL", "pED", "pELA", "pMath", "pMin", "MEDINC")
+covariates <- c("T1", "n", "pTotfrl", "Urban", "Suburban",
+                "ethWhite", "ethBlack", "ethHisp", "pFem",
+                "ST.ratio", "dSCH","pELL")
 
 df <- df[,vars] %>% na.omit %>% unique()
 
-# Covarites 
-# subs_f_vars <- c("n", "urbanicity",
-#                  "pELL", "pED", "pELA", "pMath", "pMin", "MEDINC")
-subs_f_vars <- c("n", "urbanicity",
-                 "pELL", "pED", "pELA", "pMath", "pMin")
- 
-# School Level Data
-df.sch <- df[,vars]
 
 
-save(df, df.sch, subs_f_vars, file_date, file = paste(file_dir, "base data.rdata", sep = ""))
+save(df, covariates, file_date, file = paste(file_dir, "base data.rdata", sep = ""))
 

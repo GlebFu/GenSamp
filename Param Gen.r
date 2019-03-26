@@ -8,7 +8,7 @@ library(snow)
 source("ParGenSource.r")
 
 
-file_date <- "2019-02-28"
+file_date <- "2019-03-26"
 
 load(paste("data/", file_date, "/base data.rdata", sep = ""))
 
@@ -16,110 +16,39 @@ load(paste("data/", file_date, "/base data.rdata", sep = ""))
 # Schools
 #-----------------------
 
-# Set School SMD Goals
-# schGoal <- c(.374, .433, .007, -.403, .081, .538, .412, -.3, -.3)
-schGoal <- c(.4, .4, 0, -.4, 0.1, .5, .4, -.3, -.3)
-schVars <- c("n", "Urban", "Suburban", "ToRu", "pED", "pMin", "pELL", "pELA", "pMath")
-names(schGoal) <- schVars
+covariates
 
-schGoal
+# LogOdds
+schBs <- c(-.03, 0, -.02, .46, .04, -.01, .01, .01, 0, -.1, 0, .02)
+names(schBs) <- covariates
 
-# Initial School Betas
-schBs <- c(0, 0, 0, 0, 0, 0, 0, 0, 0)
-
-# Set urban as focus
-#schEx <- "Urban"
-schEx <- NULL
 
 
 #-----------------------
-# Generate Parameters
+# Generate Intercept
 # -----------------------
 
-generate_parameters <- function(RR, data, Bs, vars, exclude = NULL, goal) {
-  source("ParGenSource.r")
-  
-  pars <- optim(par = Bs, fn = testGoal,
-              MRR = RR, vars = vars,
-              data = data, exclude = exclude, goal = goal) %>%
-          c(resp = RR)
-  
-  getVals(bs = pars, vars = vars, data = data, exclude = exclude, goal = goal)
-}
-
-
-sch.resps <- 8:1/20
-# sch.resps <- 9:1/10
+# sch.resps <- 8:1/20
+sch.resps <- 9:1/10
 # sch.resps <- c(.1, .2, .3)
 sch.respNames <- paste("PS", formatC(sch.resps*100, width = 2, format = "d", flag = "0"), sep = "")
 
-# Standardize X matrix
-df.sch.sd <- df.sch[,schVars] %>% mutate_all(STAND)
+schPS <- sapply(sch.resps, calcPS, Bs = schBs, vars = covariates, data = df, exclude = NULL, getint = F) %>%
+  as.data.frame
+
+intercepts <- sapply(sch.resps, calcPS, Bs = schBs, vars = covariates, data = df, exclude = NULL, getint = T)[2,] %>%
+  unlist
+
+names(intercepts) <- names(schPS) <- sch.respNames
 
 
-generate_parameters(RR = 0.2, data = df.sch.sd, Bs = schBs, vars = schVars, goal = schGoal)
-
-# run in parallel
-
-no_cores <- min(length(sch.resps), 7)
-cl <- start_parallel(no_cores, packages = c("tidyverse"))
-
-seed <- runif(1,0,1)*10^8
-set.seed(seed)
-
-
-runtime <- system.time(schPars <- parSapply(cl, 
-                                            sch.resps, 
-                                            generate_parameters, 
-                                            data = df.sch.sd, 
-                                            Bs = schBs,
-                                            vars = schVars,
-                                            goal = schGoal))
-
-stop_parallel(cl)
-
-
-schPars <- apply(schPars, 2, bind_rows)
-
-schPS <- lapply(schPars, calcPS_RRs, x.data = df.sch.sd) %>% 
-  data.frame
-
-schVals <- bind_rows(schPars)
-
-
-names(schPS) <- sch.respNames
-df.sch <- cbind(df.sch, schPS)
+df.sch <- cbind(df, schPS)
 
 schPS %>%
   gather(key = RR, value = PS) %>%
   ggplot(aes(x = PS)) +
   geom_histogram() +
   facet_wrap(~RR)
-
-schVals %>%
-  ggplot(aes(x = RR, y = pars, group = Var)) +
-  geom_point() +
-  geom_line() +
-  facet_wrap(~Var) +
-  geom_hline(yintercept = 0, linetype = "dotted")
-
-schVals %>%
-  ggplot(aes(x = RR, y = pars, group = Var, color = Var)) +
-  geom_point() +
-  geom_line() +
-  geom_hline(yintercept = 0, linetype = "dotted")
-
-schVals %>%
-  ggplot(aes(x = RR, y = dif, color = Var)) +
-  geom_point() +
-  geom_line() +
-  geom_hline(yintercept = 0) +
-  geom_hline(yintercept = c(-1, 1) * .25, linetype = "dashed")
-
-save(schVals, df.sch, sch.respNames, sch.resps, schGoal, file = paste("Params/", file_date, "/schPars.rdata", sep = ""))
-
-load(paste("Params/", file_date, "/schPars.rdata", sep = ""))
-
 
 #-----------------------
 # Run Cluster Analysis
