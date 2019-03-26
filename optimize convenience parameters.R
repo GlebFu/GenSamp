@@ -37,17 +37,17 @@ df_standardized <-
   scale() %>%
   as_tibble()
 
-dat <- df_standardized[1:2]
-data_mat <- as.matrix(dat)
-N = nrow(data_mat)
-goal <- schGoal[1:2]
-sample_n <- 500
-RR <- 0.2
-seed <- 20190325
-reps <- 100
-Bs <- rep(0, ncol(dat))
-opt_method <- "Nelder-Mead"
-control <- list(trace = 4, maxit = 100)
+# dat <- df_standardized[1:2]
+# data_mat <- as.matrix(dat)
+# N = nrow(data_mat)
+# goal <- schGoal[1:2]
+# sample_n <- 500
+# RR <- 0.2
+# seed <- 20190325
+# reps <- 100
+# Bs <- rep(0, ncol(dat))
+# opt_method <- "Nelder-Mead"
+# control <- list(trace = 4, maxit = 100)
 
 convenience_sample <- function(Bs, RR, sample_n, data_mat, N = nrow(data_mat), seed = NULL) {
   
@@ -109,14 +109,13 @@ generate_parameters <- function(goal, RR, sample_n, dat,
                     seed = seed, 
                     method = opt_method, control = control)
   
-  tibble(par = list(beta_opt$par), 
+  tibble(beta = list(beta_opt$par), 
          value = beta_opt$value, 
          counts_fn = beta_opt$counts[[1]],
-         convergence = beta_opt$convergence,
-         message = beta_opt$message)
+         convergence = beta_opt$convergence)
   
 }
 
-generate_parameters(goal = schGoal, RR = 0.2,
-                    sample_n = 200, dat = df_standardized,
-                    reps = 100, seed = 20190325)
+generate_parameters(goal = schGoal[1:3], RR = 0.2,
+                    sample_n = 200, dat = df_standardized[1:3],
+                    reps = 500, seed = 20190325)
