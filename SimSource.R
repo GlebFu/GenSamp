@@ -1,10 +1,6 @@
 library(tidyverse)
 
-rm(list = ls())
-
-file_date <- "2019-02-28"
-
-file_date <- "2019-02-28"
+file_date <- "2019-03-26"
 
 
 #-----------------
@@ -14,9 +10,6 @@ file_date <- "2019-02-28"
 
 # Base data set
 load(paste("Data/", file_date, "/simData.Rdata", sep = ""))
-
-# Response generating variables and goal SMD
-load(paste("Data/", file_date, "/RGM Vars.Rdata", sep = ""))
 
 
 
@@ -218,101 +211,22 @@ calcResponseRates <- function(data, cluster = F) {
 weighted.sd <- function(x, w) sqrt(sum((w * (x - weighted.mean(x, w)))^2) / (sum(w) - 1))
 # weighted.sd <- function(x, w) sd(x[w == 1])
 
-# calculates standardized mean diferences between sample and population
-calcDistSMDs <- function(sample) {
-  sample[, c("dist.RR", "sch.RR", "sample","DID", "Ej", "Eij", names(distGoal))] %>%
-    gather(key = "Variable", value = "Value", names(distGoal)) %>%
-    group_by(sample, dist.RR, sch.RR, Variable, DID) %>%
-    summarise(sampled = mean(Ej),
-              contributed = as.numeric(sum(Eij) > 0),
-              rejected = 1 - sampled,
-              dist_mean = mean(Value)) %>%
-    gather(key = "Group", value = "Weight", sampled:rejected) %>%
-    group_by(sample, dist.RR, sch.RR, Variable, Group) %>%
-    summarise(sample_mean = weighted.mean(dist_mean, Weight),
-              sample_sd = weighted.sd(dist_mean, Weight)) %>% 
-    left_join(dist_stats) %>%
-    mutate(sim_SMD = (sample_mean - pop_mean) / pop_sd,
-           miss = sim_SMD - goal_SMD)
-}
 
-calcSchSMDs <- function(sample) {
-  sample[, c("sch.RR", "sample","DID", "Eij", names(schGoal))] %>%
-    gather(key = "Variable", value = "Value", names(schGoal)) %>%
-    mutate(sampled = Eij,
-           rejected = 1 - Eij) %>%
-    gather(key = "Group", value = "Weight", sampled:rejected) %>%
-    group_by(sample, sch.RR, Variable, Group) %>%
-    summarise(sample_mean = weighted.mean(Value, Weight),
-              sample_sd = weighted.sd(Value, Weight)) %>% 
-    left_join(sch_stats) %>%
-    mutate(sim_SMD = (sample_mean - pop_mean) / pop_sd,
-           miss = sim_SMD - goal_SMD)
-}
+# calcSchSMDs <- function(sample) {
+#   sample[, c("sch.RR", "sample","DID", "Eij", names(schGoal))] %>%
+#     gather(key = "Variable", value = "Value", names(schGoal)) %>%
+#     mutate(sampled = Eij,
+#            rejected = 1 - Eij) %>%
+#     gather(key = "Group", value = "Weight", sampled:rejected) %>%
+#     group_by(sample, sch.RR, Variable, Group) %>%
+#     summarise(sample_mean = weighted.mean(Value, Weight),
+#               sample_sd = weighted.sd(Value, Weight)) %>% 
+#     left_join(sch_stats) %>%
+#     mutate(sim_SMD = (sample_mean - pop_mean) / pop_sd,
+#            miss = sim_SMD - goal_SMD)
+# }
 
-#-----------------
-# Test Sim Stages
-#-----------------
 
-# set.seed(1010)
-# df.select <- df.select %>%
-#   gather(key = sch.RR, value = sch.PS, PS25:PS75)
-# 
-# test_approached <- generateE(df.select)
-# test_sample <- createSample(test_approached) # undebug(createSample)
-# test_responses <- calcResponseRates(test_sample)
-# # test_dist_smds <- calcDistSMDs(test_sample)
-# # test_dist_smds <- test_dist_smds %>% select(sample:Group, goal_SMD:miss)
-# test_sch_smds <- calcSchSMDs(test_sample)
-# test_sch_smds <- test_sch_smds %>% select(sample:Group, goal_SMD:miss)
-# 
-# 
-# # Visualize Sampling
-# 
-# test_responses %>%
-#   filter(sch.RR == 30) %>%
-#   gather(key = measure, value = value, -sample, -sch.RR, -dist.RR) %>%
-#   mutate(level = str_split(measure, "_", simplify = T)[,1],
-#          measure =  str_split(measure, "_", simplify = T)[,2]) %>%
-#   ggplot(aes(x = dist.RR, y = value, group = sample, color = sample)) +
-#   geom_point() +
-#   geom_line() +
-#   facet_grid(measure ~ level, scales = "free_y") +
-#   theme_bw()
-# 
-# # Visualize District SMDs
-# test_dist_smds %>%
-#   filter(sch.RR == 30) %>%
-#   ggplot(aes(x = dist.RR, y = abs(sim_SMD), group = sample, color = sample)) +
-#   geom_point() +
-#   geom_line() +
-#   geom_hline(yintercept = 0) +
-#   geom_hline(yintercept = c(-.1, .1), linetype = "dashed") +
-#   facet_grid(Group ~ Variable) +
-#   theme_bw()
-# 
-# # Visualize School SMDs
-# test_sch_smds %>%
-#   filter(sch.RR == 30) %>%
-#   ggplot(aes(x = dist.RR, y = abs(sim_SMD), group = sample, color = sample)) +
-#   geom_point() +
-#   geom_line() +
-#   geom_hline(yintercept = 0) +
-#   geom_hline(yintercept = c(-.1, .1), linetype = "dashed") +
-#   facet_grid(Group ~ Variable) +
-#   theme_bw()
-# 
-# 
-# # Compare to goal SMDs
-# test_dist_smds %>%
-#   filter(sch.RR == 30) %>%
-#   ggplot(aes(x = dist.RR, y = miss, group = sample, color = sample)) +
-#   geom_point() +
-#   geom_line() +
-#   geom_hline(yintercept = 0) +
-#   geom_hline(yintercept = c(-.1, .1), linetype = "dashed") +
-#   facet_grid(Group ~ Variable) +
-#   theme_bw()
 
 runSim <- function(data, pop.PS, frm, vars) {
   
@@ -326,9 +240,13 @@ runSim <- function(data, pop.PS, frm, vars) {
     gather(key = variable, value = value, -sample, -sch.RR, -cluster) %>%
     rbind(responses)
   
-  sch_smds <- calcSchSMDs(samp) %>% 
-    select(sample:Group, goal_SMD:miss) %>% 
-    gather(key = variable, value = value, -sample, -sch.RR, -Variable, -Group)
+  samp.stats <- samp %>%
+    ungroup() %>%
+    select(sch.RR, sample, vars) %>%
+    gather(key = var, value = val, -sample, -sch.RR) %>%
+    group_by(sch.RR, sample, var) %>%
+    summarise(samp.mean = mean(val),
+              samp.sd = sd(val))
 
   Bindicies <- samp %>%
     select(sample, DSID, Eij, vars, sch.RR) %>%
@@ -364,7 +282,7 @@ runSim <- function(data, pop.PS, frm, vars) {
     # glm(formula = frm, family = quasibinomial(), data = test) %>%
     #   fitted
   
-  return(list(responses = responses, sch_smds = sch_smds, Bindicies = Bindicies, samp_counts))
+  return(list(responses = responses, samp.stats = samp.stats, Bindicies = Bindicies, samp_counts))
   # return(list(responses = responses, dist_smds = dist_smds, sch_smds = sch_smds))
   
   # return(samp)

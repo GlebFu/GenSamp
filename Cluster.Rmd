@@ -8,7 +8,7 @@ library(tidyverse)
 
 rm(list = ls())
 
-file_date <- "2019-02-28"
+file_date <- "2019-03-26"
 
 load(paste("data/", file_date, "/base data.rdata", sep = ""))
 
@@ -24,7 +24,7 @@ library(cluster)
 library(tidyverse)
 
 
-run_clusters <- function(K, distance) {
+run_clusters <- function(K, distance, minK) {
 
   # # Calculate the number of cores
   # no_cores <- min(K, detectCores() - 7)
@@ -42,7 +42,7 @@ run_clusters <- function(K, distance) {
   
   clusters <- list()
   
-  for(k in 1:K) {
+  for(k in minK:K) {
     clusters <- append(clusters, list(genClusters(distance = distance, k = k)))
   }
 
@@ -68,18 +68,19 @@ genClusters <- function(distance, k, iterations = 10) {
   
 }
 
-get_CH <- function(K, distance, clusters) {
+get_CH <- function(K, distance, clusters, minK) {
   ch <- list()
+  knumber <- minK:K
   
-  for(k in 2:K) {
-    ch1 <- (clusters[[k]]$betweenss / (k - 1)) / (clusters[[k]]$tot.withinss / (length(clusters[[k]]$cluster- k)))
+  for(k in 2:length(knumber)) {
+    ch1 <- (clusters[[k]]$betweenss / (k - 1)) / (clusters[[k]]$tot.withinss / (length(clusters[[k]]$cluster - k)))
     ch2 <- cluster.stats(distance, clusters[[k]]$cluster,
                                 silhouette = F, G2 = FALSE, G3 = FALSE,
                                 wgap=F, sepindex=F, sepprob=0.1,
                                 sepwithnoise=F)
     ch_d <- ch2$ch
     
-    ch = append(ch , list(k = k, 
+    ch = append(ch , list(k = knumber[k], 
                      ch = ch1,
                      ch_d = ch_d))
   }
@@ -104,38 +105,35 @@ get_CH <- function(K, distance, clusters) {
 
 
 ```{r SUBS_FULL, eval = F}
-# K <- 20
-# 
-# # distance <- df[, subs_f_vars] %>%
-# #   mutate(MEDINC = log(MEDINC),
-# #          n = log(n)) %>%
-# #   # sample_n(500) %>%
-# #   daisy(metric = "gower")
-# 
-# distance <- df[, subs_f_vars] %>%
-#   mutate(n = log(n)) %>%
-#   # sample_n(500) %>%
-#   daisy(metric = "gower")
-# 
-# 
-# 
-# 
-# clust_time <- system.time(
-#   clusters <- run_clusters(K, distance)
-# )
-# 
-# ch_time <- system.time(
-#   chPlot <- get_CH(K, distance, clusters)
-# )
-# 
-# # undebug(get_CH)
-# 
-# save(clusters, chPlot, clust_time, ch_time, K, distance, file =  paste("Paper Data/", file_date, "/clusters-full-logs.rdata", sep = ""))
+ K <- 7
+minK <- 5
+
+cluster_vars <- c(covariates[!(covariates %in% c("Urban", "Suburban", "ToRu"))], "urbanicity")
+
+distance <- df[, cluster_vars] %>%
+  mutate(n = log(n)) %>%
+  # sample_n(500) %>%
+  daisy(metric = "gower")
+
+
+
+
+clust_time <- system.time(
+  clusters <- run_clusters(K, distance, minK)
+)
+
+ch_time <- system.time(
+  chPlot <- get_CH(K, distance, clusters, minK)
+)
+
+# undebug(get_CH)
+save(clusters, distance, file =  paste("Paper Data/", file_date, "/cluster analysis data.rdata", sep = ""))
+save(chPlot, clust_time, ch_time, K, cluster_vars, minK, file =  paste("Paper Data/", file_date, "/Clusters.rdata", sep = ""))
 ```
 
 ```{r SUBS_FULL_CH}
 # load("clusters-full.rdata")
-load(paste("Paper Data/", file_date, "/clusters-full-logs.rdata", sep = ""))
+load(paste("Paper Data/", file_date, "/Clusters.rdata", sep = ""))
 
 
 chPlot %>%
@@ -154,7 +152,7 @@ chPlot %>%
 cls <- bind_cols(lapply(clusters, function(x) data.frame(x$cluster)))
 vrat <- unlist(lapply(clusters, function(x) x$betweenss / x$totss))
 
-data.frame(k = 1:K, var = vrat, min80 = sum(vrat < .8) + .5) %>%
+data.frame(k = minK:K, var = vrat, min80 = sum(vrat < .8) + .5) %>%
   ggplot(aes(x = k, y = var)) +
   geom_point() +
   ggtitle("Between cluster variance by number of strata") +
@@ -163,20 +161,19 @@ data.frame(k = 1:K, var = vrat, min80 = sum(vrat < .8) + .5) %>%
   geom_line() +
   geom_vline(aes(xintercept = min80), linetype = "dashed") +
   theme_apa() +
-  scale_x_discrete(limits = c(1:K)) +
+  scale_x_discrete(limits = c(minK:K)) +
   scale_y_continuous(breaks = seq(0, 1, .1))
 
-df$cluster_full_6 <- cls[,6]
-df$cluster_full_10 <- cls[,10]
+names(cls) <- paste("cls_",minK:K, sep = "")
 
-save(cls, file =  paste("Paper Data/", file_date, "/Clusters.rdata", sep = ""))
+save(chPlot, clust_time, ch_time, K, cluster_vars, cls, minK, file =  paste("Paper Data/", file_date, "/Clusters.rdata", sep = ""))
 
 ```
 
 ```{r}
 
 # names(cls_ov) <- names(cls_f) <- 1:K
-names(cls) <- 1:K
+names(cls) <- minK:K
 # cls_ov$subs <- "OV"
 cls$subs <- "F"
 

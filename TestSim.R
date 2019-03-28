@@ -2,15 +2,11 @@ library(tidyverse)
 
 rm(list = ls())
 
-file_date <- "2019-02-28"
-
 source("SimSource.R")
 
-vars <- c("n", "urbanicity", "pELL", "pED", "pELA", "pMath", "pMin")
+frm <- as.formula(paste("Eij ~ ", paste(covariates, collapse = " + ")))
 
-frm <- as.formula(paste("Eij ~ ", paste(vars, collapse = " + ")))
-
-df.Bindex <- df %>% ungroup() %>% select(DSID, vars)
+df.Bindex <- df %>% ungroup() %>% select(DSID, covariates)
 
 #----------------------
 # Run Single Iteration
@@ -24,13 +20,15 @@ df.test <- filter(df.select, sch.RR == 40)
 seed <- 74069381
 set.seed(seed)
 
-results <- runSim(df.test,  pop.PS = df.Bindex, frm = frm, vars = vars)
+# debug(runSim)
+
+results <- runSim(df.test,  pop.PS = df.Bindex, frm = frm, vars = covariates)
+
 
 
 df_responses <- bind_rows(results[1]) %>% data.frame
-df_sch_smd <- bind_rows(results[2]) %>% data.frame
+df_sch_stats <- bind_rows(results[2]) %>% data.frame
 df_Bindex <- bind_rows(results[3]) %>% data.frame
-df_Bindex
 df_counts <- bind_rows(results[4]) %>% data.frame
 
 

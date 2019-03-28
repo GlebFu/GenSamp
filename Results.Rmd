@@ -52,19 +52,16 @@ library(tidyverse)
 
 rm(list = ls())
 
-file_date <- "2019-02-28"
+file_date <- "2019-03-26"
 
 
-runtimeFile <- paste("Data/", file_date, "/runtime r1000.rdata", sep = "")
-resultsFile <- paste("Data/", file_date, "/results r1000.rdata", sep = "")
+runtimeFile <- paste("Data/", file_date, "/runtime r10.rdata", sep = "")
+resultsFile <- paste("Data/", file_date, "/results r10.rdata", sep = "")
 
 load(paste("data/", file_date, "/base data.rdata", sep = ""))
 
 # Base data set
 load(paste("Data/", file_date, "/simData.Rdata", sep = ""))
-
-# Response generating variables and goal SMD
-load(paste("Data/", file_date, "/RGM Vars.Rdata", sep = ""))
 
 load(runtimeFile)
 load(resultsFile)
@@ -86,7 +83,7 @@ df_counts <- df_counts %>% rename_conditions()
 
 df_responses <- df_responses %>% rename_conditions()
   
-df_sch_smd <- df_sch_smd %>% rename_conditions()
+df_sch_stats <- df_sch_stats %>% rename_conditions()
 
 savePlot <- F
 ```
@@ -123,61 +120,61 @@ df.sch %>%
 
 
 ```{r, fig.cap = "Difference between expected SMDs and goal SMDs"}
-schVals_lab <- schVals %>%
-  filter(RR == max(RR)) %>%
-  mutate(RR = paste(RR*100, "%", sep = "")) %>%
-  select(Var, dif, RR, pars)
-
-
-schVals %>%
-  filter(Var != "Intercept") %>%
-  select(Var, dif, RR) %>%
-  mutate(RR = ordered(paste(RR*100, "%", sep = ""),
-                      levels  = paste(sort(unique(RR))*100, "%", sep = ""))) %>%
-  na.omit() %>%
-  ggplot(aes(x = RR, y = dif, group = Var, linetype = Var, color = Var)) +
-  geom_point() +
-  geom_line() +
-  theme_apa() +
-  labs(x = "Population Response Rates",
-       y = expression(Delta*"SMD")) +
-  ggrepel::geom_text_repel(data = schVals_lab, 
-                           aes(x  = RR, y = dif, label = Var),
-                           direction = "y",
-                           nudge_x = 1,
-                           xlim = c(NA, 10.4),
-                           segment.size = .1,
-                           vjust = 1) +
-  theme(legend.position="none",
-       plot.margin=unit(c(0,2,0,0),"cm")) +
-  coord_cartesian(clip = 'off')
+# schVals_lab <- schVals %>%
+#   filter(RR == max(RR)) %>%
+#   mutate(RR = paste(RR*100, "%", sep = "")) %>%
+#   select(Var, dif, RR, pars)
+# 
+# 
+# schVals %>%
+#   filter(Var != "Intercept") %>%
+#   select(Var, dif, RR) %>%
+#   mutate(RR = ordered(paste(RR*100, "%", sep = ""),
+#                       levels  = paste(sort(unique(RR))*100, "%", sep = ""))) %>%
+#   na.omit() %>%
+#   ggplot(aes(x = RR, y = dif, group = Var, linetype = Var, color = Var)) +
+#   geom_point() +
+#   geom_line() +
+#   theme_apa() +
+#   labs(x = "Population Response Rates",
+#        y = expression(Delta*"SMD")) +
+#   ggrepel::geom_text_repel(data = schVals_lab, 
+#                            aes(x  = RR, y = dif, label = Var),
+#                            direction = "y",
+#                            nudge_x = 1,
+#                            xlim = c(NA, 10.4),
+#                            segment.size = .1,
+#                            vjust = 1) +
+#   theme(legend.position="none",
+#        plot.margin=unit(c(0,2,0,0),"cm")) +
+#   coord_cartesian(clip = 'off')
 ```
 
 
 ```{r, results = "asis", fig.cap="Odds ratio coeficients for Response Generating Model"}
 
 
-schVals %>%
-  # filter(Var != "Intercept") %>%
-  select(Var, pars, RR) %>%
-  mutate(RR = ordered(paste(RR*100, "%", sep = ""),
-                      levels  = paste(sort(unique(RR))*100, "%", sep = ""))) %>%
-  ggplot(aes(x = RR, y = pars, group = Var, linetype = Var, color = Var)) +
-  geom_point() +
-  geom_line() +
-  theme_apa() +
-  labs(x = "Population Response Rates",
-       y = expression(beta[h])) +
-  ggrepel::geom_text_repel(data = schVals_lab, 
-                           aes(x  = RR, y = pars, label = Var),
-                           direction = "y",
-                           nudge_x = 1,
-                           xlim = c(NA, 10.4),
-                           segment.size = .1,
-                           vjust = 1) +
-  theme(legend.position="none",
-       plot.margin=unit(c(0,2,0,0),"cm")) +
-  coord_cartesian(clip = 'off')
+# schVals %>%
+#   # filter(Var != "Intercept") %>%
+#   select(Var, pars, RR) %>%
+#   mutate(RR = ordered(paste(RR*100, "%", sep = ""),
+#                       levels  = paste(sort(unique(RR))*100, "%", sep = ""))) %>%
+#   ggplot(aes(x = RR, y = pars, group = Var, linetype = Var, color = Var)) +
+#   geom_point() +
+#   geom_line() +
+#   theme_apa() +
+#   labs(x = "Population Response Rates",
+#        y = expression(beta[h])) +
+#   ggrepel::geom_text_repel(data = schVals_lab, 
+#                            aes(x  = RR, y = pars, label = Var),
+#                            direction = "y",
+#                            nudge_x = 1,
+#                            xlim = c(NA, 10.4),
+#                            segment.size = .1,
+#                            vjust = 1) +
+#   theme(legend.position="none",
+#        plot.margin=unit(c(0,2,0,0),"cm")) +
+#   coord_cartesian(clip = 'off')
 ```
 
 ## B Index
@@ -210,23 +207,23 @@ if(savePlot) ggsave(paste("Figs/", file_date, "/Paper B-Index.jpg", sep = ""), d
 ## Standardized mean differences
 
 ```{r, fig.cap = "Average SMDs"}
-sSMDplot <- df_sch_smd %>%
-  group_by(sample, sch.RR, Variable, Group, variable, Sampling, Clustering) %>%
-  summarise(value = mean(abs(value), na.rm = F)) %>% 
-  spread(key = variable, value = value) %>%
-  ungroup()
+sSMDplot <- df_sch_stats %>%
+  group_by(sample, sch.RR, var, sample, Sampling, Clustering) %>%
+  summarise(mSMD = mean(abs(smd)),
+            mSMD.sd = sd(abs(smd)))
 
-# levels(sSMDplot$dist.RR) <- paste("District: ", levels(sSMDplot$dist.RR), "%", sep = "")
-# levels(sSMDplot$sch.RR) <- paste("School: ", levels(sSMDplot$sch.RR), "%", sep = "")
+df_sch_stats %>%
+  filter(is.na(smd)) %>%
+  unique()
 
 sSMDplot %>%
-  filter(Group == "sampled") %>%
-  ggplot(aes(x = sch.RR, y = sim_SMD, color = Sampling, linetype = Clustering, group = sample)) +
+  # ggplot(aes(x = sch.RR, y = mSMD, color = sample, linetype = sample, group = sample)) +
+  ggplot(aes(x = sch.RR, y = mSMD, color = Sampling, linetype = Clustering, group = sample)) +
   # geom_point() +
   geom_line() +
   geom_hline(yintercept = 0) +
   geom_hline(yintercept = .25, linetype = "dashed") +
-  facet_wrap( ~ Variable, scales = "free_y") +
+  facet_wrap( ~ var, scales = "free_y") +
   theme_apa(box = F) +
   labs(y = "Mean SMD",
        x = "Population Participation Rate")
@@ -325,6 +322,6 @@ df.rr %>%
 
 
 ```{r}
-save(avg_Bindex, df_Bindex, df_responses, df_sch_smd, samplot, sSMDplot, file = paste("Paper Data/", file_date, "/Result Data.rdata", sep = ""))
+save(avg_Bindex, df_Bindex, df_responses, df_sch_stats, samplot, sSMDplot, file = paste("Paper Data/", file_date, "/Result Data.rdata", sep = ""))
 
 ```
