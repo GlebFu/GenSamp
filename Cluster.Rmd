@@ -105,8 +105,8 @@ get_CH <- function(K, distance, clusters, minK) {
 
 
 ```{r SUBS_FULL, eval = F}
- K <- 7
-minK <- 5
+ K <- 10
+minK <- 2
 
 cluster_vars <- c(covariates[!(covariates %in% c("Urban", "Suburban", "ToRu"))], "urbanicity")
 
