@@ -20,6 +20,7 @@ covariates
 
 # LogOdds
 schBs <- c(-.03, 0, -.02, .46, .04, -.01, .01, .01, 0, -.1, 0, .02)
+# schBs <- schBs*2
 
 # Set focus to Town/Rural
 schEx <- "ToRu"
@@ -129,10 +130,10 @@ df %>%
 # Export Data
 #-----------------------
 
-schVals %>%
-  select(Var, pars, RR) %>%
-  mutate(pars = round(pars,2)) %>%
-  write.csv(paste("Params/", file_date, "/School Parameters.csv", sep = ""))
+# schVals %>%
+#   select(Var, pars, RR) %>%
+#   mutate(pars = round(pars,2)) %>%
+#   write.csv(paste("Params/", file_date, "/School Parameters.csv", sep = ""))
 
 
 head(df.sch)
@@ -158,4 +159,4 @@ pop.stats <- df %>%
 
 
 
-save(df, df.select, df.sch, sch.PS, df.PS, PS.Int, covariates, cluster_vars, pop.stats, file = paste("Data/", file_date, "/simData.Rdata", sep = ""))
+save(df, df.select, df.sch, sch.PS, df.PS, PS.Int, covariates, cluster_vars, pop.stats, schBs, file = paste("Data/", file_date, "/simData.Rdata", sep = ""))

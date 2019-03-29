@@ -20,7 +20,7 @@ df.test <- filter(df.select, sch.RR == 40)
 seed <- 74069381
 set.seed(seed)
 
-# debug(runSim)
+debug(propAllocation)
 
 results <- runSim(df.test,  pop.PS = df.Bindex, frm = frm, vars = covariates)
 

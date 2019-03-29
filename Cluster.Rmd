@@ -134,6 +134,7 @@ save(chPlot, clust_time, ch_time, K, cluster_vars, minK, file =  paste("Paper Da
 ```{r SUBS_FULL_CH}
 # load("clusters-full.rdata")
 load(paste("Paper Data/", file_date, "/Clusters.rdata", sep = ""))
+load(paste("Paper Data/", file_date, "/cluster analysis data.rdata", sep = ""))
 
 
 chPlot %>%

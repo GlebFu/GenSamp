@@ -112,6 +112,9 @@ generateE <- function(data) {
 
 propAllocation <- function(cluster, whichCass) {
   allocations <- round((table(df[,whichCass]) / nrow(df)) * 60,0)
+  
+  if(sum(allocations < 60)) allocations[allocations == min(allocations)] <- min(allocations) + 1
+  
   return(allocations[cluster])
 }
 

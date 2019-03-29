@@ -49,14 +49,15 @@ knitr::opts_chunk$set(echo = F, cache = F, warnings = F)
 ```{r load.packages, include = FALSE}
 library(papaja)
 library(tidyverse)
+library(kableExtra)
 
 rm(list = ls())
 
 file_date <- "2019-03-26"
 
 
-runtimeFile <- paste("Data/", file_date, "/runtime r10.rdata", sep = "")
-resultsFile <- paste("Data/", file_date, "/results r10.rdata", sep = "")
+runtimeFile <- paste("Data/", file_date, "/runtime r1000.rdata", sep = "")
+resultsFile <- paste("Data/", file_date, "/results r1000.rdata", sep = "")
 
 load(paste("data/", file_date, "/base data.rdata", sep = ""))
 
@@ -103,6 +104,37 @@ boxErrors <- function(x) {
 # Methods Summary
 
 ## Participation Generating Model
+
+```{r}
+df.coefs <- data.frame(Variables = names(schBs), vnames = names(schBs), log_odds = schBs, row.names = NULL)
+
+levels(df.coefs$Variables) <- c("Total District Schools", 
+                                "% Black",
+                                "% Hispanic",
+                                "% White",
+                                "Total Students",
+                                "% ELL",
+                                "% Female",
+                                "% FRL", # Free Reduced Lunch
+                                "Student/Teacher Ratio",
+                                "Suburban",
+                                "Schoolwide Title I",
+                                "Urban")
+
+df.coefs %>%
+  kable() %>%
+  kable_styling()
+```
+
+```{r}
+data.frame(Intercept = unlist(PS.Int[2,]), RR = names(select(df.PS, -DID, -DSID, -SID))) %>%
+  ggplot(aes(x = RR, y = Intercept, group = 1)) +
+  geom_point() +
+  geom_line() +
+  theme_apa() +
+  labs(title = "Intercept values")
+```
+
 
 ```{r, fig.cap = "Distributions of Participation Propensity Scores"}
 
@@ -206,15 +238,13 @@ if(savePlot) ggsave(paste("Figs/", file_date, "/Paper B-Index.jpg", sep = ""), d
 
 ## Standardized mean differences
 
-```{r, fig.cap = "Average SMDs"}
+```{r, fig.cap = "Average SMDs", fig.height = 7}
 sSMDplot <- df_sch_stats %>%
   group_by(sample, sch.RR, var, sample, Sampling, Clustering) %>%
   summarise(mSMD = mean(abs(smd)),
             mSMD.sd = sd(abs(smd)))
 
-df_sch_stats %>%
-  filter(is.na(smd)) %>%
-  unique()
+
 
 sSMDplot %>%
   # ggplot(aes(x = sch.RR, y = mSMD, color = sample, linetype = sample, group = sample)) +
@@ -223,7 +253,7 @@ sSMDplot %>%
   geom_line() +
   geom_hline(yintercept = 0) +
   geom_hline(yintercept = .25, linetype = "dashed") +
-  facet_wrap( ~ var, scales = "free_y") +
+  facet_wrap( ~ var, scales = "free_y", ncol  = 3) +
   theme_apa(box = F) +
   labs(y = "Mean SMD",
        x = "Population Participation Rate")
@@ -241,6 +271,8 @@ samplot <- df_responses %>%
   group_by(sample, sch.RR, variable, Sampling, Clustering) %>%
   summarise(value = mean(value)) %>%
   spread(key = variable, value = value)
+
+
 ```
 
 
