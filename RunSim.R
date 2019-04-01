@@ -32,6 +32,8 @@ runIterations <- function(reps, vars) {
 runtimeFile <- paste("Data/", file_date, "/runtime r100.rdata", sep = "")
 resultsFile <- paste("Data/", file_date, "/results r100.rdata", sep = "")
 
+
+
 library(parallel)
 
 no_cores <- detectCores() - 1
