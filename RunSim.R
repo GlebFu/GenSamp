@@ -29,8 +29,8 @@ runIterations <- function(reps, vars) {
 
 # runSim(1)
 
-runtimeFile <- paste("Data/", file_date, "/runtime r1000.rdata", sep = "")
-resultsFile <- paste("Data/", file_date, "/results r1000.rdata", sep = "")
+runtimeFile <- paste("Data/", file_date, "/runtime r10.rdata", sep = "")
+resultsFile <- paste("Data/", file_date, "/results r10.rdata", sep = "")
 
 library(parallel)
 
