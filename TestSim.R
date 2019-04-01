@@ -6,13 +6,12 @@ source("SimSource.R")
 
 frm <- as.formula(paste("Eij ~ ", paste(covariates, collapse = " + ")))
 
-df.Bindex <- df %>% ungroup() %>% select(DSID, covariates)
+df.cov <- df %>% ungroup() %>% select(DSID, covariates) %>% unique
 
 #----------------------
 # Run Single Iteration
 #----------------------
-df.test <- filter(df.select, sch.RR == 40)
-
+df.test <- filter(df.select, sch.RR == 40, K %in% c(2, 5))
 
 #69590806 - SBS B-Index < .001
 #74069381 - SBS B-Index = .941
@@ -20,9 +19,9 @@ df.test <- filter(df.select, sch.RR == 40)
 seed <- 74069381
 set.seed(seed)
 
-debug(propAllocation)
+# debug(runSim)
 
-results <- runSim(df.test,  pop.PS = df.Bindex, frm = frm, vars = covariates)
+results <- runSim(df.test,  df.cov = df.cov, frm = frm, vars = covariates)
 
 
 

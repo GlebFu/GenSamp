@@ -14,16 +14,16 @@ source("SimSource.R")
 
 # reps <- 1000
 
-runSim <- function(reps, vars) {
+runIterations <- function(reps, vars) {
   source("SimSource.R")
   # debug(runSim)
   
 
   frm <- as.formula(paste("Eij ~ ", paste(vars, collapse = " + ")))
   
-  df.Bindex <- df %>% ungroup() %>% select(DSID, vars)
+  df.cov <- df %>% ungroup() %>% select(DSID, covariates) %>% unique
   
-  replicate(reps, runSim(df.select,  pop.PS = df.Bindex, frm = frm, vars = vars))
+  replicate(reps, runSim(df.select,  df.cov = df.cov, frm = frm, vars = vars))
   
 }
 
@@ -36,7 +36,7 @@ library(parallel)
 
 no_cores <- detectCores() - 1
 
-minreps <- 1000
+minreps <- 2
 reps <- rep((minreps + (no_cores - minreps %% no_cores)) / no_cores, each = no_cores)
 
 # Initiate cluster
@@ -45,7 +45,7 @@ cl <- makeCluster(no_cores)
 seed <- runif(1,0,1)*10^8
 set.seed(27770460)
 
-runtime <- system.time(results <- parSapply(cl, reps, runSim, covariates))
+runtime <- system.time(results <- parSapply(cl, reps, runIterations, covariates))
 
 stopCluster(cl)
 

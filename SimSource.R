@@ -110,78 +110,67 @@ generateE <- function(data) {
 }
 
 
-propAllocation <- function(cluster, whichCass) {
-  allocations <- round((table(df[,whichCass]) / nrow(df)) * 60,0)
-  
-  if(sum(allocations < 60)) allocations[allocations == min(allocations)] <- min(allocations) + 1
-  
-  return(allocations[cluster])
-}
+
 
 # Creates dataset with samples for each method and response rate
-createSample <- function(data) {
+createSample <- function(data, df.cov) {
+  
+  
   
   # Simple Random Sampling
   SRS_Sample <- data %>%
+    filter(is.na(K)) %>%
     group_by(sch.RR) %>%
     mutate(rank.SRS = sample(1:n())) %>%
     arrange(rank.SRS) %>%
     mutate(count = cumsum(Eij)) %>% 
     filter(count <= 60) %>%
-    left_join(df) %>%
+    left_join(df.cov) %>%
     mutate(sample = "SRS",
            cluster = NA)
   
   #Convenience Sampling
   CS_Sample <- data %>%
+    filter(is.na(K)) %>%
     group_by(sch.RR) %>%
     sample_frac(size = 1, weight = sch.PS) %>%
     mutate(count = cumsum(Eij)) %>% 
     filter(count <= 60) %>%
-    left_join(df) %>%
+    left_join(df.cov) %>%
     mutate(sample = "CS",
            cluster = NA)
   
-  #OV Cluster Analyusis Stratified Sampling
-  # SUBS_OV_Sample <- data %>%
-  #   group_by(dist.RR, sch.RR, cluster_ov) %>%
-  #   arrange(rank_ov) %>%
-  #   mutate(count = cumsum(Eij)) %>%
-  #   filter(count <= propAllocation(cluster_ov, "cluster_ov")) %>%
-  #   left_join(df) %>%
-  #   mutate(sample = "SUBS_OV",
-  #          cluster = cluster_ov)
-  
-  #Full Cluster Analyusis Stratified Sampling
+
+  #Full Cluster Analysis Stratified Sampling
   SUBS_F_Sample <- data %>%
-    group_by(sch.RR, cluster_full) %>%
+    group_by(sch.RR, K, strata) %>%
     arrange(rank_full) %>%
     mutate(count = cumsum(Eij)) %>%
-    filter(count <= propAllocation(cluster_full, "cluster_full")) %>%
-    left_join(df) %>%
+    filter(count <= pa) %>%
+    left_join(df.cov) %>%
     mutate(sample = "SUBS_F",
-           cluster = cluster_full)
+           cluster = strata)
   
-  #Full Cluster Analyusis Stratified Sampling
+  #Full Cluster Analysis Stratified Sampling
   SUBS_SRS_Sample <- data %>%
-    group_by(sch.RR, cluster_full) %>%
+    group_by(sch.RR, K, strata) %>%
     mutate(rank.SRS = sample(1:n())) %>%
     arrange(rank.SRS) %>%
     mutate(count = cumsum(Eij)) %>% 
-    filter(count <= propAllocation(cluster_full, "cluster_full")) %>%
-    left_join(df) %>%
+    filter(count <= pa) %>%
+    left_join(df.cov) %>%
     mutate(sample = "SUBS_SRS",
-           cluster = cluster_full)
+           cluster = strata)
   
-  #Full Cluster Analyusis Stratified Sampling
+  #Full Cluster Analysis Stratified Sampling
   SUBS_CS_Sample <- data %>%
-    group_by(sch.RR, cluster_full) %>%
+    group_by(sch.RR, K, strata) %>%
     sample_frac(size = 1, weight = sch.PS) %>%
     mutate(count = cumsum(Eij)) %>% 
-    filter(count <= propAllocation(cluster_full, "cluster_full")) %>%
-    left_join(df) %>%
+    filter(count <= pa) %>%
+    left_join(df.cov) %>%
     mutate(sample = "SUBS_CS",
-           cluster = cluster_full)
+           cluster = strata)
   
   return(rbind(SRS_Sample, CS_Sample, SUBS_F_Sample, SUBS_SRS_Sample, SUBS_CS_Sample))
 }
@@ -190,12 +179,12 @@ createSample <- function(data) {
 calcResponseRates <- function(data, cluster = F) {
   if(!cluster){
     data <- data %>%
-      mutate(cluster = NA) %>%
-      group_by(sample, sch.RR, cluster)
+      mutate(strata = NA) %>%
+      group_by(sample, sch.RR, strata, K)
   } else {
     data <- data %>%
       filter(sample %in% c("SUBS_F", "SUBS_OV")) %>%
-      group_by(sample, sch.RR, cluster)
+      group_by(sample, sch.RR, strata, K)
 
   }
   
@@ -204,7 +193,7 @@ calcResponseRates <- function(data, cluster = F) {
             sch_accepted = sum(Eij)) %>%
     mutate(sch_rejected = sch_contacted - sch_accepted) %>%
     mutate(sch_RR = sch_accepted/sch_contacted) %>%
-    group_by(sample, sch.RR, cluster) %>%
+    group_by(sample, sch.RR, strata, K) %>%
     return()
 }
 
@@ -231,43 +220,48 @@ weighted.sd <- function(x, w) sqrt(sum((w * (x - weighted.mean(x, w)))^2) / (sum
 
 
 
-runSim <- function(data, pop.PS, frm, vars) {
+runSim <- function(data, df.cov, frm, vars) {
+  df.unstrat <- data %>% 
+    ungroup %>% 
+    select(-K, -strata, -rank_full, -pa) %>% 
+    unique 
   
-  approached <- generateE(data)
-  samp <- createSample(approached)
+  approached <- generateE(df.unstrat)
+  approached <- data %>% left_join(approached) %>% bind_rows(approached)
+  samp <- createSample(approached, df.cov)
   
   responses <- calcResponseRates(samp) %>%
-    gather(key = variable, value = value, -sample, -sch.RR, -cluster)
+    gather(key = variable, value = value, -sample, -sch.RR, -strata, -K)
   
   responses <- calcResponseRates(samp, cluster = T) %>%
-    gather(key = variable, value = value, -sample, -sch.RR, -cluster) %>%
+    gather(key = variable, value = value, -sample, -sch.RR, -strata, -K) %>%
     rbind(responses)
   
   samp.stats <- samp %>%
     ungroup() %>%
-    select(sch.RR, sample, vars) %>%
-    gather(key = var, value = val, -sample, -sch.RR) %>%
-    group_by(sch.RR, sample, var) %>%
+    select(sch.RR, sample, vars, K) %>%
+    gather(key = var, value = val, -sample, -sch.RR, -K) %>%
+    group_by(sch.RR, sample, var, K) %>%
     summarise(samp.mean = mean(val),
               samp.sd = sd(val))
 
   Bindicies <- samp %>%
-    select(sample, DSID, Eij, vars, sch.RR) %>%
-    group_by(sample, sch.RR) %>%
+    select(sample, DSID, Eij, vars, sch.RR, K) %>%
+    group_by(sample, sch.RR, K) %>%
     nest() %>%
-    mutate(data = map(data, full_join, pop.PS)) %>%
+    mutate(data = map(data, full_join, df.cov)) %>%
     unnest() %>%
     mutate(Eij = ifelse(is.na(Eij), 0, Eij)) %>% 
-    group_by(sample, sch.RR) %>%
+    group_by(sample, sch.RR, K) %>%
     nest() %>% 
     mutate(PS_sample = map(data, glm, formula = frm, family = quasibinomial()),
            PS_sample = map(PS_sample, fitted)) %>%
     unnest() %>%
-    group_by(sample, sch.RR) %>%
+    group_by(sample, sch.RR, K) %>%
     summarise(Bs = Bindex(PS_sample, Eij))
   
   samp_counts <- samp %>%
-    select(sample, DSID, Eij) %>%
+    select(sample, DSID, Eij, K, sch.RR) %>%
     filter(Eij == 1)
   
   # test <- samp %>%

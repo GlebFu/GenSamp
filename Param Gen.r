@@ -78,8 +78,7 @@ load(paste("data/", file_date, "/base data.rdata", sep = ""))
 load(paste("Paper Data/", file_date, "/Clusters.rdata", sep = ""))
 # load(paste("Paper Data/", file_date, "/clusters-full-logs.rdata", sep = ""))
 
-df <- df %>%
-  mutate(cluster_full = cls$cls_5)
+df <- cbind(df, cls)
 
 to_matrix <- function(data, vars, add.vars = NA) {
   frm <- as.formula(paste("~", paste(vars, collapse = " + ")))
@@ -91,18 +90,19 @@ to_matrix <- function(data, vars, add.vars = NA) {
   return(data_matrixed %>% select(-`(Intercept)`))
 }
 
-df <- to_matrix(data = df, vars = cluster_vars, add.vars = c("DSID", "cluster_full")) %>%
-  gather(key = var, value = value, -one_of(c("DSID", "cluster_full"))) %>%
-  group_by(var) %>%
+df <- to_matrix(data = df, vars = cluster_vars, add.vars = c("DSID", names(cls))) %>%
+  gather(key = var, value = value, -one_of(c("DSID", names(cls)))) %>%
+  gather(key = K, value = strata, - var, -DSID, -value) %>%
+  group_by(K, var, strata) %>%
   mutate(w = 1/var(value)) %>%
   filter(w != Inf) %>%
-  group_by(cluster_full, var) %>%
+  group_by(K, strata, var) %>%
   mutate(value = w * (value - mean(value))^2) %>%
   # mutate(value = (value - mean(value))^2) %>%
-  group_by(DSID, cluster_full) %>%
+  group_by(K, DSID, strata) %>%
   summarise(value = sqrt(sum(value))) %>%
-  group_by(cluster_full) %>%
-  arrange(cluster_full, value) %>%
+  group_by(K, strata) %>%
+  arrange(K, strata, value) %>%
   mutate(rank_full = 1:n(),
          rankp_full = rank_full/n() * 100) %>%
   select(-value) %>%
@@ -110,19 +110,21 @@ df <- to_matrix(data = df, vars = cluster_vars, add.vars = c("DSID", "cluster_fu
 
 
 
-df$cluster_full <- as.factor(df$cluster_full)
-
+df$K <- str_split(df$K, pattern = "_", simplify = T)[,2] %>% as.numeric
+df$strata <- as.factor(df$strata)
 
 df %>%
+  filter(K == 2) %>%
   mutate(urbanicity = ifelse(urbanicity == "Rural" | urbanicity == "Town", "ToRu", as.character(urbanicity))) %>%
-  ggplot(aes(x = pED, y = pMin, color = cluster_full, alpha = (1 - rankp_full)/100)) +
+  ggplot(aes(x = pED, y = pMin, color = strata, alpha = (1 - rankp_full)/100)) +
   facet_wrap(~urbanicity) +
   geom_point()
 
 df %>%
+  filter(K == 7) %>%
   mutate(urbanicity = ifelse(urbanicity == "Rural" | urbanicity == "Town", "ToRu", as.character(urbanicity))) %>%
   ggplot(aes(x = pMin, y = pELL, color = pED, alpha = (1 - rankp_full)/100)) +
-  facet_grid(urbanicity~cluster_full) +
+  facet_grid(urbanicity ~ strata) +
   geom_point()
 
 
@@ -143,11 +145,29 @@ sch.PS <- df.sch %>%
 df.PS <- sch.PS
 
 # Pull out necesary variables for generating selections
-df.select <- select(df, DSID, DID, SID, cluster_full, rank_full)
+df.select <- select(df, DSID, DID, SID, K, strata, rank_full)
 
 df.select <- left_join(df.select, df.PS) %>%
   gather(key = sch.RR, value = sch.PS, sch.respNames) %>%
   mutate(sch.RR = as.numeric(str_sub(sch.RR, start = 3)))
+
+propAllocation <- function(goal, total, perc) {
+  if(mean(total) < 60) goal[perc == min(perc)] <- goal[perc == min(perc)] + 1
+  return(goal)
+}
+
+df.select <- df.select %>%
+  group_by(K, strata) %>%
+  summarise(n = n()) %>%
+  filter(n != 0) %>%
+  group_by(K) %>%
+  mutate(p = n / sum(n),
+         pa = round(p * 60),
+         t = sum(pa),
+         pa = propAllocation(pa, t, p)) %>%
+  select(K, strata, pa) %>%
+  right_join(df.select)
+
 
 pop.stats <- df %>%
   ungroup() %>%

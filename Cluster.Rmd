@@ -105,7 +105,7 @@ get_CH <- function(K, distance, clusters, minK) {
 
 
 ```{r SUBS_FULL, eval = F}
- K <- 10
+K <- 10
 minK <- 2
 
 cluster_vars <- c(covariates[!(covariates %in% c("Urban", "Suburban", "ToRu"))], "urbanicity")
@@ -126,9 +126,14 @@ ch_time <- system.time(
   chPlot <- get_CH(K, distance, clusters, minK)
 )
 
+
+cls <- bind_cols(lapply(clusters, function(x) data.frame(x$cluster)))
+vrat <- unlist(lapply(clusters, function(x) x$betweenss / x$totss))
+
+
 # undebug(get_CH)
-save(clusters, distance, file =  paste("Paper Data/", file_date, "/cluster analysis data.rdata", sep = ""))
-save(chPlot, clust_time, ch_time, K, cluster_vars, minK, file =  paste("Paper Data/", file_date, "/Clusters.rdata", sep = ""))
+save(clusters, distance, file =  paste("Paper Data/", file_date, "/cluster analysis data - OV.rdata", sep = ""))
+save(chPlot, clust_time, ch_time, K, cluster_vars, minK, cls, vrat file =  paste("Paper Data/", file_date, "/Clusters - OV.rdata", sep = ""))
 ```
 
 ```{r SUBS_FULL_CH}
