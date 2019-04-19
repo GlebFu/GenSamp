@@ -158,17 +158,21 @@ chPlot %>%
 cls <- bind_cols(lapply(clusters, function(x) data.frame(x$cluster)))
 vrat <- unlist(lapply(clusters, function(x) x$betweenss / x$totss))
 
-data.frame(k = minK:K, var = vrat, min80 = sum(vrat < .8) + .5) %>%
+data.frame(k = minK:K, var = vrat, min80 = sum(vrat <= .8) + 1.5) %>%
   ggplot(aes(x = k, y = var)) +
   geom_point() +
-  ggtitle("Between cluster variance by number of strata") +
+  # ggtitle("Between cluster variance by number of strata") +
   labs(y = "Between Cluster Variance",
        x = "Number of Strata (k)") +
   geom_line() +
-  geom_vline(aes(xintercept = min80), linetype = "dashed") +
+  geom_vline(aes(xintercept = min80), linetype = "dotted") +
+  geom_hline(yintercept = .8, linetype = "dotted") +
   theme_apa() +
   scale_x_discrete(limits = c(minK:K)) +
-  scale_y_continuous(breaks = seq(0, 1, .1))
+  scale_y_continuous(breaks = seq(0, 1, .1), limits = c(.3, 1)) +
+  theme(text = element_text(size=20))
+
+ggsave(filename ="Figs/AERA Cluster SS.jpg", dpi = 1000, width = 10, height = 7)
 
 names(cls) <- paste("cls_",minK:K, sep = "")
 
@@ -194,13 +198,21 @@ cls %>%
   group_by(k, subs) %>%
   mutate(sample = (n / sum(n)) * 60) %>%
   ggplot(aes(x = k, y = sample)) +
-  geom_point() +
+  geom_point(shape = "-", size = 15, alpha = .5) +
   theme_apa() +
   labs(y = "Allocated Sample Size",
-       x = "Number of Strata (k)") +
-  scale_x_discrete(limits = c(1:K)) +
-  scale_y_continuous(breaks = seq(0, 30, 5)) +
-  stat_function(fun = function(x) 60/x, geom = "line", linetype = "dashed") +
+       x = "Number of Strata (K)") +
+  scale_x_discrete(limits = c(2:20)) +
+  scale_y_continuous(breaks = seq(0, 30, 5),
+                     sec.axis = sec_axis(~./60*9882, name = "Strata Size")) +
+  stat_function(fun = function(x) 60/x, geom = "line", linetype = "dashed", size = .5) +
   # facet_grid(subs ~ .) +
-  geom_hline(yintercept = 5, linetype = "dotted")
+  # theme(text = element_text(size=20)) +
+  geom_hline(yintercept = 5, linetype = "dotted", size = .5) +
+  theme(text = element_text(size=20))
+
+ggsave(filename ="Figs/AERA Cluster Size.jpg", dpi = 1000, width = 10, height = 7)
+
+
+
 ```

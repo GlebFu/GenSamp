@@ -420,7 +420,8 @@ cls_f %>%
   stat_function(fun = function(x) 60/x, geom = "line", linetype = "dashed", size = .5) +
   # facet_grid(subs ~ .) +
   # theme(text = element_text(size=20)) +
-  geom_hline(yintercept = 5, linetype = "dotted", size = .5)
+  geom_hline(yintercept = 5, linetype = "dotted", size = .5) +
+  theme(text = element_text(size=20))
 
 if(saveFigs) save.figures("Intro - Cluster Size")
 
