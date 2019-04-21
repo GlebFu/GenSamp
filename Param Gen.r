@@ -19,11 +19,16 @@ load(paste("data/", file_date, "/base data.rdata", sep = ""))
 covariates
 
 # LogOdds
-schBs <- c(-.03, 0, -.02, .46, .04, -.01, .01, .01, 0, -.1, 0, .02)
+# schBs <- c(-.03, 0, -.02, .46, .04, -.01, .01, .01, 0, -.1, 0, .02)
+
+# SMDs
+schBs <- c(.019, .374, .081, .433, .007, -.403, -.538, .291, .395, -.019, -.101, .520, .412)
+
 # schBs <- schBs*2
 
 # Set focus to Town/Rural
-schEx <- "ToRu"
+# schEx <- "ToRu"
+schEx <- ""
 
 names(schBs) <- covariates[!(covariates %in% schEx)]
 
@@ -38,12 +43,17 @@ rescale <- function(x) {
 }
 
 
+stand <- function(x) (x - mean(x)) / sd(x)
+
+df.stand <- df[,covariates] %>%
+  mutate_all(stand)
+
 # sch.resps <- 8:1/20
 sch.resps <- 9:1/10
 # sch.resps <- c(.1, .2, .3)
 sch.respNames <- paste("PS", formatC(sch.resps*100, width = 2, format = "d", flag = "0"), sep = "")
 
-PS.Int <- sapply(sch.resps, calcPS, Bs = schBs, vars = covariates, data = df, exclude = schEx, getint = T)
+PS.Int <- sapply(sch.resps, calcPS, Bs = schBs, vars = covariates, data = df.stand, exclude = schEx, getint = T)
 
 schPS <- bind_cols(PS.Int[1,])
   # mutate_all(rescale)
@@ -56,7 +66,7 @@ intercepts <- PS.Int[2,] %>%
 names(intercepts) <- names(schPS) <- sch.respNames
 
 
-df.sch <- cbind(df, schPS)
+df.PS <- cbind(df, schPS)
 
 schPS %>%
   gather(key = RR, value = PS) %>%
@@ -138,11 +148,9 @@ df %>%
 #   write.csv(paste("Params/", file_date, "/School Parameters.csv", sep = ""))
 
 
-head(df.sch)
-sch.PS <- df.sch %>%
+head(df.PS)
+df.PS <- df.PS %>%
   select(DID, DSID, SID, sch.respNames)
-
-df.PS <- sch.PS
 
 # Pull out necesary variables for generating selections
 df.select <- select(df, DSID, DID, SID, K, strata, rank_full)
@@ -152,7 +160,15 @@ df.select <- left_join(df.select, df.PS) %>%
   mutate(sch.RR = as.numeric(str_sub(sch.RR, start = 3)))
 
 propAllocation <- function(goal, total, perc) {
-  if(mean(total) < 60) goal[perc == min(perc)] <- goal[perc == min(perc)] + 1
+  total <- mean(total)
+  pa_i <- 60 - total
+  
+  if(pa_i == 0) return(goal)
+  
+  g_i <- which(perc %in% sort(perc, decreasing = pa_i < 0)[1:abs(pa_i)])
+  
+  goal[g_i] <- goal[g_i] + 1 - 2 * (pa_i < 0)
+  
   return(goal)
 }
 
@@ -179,4 +195,4 @@ pop.stats <- df %>%
 
 
 
-save(df, df.select, df.sch, sch.PS, df.PS, PS.Int, covariates, cluster_vars, pop.stats, schBs, file = paste("Data/", file_date, "/simData.Rdata", sep = ""))
+save(df, df.select, df.PS, PS.Int, covariates, cluster_vars, pop.stats, schBs, file = paste("Data/", file_date, "/simData.Rdata", sep = ""))

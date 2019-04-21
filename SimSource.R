@@ -51,27 +51,31 @@ h <- function(x){
 
 Bindex <- function(PS, Eij) {
   
-  dat1B <- PS[Eij == 1]
-  dat2B <- PS[Eij == 0]
-  ##Baklizi and Eidous (2006) estimator
-  # bandwidth
-  h1 <- h(dat1B)
-  h2 <- h(dat2B)
-  
-  # kernel estimators of the density and the distribution
-  kg = function(x, data, hb = h(data)){
-    k = r = length(x)
-    for(i in 1:k) r[i] = mean(dnorm((x[i]-data)/hb))/hb
-    return(r)
-  } 
-  
-  h_max <- max(h1, h2)
-  min_x <- min(PS) - 3 * h_max
-  max_x <- max(PS) + 3 * h_max
-  
-  integrate(function(x) sqrt(kg(x, dat1B, h1) * kg(x, dat2B, h2)), min_x, max_x)$value %>%
-    as.numeric() %>%
-    return()
+  tryCatch({
+    dat1B <- PS[Eij == 1]
+    dat2B <- PS[Eij == 0]
+    ##Baklizi and Eidous (2006) estimator
+    # bandwidth
+    h1 <- h(dat1B)
+    h2 <- h(dat2B)
+    
+    # kernel estimators of the density and the distribution
+    kg = function(x, data, hb = h(data)){
+      k = r = length(x)
+      for(i in 1:k) r[i] = mean(dnorm((x[i]-data)/hb))/hb
+      return(r)
+    } 
+    
+    h_max <- max(h1, h2)
+    min_x <- min(PS) - 3 * h_max
+    max_x <- max(PS) + 3 * h_max
+    
+    integrate(function(x) sqrt(kg(x, dat1B, h1) * kg(x, dat2B, h2)), min_x, max_x)$value %>%
+      as.numeric() %>%
+      return
+  },
+  error = function(cond) {return(NA)})
+
 
 }
 

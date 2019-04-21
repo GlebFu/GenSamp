@@ -11,7 +11,7 @@ df.cov <- df %>% ungroup() %>% select(DSID, covariates) %>% unique
 #----------------------
 # Run Single Iteration
 #----------------------
-df.test <- filter(df.select, sch.RR == 40, K %in% c(2, 5))
+df.test <- filter(df.select, sch.RR == 10, K %in% c(6))
 
 #69590806 - SBS B-Index < .001
 #74069381 - SBS B-Index = .941
@@ -19,7 +19,7 @@ df.test <- filter(df.select, sch.RR == 40, K %in% c(2, 5))
 seed <- 74069381
 set.seed(seed)
 
-# debug(runSim)
+# debug(Bindex)
 
 results <- runSim(df.test,  df.cov = df.cov, frm = frm, vars = covariates)
 

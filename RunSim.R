@@ -6,13 +6,8 @@ file_date <- "2019-03-26"
 
 source("SimSource.R")
 
-# vars <- c("n", "urbanicity", "pELL", "pED", "pELA", "pMath", "pMin", "MEDINC")
-# 
-# frm <- as.formula(paste("Eij ~ ", paste(vars, collapse = " + ")))
-# 
-# df.Bindex <- df %>% ungroup() %>% select(DSID, vars)
-
-# reps <- 1000
+df.select <- df.select %>% filter(K == 6)
+df <- df %>% fliter(K == 6)
 
 runIterations <- function(reps, vars) {
   source("SimSource.R")
@@ -29,8 +24,8 @@ runIterations <- function(reps, vars) {
 
 # runSim(1)
 
-runtimeFile <- paste("Data/", file_date, "/runtime r100.rdata", sep = "")
-resultsFile <- paste("Data/", file_date, "/results r100.rdata", sep = "")
+runtimeFile <- paste("Data/", file_date, "/runtime r10.rdata", sep = "")
+resultsFile <- paste("Data/", file_date, "/results r10.rdata", sep = "")
 
 
 
@@ -38,7 +33,7 @@ library(parallel)
 
 no_cores <- detectCores() - 1
 
-minreps <- 100
+minreps <- 10
 reps <- rep((minreps + (no_cores - minreps %% no_cores)) / no_cores, each = no_cores)
 
 # Initiate cluster
