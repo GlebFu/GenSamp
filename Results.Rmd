@@ -56,8 +56,8 @@ rm(list = ls())
 file_date <- "2019-03-26"
 
 
-runtimeFile <- paste("Data/", file_date, "/runtime r1000.rdata", sep = "")
-resultsFile <- paste("Data/", file_date, "/results r1000.rdata", sep = "")
+runtimeFile <- paste("Data/", file_date, "/runtime r10.rdata", sep = "")
+resultsFile <- paste("Data/", file_date, "/results r10.rdata", sep = "")
 
 load(paste("data/", file_date, "/base data.rdata", sep = ""))
 
@@ -119,6 +119,7 @@ levels(df.coefs$Variables) <- c("Total District Schools",
                                 "Student/Teacher Ratio",
                                 "Suburban",
                                 "Schoolwide Title I",
+                                "Town/Rural",
                                 "Urban")
 
 df.coefs %>%
@@ -139,7 +140,7 @@ data.frame(Intercept = unlist(PS.Int[2,]), RR = names(select(df.PS, -DID, -DSID,
 ```{r, fig.cap = "Distributions of Participation Propensity Scores"}
 
 
-df.sch %>% 
+df.PS %>% 
   select(contains("PS")) %>% 
   gather(key = RR, value = PS) %>% 
   ggplot(aes(x = PS)) + 
@@ -215,16 +216,13 @@ df.sch %>%
 
 avg_Bindex <- df_Bindex %>%
   group_by(sample, sch.RR, Clustering, Sampling, K) %>%
-  summarise(M = mean(Bs),
-            SD = sd(Bs)) %>%
-  group_by(sample, sch.RR, Clustering, Sampling, K) %>%
-  summarise(M = mean(M),
-            SD = mean(SD)) %>%
+  summarise(M = mean(Bs, na.rm = T),
+            SD = sd(Bs, na.rm = T)) %>%
   mutate(LL = M - SD,
          UL = M + SD)
 
 avg_Bindex %>%
-  filter(K == 4 | is.na(K)) %>%
+  # filter(K == 6 | is.na(K)) %>%
   ggplot(aes(x = sch.RR, y = M, color = Sampling, linetype = Clustering)) +
   geom_line() +
   labs(y = "Mean B-index",
@@ -233,21 +231,26 @@ avg_Bindex %>%
 
 if(savePlot) ggsave(paste("Figs/", file_date, "/Paper B-Index.jpg", sep = ""), dpi = 1000, width = 7, height = 4)
 
-avg_Bindex %>%
-  filter(!is.na(K), Sampling == "CS") %>%
-  # mutate(K = as.numeric(K)) %>%
-  ggplot(aes(x = sch.RR, y = M, color = K, group = K)) +
-  geom_line() +
-  geom_hline(yintercept = .9, linetype = "dashed") +
-  labs(y = "Mean B-index",
-       x = "Population Participation Rate") +
-  theme_apa() +
-  scale_y_continuous(breaks = (6:10) / 10, limits = c(.6, 1)) +
-  scale_x_continuous(breaks = (1:9) * 10, limits = c(10, 90)) +
-  scale_colour_gradient(low = "#133913", high = "#00cc00") +
-  theme(text = element_text(size=20))
-  
-ggsave(filename ="Figs/AERA B-Index.jpg", dpi = 1000, width = 10, height = 7)
+df_Bindex %>%
+  group_by(sample, sch.RR, Clustering, Sampling, K) %>%
+  summarise(NA.Count = sum(is.na(Bs))) %>%
+  spread(key = sch.RR, value = NA.Count)
+
+# avg_Bindex %>%
+#   filter(!is.na(K), Sampling == "CS") %>%
+#   # mutate(K = as.numeric(K)) %>%
+#   ggplot(aes(x = sch.RR, y = M, color = K, group = K)) +
+#   geom_line() +
+#   geom_hline(yintercept = .9, linetype = "dashed") +
+#   labs(y = "Mean B-index",
+#        x = "Population Participation Rate") +
+#   theme_apa() +
+#   scale_y_continuous(breaks = (6:10) / 10, limits = c(.6, 1)) +
+#   scale_x_continuous(breaks = (1:9) * 10, limits = c(10, 90)) +
+#   scale_colour_gradient(low = "#133913", high = "#00cc00") +
+#   theme(text = element_text(size=20))
+#   
+# ggsave(filename ="Figs/AERA B-Index.jpg", dpi = 1000, width = 10, height = 7)
 
 ```
 
@@ -264,7 +267,7 @@ sSMDplot <- df_sch_stats %>%
 
 
 sSMDplot %>%
-  filter(K == 4 | is.na(K)) %>%
+  # filter(K == 6 | is.na(K)) %>%
   ggplot(aes(x = sch.RR, y = mSMD, color = Sampling, linetype = Clustering, group = sample)) +
   # geom_point() +
   geom_line() +
@@ -279,23 +282,23 @@ sSMDplot %>%
 if(savePlot)  ggsave(paste("Figs/", file_date, "/All SMDs.jpg", sep = ""), dpi = 1000, width = 7, height = 5)
 
 
-sSMDplot %>%
-  filter(!is.na(K),
-         Sampling == "BS",
-         var %in% c("pTotfrl", "dSCH", "Urban")) %>%
-  ggplot(aes(x = sch.RR, y = mSMD, color = K, group = K)) +
-  geom_line() +
-  geom_hline(yintercept = 0) +
-  geom_hline(yintercept = .25, linetype = "dashed") +
-  facet_wrap(~ var, ncol  = 3) +
-  theme_apa(box = F) +
-  labs(y = "Mean SMD",
-       x = "Population Participation Rate") +
-  scale_x_continuous(breaks = seq(10, 90, 20), limits = c(10, 90)) +
-  scale_colour_gradient(low = "#133913", high = "#00cc00") +
-  theme(text = element_text(size=20))
-
-ggsave(filename ="Figs/AERA SMDs.jpg", dpi = 1000, width = 10, height = 7)
+# sSMDplot %>%
+#   filter(!is.na(K),
+#          Sampling == "BS",
+#          var %in% c("pTotfrl", "dSCH", "Urban")) %>%
+#   ggplot(aes(x = sch.RR, y = mSMD, color = K, group = K)) +
+#   geom_line() +
+#   geom_hline(yintercept = 0) +
+#   geom_hline(yintercept = .25, linetype = "dashed") +
+#   facet_wrap(~ var, ncol  = 3) +
+#   theme_apa(box = F) +
+#   labs(y = "Mean SMD",
+#        x = "Population Participation Rate") +
+#   scale_x_continuous(breaks = seq(10, 90, 20), limits = c(10, 90)) +
+#   scale_colour_gradient(low = "#133913", high = "#00cc00") +
+#   theme(text = element_text(size=20))
+# 
+# ggsave(filename ="Figs/AERA SMDs.jpg", dpi = 1000, width = 10, height = 7)
 ```
 
 
@@ -318,8 +321,8 @@ samplot %>%
   gather(key = measure, value = value, -sample, -sch.RR, -Sampling, -Clustering, -K) %>%
   mutate(level = str_split(measure, "_", simplify = T)[,1],
          measure =  str_split(measure, "_", simplify = T)[,2]) %>%
-  filter(level == "sch",
-         K == 4 | is.na(K)) %>%
+  # filter(level == "sch",
+  #        K == 4 | is.na(K)) %>%
   ggplot(aes(x = sch.RR, y = value, group = sample, color = Sampling, linetype = Clustering)) +
   geom_point() +
   geom_line() +
@@ -327,17 +330,17 @@ samplot %>%
   expand_limits(y=0) +
   theme_apa(box = T)
 
-samplot %>%
-  gather(key = measure, value = value, -sample, -sch.RR, -Sampling, -Clustering, -K) %>%
-  mutate(level = str_split(measure, "_", simplify = T)[,1],
-         measure =  str_split(measure, "_", simplify = T)[,2]) %>%
-  filter(level == "sch",
-         sample == "S_BS") %>%
-  ggplot(aes(x = sch.RR, y = value, color = K, group = K)) +
-  geom_line() +
-  facet_wrap( ~ measure, scales = "free_y") +
-  expand_limits(y=0) +
-  theme_apa(box = T)
+# samplot %>%
+#   gather(key = measure, value = value, -sample, -sch.RR, -Sampling, -Clustering, -K) %>%
+#   mutate(level = str_split(measure, "_", simplify = T)[,1],
+#          measure =  str_split(measure, "_", simplify = T)[,2]) %>%
+#   filter(level == "sch",
+#          sample == "S_BS") %>%
+#   ggplot(aes(x = sch.RR, y = value, color = K, group = K)) +
+#   geom_line() +
+#   facet_wrap( ~ measure, scales = "free_y") +
+#   expand_limits(y=0) +
+#   theme_apa(box = T)
 
 ```
 
@@ -353,29 +356,29 @@ samplot2 <- samplot %>%
   filter(measure == "contacted") %>%
   mutate(level = ifelse(level == "sch", "Schools", "Districts"))
 
-samplot2 %>%
-  filter(Sampling == "BS") %>%
-  ggplot(aes(x = sch.RR, y = value, group = K, color = K)) +
-  geom_point() +
-  geom_line() +
-  # facet_wrap( ~ level, scales = "free_y") +
-  expand_limits(y=0) +
-  # theme_apa(box = T) +
-  # scale_fill_brewer(type = "seq", palette = 4) +
-  # scale_color_brewer(type = "qual", palette = 3)  +
-  theme(legend.position = "bottom",
-        panel.spacing = unit(2, "lines"),
-        # text = element_text(size=20),
-        # legend.title = element_text(size=15),
-        axis.text.x = element_text(angle = 45, hjust = 1)) +
-  labs(x = "Population Response Rate", y = "Units Contacted") +
-  theme_apa() +
-  scale_y_continuous(breaks = seq(0, 1000, 200), limits = c(0, 1000), minor_breaks = seq(0, 1000, 100)) +
-  scale_x_continuous(breaks = seq(10, 90, 10), limits = c(10, 90)) +
-  scale_colour_gradient(low = "#133913", high = "#00cc00") +
-  theme(text = element_text(size=20))
-
-ggsave(filename ="Figs/AERA Contacts.jpg", dpi = 1000, width = 10, height = 7)
+# samplot2 %>%
+#   filter(Sampling == "BS") %>%
+#   ggplot(aes(x = sch.RR, y = value, group = K, color = K)) +
+#   geom_point() +
+#   geom_line() +
+#   # facet_wrap( ~ level, scales = "free_y") +
+#   expand_limits(y=0) +
+#   # theme_apa(box = T) +
+#   # scale_fill_brewer(type = "seq", palette = 4) +
+#   # scale_color_brewer(type = "qual", palette = 3)  +
+#   theme(legend.position = "bottom",
+#         panel.spacing = unit(2, "lines"),
+#         # text = element_text(size=20),
+#         # legend.title = element_text(size=15),
+#         axis.text.x = element_text(angle = 45, hjust = 1)) +
+#   labs(x = "Population Response Rate", y = "Units Contacted") +
+#   theme_apa() +
+#   scale_y_continuous(breaks = seq(0, 1000, 200), limits = c(0, 1000), minor_breaks = seq(0, 1000, 100)) +
+#   scale_x_continuous(breaks = seq(10, 90, 10), limits = c(10, 90)) +
+#   scale_colour_gradient(low = "#133913", high = "#00cc00") +
+#   theme(text = element_text(size=20))
+# 
+# ggsave(filename ="Figs/AERA Contacts.jpg", dpi = 1000, width = 10, height = 7)
 
 if(savePlot)  ggsave(paste("Figs/", file_date, "/Units Contacted.jpg", sep = ""), dpi = 1000, width = 7, height = 5)
 
@@ -383,7 +386,7 @@ if(savePlot)  ggsave(paste("Figs/", file_date, "/Units Contacted.jpg", sep = "")
 
 ```{r, fig.cap = "Sampling response rates"}
 df.rr <- df_responses %>%
-  filter(str_detect(variable, "sch_RR"), is.na(cluster)) %>%
+  filter(str_detect(variable, "sch_RR"), is.na(strata)) %>%
   group_by(sample, sch.RR, Sampling, Clustering) %>%
   summarise(value = mean(value)) %>%
   rename(RR = sch.RR) %>%

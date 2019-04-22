@@ -6,17 +6,18 @@ file_date <- "2019-03-26"
 
 source("SimSource.R")
 
-df.select <- df.select %>% filter(K == 6)
-df <- df %>% fliter(K == 6)
 
-runIterations <- function(reps, vars) {
+
+runIterations <- function(reps, vars, data) {
   source("SimSource.R")
   # debug(runSim)
   
+  df.select <- df.select %>% filter(K == 6)
+  data <- data %>% filter(K == 6)
 
   frm <- as.formula(paste("Eij ~ ", paste(vars, collapse = " + ")))
   
-  df.cov <- df %>% ungroup() %>% select(DSID, covariates) %>% unique
+  df.cov <- data %>% ungroup() %>% select(DSID, covariates) %>% unique
   
   replicate(reps, runSim(df.select,  df.cov = df.cov, frm = frm, vars = vars))
   
@@ -24,8 +25,8 @@ runIterations <- function(reps, vars) {
 
 # runSim(1)
 
-runtimeFile <- paste("Data/", file_date, "/runtime r10.rdata", sep = "")
-resultsFile <- paste("Data/", file_date, "/results r10.rdata", sep = "")
+runtimeFile <- paste("Data/", file_date, "/runtime r100.rdata", sep = "")
+resultsFile <- paste("Data/", file_date, "/results r100.rdata", sep = "")
 
 
 
@@ -33,7 +34,7 @@ library(parallel)
 
 no_cores <- detectCores() - 1
 
-minreps <- 10
+minreps <- 100
 reps <- rep((minreps + (no_cores - minreps %% no_cores)) / no_cores, each = no_cores)
 
 # Initiate cluster
@@ -42,7 +43,7 @@ cl <- makeCluster(no_cores)
 seed <- runif(1,0,1)*10^8
 set.seed(27770460)
 
-runtime <- system.time(results <- parSapply(cl, reps, runIterations, covariates))
+runtime <- system.time(results <- parSapply(cl, reps, runIterations, covariates, df))
 
 stopCluster(cl)
 
