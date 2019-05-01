@@ -97,6 +97,178 @@
 \hypertarget{methods-summary}{%
 \section{Methods Summary}\label{methods-summary}}
 
+\hypertarget{clustering}{%
+\subsection{Clustering}\label{clustering}}
+
+\begin{verbatim}
+## Warning: package 'tableone' was built under R version 3.5.3
+\end{verbatim}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{l|l|l}
+\hline
+strata & var & SMD\\
+\hline
+1 & dSCH & 0.11\\
+\hline
+1 & ethBlack & \textbackslash{}textbf\{-0.39\}\\
+\hline
+1 & ethHisp & -0.22\\
+\hline
+1 & ethWhite & \textbackslash{}textbf\{0.47\}\\
+\hline
+1 & n & 0.01\\
+\hline
+1 & pELL & 0.02\\
+\hline
+1 & pFem & 0\\
+\hline
+1 & pTotfrl & \textbackslash{}textbf\{-0.49\}\\
+\hline
+1 & ST.ratio & 0.03\\
+\hline
+1 & Suburban & \textbackslash{}textbf\{0.83\}\\
+\hline
+1 & T1 & \textbackslash{}textbf\{-0.71\}\\
+\hline
+1 & ToRu & -0.02\\
+\hline
+1 & Urban & \textbackslash{}textbf\{-0.81\}\\
+\hline
+2 & dSCH & \textbackslash{}textbf\{0.33\}\\
+\hline
+2 & ethBlack & -0.19\\
+\hline
+2 & ethHisp & \textbackslash{}textbf\{0.71\}\\
+\hline
+2 & ethWhite & \textbackslash{}textbf\{-0.77\}\\
+\hline
+2 & n & \textbackslash{}textbf\{0.46\}\\
+\hline
+2 & pELL & \textbackslash{}textbf\{0.68\}\\
+\hline
+2 & pFem & 0.06\\
+\hline
+2 & pTotfrl & 0.05\\
+\hline
+2 & ST.ratio & \textbackslash{}textbf\{0.52\}\\
+\hline
+2 & Suburban & 0.12\\
+\hline
+2 & T1 & \textbackslash{}textbf\{-0.61\}\\
+\hline
+2 & ToRu & \textbackslash{}textbf\{-0.99\}\\
+\hline
+2 & Urban & \textbackslash{}textbf\{0.67\}\\
+\hline
+3 & dSCH & \textbackslash{}textbf\{-0.89\}\\
+\hline
+3 & ethBlack & -0.03\\
+\hline
+3 & ethHisp & \textbackslash{}textbf\{-1.15\}\\
+\hline
+3 & ethWhite & \textbackslash{}textbf\{1.03\}\\
+\hline
+3 & n & -0.23\\
+\hline
+3 & pELL & \textbackslash{}textbf\{-1.15\}\\
+\hline
+3 & pFem & -0.05\\
+\hline
+3 & pTotfrl & \textbackslash{}textbf\{-1.04\}\\
+\hline
+3 & ST.ratio & -0.09\\
+\hline
+3 & Suburban & \textbackslash{}textbf\{0.76\}\\
+\hline
+3 & T1 & \textbackslash{}textbf\{-0.75\}\\
+\hline
+3 & ToRu & 0.25\\
+\hline
+3 & Urban & \textbackslash{}textbf\{-0.96\}\\
+\hline
+4 & dSCH & \textbackslash{}textbf\{0.3\}\\
+\hline
+4 & ethBlack & \textbackslash{}textbf\{0.27\}\\
+\hline
+4 & ethHisp & \textbackslash{}textbf\{0.87\}\\
+\hline
+4 & ethWhite & \textbackslash{}textbf\{-0.98\}\\
+\hline
+4 & n & 0.05\\
+\hline
+4 & pELL & \textbackslash{}textbf\{0.76\}\\
+\hline
+4 & pFem & 0.02\\
+\hline
+4 & pTotfrl & \textbackslash{}textbf\{1.1\}\\
+\hline
+4 & ST.ratio & 0.1\\
+\hline
+4 & Suburban & \textbackslash{}textbf\{-0.72\}\\
+\hline
+4 & T1 & \textbackslash{}textbf\{1.31\}\\
+\hline
+4 & ToRu & -0.13\\
+\hline
+4 & Urban & \textbackslash{}textbf\{0.82\}\\
+\hline
+5 & dSCH & -0.1\\
+\hline
+5 & ethBlack & 0.17\\
+\hline
+5 & ethHisp & \textbackslash{}textbf\{0.69\}\\
+\hline
+5 & ethWhite & \textbackslash{}textbf\{-0.43\}\\
+\hline
+5 & n & -0.08\\
+\hline
+5 & pELL & \textbackslash{}textbf\{0.54\}\\
+\hline
+5 & pFem & -0.05\\
+\hline
+5 & pTotfrl & \textbackslash{}textbf\{1.08\}\\
+\hline
+5 & ST.ratio & \textbackslash{}textbf\{-0.29\}\\
+\hline
+5 & Suburban & \textbackslash{}textbf\{0.83\}\\
+\hline
+5 & T1 & \textbackslash{}textbf\{1.31\}\\
+\hline
+5 & ToRu & \textbackslash{}textbf\{0.48\}\\
+\hline
+5 & Urban & \textbackslash{}textbf\{-1.21\}\\
+\hline
+6 & dSCH & 0.24\\
+\hline
+6 & ethBlack & 0.07\\
+\hline
+6 & ethHisp & \textbackslash{}textbf\{-0.82\}\\
+\hline
+6 & ethWhite & \textbackslash{}textbf\{0.76\}\\
+\hline
+6 & n & -0.17\\
+\hline
+6 & pELL & \textbackslash{}textbf\{-0.77\}\\
+\hline
+6 & pFem & 0.01\\
+\hline
+6 & pTotfrl & \textbackslash{}textbf\{-0.71\}\\
+\hline
+6 & ST.ratio & \textbackslash{}textbf\{-0.35\}\\
+\hline
+6 & Suburban & \textbackslash{}textbf\{-1.21\}\\
+\hline
+6 & T1 & \textbackslash{}textbf\{-0.71\}\\
+\hline
+6 & ToRu & \textbackslash{}textbf\{0.49\}\\
+\hline
+6 & Urban & \textbackslash{}textbf\{0.82\}\\
+\hline
+\end{tabular}
+\end{table}
+
 \hypertarget{participation-generating-model}{%
 \subsection{Participation Generating Model}\label{participation-generating-model}}
 
@@ -106,39 +278,41 @@
 \hline
 Variables & vnames & log\_odds\\
 \hline
-Schoolwide Title I & T1 & -0.03\\
+Schoolwide Title I & T1 & 0.019\\
 \hline
-Total Students & n & 0.00\\
+Total Students & n & 0.374\\
 \hline
-\% FRL & pTotfrl & -0.02\\
+\% FRL & pTotfrl & 0.081\\
 \hline
-Urban & Urban & 0.46\\
+Urban & Urban & 0.433\\
 \hline
-Suburban & Suburban & 0.04\\
+Suburban & Suburban & 0.007\\
 \hline
-\% White & ethWhite & -0.01\\
+Town/Rural & ToRu & -0.403\\
 \hline
-\% Black & ethBlack & 0.01\\
+\% White & ethWhite & -0.538\\
 \hline
-\% Hispanic & ethHisp & 0.01\\
+\% Black & ethBlack & 0.291\\
 \hline
-\% Female & pFem & 0.00\\
+\% Hispanic & ethHisp & 0.395\\
 \hline
-Student/Teacher Ratio & ST.ratio & -0.10\\
+\% Female & pFem & -0.019\\
 \hline
-Total District Schools & dSCH & 0.00\\
+Student/Teacher Ratio & ST.ratio & -0.101\\
 \hline
-\% ELL & pELL & 0.02\\
+Total District Schools & dSCH & 0.520\\
+\hline
+\% ELL & pELL & 0.412\\
 \hline
 \end{tabular}
 \end{table}
 
-\includegraphics{Results_files/figure-latex/unnamed-chunk-3-1.pdf}
+\includegraphics{Results_files/figure-latex/unnamed-chunk-4-1.pdf}
 
 \begin{figure}
 \centering
-\includegraphics{Results_files/figure-latex/unnamed-chunk-4-1.pdf}
-\caption{\label{fig:unnamed-chunk-4}Distributions of Participation Propensity Scores}
+\includegraphics{Results_files/figure-latex/unnamed-chunk-5-1.pdf}
+\caption{\label{fig:unnamed-chunk-5}Distributions of Participation Propensity Scores}
 \end{figure}
 
 \hypertarget{b-index}{%
@@ -146,17 +320,30 @@ Total District Schools & dSCH & 0.00\\
 
 \begin{figure}
 \centering
-\includegraphics{Results_files/figure-latex/unnamed-chunk-7-1.pdf}
-\caption{\label{fig:unnamed-chunk-7}Averge B-Index}
+\includegraphics{Results_files/figure-latex/unnamed-chunk-8-1.pdf}
+\caption{\label{fig:unnamed-chunk-8}Averge B-Index}
 \end{figure}
+
+\begin{verbatim}
+## # A tibble: 5 x 13
+## # Groups:   sample, Clustering, Sampling [5]
+##   sample Clustering Sampling     K  `10`  `20`  `30`  `40`  `50`  `60`
+##   <chr>  <chr>      <chr>    <dbl> <int> <int> <int> <int> <int> <int>
+## 1 S_BS   Stratified BS           6     0     0     0     0     0     0
+## 2 S_CS   Stratified CS           6     0     7     4     4     0     0
+## 3 S_RS   Stratified RS           6     0     0     0     0     0     0
+## 4 U_CS   Unstratif~ CS          NA     6     4     5     1     3     0
+## 5 U_RS   Unstratif~ RS          NA     2     3     2     0     1     0
+## # ... with 3 more variables: `70` <int>, `80` <int>, `90` <int>
+\end{verbatim}
 
 \hypertarget{standardized-mean-differences}{%
 \subsection{Standardized mean differences}\label{standardized-mean-differences}}
 
 \begin{figure}
 \centering
-\includegraphics{Results_files/figure-latex/unnamed-chunk-8-1.pdf}
-\caption{\label{fig:unnamed-chunk-8}Average SMDs}
+\includegraphics{Results_files/figure-latex/unnamed-chunk-9-1.pdf}
+\caption{\label{fig:unnamed-chunk-9}Average SMDs}
 \end{figure}
 
 \hypertarget{sampling-difficulty}{%
@@ -164,20 +351,14 @@ Total District Schools & dSCH & 0.00\\
 
 \begin{figure}
 \centering
-\includegraphics{Results_files/figure-latex/unnamed-chunk-10-1.pdf}
-\caption{\label{fig:unnamed-chunk-10}Recruitment Counts}
-\end{figure}
-
-\begin{figure}
-\centering
 \includegraphics{Results_files/figure-latex/unnamed-chunk-11-1.pdf}
-\caption{\label{fig:unnamed-chunk-11}Schools Contacted}
+\caption{\label{fig:unnamed-chunk-11}Recruitment Counts}
 \end{figure}
 
 \begin{figure}
 \centering
-\includegraphics{Results_files/figure-latex/unnamed-chunk-12-1.pdf}
-\caption{\label{fig:unnamed-chunk-12}Sampling response rates}
+\includegraphics{Results_files/figure-latex/unnamed-chunk-13-1.pdf}
+\caption{\label{fig:unnamed-chunk-13}Sampling response rates}
 \end{figure}
 
 

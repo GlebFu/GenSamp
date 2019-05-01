@@ -27,7 +27,8 @@ df <- df %>%
   mutate(SID = 1:n() + 10000) %>%
   ungroup() %>%
   mutate(DSID = paste(DID, SID, sep = "-")) %>%
-  filter(ST.ratio <= 1000)
+  filter(ST.ratio <= 50,
+         n <= 3000)
 
 
 vars <- c("LSTATE", "LEANM", "SCHNAM", "DID", "SID", "DSID", "n", "pTotfrl",
@@ -40,6 +41,21 @@ covariates <- c("T1", "n", "pTotfrl", "Urban", "Suburban", "ToRu",
                 "ST.ratio", "dSCH","pELL")
 
 df <- df[,vars] %>% na.omit %>% unique()
+
+
+
+
+df %>%
+  select(DSID, covariates) %>%
+  gather(key = var, value = value, -DSID) %>%
+  group_by(var) %>%
+  mutate(z = (value - mean(value)) / sd(value)) %>%
+  filter(abs(z) > 4) %>%
+  summarise(min = min(value),
+            max = max(value),
+            minz = min(abs(z)),
+            maxz = max(abs(z)))
+
 
 
 #Convert to Percents

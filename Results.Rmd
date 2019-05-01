@@ -43,7 +43,7 @@ output            : papaja::apa6_pdf
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = F, cache = F, warnings = F)
+knitr::opts_chunk$set(echo = F, cache = F, warnings = F, cache = T)
 ```
 
 ```{r load.packages, include = FALSE}
@@ -56,8 +56,8 @@ rm(list = ls())
 file_date <- "2019-03-26"
 
 
-runtimeFile <- paste("Data/", file_date, "/runtime r10.rdata", sep = "")
-resultsFile <- paste("Data/", file_date, "/results r10.rdata", sep = "")
+runtimeFile <- paste("Data/", file_date, "/runtime r1000.rdata", sep = "")
+resultsFile <- paste("Data/", file_date, "/results r1000.rdata", sep = "")
 
 load(paste("data/", file_date, "/base data.rdata", sep = ""))
 
@@ -102,6 +102,51 @@ boxErrors <- function(x) {
 
 
 # Methods Summary
+
+## Clustering
+
+```{r, results = "asis"}
+library(tableone)
+
+tab1 <- df %>% 
+  ungroup() %>% 
+  filter(K == 6) %>% 
+  droplevels() %>% 
+  select(strata, covariates) %>%
+  gather(key = var, value = val, -strata) %>%
+  group_by(strata, var) %>%
+  summarise(strat.mean = mean(val)) %>%
+  left_join(pop.stats) %>%
+  transmute(var = var,
+            SMD = round((pop.mean - strat.mean) / pop.sd, 2))
+
+# tab1 %>%
+#   mutate(SMD = cell_spec(SMD, "latex", bold = abs(SMD) > .25)) %>%
+#   kable() %>%
+#   kable_styling()
+
+tab1 %>%
+  mutate(sig = ifelse(abs(SMD) > .25, "Sig", "Not Sig"),
+         neg = SMD > 0) %>%
+  ggplot(aes(x = strata, y = var, size = abs(SMD), color = neg, alpha = sig)) +
+  geom_point(shape = "-") + 
+  scale_size_continuous(range = c(10,30)) +
+  theme(legend.position = "none") +
+  scale_alpha_discrete(range = c(.5, 1))
+  
+
+df %>% 
+  ungroup() %>% 
+  filter(K == 6) %>% 
+  droplevels() %>% 
+  select(strata, covariates) %>%
+  gather(key = var, value = val, -strata) %>%
+  ggplot(aes(strata, val, color = val)) + 
+  geom_boxplot() + 
+  facet_wrap(~ var, scales = "free_y") + 
+  theme(legend.position = "none")
+
+```
 
 ## Participation Generating Model
 
@@ -148,6 +193,22 @@ df.PS %>%
   facet_wrap(~RR, scales = "free") +
   theme_apa()
 
+
+df.temp <- df.select %>%
+  ungroup() %>%
+  filter(K == 6) %>%
+  select(strata, DSID) %>%
+  right_join(df.PS) %>% 
+  gather(key = RR, value = PS, PS90:PS10)
+  
+ggplot(df.temp, aes(x = PS, color = strata)) +
+  geom_density() +
+  facet_wrap(~RR, scales = "free_y")
+
+ggplot(df.temp, aes(x = strata, y = PS, color = strata)) +
+  geom_boxplot() +
+  facet_wrap(~RR, scales = "free_y") + 
+  theme(legend.position = "none")
 
 ```
 
@@ -222,12 +283,22 @@ avg_Bindex <- df_Bindex %>%
          UL = M + SD)
 
 avg_Bindex %>%
-  # filter(K == 6 | is.na(K)) %>%
+  filter(!is.na(K),
+         Sampling == "BS") %>%
+  ggplot(aes(x = sch.RR, y = M, color = K, linetype = Clustering, group = K)) +
+  geom_line() +
+  labs(y = "Mean B-index",
+       x = "Population Participation Rate") +
+  theme_apa()
+
+avg_Bindex %>%
+  filter(K == 6 | is.na(K)) %>%
   ggplot(aes(x = sch.RR, y = M, color = Sampling, linetype = Clustering)) +
   geom_line() +
   labs(y = "Mean B-index",
        x = "Population Participation Rate") +
   theme_apa()
+
 
 if(savePlot) ggsave(paste("Figs/", file_date, "/Paper B-Index.jpg", sep = ""), dpi = 1000, width = 7, height = 4)
 
@@ -259,6 +330,7 @@ df_Bindex %>%
 ## Standardized mean differences
 
 ```{r, fig.cap = "Average SMDs", fig.height = 7}
+
 sSMDplot <- df_sch_stats %>%
   group_by(sample, sch.RR, var, sample, Sampling, Clustering, K) %>%
   summarise(mSMD = mean(abs(smd)),
@@ -267,7 +339,7 @@ sSMDplot <- df_sch_stats %>%
 
 
 sSMDplot %>%
-  # filter(K == 6 | is.na(K)) %>%
+  filter(K == 6 | is.na(K)) %>%
   ggplot(aes(x = sch.RR, y = mSMD, color = Sampling, linetype = Clustering, group = sample)) +
   # geom_point() +
   geom_line() +
@@ -277,6 +349,19 @@ sSMDplot %>%
   theme_apa(box = F) +
   labs(y = "Mean SMD",
        x = "Population Participation Rate")
+
+sSMDplot %>%
+  filter(Sampling == "BS") %>%
+  ggplot(aes(x = sch.RR, y = mSMD, color = K, linetype = Clustering, group = K)) +
+  # geom_point() +
+  geom_line() +
+  geom_hline(yintercept = 0) +
+  geom_hline(yintercept = .25, linetype = "dashed") +
+  facet_wrap( ~ var, scales = "free_y", ncol  = 3) +
+  theme_apa(box = F) +
+  labs(y = "Mean SMD",
+       x = "Population Participation Rate")
+
 
 
 if(savePlot)  ggsave(paste("Figs/", file_date, "/All SMDs.jpg", sep = ""), dpi = 1000, width = 7, height = 5)
@@ -321,9 +406,21 @@ samplot %>%
   gather(key = measure, value = value, -sample, -sch.RR, -Sampling, -Clustering, -K) %>%
   mutate(level = str_split(measure, "_", simplify = T)[,1],
          measure =  str_split(measure, "_", simplify = T)[,2]) %>%
-  # filter(level == "sch",
-  #        K == 4 | is.na(K)) %>%
+  filter(K == 6 | is.na(K)) %>%
   ggplot(aes(x = sch.RR, y = value, group = sample, color = Sampling, linetype = Clustering)) +
+  geom_point() +
+  geom_line() +
+  facet_wrap( ~ measure, scales = "free_y") +
+  expand_limits(y = 0) +
+  theme_apa(box = T)
+
+
+samplot %>%
+  gather(key = measure, value = value, -sample, -sch.RR, -Sampling, -Clustering, -K) %>%
+  mutate(level = str_split(measure, "_", simplify = T)[,1],
+         measure =  str_split(measure, "_", simplify = T)[,2]) %>%
+  filter(Sampling == "BS") %>%
+  ggplot(aes(x = sch.RR, y = value, group = K, color = K, linetype = Clustering)) +
   geom_point() +
   geom_line() +
   facet_wrap( ~ measure, scales = "free_y") +

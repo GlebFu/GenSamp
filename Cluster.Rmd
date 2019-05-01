@@ -111,7 +111,9 @@ minK <- 2
 cluster_vars <- c(covariates[!(covariates %in% c("Urban", "Suburban", "ToRu"))], "urbanicity")
 
 distance <- df[, cluster_vars] %>%
-  mutate(n = log(n)) %>%
+  mutate(n = log(n),
+         dSCH = log(dSCH),
+         ST.ratio = log(ST.ratio)) %>%
   # sample_n(500) %>%
   daisy(metric = "gower")
 
