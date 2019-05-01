@@ -57,7 +57,6 @@ df %>%
             maxz = max(abs(z)))
 
 
-
 #Convert to Percents
 
 df <- df %>%
