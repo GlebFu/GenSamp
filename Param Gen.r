@@ -32,7 +32,7 @@ schEx <- ""
 
 names(schBs) <- covariates[!(covariates %in% schEx)]
 
-
+schBs
 
 #-----------------------
 # Generate Intercept
@@ -57,6 +57,7 @@ PS.Int <- sapply(sch.resps, calcPS, Bs = schBs, vars = covariates, data = df.sta
 
 schPS <- bind_cols(PS.Int[1,])
   # mutate_all(rescale)
+schPS %>% colMeans()
 
 intercepts <- PS.Int[2,] %>%
   unlist
@@ -103,10 +104,9 @@ to_matrix <- function(data, vars, add.vars = NA) {
 df <- to_matrix(data = df, vars = cluster_vars, add.vars = c("DSID", names(cls))) %>%
   gather(key = var, value = value, -one_of(c("DSID", names(cls)))) %>%
   gather(key = K, value = strata, - var, -DSID, -value) %>%
-  group_by(K, var, strata) %>%
+  group_by(K, strata, var) %>%
   mutate(w = 1/var(value)) %>%
   filter(w != Inf) %>%
-  group_by(K, strata, var) %>%
   mutate(value = w * (value - mean(value))^2) %>%
   # mutate(value = (value - mean(value))^2) %>%
   group_by(K, DSID, strata) %>%
@@ -165,31 +165,26 @@ df.select <- left_join(df.select, df.PS) %>%
   gather(key = sch.RR, value = sch.PS, sch.respNames) %>%
   mutate(sch.RR = as.numeric(str_sub(sch.RR, start = 3)))
 
-propAllocation <- function(goal, total, perc) {
-  total <- mean(total)
-  pa_i <- 60 - total
-  
-  if(pa_i == 0) return(goal)
-  
-  g_i <- which(perc %in% sort(perc, decreasing = pa_i < 0)[1:abs(pa_i)])
-  
-  goal[g_i] <- goal[g_i] + 1 - 2 * (pa_i < 0)
-  
-  return(goal)
-}
 
-df.select <- df.select %>%
+prop_allocations <-
+  df.select %>%
   group_by(K, strata) %>%
   summarise(n = n()) %>%
-  filter(n != 0) %>%
+  # filter(n != 0) %>%
   group_by(K) %>%
   mutate(p = n / sum(n),
          pa = round(p * 60),
          t = sum(pa),
-         pa = propAllocation(pa, t, p)) %>%
+         pa = propAllocation(pa, t, p))
+
+prop_allocations %>%
+  group_by(K) %>%
+  summarise(t = sum(pa))
+
+df.select <- 
+  prop_allocations %>%
   select(K, strata, pa) %>%
   right_join(df.select)
-
 
 pop.stats <- df %>%
   ungroup() %>%

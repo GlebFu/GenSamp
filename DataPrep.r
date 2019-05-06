@@ -1,5 +1,7 @@
 library(tidyverse)
 
+rm(list = ls())
+
 file_date <- "2019-03-26"
 file_dir <- paste("data/", file_date, "/", sep = "")
 
@@ -8,15 +10,17 @@ df <- read.csv("Data/final data.csv", stringsAsFactors = F)
 df$urbanicity <- factor(df$urbanicity)
 levels(df$urbanicity) <- c("ToRu", "Suburban", "ToRu", "Urban")
 
-# Create ELL and ED variable district data when school is unavailable
-# Create Minority variable
-# Create Town/Rural Variable
+
+# Drop large schools
+# Fix binary variables
+# Fix percentage variables
+
 df <- df %>% 
-  filter(n < 4000) %>%
+  filter(n < 4000) %>%      
   unique() %>%
   mutate(pELL = ifelse(is.na(pELL), pELL_D, pELL), 
          pED = ifelse(is.na(pED), pTotfrl, pED),
-         pMin = 1-ethWhite,
+         pMin = 1 - ethWhite,
          ToRu = Town + Rural,
          MEDINC = as.numeric(MEDINC),
          DID = as.numeric(as.factor(LEAID)) + 1000,
@@ -40,9 +44,8 @@ covariates <- c("T1", "n", "pTotfrl", "Urban", "Suburban", "ToRu",
                 "ethWhite", "ethBlack", "ethHisp", "pFem",
                 "ST.ratio", "dSCH","pELL")
 
+
 df <- df[,vars] %>% na.omit %>% unique()
-
-
 
 
 df %>%

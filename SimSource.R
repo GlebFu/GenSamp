@@ -127,6 +127,7 @@ createSample <- function(data, df.cov) {
     group_by(sch.RR) %>%
     mutate(rank.SRS = sample(1:n())) %>%
     arrange(rank.SRS) %>%
+    # or do sample_frac(size = 1)
     mutate(count = cumsum(Eij)) %>% 
     filter(count <= 60) %>%
     left_join(df.cov) %>%
@@ -160,6 +161,7 @@ createSample <- function(data, df.cov) {
     group_by(sch.RR, K, strata) %>%
     mutate(rank.SRS = sample(1:n())) %>%
     arrange(rank.SRS) %>%
+    # or do sample_frac(size = 1)
     mutate(count = cumsum(Eij)) %>% 
     filter(count <= pa) %>%
     left_join(df.cov) %>%

@@ -21,6 +21,68 @@ set.seed(seed)
 
 # debug(Bindex)
 
+
+#--------
+dat <- df.test
+vars <- covariates
+df.cov
+frm
+
+df.unstrat <- dat %>% 
+  ungroup() %>% 
+  select(-K, -strata, -rank_full, -pa) %>% 
+  unique 
+
+approached <- generateE(df.unstrat)
+approached <- dat %>% left_join(approached) %>% bind_rows(approached)
+samp <- createSample(approached, df.cov)
+
+responses <- calcResponseRates(samp) %>%
+  gather(key = variable, value = value, -sample, -sch.RR, -strata, -K)
+
+responses <- calcResponseRates(samp, cluster = T) %>%
+  gather(key = variable, value = value, -sample, -sch.RR, -strata, -K) %>%
+  rbind(responses)
+
+samp.stats <- samp %>%
+  ungroup() %>%
+  select(sch.RR, sample, vars, K) %>%
+  gather(key = var, value = val, -sample, -sch.RR, -K) %>%
+  group_by(sch.RR, sample, var, K) %>%
+  summarise(samp.mean = mean(val),
+            samp.sd = sd(val))
+
+Bindicies <- samp %>%
+  select(sample, DSID, Eij, vars, sch.RR, K) %>%
+  group_by(sample, sch.RR, K) %>%
+  nest() %>%
+  mutate(data = map(data, full_join, df.cov)) %>%
+  unnest() %>%
+  mutate(Eij = ifelse(is.na(Eij), 0, Eij)) %>% 
+  group_by(sample, sch.RR, K) %>%
+  nest() %>% 
+  mutate(PS_sample = map(data, glm, formula = frm, family = quasibinomial()),
+         PS_sample = map(PS_sample, fitted)) %>%
+  unnest() %>%
+  group_by(sample, sch.RR, K) %>%
+  summarise(Bs = Bindex(PS_sample, Eij))
+
+samp_counts <- samp %>%
+  select(sample, DSID, Eij, K, sch.RR) %>%
+  filter(Eij == 1)
+
+
+#--------
+
+
+
+
+
+
+
+
+
+
 results <- runSim(df.test,  df.cov = df.cov, frm = frm, vars = covariates)
 
 

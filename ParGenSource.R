@@ -158,3 +158,16 @@ getVals <- function (bs, vars, data, exclude, goal) {
   return(values)
   
 }
+
+propAllocation <- function(goal, total, perc) {
+  total <- mean(total)
+  pa_i <- 60 - total
+  
+  if(pa_i == 0) return(goal)
+  
+  g_i <- which(perc %in% sort(perc, decreasing = pa_i < 0)[1:abs(pa_i)])
+  
+  goal[g_i] <- goal[g_i] + 1 - 2 * (pa_i < 0)
+  
+  return(goal)
+}
