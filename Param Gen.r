@@ -85,7 +85,7 @@ schPS %>%
 #-----------------------
 load(paste("data/", file_date, "/base data.rdata", sep = ""))
 
-load(paste("Paper Data/", file_date, "/Clusters.rdata", sep = ""))
+load(paste("Paper Data/", file_date, "/Clusters - OV.rdata", sep = ""))
 # load(paste("Paper Data/", file_date, "/clusters-full-logs.rdata", sep = ""))
 
 df <- cbind(df, cls)
@@ -120,7 +120,13 @@ df <- to_matrix(data = df, vars = cluster_vars, add.vars = c("DSID", names(cls))
 
 
 
-df$K <- str_split(df$K, pattern = "_", simplify = T)[,2] %>% as.numeric
+df <- df %>%
+  group_by(K) %>%
+  mutate(K2 = max(strata)) %>%
+  ungroup() %>%
+  select(-K) %>%
+  rename(K = K2)
+
 df$strata <- as.factor(df$strata)
 
 df %>%

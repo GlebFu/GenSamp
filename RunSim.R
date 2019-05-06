@@ -12,8 +12,8 @@ runIterations <- function(reps, vars, data) {
   source("SimSource.R")
   # debug(runSim)
   
-  # df.select <- df.select %>% filter(K == 6)
-  # data <- data %>% filter(K == 6)
+  df.select <- df.select %>% filter(K == 6)
+  data <- data %>% filter(K == 6)
 
   frm <- as.formula(paste("Eij ~ ", paste(vars, collapse = " + ")))
   
@@ -25,8 +25,8 @@ runIterations <- function(reps, vars, data) {
 
 # runSim(1)
 
-runtimeFile <- paste("Data/", file_date, "/runtime r10x10.rdata", sep = "")
-resultsFile <- paste("Data/", file_date, "/results r10x10.rdata", sep = "")
+runtimeFile <- paste("Data/", file_date, "/runtime r100.rdata", sep = "")
+resultsFile <- paste("Data/", file_date, "/results r100.rdata", sep = "")
 
 
 
@@ -34,7 +34,7 @@ library(parallel)
 
 no_cores <- detectCores() - 1
 
-minreps <- 10
+minreps <- 100
 reps <- rep((minreps + (no_cores - minreps %% no_cores)) / no_cores, each = no_cores)
 
 # Initiate cluster
