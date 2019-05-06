@@ -135,7 +135,7 @@ vrat <- unlist(lapply(clusters, function(x) x$betweenss / x$totss))
 
 # undebug(get_CH)
 save(clusters, distance, file =  paste("Paper Data/", file_date, "/cluster analysis data - OV.rdata", sep = ""))
-save(chPlot, clust_time, ch_time, K, cluster_vars, minK, cls, vrat file =  paste("Paper Data/", file_date, "/Clusters - OV.rdata", sep = ""))
+save(chPlot, clust_time, ch_time, K, cluster_vars, minK, cls, vrat, file =  paste("Paper Data/", file_date, "/Clusters - OV.rdata", sep = ""))
 ```
 
 ```{r SUBS_FULL_CH}
@@ -189,7 +189,7 @@ names(cls) <- minK:K
 # cls_ov$subs <- "OV"
 cls$subs <- "F"
 
-
+ 
 # rbind(cls_f, cls_ov) %>%
 cls %>%
   gather(key = k, value = cluster, -subs) %>%
