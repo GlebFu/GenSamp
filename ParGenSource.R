@@ -6,7 +6,7 @@
 # Calculates grand mean centering
 GMC <- function(x) x - mean(x, na.rm = T)
 # Standardizes scores
-STAND <- function(x) (x - mean(x, na.rm = T))/sd(x, na.rm = T)
+stand <- function(x) (x - mean(x, na.rm = T))/sd(x, na.rm = T)
 
 logit <- function(x) log(x / (1 - x)) 
 expit <- function(x) exp(x) / (1 + exp(x))

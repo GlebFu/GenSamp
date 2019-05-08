@@ -1,66 +1,45 @@
-library(tidyverse)
-
-file_date <- "2019-03-26"
-
-
-#-----------------
-# Fixed data
-#-----------------
-#tets
-
-# Base data set
-load(paste("Data/", file_date, "/simData.Rdata", sep = ""))
-
 
 
 #-----------------
 # Functions
 #-----------------
 
-sampleBinomial <- function(ps) rbinom(length(ps), 1, prob = ps)
+# Calculates weighted standard deviation
+Weighted_SD <- function(x, w) sqrt(sum((w * (x - weighted.mean(x, w)))^2) / (sum(w) - 1))
 
-# This version is inaccurate!!!! Don't use it!!!
-# 
-# Bindex <- function(PS, Eij) {
-#   
-#   dat1B <- PS[Eij == 1]
-#   dat2B <- PS[Eij == 0]
-#   ##Baklizi and Eidous (2006) estimator
-#   # bandwidth
-#   h = function(x){
-#     n = length(x)
-#     return((4*sqrt(var(x))^5/(3*n))^(1/5)) 
-#   }
-#   
-#   # kernel estimators of the density and the distribution
-#   kg = function(x,data){
-#     hb = h(data) #bin width
-#     k = r = length(x)
-#     for(i in 1:k) r[i] = mean(dnorm((x[i]-data)/hb))/hb
-#     return(r )
-#   } 
-#   
-#   return( as.numeric(integrate(function(x) sqrt(kg(x,dat1B)*kg(x,dat2B)),-Inf,Inf)$value))
-#   
-# }
+Sample_Binomial <- function(ps) rbinom(length(ps), 1, prob = ps)
 
-h <- function(x){
+Generate_Responses <- function(PS.data, cluster.data, K.condition, RR.condition) {
+  df.responses <- PS.data %>%
+    ungroup() %>%
+    filter(RR == RR.condition) %>%
+    mutate(Ej = Sample_Binomial(PS))
+  
+  df.responses <- cluster.data %>%
+    ungroup() %>%
+    filter(K == K.condition) %>%
+    left_join(df.responses)
+  
+  return(df.responses)
+}
+
+Calc_H <- function(x){
   n <- length(x)
   (4 * sqrt(var(x))^5 / (3 * n))^(1/5) 
 }
 
-Bindex <- function(PS, Eij) {
+Calc_Bindex <- function(PS, sampled) {
   
   tryCatch({
-    dat1B <- PS[Eij == 1]
-    dat2B <- PS[Eij == 0]
+    dat1B <- PS[sampled == 1]
+    dat2B <- PS[sampled == 0]
     ##Baklizi and Eidous (2006) estimator
     # bandwidth
-    h1 <- h(dat1B)
-    h2 <- h(dat2B)
+    h1 <- Calc_H(dat1B)
+    h2 <- Calc_H(dat2B)
     
     # kernel estimators of the density and the distribution
-    kg = function(x, data, hb = h(data)){
+    kg = function(x, data, hb = Calc_H(data)){
       k = r = length(x)
       for(i in 1:k) r[i] = mean(dnorm((x[i]-data)/hb))/hb
       return(r)
@@ -76,220 +55,146 @@ Bindex <- function(PS, Eij) {
   },
   error = function(cond) {return(NA)})
 
-
 }
-
-# getBindex <- function(sample, pop.PS) {
-#   
-#   forBindex <- sample %>%
-#     ungroup() %>%
-#     filter(Eij == 1) %>%
-#     select(DSID, sample, dist.RR, sch.RR) %>%
-#     left_join(pop.PS)
-#   
-#   Bindicies <- data.frame(B = NA, sample = NA, dist.RR = NA, sch.RR = NA)
-#   
-#   for(i in unique(sample$sample)) {
-#     for(j in unique(sample$dist.RR)) {
-#       for(k in unique(sample$sch.RR)) {
-#         d1 <- filter(forBindex, sample == i, dist.RR == j, sch.RR == k)
-#         d2 <- filter(pop.PS, dist.RR == j, sch.RR == k)
-#         
-#         B <- Bindex(d1$sch.PS, d2$sch.PS)
-#         
-#         Bindicies <- rbind(Bindicies, data.frame(B = B, sample = i, dist.RR = j, sch.RR = k))
-#       }
-#     }
-#   }
-#   
-#   return(na.omit(Bindicies))
-# }
-  
-
-generateE <- function(data) {
-  data %>%
-    group_by(sch.RR) %>%
-    mutate(Eij = sampleBinomial(sch.PS)) %>%
-    return()
-}
-
 
 
 
 # Creates dataset with samples for each method and response rate
-createSample <- function(data, df.cov) {
-  
-  
+Create_Samples <- function(data, df.cov) {
   
   # Simple Random Sampling
-  SRS_Sample <- data %>%
-    filter(is.na(K)) %>%
-    group_by(sch.RR) %>%
-    mutate(rank.SRS = sample(1:n())) %>%
-    arrange(rank.SRS) %>%
-    # or do sample_frac(size = 1)
-    mutate(count = cumsum(Eij)) %>% 
-    filter(count <= 60) %>%
-    left_join(df.cov) %>%
-    mutate(sample = "SRS",
-           cluster = NA)
+  U.RS <- data %>%
+    sample_frac(size = 1) %>%
+    mutate(contacted = cumsum(Ej) <= 60,
+           accepted = contacted  & Ej == 1,
+           sample_method = "Unstratified_RS")
   
   #Convenience Sampling
-  CS_Sample <- data %>%
-    filter(is.na(K)) %>%
-    group_by(sch.RR) %>%
-    sample_frac(size = 1, weight = sch.PS) %>%
-    mutate(count = cumsum(Eij)) %>% 
-    filter(count <= 60) %>%
-    left_join(df.cov) %>%
-    mutate(sample = "CS",
-           cluster = NA)
-  
+  U.CS <- data %>%
+    sample_frac(size = 1, weight = PS) %>%
+    mutate(contacted = cumsum(Ej) <= 60,
+           accepted = contacted  & Ej == 1,
+           sample_method = "Unstratified_CS")
 
-  #Full Cluster Analysis Stratified Sampling
-  SUBS_F_Sample <- data %>%
-    group_by(sch.RR, K, strata) %>%
-    arrange(rank_full) %>%
-    mutate(count = cumsum(Eij)) %>%
-    filter(count <= pa) %>%
-    left_join(df.cov) %>%
-    mutate(sample = "SUBS_F",
-           cluster = strata)
+  #Stratified Balanced Sampling
+  S.BS <- data %>%
+    group_by(strata) %>%
+    arrange(cluster_rank ) %>%
+    mutate(contacted = cumsum(Ej) <= pa,
+           accepted = contacted  & Ej == 1,
+           sample_method = "Stratified_BS")
   
   #Full Cluster Analysis Stratified Sampling
-  SUBS_SRS_Sample <- data %>%
-    group_by(sch.RR, K, strata) %>%
-    mutate(rank.SRS = sample(1:n())) %>%
-    arrange(rank.SRS) %>%
-    # or do sample_frac(size = 1)
-    mutate(count = cumsum(Eij)) %>% 
-    filter(count <= pa) %>%
-    left_join(df.cov) %>%
-    mutate(sample = "SUBS_SRS",
-           cluster = strata)
+  S.RS <- data %>%
+    group_by(strata) %>%
+    sample_frac(size = 1) %>%
+    mutate(contacted = cumsum(Ej) <= pa,
+           accepted = contacted  & Ej == 1,
+           sample_method = "Stratified_RS")
   
   #Full Cluster Analysis Stratified Sampling
-  SUBS_CS_Sample <- data %>%
-    group_by(sch.RR, K, strata) %>%
-    sample_frac(size = 1, weight = sch.PS) %>%
-    mutate(count = cumsum(Eij)) %>% 
-    filter(count <= pa) %>%
-    left_join(df.cov) %>%
-    mutate(sample = "SUBS_CS",
-           cluster = strata)
+  S.CS <- data %>%
+    group_by(strata)  %>%
+    sample_frac(size = 1, weight = PS) %>%
+    mutate(contacted = cumsum(Ej) <= pa,
+           accepted = contacted  & Ej == 1,
+           sample_method = "Stratified_CS")
   
-  return(rbind(SRS_Sample, CS_Sample, SUBS_F_Sample, SUBS_SRS_Sample, SUBS_CS_Sample))
+  return(bind_rows(U.RS, U.CS, S.BS, S.RS, S.CS))
 }
 
 # Calculates response rates and other recruiting statistics
-calcResponseRates <- function(data, cluster = F) {
-  if(!cluster){
+Calc_Recruitment_Stats <- function(data, include_strata = F) {
+  if(!include_strata){
     data <- data %>%
-      mutate(strata = NA) %>%
-      group_by(sample, sch.RR, strata, K)
+      group_by(sample_method)
   } else {
     data <- data %>%
-      filter(sample %in% c("SUBS_F", "SUBS_OV")) %>%
-      group_by(sample, sch.RR, strata, K)
+      group_by(sample_method, strata)
 
   }
   
   data %>%
-    summarise(sch_contacted = n(),
-            sch_accepted = sum(Eij)) %>%
-    mutate(sch_rejected = sch_contacted - sch_accepted) %>%
-    mutate(sch_RR = sch_accepted/sch_contacted) %>%
-    group_by(sample, sch.RR, strata, K) %>%
+    summarise(sch.contacted = sum(contacted),
+              sch.accepted = sum(accepted),
+              sch.rejected = sch.contacted - sch.accepted,
+              sch.response.rate = sch.accepted/sch.contacted) %>%
+    gather(key = measure, value = value, -sample_method) %>%
     return()
+
 }
 
 
-
-# Calculates weighted standard deviation
-weighted.sd <- function(x, w) sqrt(sum((w * (x - weighted.mean(x, w)))^2) / (sum(w) - 1))
-# weighted.sd <- function(x, w) sd(x[w == 1])
-
-
-# calcSchSMDs <- function(sample) {
-#   sample[, c("sch.RR", "sample","DID", "Eij", names(schGoal))] %>%
-#     gather(key = "Variable", value = "Value", names(schGoal)) %>%
-#     mutate(sampled = Eij,
-#            rejected = 1 - Eij) %>%
-#     gather(key = "Group", value = "Weight", sampled:rejected) %>%
-#     group_by(sample, sch.RR, Variable, Group) %>%
-#     summarise(sample_mean = weighted.mean(Value, Weight),
-#               sample_sd = weighted.sd(Value, Weight)) %>% 
-#     left_join(sch_stats) %>%
-#     mutate(sim_SMD = (sample_mean - pop_mean) / pop_sd,
-#            miss = sim_SMD - goal_SMD)
-# }
-
-
-
-runSim <- function(data, df.cov, frm, vars) {
-  df.unstrat <- data %>% 
-    ungroup %>% 
-    select(-K, -strata, -rank_full, -pa) %>% 
-    unique 
-  
-  approached <- generateE(df.unstrat)
-  approached <- data %>% left_join(approached) %>% bind_rows(approached)
-  samp <- createSample(approached, df.cov)
-  
-  responses <- calcResponseRates(samp) %>%
-    gather(key = variable, value = value, -sample, -sch.RR, -strata, -K)
-  
-  responses <- calcResponseRates(samp, cluster = T) %>%
-    gather(key = variable, value = value, -sample, -sch.RR, -strata, -K) %>%
-    rbind(responses)
-  
-  samp.stats <- samp %>%
-    ungroup() %>%
-    select(sch.RR, sample, vars, K) %>%
-    gather(key = var, value = val, -sample, -sch.RR, -K) %>%
-    group_by(sch.RR, sample, var, K) %>%
+Calc_Sample_Statistics <- function(sample.data, list.covariates) {
+  sample.data %>%
+    filter(accepted) %>%
+    select(sample_method, list.covariates) %>%
+    gather(key = var, value = val, -sample_method) %>%
+    group_by(sample_method, var) %>%
     summarise(samp.mean = mean(val),
               samp.sd = sd(val))
-
-  Bindicies <- samp %>%
-    select(sample, DSID, Eij, vars, sch.RR, K) %>%
-    group_by(sample, sch.RR, K) %>%
-    nest() %>%
-    mutate(data = map(data, full_join, df.cov)) %>%
-    unnest() %>%
-    mutate(Eij = ifelse(is.na(Eij), 0, Eij)) %>% 
-    group_by(sample, sch.RR, K) %>%
-    nest() %>% 
-    mutate(PS_sample = map(data, glm, formula = frm, family = quasibinomial()),
-           PS_sample = map(PS_sample, fitted)) %>%
-    unnest() %>%
-    group_by(sample, sch.RR, K) %>%
-    summarise(Bs = Bindex(PS_sample, Eij))
-  
-  samp_counts <- samp %>%
-    select(sample, DSID, Eij, K, sch.RR) %>%
-    filter(Eij == 1)
-  
-  # test <- samp %>%
-  #   select(sample, DSID, Eij, vars, sch.RR) %>%
-  #   group_by(sample, sch.RR) %>%
-  #   nest() %>%
-  #   mutate(data = map(data, full_join, pop.PS)) %>%
-  #   unnest() %>%
-  #   mutate(Eij = ifelse(is.na(Eij), 0, Eij)) %>% 
-  #   group_by(sample, sch.RR) %>%
-  #   filter(sample == "CS")
-  # 
-  # summary(test)
-    # 
-    # glm(formula = frm, family = quasibinomial(), data = test) %>%
-    #   fitted
-  
-  return(list(responses = responses, samp.stats = samp.stats, Bindicies = Bindicies, samp_counts))
-  # return(list(responses = responses, dist_smds = dist_smds, sch_smds = sch_smds))
-  
-  # return(samp)
 }
 
+Run_Iteration <- function(sim.data, PS.data, cluster.data, K.condition, RR.condition, B.index.formula, list.covariates) {
+  
+  df.responses <- Generate_Responses(PS.data = PS.data, 
+                                     cluster.data = cluster.data,
+                                     K.condition = K.condition,
+                                     RR.condition = RR.condition)
+  
+  df.sampled <- Create_Samples(df.responses)
+  
+  df.recruitment.stats <- Calc_Recruitment_Stats(df.sampled) 
+  
+  df.samp.counts <- df.sampled %>%
+    filter(accepted) %>%
+    select(sample_method, DSID) 
+  
+  df.sampled <- sim.data %>% 
+    full_join(df.sampled)
+  
+  df.samp.stats <- Calc_Sample_Statistics(df.sampled, list.covariates)
+  
+  df.B.indicies <- df.sampled %>%
+    mutate(accepted = ifelse(accepted, 1, 0)) %>%
+    group_by(sample_method) %>%
+    nest() %>%
+    mutate(PS_sample = map(data, glm, formula = B.index.formula, family = quasibinomial()),
+           PS_sample = map(PS_sample, fitted)) %>%
+    unnest() %>%
+    select(sample_method, PS_sample, accepted) %>%
+    group_by(sample_method) %>%
+    summarise(Bs = Calc_Bindex(PS_sample, accepted))
+  
+  results <- list(df.recruitment.stats = df.recruitment.stats, 
+                 df.samp.counts = df.samp.counts, 
+                 df.B.indicies = df.B.indicies, 
+                 df.samp.stats = df.samp.stats) %>%
+    lapply(function(x) mutate(x, K = K.condition, RR = RR.condition))
+  return(results)
+}
 
+Sim_Driver <- function(sim.data, PS.data, cluster.data, B.index.formula, list.covariates, K.list, RR.list) {
+  results <- list()
+  
+  for(cond.K in K.list) {
+    for(cond.RR in RR.list) {
+      results <- Run_Iteration(sim.data = sim.data,
+                               PS.data = PS.data,
+                               cluster.data = cluster.data,
+                               K.condition = cond.K,
+                               RR.condition = cond.RR,
+                               B.index.formula = B.index.formula,
+                               list.covariates = list.covariates) %>%
+        as.matrix %>%
+        cbind(results)
+    }
+  }
+  
+  # results <- apply(results, 2, bind_cols)
+  results %>%
+    apply(1, bind_rows) %>%
+    return()
+  
+}
 

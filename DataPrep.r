@@ -2,20 +2,16 @@ library(tidyverse)
 
 rm(list = ls())
 
-file_date <- "2019-03-26"
-file_dir <- paste("data/", file_date, "/", sep = "")
-
-
-df <- read.csv("Data/final data.csv", stringsAsFactors = F)
-df$urbanicity <- factor(df$urbanicity)
-levels(df$urbanicity) <- c("ToRu", "Suburban", "ToRu", "Urban")
+df.source <- read.csv("Data/Population Data/Source Data.csv", stringsAsFactors = F)
+df.source$urbanicity <- factor(df.source$urbanicity)
+levels(df.source$urbanicity) <- c("ToRu", "Suburban", "ToRu", "Urban")
 
 
 # Drop large schools
 # Fix binary variables
 # Fix percentage variables
 
-df <- df %>% 
+df.sim <- df.source %>% 
   filter(n < 4000) %>%      
   unique() %>%
   mutate(pELL = ifelse(is.na(pELL), pELL_D, pELL), 
@@ -45,10 +41,10 @@ covariates <- c("T1", "n", "pTotfrl", "Urban", "Suburban", "ToRu",
                 "ST.ratio", "dSCH","pELL")
 
 
-df <- df[,vars] %>% na.omit %>% unique()
+df.sim <- df.sim[,vars] %>% na.omit %>% unique()
 
 
-df %>%
+df.sim %>%
   select(DSID, covariates) %>%
   gather(key = var, value = value, -DSID) %>%
   group_by(var) %>%
@@ -62,7 +58,7 @@ df %>%
 
 #Convert to Percents
 
-df <- df %>%
+df.sim <- df.sim %>%
   mutate(pTotfrl = 100 * pTotfrl,
          ethBlack = 100 * ethBlack,
          ethHisp = 100 * ethHisp,
@@ -70,7 +66,7 @@ df <- df %>%
          pFem = 100 * pFem,
          pELL = 100 * pELL)
 
-df[,covariates]
+df.sim[,covariates]
 
-save(df, covariates, file_date, file = paste(file_dir, "base data.rdata", sep = ""))
+save(df.sim, covariates, file = "Data/Population Data/Cleaned Data.rdata")
 

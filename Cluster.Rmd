@@ -8,10 +8,7 @@ library(tidyverse)
 
 rm(list = ls())
 
-file_date <- "2019-03-26"
-
-load(paste("data/", file_date, "/base data.rdata", sep = ""))
-
+load("Data/Population Data/Sim Data.rdata")
 ```
 
 ## SUBS
@@ -108,7 +105,7 @@ get_CH <- function(K, distance, clusters, minK) {
 K <- 10
 minK <- 2
 
-cluster_vars <- c(covariates[!(covariates %in% c("Urban", "Suburban", "ToRu"))], "urbanicity")
+cluster.vars <- c(covariates[!(covariates %in% c("Urban", "Suburban", "ToRu"))], "urbanicity")
 
 distance <- df[, cluster_vars] %>%
   mutate(n = log(n),
@@ -129,19 +126,29 @@ ch_time <- system.time(
 )
 
 
-cls <- bind_cols(lapply(clusters, function(x) data.frame(x$cluster)))
-vrat <- unlist(lapply(clusters, function(x) x$betweenss / x$totss))
+K.names <- paste("K_", formatC(minK:K, width = 2, format = "d", flag = "0"), sep = "")
+
+df.clusters <- 
+  bind_cols(lapply(clusters, function(x) data.frame(x$cluster))) %>%
+  setNames(K.names)
+
+df.clusters <- df.sim %>%
+  select(DSID) %>%
+  cbind(df.clusters)
+
+cluster.vratio <- unlist(lapply(clusters, function(x) x$betweenss / x$totss)) %>%
+  setNames(paste("K", minK:K, sep = "_"))
 
 
 # undebug(get_CH)
-save(clusters, distance, file =  paste("Paper Data/", file_date, "/cluster analysis data - OV.rdata", sep = ""))
-save(chPlot, clust_time, ch_time, K, cluster_vars, minK, cls, vrat, file =  paste("Paper Data/", file_date, "/Clusters - OV.rdata", sep = ""))
+save(clusters, distance, file =  "Data/Cluster Analysis/cluster analysis data - OV.rdata")
+save(chPlot, clust_time, ch_time, K, cluster.vars, minK, df.clusters, cluster.vratio, file =  "Data/Cluster Analysis/Clusters - OV.rdata")
 ```
 
 ```{r SUBS_FULL_CH}
 # load("clusters-full.rdata")
-load(paste("Paper Data/", file_date, "/Clusters - OV.rdata", sep = ""))
-load(paste("Paper Data/", file_date, "/cluster analysis data.rdata - OV", sep = ""))
+load("Data/Cluster Analysis/cluster analysis data - OV.rdata")
+load("Data/Cluster Analysis/Clusters - OV.rdata")
 
 
 chPlot %>%
@@ -157,10 +164,8 @@ chPlot %>%
 ```
 
 ```{r SUBS_FULL_SSB/SST}
-cls <- bind_cols(lapply(clusters, function(x) data.frame(x$cluster)))
-vrat <- unlist(lapply(clusters, function(x) x$betweenss / x$totss))
 
-data.frame(k = minK:K, var = vrat, min80 = sum(vrat <= .8) + 1.5) %>%
+data.frame(k = minK:K, var = cluster.vratio, min80 = sum(cluster.vratio <= .8) + 1.5) %>%
   ggplot(aes(x = k, y = var)) +
   geom_point() +
   # ggtitle("Between cluster variance by number of strata") +
@@ -176,35 +181,26 @@ data.frame(k = minK:K, var = vrat, min80 = sum(vrat <= .8) + 1.5) %>%
 
 ggsave(filename ="Figs/AERA Cluster SS.jpg", dpi = 1000, width = 10, height = 7)
 
-names(cls) <- paste("cls_",minK:K, sep = "")
-
-save(chPlot, clust_time, ch_time, K, cluster_vars, cls, minK, file =  paste("Paper Data/", file_date, "/Clusters.rdata", sep = ""))
 
 ```
 
 ```{r}
 
-# names(cls_ov) <- names(cls_f) <- 1:K
-names(cls) <- minK:K
-# cls_ov$subs <- "OV"
-cls$subs <- "F"
 
- 
 # rbind(cls_f, cls_ov) %>%
-cls %>%
-  gather(key = k, value = cluster, -subs) %>%
-  filter(k > 1) %>%
-  mutate(k = as.numeric(k)) %>%
-  group_by(k, cluster, subs) %>%
+df.clusters %>%
+  gather(key = k, value = cluster, -DSID) %>%
+  mutate(k = extract_numeric(k)) %>%
+  group_by(k, cluster) %>%
   summarise(n = n()) %>%
-  group_by(k, subs) %>%
+  group_by(k) %>%
   mutate(sample = (n / sum(n)) * 60) %>%
   ggplot(aes(x = k, y = sample)) +
   geom_point(shape = "-", size = 15, alpha = .5) +
   theme_apa() +
   labs(y = "Allocated Sample Size",
        x = "Number of Strata (K)") +
-  scale_x_discrete(limits = c(2:20)) +
+  scale_x_continuous(breaks = seq(minK, K, 1)) +
   scale_y_continuous(breaks = seq(0, 30, 5),
                      sec.axis = sec_axis(~./60*9882, name = "Strata Size")) +
   stat_function(fun = function(x) 60/x, geom = "line", linetype = "dashed", size = .5) +
