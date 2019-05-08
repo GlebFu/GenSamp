@@ -53,9 +53,9 @@ library(kableExtra)
 
 rm(list = ls())
 
-load("Data/Results/Results - 105 Reps.Rdata")
+load("Data/Results/Results - 14 Reps.Rdata")
 load("Data/Simulation Data/Sim Data.Rdata")
-load("Data/Cluster Analysis/Clusters - OV.Rdata")
+load("Data/Cluster Analysis/Clusters.Rdata")
 
 
 rename_conditions <- function(orig.data) {
@@ -175,7 +175,7 @@ data.frame(Intercept = intercepts, RR = names(intercepts), row.names = NULL) %>%
 
 
 ```{r, fig.cap = "Distributions of Participation Propensity Scores"}
-♣df.PS %>% 
+df.PS %>% 
   ggplot(aes(x = PS)) + 
   geom_histogram() + 
   facet_wrap(~RR, scales = "free") +
@@ -302,7 +302,7 @@ if(savePlot)  ggsave(paste("Figs/", file_date, "/Units Contacted.jpg", sep = "")
 ```
 
 ```{r, fig.cap = "Sampling response rates"}
-Nsamplot %>%
+samplot %>%
   filter(measure == "sch.response.rate") %>%
   ggplot(aes(x = RR, y = value, group = sample_method, color = Sampling, linetype = Clustering)) +
   geom_point() +

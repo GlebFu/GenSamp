@@ -9,6 +9,8 @@ Weighted_SD <- function(x, w) sqrt(sum((w * (x - weighted.mean(x, w)))^2) / (sum
 
 Sample_Binomial <- function(ps) rbinom(length(ps), 1, prob = ps)
 
+
+
 Generate_Responses <- function(PS.data, cluster.data, K.condition, RR.condition) {
   df.responses <- PS.data %>%
     ungroup() %>%
