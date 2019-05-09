@@ -11,9 +11,14 @@ source("SimSource.R")
 
 load("Data/Simulation Data/Sim Data.Rdata")
 
-minreps <- 100
+minreps <- 1
+whichK <- c("K_05")
+whichRR <- NULL
 
-Run_Sim <- function(reps) {
+
+
+
+Run_Sim <- function(reps, RR.list = NULL, K.list = NULL) {
   library(tidyverse)
   
   source("SimSource.R")
@@ -21,8 +26,11 @@ Run_Sim <- function(reps) {
   load("Data/Simulation Data/Sim Data.Rdata")
   
   frm <- as.formula(paste("accepted ~", paste(c(covariates[!(covariates %in% c("Urban", "Suburban", "ToRu"))], "urbanicity"), collapse = " + ")))
-  RR.list <- unique(df.PS$RR)
-  K.list <- "K_06"
+  
+  if(is.null((RR.list))) RR.list <- unique(df.PS$RR)
+  if(is.null((K.list))) K.list <- unique(df.clusters$K)
+  
+  
   
   results <- replicate(reps,
                        Sim_Driver(sim.data = df.sim,
@@ -38,6 +46,8 @@ Run_Sim <- function(reps) {
   return(results)
 }
 
+
+# Run_Sim(1, K.list = whichK)
 
 #----------------
 # RUN SIM
@@ -55,7 +65,7 @@ cl <- makeCluster(no_cores)
 seed <- runif(1,0,1)*10^8
 set.seed(27770460)
 
-runtime <- system.time(results <- parSapply(cl, reps, Run_Sim))
+runtime <- system.time(results <- parSapply(cl, reps, Run_Sim, whichRR, whichK))
 
 stopCluster(cl)
 
@@ -65,13 +75,16 @@ stopCluster(cl)
 
 results <- apply(results, 1, bind_rows)
 
-runtimeFile <- paste("Data/Results/Time - ", sum(reps), " Reps.rdata", sep = "")
-resultsFile <- paste("Data/Results/Results - ", sum(reps), " Reps.rdata", sep = "")
 
-with(results, save(list = names(results), file = resultsFile))
-save(runtime, file = runtimeFile)
+whichK <- paste(parse_number(unique(c(whichK[1], whichK[length(whichK)]))), collapse = " to ")
 
-load(runtimeFile)
+
+resultsFile <- paste("Data/Results/", sum(reps), " Reps - K", whichK, ".rdata", sep = "")
+
+with(results, save(list = c(names(results), "runtime"), file = resultsFile))
+
+write_file(x = resultsFile, "Data/Results/LastResults.txt")
+
 load(resultsFile)
 avgRun <- runtime/sum(reps)
 avgRun * 1000 / 60 / 60 # Hours
