@@ -11,7 +11,7 @@ source("SimSource.R")
 
 load("Data/Simulation Data/Sim Data.Rdata")
 
-minreps <- 1
+minreps <- 1000
 whichK <- c("K_05")
 whichRR <- NULL
 
@@ -63,7 +63,7 @@ reps <- rep((minreps + (no_cores - minreps %% no_cores)) / no_cores, each = no_c
 cl <- makeCluster(no_cores)
 
 seed <- runif(1,0,1)*10^8
-set.seed(27770460)
+set.seed(75702217)
 
 runtime <- system.time(results <- parSapply(cl, reps, Run_Sim, whichRR, whichK))
 
@@ -81,7 +81,7 @@ whichK <- paste(parse_number(unique(c(whichK[1], whichK[length(whichK)]))), coll
 
 resultsFile <- paste("Data/Results/", sum(reps), " Reps - K", whichK, ".rdata", sep = "")
 
-with(results, save(list = c(names(results), "runtime"), file = resultsFile))
+with(results, save(list = c(names(results), "runtime", "seed"), file = resultsFile))
 
 write_file(x = resultsFile, "Data/Results/LastResults.txt")
 
