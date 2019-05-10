@@ -87,8 +87,8 @@ get_CH <- function(K, distance, clusters, minK) {
 
 
 ```{r SUBS_FULL, eval = F}
-K <- 7
-minK <- 4
+K <- 10
+minK <- 2
 
 cluster_vars <- c(covariates[!(covariates %in% c("Urban", "Suburban", "ToRu"))], "urbanicity")
 # cluster_vars <- c("n", "dSCH", "ST.ratio", "urbanicity")
@@ -113,7 +113,7 @@ ch_time <- system.time(
   chPlot <- get_CH(K, distance, clusters, minK)
 )
 
->
+
 K.names <- paste("K_", formatC(minK:K, width = 2, format = "d", flag = "0"), sep = "")
 
 df.clusters <- 
@@ -130,14 +130,16 @@ cluster.vratio <- unlist(lapply(clusters, function(x) x$betweenss / x$totss)) %>
 
 
 # undebug(get_CH)
-save(clusters, distance, file =  "Data/Cluster Analysis/cluster analysis data.rdata")
-save(chPlot, clust_time, ch_time, K, cluster_vars, minK, df.clusters, cluster.vratio, file =  "Data/Cluster Analysis/Clusters.rdata")
+save(clusters, distance, file =  "Data/Cluster Analysis/cluster analysis data k2-10.rdata")
+save(chPlot, clust_time, ch_time, K, cluster_vars, minK, df.clusters, cluster.vratio, file =  "Data/Cluster Analysis/Clusters k2-10.rdata")
+
+write_file(x = "Data/Cluster Analysis/Clusters k2-10.rdata", "Data/Cluster Analysis/LastCluster.txt")
 ```
 
 ```{r SUBS_FULL_CH}
 # load("clusters-full.rdata")
-load("Data/Cluster Analysis/cluster analysis data.rdata")
-load("Data/Cluster Analysis/Clusters.rdata")
+load("Data/Cluster Analysis/cluster analysis data k2-10.rdata")
+load("Data/Cluster Analysis/Clusters k2-10.rdata")
 
 
 chPlot %>%

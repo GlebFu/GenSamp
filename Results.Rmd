@@ -132,6 +132,10 @@ tab1 %>%
 
 df %>% 
   select(strata, covariates) %>%
+  # select(strata, n, dSCH, ST.ratio) %>%
+  mutate(n = log(n),
+         dSCH = log(dSCH),
+         ST.ratio = log(ST.ratio)) %>%
   gather(key = var, value = val, -strata) %>%
   ggplot(aes(x = strata, y = val)) + 
   geom_boxplot() + 

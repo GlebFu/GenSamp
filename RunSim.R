@@ -11,8 +11,8 @@ source("SimSource.R")
 
 load("Data/Simulation Data/Sim Data.Rdata")
 
-minreps <- 1000
-whichK <- c("K_05")
+minreps <- 100
+whichK <- c("K_06")
 whichRR <- NULL
 
 

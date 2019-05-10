@@ -7,7 +7,7 @@ library(snow)
 source("ParGenSource.r")
 
 load("Data/Population Data/Cleaned Data.rdata")
-load("Data/Cluster Analysis/Clusters.rdata")
+load("Data/Cluster Analysis/Clusters k2-10.rdata")
 
 #-----------------------
 # Schools
@@ -70,6 +70,7 @@ df.PS <-
 #-----------------------
 # Generate Within Cluster Ranks and Proportional Allocations
 #-----------------------
+
 prop_allocations <-
   df.clusters %>%
   gather(key = K, value = strata, -DSID) %>%
@@ -89,6 +90,9 @@ prop_allocations %>%
 
 df.clusters <- df.sim %>%
   select(DSID, covariates) %>%
+  mutate(n = log(n),
+         dSCH = log(dSCH),
+         ST.ratio = log(ST.ratio)) %>%
   gather(key = variables, value = value, -DSID) %>%
   left_join(df.clusters) %>%
   gather(key = K, value = strata, -DSID, -variables, -value) %>%
@@ -106,16 +110,16 @@ df.clusters <- df.sim %>%
   select(-value)
 
 
-df.clusters %>%
-  filter(K == "K_06") %>%
-  full_join(df.PS) %>%
-  ggplot(aes(x = cluster_percentile, y = PS)) +
-  geom_point() +
-  facet_grid(RR ~ strata)
+# df.clusters %>%
+#   filter(K == "K_05") %>%
+#   full_join(df.PS) %>%
+#   ggplot(aes(x = cluster_percentile, y = PS)) +
+#   geom_point() +
+#   facet_grid(RR ~ strata)
 
 
 df.clusters %>%
-  filter(K == "K_06") %>%
+  filter(K == "K_05") %>%
   full_join(df.PS) %>%
   filter(strata == 4,
          RR == "RR_10") %>%
@@ -125,20 +129,20 @@ df.clusters %>%
   geom_point() +
   facet_wrap(~ var, scales = "free")
   
-
-df.strat4 <- df.clusters %>%
-  filter(K == "K_06") %>%
-  full_join(df.PS) %>%
-  filter(strata == 4,
-         RR == "RR_10") %>%
-  left_join(df.sim.standardized %>% mutate(DSID = df.sim$DSID))
-
-X.strat4 <- df.strat4 %>%
-  ungroup() %>%
-  select(covariates) %>%
-  as.matrix
-
-df.strat4$PS == (expit(intercepts["RR_10"] + X.strat4 %*% (DGM.Bs %>% as.matrix())))
+# 
+# df.strat4 <- df.clusters %>%
+#   filter(K == "K_06") %>%
+#   full_join(df.PS) %>%
+#   filter(strata == 4,
+#          RR == "RR_10") %>%
+#   left_join(df.sim.standardized %>% mutate(DSID = df.sim$DSID))
+# 
+# X.strat4 <- df.strat4 %>%
+#   ungroup() %>%
+#   select(covariates) %>%
+#   as.matrix
+# 
+# df.strat4$PS == (expit(intercepts["RR_10"] + X.strat4 %*% (DGM.Bs %>% as.matrix())))
 
 
 
