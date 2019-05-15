@@ -57,8 +57,8 @@ rm(list = ls())
 load("Data/Simulation Data/Sim Data.Rdata")
 load("Data/Cluster Analysis/Clusters.Rdata")
 
-load(read_file("Data/Results/LastResults.txt"))
-# load("Data/Results/Results - 14 Reps.Rdata")
+# load(read_file("Data/Results/LastResults.txt"))
+load("Data/Results/1001 Reps - K5.rdata")
 
 
 rename_conditions <- function(orig.data) {
@@ -81,7 +81,8 @@ df.clusters <- df.clusters %>%
 
 df <- left_join(df.sim, df.clusters)
 
-
+### Calculate SMDs using IPSW
+### Estimate variance explaiend by STRATA in covariates
 
 savePlot <- F
 ```
@@ -219,15 +220,16 @@ avg_Bindex %>%
   geom_line() +
   labs(y = "Mean B-index",
        x = "Population Participation Rate") +
-  theme_apa()
+  theme_apa() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 
 if(savePlot) ggsave(paste("Figs/", file_date, "/Paper B-Index.jpg", sep = ""), dpi = 1000, width = 7, height = 4)
 
-df.B.indicies %>%
-  group_by(sample_method, RR, Clustering, Sampling) %>%
-  summarise(NA.Count = sum(is.na(Bs))) %>%
-  spread(key = RR, value = NA.Count)
+# df.B.indicies %>%
+#   group_by(sample_method, RR, Clustering, Sampling) %>%
+#   summarise(NA.Count = sum(is.na(Bs))) %>%
+#   spread(key = RR, value = NA.Count) 
 
 
 ```
@@ -258,7 +260,8 @@ sSMDplot %>%
   facet_wrap( ~ var, scales = "free_y", ncol  = 3) +
   theme_apa(box = F) +
   labs(y = "Mean SMD",
-       x = "Population Participation Rate")
+       x = "Population Participation Rate") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 if(savePlot)  ggsave(paste("Figs/", file_date, "/All SMDs.jpg", sep = ""), dpi = 1000, width = 7, height = 5)
 
@@ -284,7 +287,8 @@ samplot %>%
   geom_line() +
   facet_wrap( ~ measure, scales = "free_y") +
   expand_limits(y = 0) +
-  theme_apa(box = T)
+  theme_apa(box = T) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 
 
@@ -302,7 +306,8 @@ samplot %>%
   geom_point() +
   geom_line() +
   expand_limits(y = 0) +
-  theme_apa(box = T)
+  theme_apa(box = T) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 if(savePlot)  ggsave(paste("Figs/", file_date, "/Units Contacted.jpg", sep = ""), dpi = 1000, width = 7, height = 5)
 
@@ -341,17 +346,45 @@ df.samp.counts %>%
   theme(legend.position = "bottom",
         axis.text.x = element_text(angle = 45, hjust = 1))
 
-
-df.samp.char <- df.sim %>% 
-  select(DSID, covariates) %>%
-  mutate_if(function(x) !is.character(x), function(x) (x - mean(x)) / sd(x)) %>%
-  right_join(df.samp.counts)
-
-df.samp.char <- df.PS %>%
-  right_join(df.samp.char) %>%
+df <- df.samp.counts %>%
+  group_by(RR, sample_method, DSID) %>%
+  summarise(count = n(),
+            perc = count/1001) %>%
+  left_join(df.PS) %>%
   left_join(df.clusters)
 
-df.samp.char
+# ggridges?
+
+df %>%
+  filter(RR == "RR_20") %>%
+  group_by(RR, strata, sample_method) %>%
+  mutate(wt = count / sum(count)) %>%
+  ggplot() +
+  geom_density(aes(x = PS), size = 2) + 
+  geom_density(aes(x = PS, fill = sample_method, weight = wt), alpha = 0.2) +
+  facet_grid(sample_method ~ strata) + 
+  theme_minimal() + 
+  theme(legend.position = "bottom")
+
+```
+
+
+
+```{r}
+df.samp.counts %>%
+  group_by(RR, sample_method) %>%
+  summarise(excluded = sum(df$DSID %in% DSID))
+
+# df.samp.char <- df.sim %>% 
+#   select(DSID, covariates) %>%
+#   mutate_if(function(x) !is.character(x), function(x) (x - mean(x)) / sd(x)) %>%
+#   right_join(df.samp.counts)
+# 
+# df.samp.char <- df.PS %>%
+#   right_join(df.samp.char) %>%
+#   left_join(df.clusters)
+
+
 
 
 ```
