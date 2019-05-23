@@ -37,17 +37,6 @@ df.sim.standardized <-
   select(DSID, covariates) %>%
   mutate_if(is.numeric, stand)
 
-# df.fellers <- read_csv("Data/Population Data/fellers pop stats.csv")
-# 
-# df.sim.standardized <- df.sim %>%
-#   select(DSID, covariates) %>%
-#   gather(key = var, value = val, -DSID) %>%
-#   left_join(df.fellers) %>%
-#   mutate(zval = (val - pop.mean) / pop.sd) %>%
-#   select(DSID, var, zval) %>%
-#   spread(var, zval)
-
-
 df.pop.stats <- df.sim %>%
   ungroup() %>%
   select(covariates) %>%
@@ -96,13 +85,9 @@ df.smd.ipsw <- df.PS %>%
   mutate(w1 = 1 / PS,
          w0 = 1 / (1 - PS)) %>%
   group_by(RR, var) %>%
-  summarise(m1 = weighted.mean(val, w1),
-            m0 = weighted.mean(val, w0),
-            m = weighted.mean(val, PS)) %>%
+  summarise(m = weighted.mean(val, PS)) %>%
   left_join(df.pop.stats) %>%
-  mutate(smd1 = (m1 - pop.mean) / pop.sd,
-         smd0 = (m0 - pop.mean) / pop.sd,
-         smd = (m - pop.mean) / pop.sd)
+  mutate(smd = (m - pop.mean) / pop.sd)
 
 df.smd.ipsw %>%
   select(RR, var, smd) %>%
@@ -196,4 +181,4 @@ df.clusters <- prop_allocations %>%
 
 DGM.Bs
 
-save(df.sim, df.PS, df.clusters, covariates, df.pop.stats, DGM.Bs, intercepts, file = "Data/Simulation Data/Sim Data.Rdata")
+save(df.sim, df.PS, df.clusters, covariates, df.pop.stats, DGM.Bs, intercepts, df.smd.ipsw, file = "Data/Simulation Data/Sim Data.Rdata")
