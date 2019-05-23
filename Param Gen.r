@@ -7,7 +7,7 @@ library(snow)
 source("ParGenSource.r")
 
 load("Data/Population Data/Cleaned Data.rdata")
-load("Data/Cluster Analysis/Clusters k2-10.rdata")
+load("Data/Cluster Analysis/Clusters.rdata")
 
 #-----------------------
 # Schools
@@ -30,24 +30,50 @@ names(DGM.Bs) <- covariates[!(covariates %in% DGM.exclude)]
 DGM.Bs
 
 #-----------------------
+# Standardize
+# -----------------------
+df.sim.standardized <-
+  df.sim %>%
+  select(DSID, covariates) %>%
+  mutate_if(is.numeric, stand)
+
+# df.fellers <- read_csv("Data/Population Data/fellers pop stats.csv")
+# 
+# df.sim.standardized <- df.sim %>%
+#   select(DSID, covariates) %>%
+#   gather(key = var, value = val, -DSID) %>%
+#   left_join(df.fellers) %>%
+#   mutate(zval = (val - pop.mean) / pop.sd) %>%
+#   select(DSID, var, zval) %>%
+#   spread(var, zval)
+
+
+df.pop.stats <- df.sim %>%
+  ungroup() %>%
+  select(covariates) %>%
+  gather(key = var, value = val) %>%
+  group_by(var) %>%
+  summarise(pop.mean = mean(val),
+            pop.sd = sd(val))
+
+#-----------------------
 # Generate Intercept
 # -----------------------
-df.sim.standardized <- 
-  df.sim[,covariates] %>%
-  mutate_all(stand)
 
 # response.rates <- 8:1/20
 response.rates <- 9:1/10
 # response.rates <- c(.1, .2, .3)
 response.rates.names <- paste("RR_", formatC(response.rates*100, width = 2, format = "d", flag = "0"), sep = "")
 
-PS.Int <- sapply(response.rates, calcPS, Bs = DGM.Bs, vars = covariates, data = df.sim.standardized, exclude = DGM.exclude, getint = T)
+PS.Int <- sapply(response.rates, calcPS, Bs = DGM.Bs, vars = covariates, data = df.sim.standardized %>% select(-DSID), exclude = DGM.exclude, getint = T)
 
 df.PS <- 
   bind_cols(PS.Int[1,]) %>%
-  setNames(response.rates.names)
+  setNames(response.rates.names) %>%
+  mutate(DSID = df.sim.standardized$DSID)
 
-df.PS %>% colMeans()
+df.PS %>% 
+  summarise_if(is.numeric, mean)
 
 intercepts <- 
   PS.Int[2,] %>%
@@ -56,21 +82,37 @@ intercepts <-
 
 
 df.PS %>%
-  gather(key = RR, value = PS) %>%
+  gather(key = RR, value = PS, -DSID) %>%
   ggplot(aes(x = PS)) +
   geom_histogram() +
   facet_wrap(~RR)
 
-df.PS <- 
-  df.sim %>%
-  select(DSID) %>%
-  cbind(df.PS) %>%
-  gather(key = RR, value = PS, - DSID)
+df.PS <- gather(df.PS, key = RR, value = PS, - DSID)
+
+
+df.smd.ipsw <- df.PS %>%
+  left_join(df.sim %>% select(DSID, covariates)) %>%
+  gather(key = var, value = val, T1:pELL) %>%
+  mutate(w1 = 1 / PS,
+         w0 = 1 / (1 - PS)) %>%
+  group_by(RR, var) %>%
+  summarise(m1 = weighted.mean(val, w1),
+            m0 = weighted.mean(val, w0),
+            m = weighted.mean(val, PS)) %>%
+  left_join(df.pop.stats) %>%
+  mutate(smd1 = (m1 - pop.mean) / pop.sd,
+         smd0 = (m0 - pop.mean) / pop.sd,
+         smd = (m - pop.mean) / pop.sd)
+
+df.smd.ipsw %>%
+  select(RR, var, smd) %>%
+  spread(var, smd)
+
+DGM.Bs
 
 #-----------------------
 # Generate Within Cluster Ranks and Proportional Allocations
 #-----------------------
-
 prop_allocations <-
   df.clusters %>%
   gather(key = K, value = strata, -DSID) %>%
@@ -90,9 +132,6 @@ prop_allocations %>%
 
 df.clusters <- df.sim %>%
   select(DSID, covariates) %>%
-  mutate(n = log(n),
-         dSCH = log(dSCH),
-         ST.ratio = log(ST.ratio)) %>%
   gather(key = variables, value = value, -DSID) %>%
   left_join(df.clusters) %>%
   gather(key = K, value = strata, -DSID, -variables, -value) %>%
@@ -110,16 +149,16 @@ df.clusters <- df.sim %>%
   select(-value)
 
 
-# df.clusters %>%
-#   filter(K == "K_05") %>%
-#   full_join(df.PS) %>%
-#   ggplot(aes(x = cluster_percentile, y = PS)) +
-#   geom_point() +
-#   facet_grid(RR ~ strata)
+df.clusters %>%
+  filter(K == "K_06") %>%
+  full_join(df.PS) %>%
+  ggplot(aes(x = cluster_percentile, y = PS)) +
+  geom_point() +
+  facet_grid(RR ~ strata)
 
 
 df.clusters %>%
-  filter(K == "K_05") %>%
+  filter(K == "K_06") %>%
   full_join(df.PS) %>%
   filter(strata == 4,
          RR == "RR_10") %>%
@@ -128,21 +167,21 @@ df.clusters %>%
   ggplot(aes(x = cluster_percentile, y = val, color = PS)) +
   geom_point() +
   facet_wrap(~ var, scales = "free")
-  
-# 
-# df.strat4 <- df.clusters %>%
-#   filter(K == "K_06") %>%
-#   full_join(df.PS) %>%
-#   filter(strata == 4,
-#          RR == "RR_10") %>%
-#   left_join(df.sim.standardized %>% mutate(DSID = df.sim$DSID))
-# 
-# X.strat4 <- df.strat4 %>%
-#   ungroup() %>%
-#   select(covariates) %>%
-#   as.matrix
-# 
-# df.strat4$PS == (expit(intercepts["RR_10"] + X.strat4 %*% (DGM.Bs %>% as.matrix())))
+
+
+df.strat4 <- df.clusters %>%
+  filter(K == "K_06") %>%
+  full_join(df.PS) %>%
+  filter(strata == 4,
+         RR == "RR_10") %>%
+  left_join(df.sim.standardized %>% mutate(DSID = df.sim$DSID))
+
+X.strat4 <- df.strat4 %>%
+  ungroup() %>%
+  select(covariates) %>%
+  as.matrix
+
+df.strat4$PS == (expit(intercepts["RR_10"] + X.strat4 %*% (DGM.Bs %>% as.matrix())))
 
 
 
@@ -155,14 +194,6 @@ df.clusters <- prop_allocations %>%
 # Export Data
 #-----------------------
 
-df.pop.stats <- df.sim %>%
-  ungroup() %>%
-  select(covariates) %>%
-  gather(key = var, value = val) %>%
-  group_by(var) %>%
-  summarise(pop.mean = mean(val),
-            pop.sd = sd(val))
-
-
+DGM.Bs
 
 save(df.sim, df.PS, df.clusters, covariates, df.pop.stats, DGM.Bs, intercepts, file = "Data/Simulation Data/Sim Data.Rdata")
