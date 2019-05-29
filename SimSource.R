@@ -150,7 +150,7 @@ Run_Iteration <- function(sim.data, PS.data, cluster.data, K.condition, RR.condi
   
   df.samp.counts <- df.sampled %>%
     filter(accepted) %>%
-    select(sample_method, DSID) 
+    select(sample_method, DSID, strata, PS, RR) 
   
   df.sampled <- sim.data %>% 
     full_join(df.sampled)

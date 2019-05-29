@@ -12,7 +12,7 @@ load("Data/Simulation Data/Sim Data.Rdata")
 
 frm <- as.formula(paste("accepted ~", paste(c(covariates[!(covariates %in% c("Urban", "Suburban", "ToRu"))], "urbanicity"), collapse = " + ")))
 RR.list <- unique(df.PS$RR)
-K.list <- "K_06"
+K.list <- "K_05"
 
 sim.data <- df.sim
 PS.data <- df.PS
@@ -22,7 +22,7 @@ list.covariates <- covariates
 RR.list <- RR.list
 K.list <- K.list
 
-K.condition <- "K_06"
+K.condition <- "K_05"
 RR.condition <- "RR_10"
 
 

@@ -11,8 +11,8 @@ source("SimSource.R")
 
 load("Data/Simulation Data/Sim Data.Rdata")
 
-minreps <- 100
-whichK <- c("K_06")
+minreps <- 1000
+whichK <- c("K_05")
 whichRR <- NULL
 
 
@@ -47,7 +47,8 @@ Run_Sim <- function(reps, RR.list = NULL, K.list = NULL) {
 }
 
 
-# Run_Sim(1, K.list = whichK)
+test <- Run_Sim(1, K.list = whichK, RR.list = c("RR_10", "RR_20"))
+test$df.samp.counts
 
 #----------------
 # RUN SIM

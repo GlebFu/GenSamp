@@ -328,123 +328,34 @@ samplot %>%
 
 ```
 
-```{r, fig.cap = "Sample Counts"}
-
-df.samp.counts
-```
 
 
 ```{r}
-df.samp.counts %>%
-  group_by(RR, sample_method, DSID) %>%
-  summarise(count = n()) %>%
-  ggplot(aes(sample_method, count)) +
-  geom_boxplot() +
-  facet_wrap(~ RR) +
-  theme(legend.position = "bottom",
-        axis.text.x = element_text(angle = 45, hjust = 1))
 
-```
-
-```{r}
-
-test <- df.samp.counts %>%
-  group_by(RR, sample_method, DSID) %>%
-  summarise(count = n(),
-            perc = count/1001) %>%
+df.counts <- df.samp.counts %>%
+  group_by_all() %>%
+  count() %>%
+  ungroup() %>%
+  mutate(perc = n/1001) %>%
+  arrange(-perc) %>%
   left_join(df.PS) %>%
   left_join(df.clusters) %>%
-  ungroup()
-
-# ggridges?
-
-test2 <- df.PS %>%
-  filter(RR == "RR_30") %>%
-  left_join(df.clusters)
-
-test %>%
-  filter(RR == "RR_30") %>%
-  mutate(sample_method = str_replace(sample_method, "tratified", "")) %>%
-  group_by(RR, strata, sample_method) %>%
-  mutate(wt = count / sum(count)) %>%
-  ggplot() +
-  geom_density(aes(x = PS, fill = sample_method, weight = wt), alpha = 0.2) +
-  geom_density(data = test2, aes(x = PS), size = .5) + 
-  facet_grid(sample_method ~ strata, scales = "free_y") + 
-  theme_minimal() + 
-  theme(legend.position = "none")
-
-```
-
-
-```{r}
-test <- df.samp.counts %>%
-  group_by(RR, sample_method, DSID) %>%
-  summarise(count = n(),
-            perc = count/1001) %>%
   left_join(df.sim) %>%
+  group_by(sample_method, K, RR, strata) %>%
+  mutate(w = n / sum(n))
+
+df.counts.pop <- df.PS %>%
   left_join(df.clusters) %>%
-  ungroup()
+  left_join(df.sim)
 
-test2 <- df.sim  %>%
-  left_join(df.clusters)
+filter.rr <- "RR_20"
 
-test %>%
-  filter(RR == "RR_20") %>%
-  mutate(sample_method = str_replace(sample_method, "tratified", "")) %>%
-  group_by(RR, strata, sample_method) %>%
-  mutate(wt = count / sum(count)) %>%
+df.counts %>%
+  filter(RR == filter.rr) %>%
   ggplot() +
-  geom_density(aes(x = ethHisp, fill = sample_method, weight = wt), alpha = 0.2) +
-  geom_density(data = test2, aes(x = ethHisp), size = .5) + 
-  facet_grid(sample_method ~ strata, scales = "free_y") + 
-  theme_minimal() + 
-  theme(legend.position = "none")
-
-```
-
-```{r}
-test <- df.samp.counts %>%
-  group_by(RR, sample_method, DSID) %>%
-  summarise(count = n(),
-            perc = count/1001) %>%
-  left_join(df.sim) %>%
-  left_join(df.clusters) %>%
-  ungroup()
-
-test2 <- df.sim  %>%
-  left_join(df.clusters)
-
-test %>%
-  filter(RR == "RR_30") %>%
-  mutate(sample_method = str_replace(sample_method, "tratified", "")) %>%
-  group_by(RR, sample_method) %>%
-  mutate(wt = count / sum(count)) %>%
-  ggplot() +
-  geom_density(aes(x = ethHisp, fill = sample_method, weight = wt), alpha = 0.2) +
-  geom_density(data = test2, aes(x = ethHisp), size = .5) + 
-  facet_grid(sample_method ~ ., scales = "free_y") + 
-  theme_minimal() + 
-  theme(legend.position = "none")
-
-```
-
-
-```{r}
-df.samp.counts %>%
-  group_by(RR, sample_method) %>%
-  summarise(excluded = sum(df$DSID %in% DSID))
-
-# df.samp.char <- df.sim %>% 
-#   select(DSID, covariates) %>%
-#   mutate_if(function(x) !is.character(x), function(x) (x - mean(x)) / sd(x)) %>%
-#   right_join(df.samp.counts)
-# 
-# df.samp.char <- df.PS %>%
-#   right_join(df.samp.char) %>%
-#   left_join(df.clusters)
-
-
-
+  geom_density(aes(x = PS, fill = sample_method, weight = w), alpha = .1) +
+  geom_density(data = df.counts.pop %>% filter(RR == filter.rr),
+               aes(x = PS)) +
+  facet_grid(Sampling ~ strata)
 
 ```
