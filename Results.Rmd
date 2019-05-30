@@ -328,34 +328,54 @@ samplot %>%
 
 ```
 
+```{r}
+
+df.samp.counts %>%
+  filter(RR == filter.rr) %>%
+  ggplot() +
+  geom_density(aes(x = PS, fill = sample_method), alpha = .1) +
+  geom_density(data = df.counts.pop %>% filter(RR == filter.rr),
+               aes(x = PS)) +
+  facet_grid(strata ~ Sampling, scales = "free_y")
+
+```
 
 
 ```{r}
 
 df.counts <- df.samp.counts %>%
   group_by_all() %>%
-  count() %>%
+  count(name = "count") %>%
   ungroup() %>%
-  mutate(perc = n/1001) %>%
+  mutate(perc = count/1001) %>%
   arrange(-perc) %>%
-  left_join(df.PS) %>%
-  left_join(df.clusters) %>%
   left_join(df.sim) %>%
   group_by(sample_method, K, RR, strata) %>%
-  mutate(w = n / sum(n))
+  mutate(w = count / sum(count))
 
 df.counts.pop <- df.PS %>%
   left_join(df.clusters) %>%
   left_join(df.sim)
 
-filter.rr <- "RR_20"
+filter.rr <- "RR_30"
 
-df.counts %>%
+df.counts   %>%
   filter(RR == filter.rr) %>%
   ggplot() +
   geom_density(aes(x = PS, fill = sample_method, weight = w), alpha = .1) +
   geom_density(data = df.counts.pop %>% filter(RR == filter.rr),
                aes(x = PS)) +
-  facet_grid(Sampling ~ strata)
+  facet_grid(strata ~ Sampling, scales = "free_y")
+
+```
+
+```{r}
+df.counts   %>%
+  filter(RR == filter.rr) %>%
+  ggplot() +
+  geom_density(aes(x = ethHisp, fill = sample_method, weight = w), alpha = .1) +
+  geom_density(data = df.counts.pop %>% filter(RR == filter.rr),
+               aes(x = ethHisp)) +
+  facet_grid(strata ~ Sampling, scales = "free_y")
 
 ```

@@ -64,21 +64,21 @@ Calc_Bindex <- function(PS, sampled) {
 # Creates dataset with samples for each method and response rate
 Create_Samples <- function(data, df.cov) {
   
-  # Simple Random Sampling
+  # Random Sampling
   U.RS <- data %>%
     sample_frac(size = 1) %>%
     mutate(contacted = cumsum(Ej) <= 60,
            accepted = contacted  & Ej == 1,
            sample_method = "Unstratified_RS")
   
-  #Convenience Sampling
+  # Convenience Sampling
   U.CS <- data %>%
     sample_frac(size = 1, weight = PS) %>%
     mutate(contacted = cumsum(Ej) <= 60,
            accepted = contacted  & Ej == 1,
            sample_method = "Unstratified_CS")
 
-  #Stratified Balanced Sampling
+  # Stratified Balanced Sampling
   S.BS <- data %>%
     group_by(strata) %>%
     arrange(cluster_rank ) %>%
@@ -86,7 +86,7 @@ Create_Samples <- function(data, df.cov) {
            accepted = contacted  & Ej == 1,
            sample_method = "Stratified_BS")
   
-  #Full Cluster Analysis Stratified Sampling
+  # Stratified Random
   S.RS <- data %>%
     group_by(strata) %>%
     sample_frac(size = 1) %>%
@@ -94,7 +94,7 @@ Create_Samples <- function(data, df.cov) {
            accepted = contacted  & Ej == 1,
            sample_method = "Stratified_RS")
   
-  #Full Cluster Analysis Stratified Sampling
+  # Stratified Convenience
   S.CS <- data %>%
     group_by(strata)  %>%
     sample_frac(size = 1, weight = PS) %>%

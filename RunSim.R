@@ -47,8 +47,8 @@ Run_Sim <- function(reps, RR.list = NULL, K.list = NULL) {
 }
 
 
-test <- Run_Sim(1, K.list = whichK, RR.list = c("RR_10", "RR_20"))
-test$df.samp.counts
+# test <- Run_Sim(1, K.list = whichK, RR.list = c("RR_10", "RR_20"))
+# test$df.samp.counts
 
 #----------------
 # RUN SIM
