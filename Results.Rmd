@@ -329,14 +329,12 @@ samplot %>%
 ```
 
 ```{r}
-
-df.samp.counts %>%
-  filter(RR == filter.rr) %>%
+df.counts   %>%
   ggplot() +
-  geom_density(aes(x = PS, fill = sample_method), alpha = .1) +
-  geom_density(data = df.counts.pop %>% filter(RR == filter.rr),
+  geom_density(aes(x = PS, fill = sample_method, weight = w), alpha = .1) +
+  geom_density(data = df.counts.pop,
                aes(x = PS)) +
-  facet_grid(strata ~ Sampling, scales = "free_y")
+  facet_grid(RR ~ Sampling, scales = "free")
 
 ```
 
@@ -350,7 +348,7 @@ df.counts <- df.samp.counts %>%
   mutate(perc = count/1001) %>%
   arrange(-perc) %>%
   left_join(df.sim) %>%
-  group_by(sample_method, K, RR, strata) %>%
+  group_by(sample_method, K, RR) %>%
   mutate(w = count / sum(count))
 
 df.counts.pop <- df.PS %>%
@@ -364,18 +362,51 @@ df.counts   %>%
   ggplot() +
   geom_density(aes(x = PS, fill = sample_method, weight = w), alpha = .1) +
   geom_density(data = df.counts.pop %>% filter(RR == filter.rr),
-               aes(x = PS)) +
-  facet_grid(strata ~ Sampling, scales = "free_y")
+               aes(x = PS),
+               linetype = "dashed") +
+  facet_grid( ~ Sampling, scales = "free_y")
 
 ```
+
+
+
+
 
 ```{r}
 df.counts   %>%
   filter(RR == filter.rr) %>%
   ggplot() +
-  geom_density(aes(x = ethHisp, fill = sample_method, weight = w), alpha = .1) +
+  geom_density(aes(x = log(n), fill = sample_method, weight = w), alpha = .1) +
   geom_density(data = df.counts.pop %>% filter(RR == filter.rr),
-               aes(x = ethHisp)) +
-  facet_grid(strata ~ Sampling, scales = "free_y")
+               aes(x = log(n)),
+               linetype = "dashed") +
+  facet_grid( ~ Sampling, scales = "free_y")
+
+df.counts   %>%
+  filter(RR == filter.rr) %>%
+  ggplot() +
+  geom_density(aes(x = log(ethBlack), fill = sample_method, weight = w), alpha = .1) +
+  geom_density(data = df.counts.pop %>% filter(RR == filter.rr),
+               aes(x = log(ethBlack)),
+               linetype = "dashed") +
+  facet_grid( ~ Sampling, scales = "free_y")
+
+
+```
+```{r}
+df.counts   %>%
+  filter(RR == filter.rr) %>%
+  ggplot() +
+  geom_density(aes(x = pELL, fill = sample_method, weight = w), alpha = .1) +
+  geom_density(data = df.counts.pop %>% filter(RR == filter.rr),
+               aes(x = pELL),
+               linetype = "dashed") +
+  facet_grid( ~ Sampling, scales = "free_y")
+
+```
+
+
+```{r}
+df.sim
 
 ```
