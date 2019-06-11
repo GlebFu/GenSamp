@@ -328,15 +328,7 @@ samplot %>%
 
 ```
 
-```{r}
-df.counts   %>%
-  ggplot() +
-  geom_density(aes(x = PS, fill = sample_method, weight = w), alpha = .1) +
-  geom_density(data = df.counts.pop,
-               aes(x = PS)) +
-  facet_grid(RR ~ Sampling, scales = "free")
 
-```
 
 
 ```{r}
@@ -355,58 +347,39 @@ df.counts.pop <- df.PS %>%
   left_join(df.clusters) %>%
   left_join(df.sim)
 
-filter.rr <- "RR_30"
 
-df.counts   %>%
-  filter(RR == filter.rr) %>%
+```
+
+```{r}
+df.counts %>%
   ggplot() +
   geom_density(aes(x = PS, fill = sample_method, weight = w), alpha = .1) +
-  geom_density(data = df.counts.pop %>% filter(RR == filter.rr),
-               aes(x = PS),
-               linetype = "dashed") +
-  facet_grid( ~ Sampling, scales = "free_y")
-
-```
-
-
-
-
-
-```{r}
-df.counts   %>%
-  filter(RR == filter.rr) %>%
-  ggplot() +
-  geom_density(aes(x = log(n), fill = sample_method, weight = w), alpha = .1) +
-  geom_density(data = df.counts.pop %>% filter(RR == filter.rr),
-               aes(x = log(n)),
-               linetype = "dashed") +
-  facet_grid( ~ Sampling, scales = "free_y")
-
-df.counts   %>%
-  filter(RR == filter.rr) %>%
-  ggplot() +
-  geom_density(aes(x = log(ethBlack), fill = sample_method, weight = w), alpha = .1) +
-  geom_density(data = df.counts.pop %>% filter(RR == filter.rr),
-               aes(x = log(ethBlack)),
-               linetype = "dashed") +
-  facet_grid( ~ Sampling, scales = "free_y")
+  geom_density(data = df.counts.pop,
+               aes(x = PS)) +
+  facet_grid(RR ~ Sampling, scales = "free")
 
 
 ```
+
 ```{r}
-df.counts   %>%
-  filter(RR == filter.rr) %>%
+df.counts %>%
   ggplot() +
-  geom_density(aes(x = pELL, fill = sample_method, weight = w), alpha = .1) +
-  geom_density(data = df.counts.pop %>% filter(RR == filter.rr),
-               aes(x = pELL),
-               linetype = "dashed") +
-  facet_grid( ~ Sampling, scales = "free_y")
+  geom_density(aes(x = ethHisp, fill = sample_method, weight = w), alpha = .1) +
+  geom_density(data = df.counts.pop,
+               aes(x = ethHisp)) +
+  facet_grid(RR ~ Sampling, scales = "free")
 
 ```
 
-
 ```{r}
-df.sim
+library(ICC)
 
+df.ICCs <- df %>%
+  gather(key = vnames, value = value, covariates) %>%
+  group_by(vnames) %>%
+  summarise(ICC = ICCbare(strata, value))
+
+df.coefs %>%
+  left_join(df.ICCs) %>%
+  arrange(ICC)
 ```
