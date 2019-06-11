@@ -64,10 +64,7 @@ rm(list = ls())
 ```{r data-prep}
 source("ParGenSource.R")
 
-file_date <- "2019-02-28"
 
-load(paste("data/", file_date, "/base data.rdata", sep = ""))
-load("Paper Data/PaperData.rdata")
 
 saveFigs <- F
 save.figures <- function(x, w = 10, h = 6) ggsave(paste("Figs/Paper/", x, ".jpg", sep = ""), width = w, height = h)
@@ -204,14 +201,15 @@ Selection of covariates was driven by prior research on district and school part
 Log-transformation was used on school size (number of students) and median income. This is done to allow proportional comparisons at the extremes of the distributions [@hennigHowFindAppropriate2013]. For instance, the difference between two schools with 4000 and 3000 students should be weighed as much as the difference between two schools with 400 and 300 students when generating clusters. Figure \@ref(fig:plot-dist1) displays the distribution of the continuous variables.
 
 ```{r plot-dist1, results = "asis", fig.cap="Comparison of covariate distributions and their log transformations."}
+
 dist_plots %>%
-  gather(key = var, value = value, pED:pMin, n_log) %>%
-  group_by(var) %>%
-  # mutate(value = value - mean(value)) %>%
-  ggplot(aes(x = value)) +
+  filter(!(vnames %in% c("Suburban", "Urban", "ToRu"))) %>%
+  ggplot(aes(x = val)) +
   geom_histogram() +
-  facet_wrap(~ var, scales = "free") +
-  theme_apa()
+  facet_wrap(~ Variables, scales = "free", ncol = 3) +
+  theme_apa() 
+
+
 
 
 if(saveFigs) save.figures("Intro - Covariate Distribution")

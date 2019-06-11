@@ -98,6 +98,22 @@ boxErrors <- function(x) {
 ```
 
 
+# Data
+
+```{r, results = "asis}
+dist_plots <- df %>%
+  select(covariates) %>%
+  select_if(is.numeric) %>%
+  mutate(n = log(n),
+         ST.ratio = log(ST.ratio),
+         dSCH = log(dSCH)) %>%
+  gather(key = vnames, value = val) %>%
+  left_join(df.coefs)
+
+
+
+```
+
 
 # Methods Summary
 
