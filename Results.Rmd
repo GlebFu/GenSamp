@@ -55,7 +55,7 @@ rm(list = ls())
 
 
 load("Data/Simulation Data/Sim Data.Rdata")
-load("Data/Cluster Analysis/Clusters.Rdata")
+load("Data/Cluster Analysis/Clusters k2-10.rdata")
 
 # load(read_file("Data/Results/LastResults.txt"))
 load("Data/Results/1001 Reps - K5.rdata")
@@ -98,21 +98,7 @@ boxErrors <- function(x) {
 ```
 
 
-# Data
 
-```{r, results = "asis}
-dist_plots <- df %>%
-  select(covariates) %>%
-  select_if(is.numeric) %>%
-  mutate(n = log(n),
-         ST.ratio = log(ST.ratio),
-         dSCH = log(dSCH)) %>%
-  gather(key = vnames, value = val) %>%
-  left_join(df.coefs)
-
-
-
-```
 
 
 # Methods Summary
@@ -184,6 +170,21 @@ levels(df.coefs$Variables) <- c("Total District Schools",
 df.coefs %>%
   kable() %>%
   kable_styling()
+```
+
+
+```{r}
+dist_plots <- df %>%
+  select(covariates) %>%
+  select_if(is.numeric) %>%
+  mutate(n = log(n),
+         ST.ratio = log(ST.ratio),
+         dSCH = log(dSCH)) %>%
+  gather(key = vnames, value = val) %>%
+  left_join(df.coefs)
+
+
+save(df, df.coefs, intercepts, chPlot, cluster.vratio, file = "Data/Paper/Paper Data.rdata")
 ```
 
 ```{r}

@@ -62,9 +62,9 @@ rm(list = ls())
 ```
 
 ```{r data-prep}
-source("ParGenSource.R")
 
 
+load("Data/Paper/Paper Data.rdata")
 
 saveFigs <- F
 save.figures <- function(x, w = 10, h = 6) ggsave(paste("Figs/Paper/", x, ".jpg", sep = ""), width = w, height = h)
@@ -201,6 +201,15 @@ Selection of covariates was driven by prior research on district and school part
 Log-transformation was used on school size (number of students) and median income. This is done to allow proportional comparisons at the extremes of the distributions [@hennigHowFindAppropriate2013]. For instance, the difference between two schools with 4000 and 3000 students should be weighed as much as the difference between two schools with 400 and 300 students when generating clusters. Figure \@ref(fig:plot-dist1) displays the distribution of the continuous variables.
 
 ```{r plot-dist1, results = "asis", fig.cap="Comparison of covariate distributions and their log transformations."}
+dist_plots <- df %>%
+  select(covariates) %>%
+  select_if(is.numeric) %>%
+  mutate(n = log(n),
+         ST.ratio = log(ST.ratio),
+         dSCH = log(dSCH)) %>%
+  gather(key = vnames, value = val) %>%
+  left_join(df.coefs)
+
 
 dist_plots %>%
   filter(!(vnames %in% c("Suburban", "Urban", "ToRu"))) %>%
@@ -247,110 +256,21 @@ Parameter values were selected that minimized the squared difference between the
 
 ```{r tab-RGM-Pars, results = "asis", fig.cap="Odds ratio coeficients for Response Generating Model", eval = F}
 
-tab_RGM_Pars %>%
+df.coefs %>%
   apa_table()
 
 ```
 
-```{r fig-SMD-goal, results = "asis", fig.cap = "Difference between expected SMDs and goal SMDs"}
-schVals_lab <- schVals %>%
-  filter(RR == .5) %>%
-  mutate(RR = paste(RR*100, "%", sep = "")) %>%
-  select(Var, dif, RR, pars) %>%
-  na.omit()
-
-# schVals %>%
-#   select(Var, dif, RR) %>%
-#   mutate(RR = paste(RR*100, "%", sep = "")) %>%
-#   na.omit() %>%
-#   ggplot(aes(x = RR, y = dif, group = Var, linetype = Var)) +
-#   geom_point() +
-#   geom_line() +
-#   theme_apa() +
-#   labs(x = "Population Response Rates",
-#        y = expression(Delta*"SMD")) +
-#   ggrepel::geom_text_repel(data = schVals_lab, 
-#                            aes(x  = RR, y = dif, label = Var),
-#                            direction = "y",
-#                            nudge_x = 1,
-#                            xlim = c(NA, 10.4),
-#                            segment.size = .1) +
-#   theme(legend.position="none",
-#        plot.margin=unit(c(0,1,0,0),"cm")) +
-#   coord_cartesian(clip = 'off')
-
-
-schVals %>%
-  select(Var, dif, RR) %>%
-  mutate(RR = paste(RR*100, "%", sep = "")) %>%
-  na.omit() %>%
-  ggplot(aes(x = RR, y = dif, group = Var, linetype = Var, color = Var)) +
+```{r fig-intercepts, results = "asis", fig.cap = "Intercepts used to generate response rates"}
+data.frame(Intercept = intercepts, RR = names(intercepts), row.names = NULL) %>%
+  ggplot(aes(x = RR, y = Intercept, group = 1)) +
   geom_point() +
   geom_line() +
-  theme_apa() +
-  labs(x = "Population Response Rates",
-       y = expression(Delta*"SMD")) +
-  ggrepel::geom_text_repel(data = schVals_lab, 
-                           aes(x  = RR, y = dif, label = Var),
-                           direction = "y",
-                           nudge_x = 1,
-                           xlim = c(NA, 10.4),
-                           segment.size = .1,
-                           vjust = 1) +
-  theme(legend.position="none",
-       plot.margin=unit(c(0,2,0,0),"cm")) +
-  coord_cartesian(clip = 'off')
-
-if(saveFigs) save.figures("Intro - Differences in SMDs")
-
+  theme_apa()
 
 ```
 
-```{r fig-RGM-Pars, results = "asis", fig.cap="Odds ratio coeficients for Response Generating Model"}
-# schVals %>%
-#   filter(Var != "Intercept") %>%
-#   select(Var, pars, RR) %>%
-#   mutate(RR = paste(RR*100, "%", sep = "")) %>%
-#   ggplot(aes(x = RR, y = pars, group = Var, linetype = Var)) +
-#   geom_point() +
-#   geom_line() +
-#   theme_apa() +
-#   labs(x = "Population Response Rates",
-#        y = expression(Delta*"SMD")) +
-#   ggrepel::geom_text_repel(data = schVals_lab, 
-#                            aes(x  = RR, y = pars, label = Var),
-#                            direction = "y",
-#                            nudge_x = 1,
-#                            xlim = c(NA, 10.4),
-#                            segment.size = .1,
-#                            vjust = 1) +
-#   theme(legend.position="none",
-#        plot.margin=unit(c(0,2,0,0),"cm")) +
-#   coord_cartesian(clip = 'off')
 
-schVals %>%
-  filter(Var != "Intercept") %>%
-  select(Var, pars, RR) %>%
-  mutate(RR = paste(RR*100, "%", sep = "")) %>%
-  ggplot(aes(x = RR, y = pars, group = Var, linetype = Var, color = Var)) +
-  geom_point() +
-  geom_line() +
-  theme_apa() +
-  labs(x = "Population Response Rates",
-       y = expression(beta[h])) +
-  ggrepel::geom_text_repel(data = schVals_lab, 
-                           aes(x  = RR, y = pars, label = Var),
-                           direction = "y",
-                           nudge_x = 1,
-                           xlim = c(NA, 10.4),
-                           segment.size = .1,
-                           vjust = 1) +
-  theme(legend.position="none",
-       plot.margin=unit(c(0,2,0,0),"cm")) +
-  coord_cartesian(clip = 'off')
-
-if(saveFigs) save.figures("Intro - Parameter Values")
-```
 
 ## Stratification
 
@@ -361,10 +281,8 @@ Selecting the number of clusters, $k$, is one of the most difficult problems in 
 
 
 ```{r fig-ch, results = "asis", fig.cap="Generalized Calinski-Harabasz index"}
-load("Paper Data/Cluster data.rdata")
-
 chPlot %>%
-  gather(key = method, value = value, ch2) %>%
+  gather(key = method, value = value, ch) %>%
   ggplot(aes(x = k, y = value)) +
   geom_point() +
   geom_line() +
@@ -378,6 +296,8 @@ if(saveFigs) save.figures("Intro - Calinski-Harabasz")
 ```
 
 ```{r fig-ratio, fig.cap="Ratio of between cluster sum of squares to total cluster sum of squares"}
+cluster.vratio
+
 ratio_data %>%
   # group_by(subs) %>%
   mutate(min80 = sum(vrat < .8) + .5) %>%
