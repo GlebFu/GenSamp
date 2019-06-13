@@ -296,13 +296,13 @@ if(saveFigs) save.figures("Intro - Calinski-Harabasz")
 ```
 
 ```{r fig-ratio, fig.cap="Ratio of between cluster sum of squares to total cluster sum of squares"}
-cluster.vratio
-
-ratio_data %>%
+df.vratio <- data.frame(vratio = cluster.vratio, K = names(cluster.vratio), row.names = NULL, stringsAsFactors = F) %>%
   # group_by(subs) %>%
-  mutate(min80 = sum(vrat < .8) + .5) %>%
-  # ungroup() %>%
-  ggplot(aes(x = k, y = vrat)) +
+  mutate(min80 = sum(vratio < .8) + .5 + minK,
+         K = parse_number(K))
+
+df.vratio %>%
+  ggplot(aes(x = K, y = vratio)) +
   geom_point() +
   labs(y = "Between Cluster Variance",
        x = "Number of Strata (k)") +
@@ -319,22 +319,19 @@ if(saveFigs) save.figures("Intro - SS Ratio")
 ```
 
 ```{r fig-k-size, fig.cap="Sampling requirements for each cluster"}
-cls_f %>%
-  gather(key = k, value = cluster, -subs) %>%
-  filter(k > 1) %>%
-  mutate(k = as.numeric(k)) %>%
-  group_by(k, cluster, subs) %>%
-  summarise(n = n()) %>%
-  group_by(k, subs) %>%
-  mutate(sample = (n / sum(n)) * 60) %>%
-  ggplot(aes(x = k, y = sample)) +
+prop_allocations %>%
+  ungroup() %>%
+  rename(sample = pa, population = n) %>%
+  mutate(K = parse_number(K)) %>%
+  ggplot(aes(x = K, y = sample)) +
   geom_point(shape = "-", size = 15, alpha = .5) +
   theme_apa() +
   labs(y = "Allocated Sample Size",
        x = "Number of Strata (k)") +
-  scale_x_discrete(limits = c(2:20)) +
-  scale_y_continuous(breaks = seq(0, 30, 5),
-                     sec.axis = sec_axis(~./60*9882, name = "Strata Size")) +
+  scale_x_discrete(limits = c(2:10)) +
+  scale_y_continuous(breaks = seq(0, 35, 5),
+                     limits = c(0, 35),
+                     sec.axis = sec_axis(~ . / 60 * 9882, name = "Strata Size")) +
   stat_function(fun = function(x) 60/x, geom = "line", linetype = "dashed", size = .5) +
   # facet_grid(subs ~ .) +
   # theme(text = element_text(size=20)) +
@@ -427,29 +424,10 @@ Figure \@ref(fig:fig-SMD-by-Var) displays the average SMD between the samples an
 Figure \@ref(fig:fig-avg-Bindex) displays the average $B$-index for each method across participation rates. Acceptable values of $B$ for generalizability vary depending on the size of the sample, the size of the population, and the number of covariates [@tiptonHowGeneralizableYour2014]. Given our design a critical value of $B = .95$ would be needed to indicate generalizability. At population participation rates of 60% and higher, all methods resulted in similarly generalizable samples. However, at lower rates only SBS and SRS consistently generated highly generalizable samples. SCS and URS performed equally, while UCS resulted in relatively less generalizable samples.
 
 
-```{r fig-SMD-by-Var, results = "asis", fig.cap = "Averge Standardized Mean Differences between sample and population", eval = T}
+```{r fig-SMD-by-Var, results = "asis", fig.cap = "Averge Standardized Mean Differences between sample and population", eval = T, fig.env = “sidewaysfigure”}
 sSMDplot$Variable <- as.factor(sSMDplot$Variable)
 levels(sSMDplot$Variable) <- c("School Size", "Free/Reduced Lunch", "English Proficient", "ELL", "Math Proficient", "Non-White", "Suburban", "Town/Rural", "Urban")
 
-
-# sSMDplot %>%
-#   filter(Group == "sampled",
-#          Variable == "School Size") %>%
-#   ggplot(aes(x = sch.RR, y = sim_SMD, color = Sampling, linetype = Clustering, group = sample)) +
-#   # geom_point() +
-#   geom_line(size = 2) +
-#   geom_hline(yintercept = 0) +
-#   geom_hline(yintercept = .25, linetype = "dashed") +
-#   theme_apa(box = F) +
-#   labs(y = "Mean SMD",
-#        x = "Population Participation Rate") +
-#   theme(legend.position = "bottom") +
-#   scale_x_continuous(breaks = seq(10, 90, 10)) +
-#   theme(text = element_text(size=20)) +
-#   scale_color_OkabeIto()
-# 
-# if(saveFigs) save.figures("Results - SMD - School Size")
-# 
 scale_y_f <- function(x, y = 3) {
   top <- max(.3, ceiling(round(max(x)*10,1))/10)
   b <- ceiling(round((top/y)*10,1))/10
@@ -458,28 +436,23 @@ scale_y_f <- function(x, y = 3) {
 
 }
 
-# scale_y_f(c(0, .5))
-
-# debug(scale_y_f)
-
-
 sSMDplot %>%
-  filter(Group == "sampled") %>%
-  ggplot(aes(x = sch.RR, y = sim_SMD, color = Sampling, linetype = Clustering, group = sample)) +
+  ungroup() %>%
+  mutate(RR = parse_number(RR)) %>%
+  ggplot(aes(x = RR, y = mSMD, color = Sampling, linetype = Clustering, group = sample_method)) +
   # geom_point() +
-  geom_line(size = 1) +
-  geom_hline(yintercept = .25, linetype = "dashed") +
+  geom_line() +
   geom_hline(yintercept = 0) +
-  facet_wrap( ~ Variable, scales = "free_y") +
+  geom_hline(yintercept = .25, linetype = "dashed") +
+  facet_wrap( ~ var, scales = "free_y", ncol  = 3) +
   theme_apa(box = F) +
   labs(y = "Mean SMD",
        x = "Population Participation Rate") +
-  theme(legend.position = "bottom") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1), 
+        legend.position = "right") +
   scale_y_continuous(breaks = scale_y_f,
                      expand = expand_scale(mult = c(0, .6))) +
   scale_x_continuous(breaks = seq(10, 90, 10)) 
-  # theme(text = element_text(size=15)) +
-  # scale_color_OkabeIto()
 
 
 if(saveFigs) save.figures("Results - SMD")
@@ -489,7 +462,9 @@ if(saveFigs) save.figures("Results - SMD")
 ```{r fig-avg-Bindex, results = "asis", fig.cap = "Averge $B$-index for varying participation rates, by sampling method", eval = T}
 
 avg_Bindex %>%
-  ggplot(aes(x = sch.RR, y = M, color = Sampling, linetype = Clustering)) +
+  ungroup() %>%
+  mutate(RR = parse_number(RR)) %>%
+  ggplot(aes(x = RR, y = M, color = Sampling, linetype = Clustering)) +
   geom_line(size = 1) +
   scale_x_continuous(breaks = seq(10, 90, 10)) +
   scale_y_continuous(limits = c(.5, 1)) +
@@ -497,8 +472,7 @@ avg_Bindex %>%
        x = "Population Participation Rate") +
   theme_apa() +
   theme(#text = element_text(size=20),
-        legend.position = "bottom") +
-  # scale_color_OkabeIto()
+        legend.position = "bottom")
 
 if(saveFigs) save.figures("Results - B Index")
 

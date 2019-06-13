@@ -7,7 +7,7 @@ library(snow)
 source("ParGenSource.r")
 
 load("Data/Population Data/Cleaned Data.rdata")
-load("Data/Cluster Analysis/Clusters.rdata")
+load("Data/Cluster Analysis/Clusters k2-10.rdata")
 
 #-----------------------
 # Schools
@@ -134,24 +134,24 @@ df.clusters <- df.sim %>%
   select(-value)
 
 
-df.clusters %>%
-  filter(K == "K_06") %>%
-  full_join(df.PS) %>%
-  ggplot(aes(x = cluster_percentile, y = PS)) +
-  geom_point() +
-  facet_grid(RR ~ strata)
-
-
-df.clusters %>%
-  filter(K == "K_06") %>%
-  full_join(df.PS) %>%
-  filter(strata == 4,
-         RR == "RR_10") %>%
-  left_join(df.sim %>% select(DSID, covariates)) %>%
-  gather(key = var, value = val, T1:pELL) %>%
-  ggplot(aes(x = cluster_percentile, y = val, color = PS)) +
-  geom_point() +
-  facet_wrap(~ var, scales = "free")
+# df.clusters %>%
+#   filter(K == "K_06") %>%
+#   full_join(df.PS) %>%
+#   ggplot(aes(x = cluster_percentile, y = PS)) +
+#   geom_point() +
+#   facet_grid(RR ~ strata)
+# 
+# 
+# df.clusters %>%
+#   filter(K == "K_06") %>%
+#   full_join(df.PS) %>%
+#   filter(strata == 4,
+#          RR == "RR_10") %>%
+#   left_join(df.sim %>% select(DSID, covariates)) %>%
+#   gather(key = var, value = val, T1:pELL) %>%
+#   ggplot(aes(x = cluster_percentile, y = val, color = PS)) +
+#   geom_point() +
+#   facet_wrap(~ var, scales = "free")
 
 
 df.strat4 <- df.clusters %>%
@@ -181,4 +181,4 @@ df.clusters <- prop_allocations %>%
 
 DGM.Bs
 
-save(df.sim, df.PS, df.clusters, covariates, df.pop.stats, DGM.Bs, intercepts, df.smd.ipsw, file = "Data/Simulation Data/Sim Data.Rdata")
+save(df.sim, df.PS, df.clusters, covariates, df.pop.stats, DGM.Bs, intercepts, df.smd.ipsw, prop_allocations, file = "Data/Simulation Data/Sim Data.Rdata")

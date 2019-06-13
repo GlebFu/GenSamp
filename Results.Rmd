@@ -75,11 +75,11 @@ df.samp.counts <- df.samp.counts %>% rename_conditions()
 df.samp.stats <- df.samp.stats %>% rename_conditions()
 
 
-df.clusters <- df.clusters %>%
+df.k5 <- df.clusters %>%
   transmute(DSID = DSID,
             strata = factor(K_05))
 
-df <- left_join(df.sim, df.clusters)
+df <- left_join(df.sim, df.k5)
 
 ### Calculate SMDs using IPSW
 ### Estimate variance explaiend by STRATA in covariates
@@ -184,7 +184,7 @@ dist_plots <- df %>%
   left_join(df.coefs)
 
 
-save(df, df.coefs, intercepts, chPlot, cluster.vratio, file = "Data/Paper/Paper Data.rdata")
+save(df, df.coefs, intercepts, chPlot, cluster.vratio, minK, prop_allocations, df.clusters, file = "Data/Paper/Paper Data.rdata")
 ```
 
 ```{r}
@@ -207,12 +207,12 @@ df.PS %>%
   theme_apa()
 
 
-left_join(df.PS, df.clusters) %>%
+left_join(df.PS, df.k5) %>%
   ggplot(aes(x = PS, color = strata, group = strata)) +
   geom_density() +
   facet_wrap(~RR, scales = "free_y")
 
-left_join(df.PS, df.clusters) %>%
+left_join(df.PS, df.k5) %>%
   ggplot(aes(x = strata, y = PS, color = strata)) +
   geom_boxplot() +
   facet_wrap(~RR, scales = "free_y") + 
@@ -361,7 +361,7 @@ df.counts <- df.samp.counts %>%
   mutate(w = count / sum(count))
 
 df.counts.pop <- df.PS %>%
-  left_join(df.clusters) %>%
+  left_join(df.k5) %>%
   left_join(df.sim)
 
 
