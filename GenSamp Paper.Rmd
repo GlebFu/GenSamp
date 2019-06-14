@@ -425,8 +425,8 @@ Figure \@ref(fig:fig-avg-Bindex) displays the average $B$-index for each method 
 
 
 ```{r fig-SMD-by-Var, results = "asis", fig.cap = "Averge Standardized Mean Differences between sample and population", eval = T, fig.env = “sidewaysfigure”}
-sSMDplot$Variable <- as.factor(sSMDplot$Variable)
-levels(sSMDplot$Variable) <- c("School Size", "Free/Reduced Lunch", "English Proficient", "ELL", "Math Proficient", "Non-White", "Suburban", "Town/Rural", "Urban")
+sSMDplot$Variable <- as.factor(sSMDplot$var)
+
 
 scale_y_f <- function(x, y = 3) {
   top <- max(.3, ceiling(round(max(x)*10,1))/10)
@@ -481,39 +481,15 @@ if(saveFigs) save.figures("Results - B Index")
 
 
 
-```{r fig-avg-SMD, results = "asis", fig.cap = "Average absolute SMD across covariates", eval = F}
-
-sSMDplot %>%
-  filter(Group == "sampled") %>%
-  ggplot(aes(x = sample, y = sim_SMD, group = sample, fill = Sampling, linetype = Clustering)) +
-  geom_boxplot() +
-  geom_line() +
-  geom_hline(yintercept = 0) +
-  geom_hline(yintercept = .25, linetype = "dashed") +
-  # facet_grid(dist.RR ~ sch.RR, scales = "free_y") +
-  theme_apa(box = T) +
-  # scale_fill_brewer(type = "seq", palette = 4, guide=FALSE) +
-  # scale_color_brewer(type = "qual", palette = 5)  +
-  theme(legend.position = "none",
-        panel.spacing = unit(2, "lines"),
-        # text = element_text(size=20),
-        legend.title = element_text(size=15)) +
-  labs(x = "Sampling Method", y = "Absolute SMD")
-
-
-```
-
 ## Feasibility
 
 Figure \@ref(fig:fig-units-contacted) reports the average number of schools that needed to be contacted before a full sample of $N = 60$ schools was selected. At higher participation rates differences between methods were negligible. However, as participation rates decreased the disparity between the methods became more apparent. Overall, UCS required the least "effort" to recruit a full sample, followed by URS and SCS, SRS, and finally SBS. Figure \@ref(fig:fig-response-rates) plots the response rates of schools approached for recruitment against the population participation rates. As expected, URS response rates reflected those in the population. Both UCS and SCS resulted in higher response rates, while SRS and SBS resulted in lower response rates. 
 
 ```{r fig-responses, results = "asis", fig.cap = "Sampling statistics", eval = F}
 samplot %>%
-  gather(key = measure, value = value, -sample, -sch.RR, -Sampling, -Clustering) %>%
-  mutate(level = str_split(measure, "_", simplify = T)[,1],
-         measure =  str_split(measure, "_", simplify = T)[,2]) %>%
-  filter(level == "sch") %>%
-  ggplot(aes(x = sch.RR, y = value, group = sample, color = Sampling, linetype = Clustering)) +
+  ungroup() %>%
+  mutate(RR = parse_number(RR)) %>%
+  ggplot(aes(x = RR, y = value, group = sample_method, color = Sampling, linetype = Clustering)) +
   geom_point() +
   geom_line() +
   facet_wrap( ~ measure, scales = "free_y") +
@@ -523,14 +499,12 @@ samplot %>%
 
 ```{r fig-units-contacted, results = "asis", fig.cap = "Averge number of schools contacted to achieve N = 60", eval = T}
 contact_data <- samplot %>%
-  gather(key = measure, value = value, -sample, -sch.RR, -Sampling, -Clustering) %>%
-  mutate(level = str_split(measure, "_", simplify = T)[,1],
-         measure =  str_split(measure, "_", simplify = T)[,2]) %>%
-  filter(measure == "contacted") %>%
-  mutate(level = ifelse(level == "sch", "Schools", "Districts"))
+  filter(measure == "sch.contacted")
 
 contact_data %>%
-  ggplot(aes(x = sch.RR, y = value, group = sample, color = Sampling, linetype = Clustering)) +
+  ungroup() %>%
+  mutate(RR = parse_number(RR)) %>%
+  ggplot(aes(x = RR, y = value, group = sample_method, color = Sampling, linetype = Clustering)) +
   # geom_point() +
   geom_line(size = 1) +
   expand_limits(y=0) +
