@@ -282,7 +282,7 @@ sSMDplot %>%
 
 if(savePlot)  ggsave(paste("Figs/", file_date, "/All SMDs.jpg", sep = ""), dpi = 1000, width = 7, height = 5)
 
-save(df, df.coefs, intercepts, chPlot, cluster.vratio, minK, prop_allocations, df.clusters, covariates, sSMDplot, file = "Data/Paper/Paper Data.rdata")
+
 
 ```
 
@@ -295,8 +295,7 @@ samplot <- df.recruitment.stats %>%
   group_by(sample_method, RR, measure, Sampling, Clustering, K) %>%
   summarise(value = mean(value))
 
-save(df, df.coefs, intercepts, chPlot, cluster.vratio, minK, prop_allocations, df.clusters, covariates, sSMDplot, samplot,
-     file = "Data/Paper/Paper Data.rdata")
+
 ```
 
 
@@ -367,7 +366,6 @@ df.counts.pop <- df.PS %>%
   left_join(df.k5) %>%
   left_join(df.sim)
 
-
 ```
 
 ```{r}
@@ -402,4 +400,20 @@ df.ICCs <- df %>%
 df.coefs %>%
   left_join(df.ICCs) %>%
   arrange(ICC)
+
+
+save(df, 
+     df.coefs, 
+     intercepts, 
+     chPlot, 
+     cluster.vratio, 
+     minK, 
+     prop_allocations, 
+     df.clusters, 
+     covariates, 
+     sSMDplot, 
+     avg_Bindex, 
+     samplot, 
+     df.counts.pop,
+     file = "Data/Paper/Paper Data.rdata")
 ```
