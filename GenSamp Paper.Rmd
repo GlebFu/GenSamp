@@ -47,14 +47,14 @@ output            : papaja::apa6_pdf
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = F, cache = T, eval = T, warning = F, message = F)
+knitr::opts_chunk$set(echo = F, cache = T, eval = T, warning = T, message = T)
 
 ```
 
 ```{r load.packages, include = FALSE}
 library(papaja)
 library(tidyverse)
-library(colorblindr)
+# library(colorblindr)
 library(colorspace)
 
 rm(list = ls())
@@ -71,7 +71,7 @@ rm(list = ls())
 load("Data/Paper/Paper Data.rdata")
 
 saveFigs <- F
-save.figures <- function(x, w = 10, h = 6) ggsave(paste("Figs/Paper/", x, ".jpg", sep = ""), width = w, height = h)
+save.figures <- function(x, w = 10, h = 6, ...) ggsave(filename = paste("Figs/Paper/", x, ".jpg", sep = ""), width = w, height = h, ...)
 
 ```
 
@@ -218,7 +218,8 @@ dist_plots %>%
   ggplot(aes(x = val)) +
   geom_histogram() +
   facet_wrap(~ Variables, scales = "free", ncol = 3) +
-  theme_apa() 
+  theme_apa() +
+  labs(x = "Value", y = "Count")
 
 if(saveFigs) save.figures("Intro - Covariate Distribution")
 ```
@@ -256,7 +257,7 @@ data.frame(Intercept = intercepts, RR = names(intercepts), row.names = NULL, str
 Stratification was performed prior to simulation because the population is constant across iterations. Per Tipton's (2013) original recommendation, we use k-means clustering to partition the population into strata. This requires selecting a distance metric, choosing the number of strata, and generating the strata.
 
 ### Number of Clusters
-Selecting the number of clusters, $k$, is one of the most difficult problems in cluster analysis (Steinley, 2006). Tipton (2013) states that both statistical and practical criteria should be used in selecting $k$. For instance, a large number of clusters would result in more homogeneous strata and, in turn, a more robust sample. However as strata become smaller, they also become more difficult to adequately sample from. Hennig and Liao (2013) argue that the method of selecting $k$ should depend on the context of the clustering and frame the issue as one of obtaining an appropriate subject-matter-dependent definition rather than a statistical estimation. Ultimately three considerations were used to select the number of clusters: the ratio of variability between clusters to the sum of within and between cluster variability as recommended by Tipton (2013), a generalized form of the Calinski-Harabasz index (Calinski and Harabasz, 1974) proposed by Hennig and Liao (2013), and the practicality of sampling from fewer clusters.
+Selecting the number of clusters, $k$, is one of the most difficult problems in cluster analysis (Steinley, 2006). Tipton (2013) states that both statistical and practical criteria should be used in selecting $k$. For instance, a large number of clusters would result in more homogeneous strata and, in turn, a more robust sample. However as strata become smaller, they also become more difficult to adequately sample from. Hennig and Liao (2013) argue that the method of selecting $k$ should depend on the context of the clustering and frame the issue as one of obtaining an appropriate subject-matter-dependent definition rather than a statistical estimation. Ultimately three considerations were used to select the number of clusters: (1) the ratio of variability between clusters to the sum of within and between cluster variability as recommended by Tipton (2013), (2) a generalized form of the Calinski-Harabasz index (Calinski and Harabasz, 1974) proposed by Hennig and Liao (2013), and (3) the practicality of sampling from fewer clusters.
 
 
 ```{r fig-ch, results = "asis", fig.cap="Generalized Calinski-Harabasz index"}
@@ -323,11 +324,11 @@ if(saveFigs) save.figures("Intro - Cluster Size")
 ```
 
 ### Cluster Analysis
-Cluster analysis was performed using the _cluster_ package (Maechler et. al. 2017) in R. First, the _daisy_ function is used to compute an $n$ by $n$ pairwise distance matrix across all observations. This function requires two parameters: (1) the data matrix, and (2) the distance metric. The data matrix included the full set of school level covariates. The metric was set to "gower". Next the _kmeans_ function was used to generate clusters. This method uses an optimization algorithm to classify sites into $k$ clusters by minimizing the total within cluster sum of squares. This function also requires two parameters: (1) the distance matrix, and (2) the number of clusters to generate ($k$). For each $k$, it is recommended to run _kmeans_ at least 10 times, and select the clustering that results in the smallest total within-cluster sum of squares. [Get Citation]
+Cluster analysis was performed using the _cluster_ package (Maechler et. al. 2017) in R. First, the _daisy_ function is used to compute an $n$ by $n$ pairwise distance matrix across all observations. This function requires two parameters: (1) the data matrix, and (2) the distance metric. The data matrix included the full set of school level covariates. The metric was set to "gower". Next the _kmeans_ function was used to generate clusters. This method uses an optimization algorithm to classify sites into $k$ clusters by minimizing the total within cluster sum of squares. This function also requires two parameters: (1) the distance matrix, and (2) the number of clusters to generate ($k$). For each $k$, it is recommended to run _kmeans_ at least 10 times, and select the clustering that results in the smallest total within-cluster sum of squares.
 
-Several methods were used to determine $k$. Figure \@ref(fig:fig-ch) displays the Calinski-Harabasz (CH) index for each $k$ clusters generated. In this case, generating 2 clusters maximises the CH-index. Figure \@ref(fig:fig-ratio) displays the ration of between-cluster SS to within-cluster SS and plots it against $k$. Tipton (2013) recommends selecting the number of clusters such that at least 80% of the variability is between clusters, indicated by the figure as a dashed line. Given this criteria it seems that at least 7 clusters should be generated. However we also see that after a sharp initial increase, the slope of the graph begins to level out. This indicates that as we increase the number of clusters, the benefit of doing so decreases, while the difficulty of sampling from each cluster increases. In that case after 5 or 6 clusters the difficulty of sampling may not be worth such small increases in homogeneity within clusters.
+Several methods were used to determine $k$. Figure \@ref(fig:fig-ch) displays the Calinski-Harabasz (CH) index for each $k$ clusters generated. In this case, generating 2 clusters maximises the CH-index. Figure \@ref(fig:fig-ratio) displays the ratio of between-cluster SS to within-cluster SS and plots it against $k$. Tipton (2013) recommends selecting the number of clusters such that at least 80% of the variability is between clusters, indicated by the figure as a dashed line. Given this criteria it seems that at least 7 clusters should be generated. However we also see that after a sharp initial increase, the slope of the graph begins to level out. This indicates that as we increase the number of clusters, the benefit of doing so decreases, while the difficulty of sampling from each cluster increases. In that case after 5 or 6 clusters the difficulty of sampling may not be worth such small increases in homogeneity within clusters.
 
-Figure \@ref(fig:fig-k-size) plots the sample size that needs to be selected from each cluster to fulfill the proportional allocation requirement such that the number of sites sampled from each cluster is proportional to the size of the cluster in the population. The dashed line indicates the ideal allocation if all clusters were of equal size. We see that the variability in cluster sizes decreases as more clusters are generated. A sensible cutoff may be determined by looking at the size of the smallest cluster. At $k > 5$ it seems that the smallest clusters would require less than 5 sites being sampled, which may be very difficult in a practical setting. We determined tha this would be the most likely criteria to be conisdered in the field, and ultimately decided to generate 5 clusters for this analysis.
+Figure \@ref(fig:fig-k-size) plots the sample size that needs to be selected from each cluster to fulfill the proportional allocation requirement such that the number of sites sampled from each cluster is proportional to the size of the cluster in the population. The dashed line indicates the ideal allocation if all clusters were of equal size. We see that the variability in cluster sizes decreases as more clusters are generated. A sensible cutoff may be determined by looking at the size of the smallest cluster. At $k > 5$ it seems that the smallest clusters would require less than 5 sites being sampled, which may be very difficult in a practical setting. We determined that this would be the most likely criteria to be conisdered in the field, and ultimately decided to generate 5 clusters for this analysis.
 
 ## Sampling Methods
 Five sampling methods were compared: stratified and unstratified random sampling (SRS, URS), stratified and unstratified convenience sampling (SCS, UCS), and stratified balanced sampling (SBS). Indicators of whether or not a school would participate if approached were generated at the begining of each iteration, and were therefore idential for each sampling method during that iteration. Let $N$ be the total number of schools in the population, and let schools be indexed by $j = 1, ..., N$. We define $E_j$ as a binary indicator that school $j$ will agree to participate if contacted by recruiters, where $E_j = 1$ if the school agrees, and $E_j = 0$ if the school refuses. Each school was checked for approval by sampling from a Bernoulli distribution with probability equal to $\pi^P_j$ for each school $j$
@@ -365,9 +366,9 @@ As with SRS, in SCS this was performed independently within strata, and proporti
 
 ### Generalizability
 
-There are several methods to determine how generalizable a sample is to a target population. One common method is to compare the sample to the population on a range of covariates by examining SMDs. Let $X^r_j$ be the full set of covariates identified in Table \ref{tab:desc} indexed by $j = 1,...,9$ to the order of $r$ where $r = 1,..,3$ if $X_j$ is continuous and $r = 1$ if $X_j$ is binary. Let $\bar{X^r_j}$ and $M^r_j$ be the mean of covariate $X^r_j$ in the sample and population respectively. Finally, let $\sigma^r_j$ be the standard deviation of $X^r_j$ in the population. We will calculated the $SMD$ of each covariate as
+There are several methods to determine how generalizable a sample is to a target population. One common method is to compare the sample to the population on a range of covariates by examining SMDs. Let $X_j$ be the full set of covariates identified in Table \@ref(tab:tab-RGM-Pars) indexed by $j = 1,...,9$. Let $\bar{X_j}$ and $M_j$ be the mean of covariate $j$ in the sample and population respectively. Finally, let $\sigma_j$ be the standard deviation of $X_j$ in the population. We will calculated the $SMD$ of each covariate as
 \begin{align}
-  SMD^r_{j} = \frac{\bar{X}^{r}_{j}-M^{r}_{j}}{\sigma_{j}}
+  SMD_{j} = \frac{\bar{X}_{j}-M_{j}}{\sigma_{j}}
 \end{align}
 
 This method is limited as it only provides us with a measure of how close the sample means are to the population means. To have true generalizability, sample variance must also be representative of the population variance. Therefore, in addition to SMDs we also estimated the generalizability index [$B$;@tiptonHowGeneralizableYour2014]. The generalizability index is bounded between 0 and 1, with 0 indicating no overlap between the sample and the population, and 1 indicating the sample is representative of the population. First all sites in the population are divided into $k$ bins. For bins $j = 1,...,k$, let $w_{pj} = N_j/N$ be the proportion of the population and $w_{sj} = n_j/n$ be the proportion of the sample in each bin. We will calculate $B$ as:
@@ -398,13 +399,12 @@ load("Data/Paper/Paper Data.rdata")
 
 ```
 
-Figure \@ref(fig:fig-SMD-by-Var) displays the average SMD between the samples and the population for each covariate and at each population participation rate resulting from each sampling method. The dotted horizontal line indicates a cutoff of .25, where SMDs above that indicate large differences between the sample and population for that covariate. Stratified methods consistently performed better than unstratified methods. SBS generally performed as well as or better than SRS. URS often resulted in highly unrepresentative samples except in cases where population participation rates were extremely high.
+Figure \@ref(fig:fig-SMD-by-Var-example) displays the average SMD between the samples and the population for four covariates and at each population participation rate resulting from each sampling method. The dotted horizontal line indicates a cutoff of .25, where SMDs above that indicate large differences between the sample and population for that covariate. For 8 out of the 13 covariates, stratified methods consistently performed better than unstratified methods. For 2 covariates (percent female and student to teacher ratio) all methods resulted in acceptible SMDs. For 3 covariates (percent black, suburban schools, and school size) the unstratified methods performed better than their stratified counterparts. SBS generally performed as well as or better than SRS. URS often resulted in highly unrepresentative samples except in cases where population participation rates were extremely high.
 
-Figure \@ref(fig:fig-avg-Bindex) displays the average $B$-index for each method across participation rates. Acceptable values of $B$ for generalizability vary depending on the size of the sample, the size of the population, and the number of covariates [@tiptonHowGeneralizableYour2014]. Given our design a critical value of $B = .95$ would be needed to indicate generalizability. At population participation rates of 60% and higher, all methods resulted in similarly generalizable samples. However, at lower rates only SBS and SRS consistently generated highly generalizable samples. SCS and URS performed equally, while UCS resulted in relatively less generalizable samples.
+Figure \@ref(fig:fig-avg-Bindex) displays the average $B$-index for each method across participation rates. Acceptable values of $B$ for generalizability vary depending on the size of the sample, the size of the population, and the number of covariates [@tiptonHowGeneralizableYour2014]. Given our design a critical value of $B = .95$ would be needed to indicate generalizability. At population participation rates of 40% or lower, only SBS consistently generated highly generalizable samples. At 50% and beyond, SBS samples began to decline slowly in generalizbility, while othe rmehtods increased. Notably, at low response rates unstratified convenience sampling seemed to perform better than stratified convenience sampling.
 
 
-```{r fig-SMD-by-Var, results = "asis", eval = T, fig.cap = "Averge Standardized Mean Differences between sample and population"}
-
+```{r}
 sSMDplot$Variable <- as.factor(sSMDplot$var)
 
 
@@ -415,7 +415,9 @@ scale_y_f <- function(x, y = 3) {
   seq(0,b*y,b)
 
 }
+```
 
+```{r fig-SMD-by-Var, results = "asis", eval = T, fig.cap = "Averge Standardized Mean Differences between sample and population", eval = F}
 sSMDplot %>%
   ungroup() %>%
   mutate(RR = parse_number(RR)) %>%
@@ -436,6 +438,60 @@ sSMDplot %>%
 
 
 if(saveFigs) save.figures("Results - SMD")
+
+```
+
+```{r fig-SMD-by-Var-ind, results = "asis", eval = T, fig.cap = "Averge Standardized Mean Differences between sample and population", eval = F}
+
+plt.smd <- list()
+
+for(v in unique(sSMDplot$var)) {
+  plt.smd[[v]] <- sSMDplot %>%
+    ungroup() %>%
+    filter(var == v) %>%
+    mutate(RR = parse_number(RR)) %>%
+    ggplot(aes(x = RR, y = mSMD, color = Sampling, linetype = Clustering, group = sample_method)) +
+    geom_line() +
+    geom_hline(yintercept = 0) +
+    geom_hline(yintercept = .25, linetype = "dashed") +
+    theme_apa(box = F) +
+    labs(y = "Mean SMD",
+         x = "Population Participation Rate",
+         title = v)
+  
+  if(saveFigs) save.figures(x = paste("Results - SMD", v, sep = "-"), plot = plt.smd[[v]])
+  
+}
+
+
+
+
+
+
+```
+
+```{r fig-SMD-by-Var-example, results = "asis", eval = T, fig.cap = "Averge Standardized Mean Differences between sample and population for select covariates", eval = T}
+plt.vgood <- c("dSCH", "ethWhite")
+plt.good <- c("ethHisp", "pELL", "pTotfrl", "T1", "Urban", "ToRu")
+plt.bad <- c("ethBlack", "Suburban", "n")
+plt.neutral <- c("pFem", "ST.ratio")
+
+sSMDplot %>%
+  ungroup() %>%
+  mutate(RR = parse_number(RR)) %>%
+  filter(var %in% c(plt.vgood[1], plt.good[1], plt.bad[1], plt.neutral[1])) %>%
+  ggplot(aes(x = RR, y = mSMD, color = Sampling, linetype = Clustering, group = sample_method)) +
+  # geom_point() +
+  geom_line() +
+  geom_hline(yintercept = 0) +
+  geom_hline(yintercept = .25, linetype = "dashed") +
+  facet_wrap( ~ var, scales = "free_y", ncol  = 2) +
+  theme_apa(box = F) +
+  labs(y = "Mean SMD",
+       x = "Population Participation Rate") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1), 
+        legend.position = "bottom") 
+
 
 ```
 
@@ -535,6 +591,23 @@ if(saveFigs) save.figures("Results - Response Rates")
 
 # Discussion
 The main goal of this study was to lay a groundwork for exploring the effectiveness and feasibility of sampling methods in the educational context. Our work uncovered several limitations in designing sampling and participation models. The sampling methods we developed made several assumptions about researcher and recruiter behavior in selecting a sample. First, that recruiters always prioritize schools that are most likely to participate. In truth, many other factors play a role such as proximity of sample sites to the researcher and to each other, existing relationships between the recruiters and the sample sites, and other researcher assumptions about the sample site's characteristics. Second, that recruiters have approximate knowledge of how likely a sampled site is to participate. Though researchers may speculate about sites that are more willing to participate (schools in larger urban districts) and prioritize recruiting such sites, it is not likely that they would estimate willingness as well as we have simulated. Given this, it is possible that the "feasibility" of the convenience methods is overestimated.
+
+```{r}
+
+df.icc %>% 
+  select(vnames, icc) %>% 
+  unnest %>%
+  left_join(df.coefs) %>%
+  select(Variables, vnames, icc, log_odds) %>%
+  mutate(icc = round(icc, 3),
+         results = NA,
+         results = ifelse(vnames %in% plt.vgood, "Very Good", results),
+         results = ifelse(vnames %in% plt.good, "Good", results),
+         results = ifelse(vnames %in% plt.neutral, "Neutral", results),
+         results = ifelse(vnames %in% plt.bad, "Bad", results)) %>%
+  arrange(results)
+
+```
 
 That said, our participation model is speculative. The parameters in our response generating model are based on values from a study that examined the difference between schools participating in large-scale randomized control trials (RCT) and the overall population of schools. However, these RCTs themselves typically rely on some form of convenience sampling. In that sense our parameters reflect participation rates of schools that are likely to participate in RCTs, rather than the full population of schools. Furthermore, the decision of whether a school participates in such a study is multi-leveled. Generally, districts serve as gatekeepers, requiring research requests to be submitted and approved before recruitment can begin. If the request is denied, no schools within that district may be recruited. If approved, schools may be contacted individually. The ultimate decision may then rest with administrators, or they may be passed on to teachers most affected by the study.
 

@@ -390,16 +390,23 @@ df.counts %>%
 ```
 
 ```{r}
-library(ICC)
+extract_ICC <- function(mlm.model) {
+  df.icc <- data.frame(l1.var = insight::get_variance_residual(mlm.model),
+                       l2.var = insight::get_variance_intercept(mlm.model)) %>%
+    mutate(t.var = sum(l1.var, l2.var))
+  
+  df.icc %>%
+    mutate(icc = l2.var / t.var)
+}
 
-df.ICCs <- df %>%
+
+df.icc <- df %>%
   gather(key = vnames, value = value, covariates) %>%
   group_by(vnames) %>%
-  summarise(ICC = ICCbare(strata, value))
+  nest() %>%
+  mutate(mlm = map(data, lme4::lmer, formula = value ~ (1|strata)),
+         icc = map(mlm, extract_ICC))
 
-df.coefs %>%
-  left_join(df.ICCs) %>%
-  arrange(ICC)
 
 
 save(df, 
@@ -415,5 +422,6 @@ save(df,
      avg_Bindex, 
      samplot, 
      df.counts.pop,
+     df.icc,
      file = "Data/Paper/Paper Data.rdata")
 ```
