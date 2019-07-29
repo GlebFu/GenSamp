@@ -408,11 +408,13 @@ Figure \@ref(fig:fig-avg-Bindex) displays the average $B$-index for each method 
 sSMDplot$Variable <- as.factor(sSMDplot$var)
 
 
-scale_y_f <- function(x, y = 3) {
-  top <- max(.3, ceiling(round(max(x)*10,1))/10)
-  b <- ceiling(round((top/y)*10,1))/10
-  # print(paste(paste(round(x,2), collapse = " - "), paste(seq(0,b*y,b), collapse = "|"), sep = " : |"))
-  seq(0,b*y,b)
+scale_y_f <- function(x) {
+  b <- 1
+  if(x[2] <= 2) b <- .5
+  if(x[2] <= 1) b <- .25
+  if(x[2] <= .25) b <- .1
+  
+  seq(0,b*4,b)
 
 }
 ```
@@ -431,10 +433,11 @@ sSMDplot %>%
   labs(y = "Mean SMD",
        x = "Population Participation Rate") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1), 
-        legend.position = "right") +
+        legend.position = "right",
+        strip.text.x = element_blank()) +
   scale_y_continuous(breaks = scale_y_f,
                      expand = expand_scale(mult = c(0, .6))) +
-  scale_x_continuous(breaks = seq(10, 90, 10)) 
+  scale_x_continuous(breaks = seq(10, 90, 20)) 
 
 
 if(saveFigs) save.figures("Results - SMD")
@@ -605,8 +608,10 @@ df.icc %>%
          results = ifelse(vnames %in% plt.good, "Good", results),
          results = ifelse(vnames %in% plt.neutral, "Neutral", results),
          results = ifelse(vnames %in% plt.bad, "Bad", results)) %>%
-  arrange(results)
+  arrange(icc)
 
+
+plt.smd[plt.bad]
 ```
 
 That said, our participation model is speculative. The parameters in our response generating model are based on values from a study that examined the difference between schools participating in large-scale randomized control trials (RCT) and the overall population of schools. However, these RCTs themselves typically rely on some form of convenience sampling. In that sense our parameters reflect participation rates of schools that are likely to participate in RCTs, rather than the full population of schools. Furthermore, the decision of whether a school participates in such a study is multi-leveled. Generally, districts serve as gatekeepers, requiring research requests to be submitted and approved before recruitment can begin. If the request is denied, no schools within that district may be recruited. If approved, schools may be contacted individually. The ultimate decision may then rest with administrators, or they may be passed on to teachers most affected by the study.
