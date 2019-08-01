@@ -457,19 +457,19 @@ The main goal of this study was to lay a groundwork for exploring the effectiven
 ## # A tibble: 13 x 5
 ##    Variables              vnames     icc log_odds results  
 ##    <fct>                  <chr>    <dbl>    <dbl> <chr>    
-##  1 Total Students         n        0.056    0.374 Bad      
-##  2 Suburban               Suburban 0.581    0.007 Bad      
+##  1 % Female               pFem     0.001   -0.019 Neutral  
+##  2 Total Students         n        0.056    0.374 Bad      
 ##  3 % Black                ethBlack 0.06     0.291 Bad      
-##  4 Schoolwide Title I     T1       0.944    0.019 Good     
-##  5 % FRL                  pTotfrl  0.764    0.081 Good     
-##  6 Urban                  Urban    0.91     0.433 Good     
-##  7 Town/Rural             ToRu     0.271   -0.403 Good     
-##  8 % Hispanic             ethHisp  0.664    0.395 Good     
-##  9 % ELL                  pELL     0.537    0.412 Good     
-## 10 % Female               pFem     0.001   -0.019 Neutral  
-## 11 Student/Teacher Ratio  ST.ratio 0.105   -0.101 Neutral  
-## 12 % White                ethWhite 0.674   -0.538 Very Good
-## 13 Total District Schools dSCH     0.119    0.52  Very Good
+##  4 Student/Teacher Ratio  ST.ratio 0.105   -0.101 Neutral  
+##  5 Total District Schools dSCH     0.119    0.52  Very Good
+##  6 Town/Rural             ToRu     0.271   -0.403 Good     
+##  7 % ELL                  pELL     0.537    0.412 Good     
+##  8 Suburban               Suburban 0.581    0.007 Bad      
+##  9 % Hispanic             ethHisp  0.664    0.395 Good     
+## 10 % White                ethWhite 0.674   -0.538 Very Good
+## 11 % FRL                  pTotfrl  0.764    0.081 Good     
+## 12 Urban                  Urban    0.91     0.433 Good     
+## 13 Schoolwide Title I     T1       0.944    0.019 Good
 \end{verbatim}
 
 That said, our participation model is speculative. The parameters in our response generating model are based on values from a study that examined the difference between schools participating in large-scale randomized control trials (RCT) and the overall population of schools. However, these RCTs themselves typically rely on some form of convenience sampling. In that sense our parameters reflect participation rates of schools that are likely to participate in RCTs, rather than the full population of schools. Furthermore, the decision of whether a school participates in such a study is multi-leveled. Generally, districts serve as gatekeepers, requiring research requests to be submitted and approved before recruitment can begin. If the request is denied, no schools within that district may be recruited. If approved, schools may be contacted individually. The ultimate decision may then rest with administrators, or they may be passed on to teachers most affected by the study.
