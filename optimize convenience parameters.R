@@ -90,7 +90,7 @@ convenience_discrepancy <- function(Bs, goal, RR, sample_n, reps,
 }
 
 generate_parameters <- function(goal, RR, sample_n, dat, 
-                                Bs = rep(0, ncol(dat)),
+                                Bs = goal,
                                 reps = 100, 
                                 seed = NULL, 
                                 opt_method = "Nelder-Mead",
@@ -116,6 +116,31 @@ generate_parameters <- function(goal, RR, sample_n, dat,
   
 }
 
-generate_parameters(goal = schGoal[1:3], RR = 0.2,
-                    sample_n = 200, dat = df_standardized[1:3],
-                    reps = 500, seed = 20190325)
+#---------------------------------
+# 20% response rate
+#---------------------------------
+  
+params_20 <- 
+  generate_parameters(goal = schGoal[-2], RR = 0.2,
+                      sample_n = 200, dat = df_standardized[-2],
+                      reps = 500, seed = 20190401)
+
+convenience_samples <- 
+  rerun(1000, {
+    convenience_sample(Bs = params_20$beta[[1]], RR = 0.2, 
+                       sample_n = 200, 
+                       data_mat = as.matrix(df_standardized[-2])) %>%
+      colMeans() %>%
+      enframe()
+  })
+
+
+goal_dat <- enframe(schGoal[-2]) %>% rename(goal = value)
+
+convenience_samples %>% 
+  bind_rows() %>% 
+  group_by(name) %>%
+  summarise(
+    achieved = mean(value)
+  ) %>%
+  inner_join(goal_dat, by = "name")
