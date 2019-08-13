@@ -23,9 +23,10 @@ affiliation:
 #   Enter author note here.
 
 abstract: |
-    <!-- In order for educational research to be informative to policy makers, studies must be designed to make robust estimates of causal effects at the population level. Large scale multi-site randomized trials (MRT) often rely on vague convenience sampling methodology when recruiting districts and schools, resulting in relatively homogeneous samples that may differ greatly from the intended population of interest. Retrospective methods that quantify and statistically adjust for those differences are promising but have limited effect when the sample differs greatly from the population. Designing sampling methods that focus on generalizability may be a more effective but costly solution, but limited methodological research has been performed to examine their effectiveness in the educational context. This paper examines one promising method, stratified balanced sampling (SBS), in the context of recruiting a representative sample of schools for a large scale MRT. Using simulations based on real data, we compare SBS to stratified and unstratified versions of convenience sampling and probability sampling. Several models for generating school participation and emulating convenience sampling are proposed. Results indicate that SBS and stratified random sampling (SRS) result in highly generalizable samples. These methods are extremely costly to implement, however, especially when the population average willingness to participate is low. Stratified convenience sampling (SCS) is a potential compromise. -->
+    In order for educational research to be informative to policy makers, studies must be designed to make robust estimates of causal effects at the population level. Large scale multi-site randomized trials (MRT) often rely on vague convenience sampling methodology when recruiting districts and schools, resulting in relatively homogeneous samples that may differ greatly from the intended population of interest. Retrospective methods that quantify and statistically adjust for those differences are promising but have limited effect when the sample differs greatly from the population. Designing sampling methods that focus on generalizability may be a more effective but costly solution, but limited methodological research has been performed to examine their effectiveness in the educational context. This paper examines one promising method, stratified balanced sampling (SBS), in the context of recruiting a representative sample of schools for a large scale MRT. Using simulations based on real data, we compare SBS to stratified and unstratified versions of convenience sampling and probability sampling. Several models for generating school participation and emulating convenience sampling are proposed. Results indicate that SBS and stratified random sampling (SRS) result in highly generalizable samples. These methods are extremely costly to implement, however, especially when the population average willingness to participate is low. Stratified convenience sampling (SCS) is a potential compromise. 
+    
 
-# keywords          : "keywords"
+keywords          : "generalizability, sampling, MRT"
 # wordcount         : "X"
 
 bibliography      : ["references.bib"]
@@ -74,6 +75,8 @@ saveFigs <- F
 save.figures <- function(x, w = 10, h = 6, ...) ggsave(filename = paste("Figs/Paper/", x, ".jpg", sep = ""), width = w, height = h, ...)
 
 ```
+# Abstract
+
 
 # Introduction
 
@@ -625,7 +628,11 @@ df.icc %>%
 ```
 
 ```{r fig-SMD-by-Var-bad, results = "asis", eval = T, fig.cap = "Poor balance for stratfied methods", eval = T, warning = F, message = F}
+plt.vgood <- c("dSCH", "ethWhite")
+plt.good <- c("ethHisp", "pELL", "pTotfrl", "T1", "Urban", "ToRu")
 plt.bad <- c("ethBlack", "Suburban", "n")
+plt.neutral <- c("pFem", "ST.ratio")
+
 
 sSMDplot %>%
   rename(vnames = Variable) %>%
