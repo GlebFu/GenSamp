@@ -105,13 +105,13 @@ In order for educational research to be informative to policy makers, studies mu
 \hypertarget{introduction}{%
 \section{Introduction}\label{introduction}}
 
-The multi-site randomized trial (MRT) has become a common design in educational research, particularly in effectiveness studies of educational interventions. In essence, an MRT is a randomized control trial (RCT) that takes place accross multiple distinct sites (e.g.~geographic locations), with random assignment taking place either at the site or unit level. In educational research, an MRT may consist of multiple schools being recruited from a district, after which each school is randomly assigned to implement an intervention (treatment) or continue business as usual (control).
+The multi-site randomized trial (MRT) has become a common design in educational research, particularly in evaluations of intervention effectiveness. In essence, an MRT is a randomized control trial (RCT) that takes place accross multiple distinct sites (e.g.~geographic locations), with random assignment taking place either at the site or unit level. In education such a design may consist of multiple schools being recruited from one or more districts. Once a sample of sites is recruited, students, teachers, classes or whole schools can be randomly assigned either to receive the intervention (treatment group) or to continue business as usual (control group).
 
-The advantage of an MRT design over an RCT is that it maintains the high level of internal validity via randomized treatment assignment, while also supporting a greater degree of generalizability by introducing cross-site variation. Ostensibly, this allows effect estimates to generalize to a larger population than estimates from a single-site design (Raudenbush \& Liu, 2000). Recently, however, the ambiguity of how this larger population is defined has increasingly come under scrutiny.
+The advantage of an MRT design over a single-site RCT is that it maintains the high level of internal validity via randomized treatment assignment, while also supporting a greater degree of generalizability by introducing cross-site variability. Ostensibly, this allows effect estimates to generalize to a larger population than estimates from a single-site design (Raudenbush \& Liu, 2000). However, the ambiguity of how this larger population is defined, and the overall generalizability of large-scale MRTs, has increasingly come under scrutiny.
 
-Generalizability falls under the purview of external validity, and is a multi-faceted problem in causal inference. For the purpose of the present study, we define generalizability as the extent to which a sample is representative of a well-specified population. In this context generalizability is of particular interest in evidence-based policy decisions, where the primary concern is intervention effectiveness on units outside of the study sample.
+Generalizability is a multi-faceted causal inference problem that falls under the purview of external validity. For the purpose of the present study, we narrowly define generalizability as the extent to which a sample represents a well-specified population of interest. In the presense of treatment effect heterogeniety, or variability in response to intervention across persons or sites, estimating sample specific average effects may not be relevant beyond the units in the study. This makes intervention evaluations less informative to policy-makers who seek to make evidence-based decisions in populations that are unrepresented by the study sample.
 
-Inadequate sampling strategies are a major threat to generalizability of MRTs. Several studies have found substantial differences between schools and districts that participate in large scale randomized trials (Fellers, 2017; Stuart, Bell, Ebnesajjad, Olsen, \& Orr, 2017). Purposive or non random samples may lead to substantially biased estimates of population level effects (Olsen, Orr, Bell, \& Stuart, 2013; Shadish, Cook, \& Campbell, 2002). Furthermore, if the sample of sites is too small or homogeneous, the scope of the generalization is greatly diminished.
+In this context, inadequate sampling strategies have been shown to be a major threat to generalizability of MRTs. Purposive or non random samples may lead to substantially biased estimates of population level effects (Olsen, Orr, Bell, \& Stuart, 2013; Shadish, Cook, \& Campbell, 2002). Several studies have found substantial differences between schools and districts that participate in large scale randomized trials (Fellers, 2017; Stuart, Bell, Ebnesajjad, Olsen, \& Orr, 2017). Beyond accurate effects estimates, generalizability can also be a question of equity. For instance, these studies have shown that small underserved rural districts are underepresented in RCTs sponsored by Institute of Education Sciences, and therefore are less likely to benefit from federally funded research.
 
 RCTs provide a high level of internal validity as they demonstrate the causality of the impact being estimated. In education research, multi-site RCTs, or multi-site randomized trials (MRTs), are used to inform policy decisions by evaluating intervention impacts on a larger scale. Recruitment and randomization occurs at the organizational level (e.g.~schools), ostensibly increasing the diversity of settings in which the study takes place. In practice, however, the generalizability of MRTs is greatly limited by the sampling method being implemented. This is a major drawback for policymakers who are interested in generalizing treatment effects beyond the sample.
 
@@ -129,44 +129,17 @@ Potential advantages of SBS include reducing under-coverage and greater recruitm
 
 The goal of the current paper is two-part. First, we propose several methods for modeling two major sources of sampling bias: recruitment and participation. Recruitment refers to how likely a sampling site is to be approached by researchers, and participation refers to how likely the sampling site is to participate if recruited. This step will lay the groundwork for testing sampling methods in the educational context. Second, using the models proposed in the first step, we will compare SBS to several other recruitment models on the method's ability to select a generalizable sample, and the ease with which a full sample can be recruited.
 
-\hypertarget{methods-and-models}{%
-\section{Methods and Models}\label{methods-and-models}}
-
-\hypertarget{framework-for-generalizability}{%
-\subsection{Framework for Generalizability}\label{framework-for-generalizability}}
-
-We begin with a data set enumerating a population of \(N\) sites (schools), indexed as \(i = 1 ... N\). We assume that each site has some unobserved probability of participating in a study if approached by recruiters which is represented by the participation propensity score \(\pi_i^P\). Each site also has a vector of observed characteristics \(X_i\) of length \(P\). This is a set of pre-treatment covariates that predict \(\pi_i\). The covariates are a mixture of continuous, binary, and categorical data.
-
-The goal is to select a sample of \(n\) sites such that there is balance along \(X_i\) between the sample and the population, indicating that the population is fully represented by the sample. We measure balance using the standardized mean difference (\(SMD\)) between the sample and population for a given covariate. \(SMD\) is calculated as
-
-\begin{align}
-  SMD = \frac{\bar{X}-\mu}{\sigma}
-\end{align}
-where \(\bar{X}\) is a vector of covariate means in the sample, \(\mu\) is the vector of covariate means in the population, and \(\sigma\) is the vector of covariate standard deviations in the population. \(SMD\) values closer to zero indicate greater balance between the sample and the population.
-
-\hypertarget{modeling-selection-bias}{%
-\subsection{Modeling Selection Bias}\label{modeling-selection-bias}}
-
-Selection bias stems from two sources: (1) site participation behavior and (2) researcher recruitment behavior. To model the former we propose a simple participation propensity score. Let \(\pi^P_i\) represent the participation propensity score, or the probability that a site agrees to participate in an RCT if approached for recruitment. Using a simple logistic transformation we model \(\pi^P_i\) as follows:
-
-\begin{align} \label{eq:RGM}
-  log\bigg(\frac{\pi^P_i}{1 - \pi^P_i}\bigg) = \beta_0 + \boldsymbol{X_i \beta}
-\end{align}
-where \(\boldsymbol{X_i}\) is an \(N\) by \(P\) matrix of covariates that predict sample selection for each site, and \(\boldsymbol{\beta}\) is a vector of coefficients associated with those covariates. Participation for site \(i\) will be determined by sampling from a Bernoulli distribution with probability equal to \(\pi^P_i\).
-
-To generate selection bias stemming from researcher recruitment, we propose a \enquote{low hanging fruit} approach to convenience sampling. We assume that researchers have some knowledge of how likely each site is to participate, and prioritize easy to recruit sites as a way of maximizing recruitment efficiency. While there are many other ways to define convenience sampling, we posit this as a first step. Sites are prioritized for recruitment by sequentially sampling from the population of sites using \(\pi^P_i\) as a sampling weight. Once a site is added to the list in order of priority, the probability of choosing the next site is proportional to the weights of the remaining items. In this way, sites that have higher values for \(\pi^P_i\) are more likely to be recruited earlier on.
-
 \hypertarget{stratified-balanced-sampling}{%
 \section{Stratified Balanced Sampling}\label{stratified-balanced-sampling}}
 
-In this section we outline SBS as implemented in the present study within the context of selecting schools for a large-scale MRT. For a more complete overview, see Tipton (2013b). SBS applies cluster analysis as a dimension reduction technique to drive bias robust balanced sampling based on a large set of covariates. The ultimate goal of SBS is to select a sample that is representative of a population along a set of covariates related to treatment heterogeneity and site selection. This process requires the availability of a rich data set of observed covariates for each site in the population. The population is first divided into heterogeneous strata comprised of homogeneous sites given the set of covariates. This is done using k-means clustering which assigns sites to strata such that similarity within strata is maximized. Once strat are generated, the next step is to select a strategy for recruiting units from within strata. To this end, a second distance metric can be used to rank sites within stata in order of how representative each site is of the strata. These ranks can then be used by researchers to prioritize recruitment. This encourages the selection of sites from subsections of the population which may otherwise not have been included in the sample.
+In this section we outline SBS within the context of selecting schools for a large-scale MRT as implemented in the present study. For a more complete overview, see Tipton (2013b). SBS applies cluster analysis as a dimension reduction technique to drive bias robust balanced sampling based on a large set of covariates. The ultimate goal is to select a sample that is representative of a population along a set of covariates related to treatment heterogeneity and site selection. This process requires the availability of a rich data set of observed covariates for each site in the population. We first divide the population into heterogeneous strata comprised of homogeneous sites given the set of covariates. Tipton (2013b) proposed k-means clustering which assigns sites to strata such that similarity within strata is maximized. After determining the strata, we then use a second distance metric to rank sites in order of how representative the site is of its stratum. We then prioritize site recruitment based on these ranks. In practice, this should encourage the selection of sites from subsections of the population which may otherwise not have been included given typical sampling strategies.
 
 \hypertarget{distance-metric}{%
 \subsection{Distance Metric}\label{distance-metric}}
 
-Once data is identified, a distance metric must be selected to summarizes the difference between two sites on a set of covariates. It is then used to maximize the similarity of sites within clusters. Determining which metric to use largely depends on the type of covariates included in \(X\) and their relative importance.
+The distance metric is used to summarizes the difference between a pair of sites on a set of covariates in order to maximize the similarity of all sites within a clusters. It is therefore necessary to select a metric that is appropriate given the types of covaraites being used. In educational research, data are likely to contain both continuous and categorical data. For mixed data such as this it is appropriate to use the general similaity measure (Gower, 1971; Tipton, 2013b).
 
-The general similarity measure (Gower, 1971) was used because \(X\) contains both continuous and categorical variables. This method relies on different calculations of distance depending on the type of covariates. Let \(X_{ih}\) and \(X_{i'h}\) be the observed value of covariate \(h = {1, ..., P}\) for sites \(i\) and \(i'\) respectively, where \(i \ne i'\). Let \(d_{ii'h}\) be the distance between observed values of covariate \(X_{h}\) for site \(i\) and site \(i'\). For categorical or dummy coded variables, \(d_{ii'h} = 1\) if \(X_{ih} = X_{i'h}\) and \(d_{ii'h} = 0\) otherwise. For continuous covariates, we use the following formula:
+This method relies on different calculations of distance depending on the type of covariates. Let \(X_{ih}\) and \(X_{i'h}\) be the observed value of covariate \(h = {1, ..., P}\) for sites \(i\) and \(i'\) respectively, where \(i \ne i'\). Let \(d_{ii'h}\) be the distance between observed values of covariate \(X_{h}\) for site \(i\) and site \(i'\). For categorical or dummy coded variables, \(d_{ii'h} = 1\) if \(X_{ih} = X_{i'h}\) and \(d_{ii'h} = 0\) otherwise. For continuous covariates, we use the following formula:
 
 \begin{align}
   d_{ii'h} = 1 - \frac{|X_{ih} - X_{i'h}|}{R_h}
@@ -226,6 +199,33 @@ There are, of course, several limitations as well. As with the retrospective met
 Although the findings in Tipton (2013b) were positive, it is unclear how generalizable they are to other potential studies. The inference population consisted of 1,713 non-charter schools serving seventh graders in Texas. Of these schools, 73 (4.3\%) were selected into the sample across nine strata. In other applications, the inference population may be much larger and more heterogeneous, requiring more strata to be created. Sampling from too many strata is difficult when sample sizes are restricted. Would this method be beneficial to researchers making inferences on a national scale? In order to create a non-response condition, Tipton (2013b) selected the first 50 sites in each stratum to be refusals, resulting in smaller strata having higher non response rates.
 
 Furthermore, what if schools in larger strata had higher non-response rates? How many schools would recruiters have to contact before collecting a full sample? School recruitment is a time consuming and complicated process which requires approval at several levels. Researchers may not want to invest in recruiting schools from strata with particularly high non response rates. Finally, the data came from a single state which happened to provide information on 26 covariates. If a national population was of interest, more states would need to be included, but data reporting is not uniform across all states.
+
+\hypertarget{methods-and-models}{%
+\section{Methods and Models}\label{methods-and-models}}
+
+\hypertarget{framework-for-generalizability}{%
+\subsection{Framework for Generalizability}\label{framework-for-generalizability}}
+
+We begin with a data set enumerating a population of \(N\) sites (schools), indexed as \(i = 1 ... N\). We assume that each site has some unobserved probability of participating in a study if approached by recruiters which is represented by the participation propensity score \(\pi_i^P\). Each site also has a vector of observed characteristics \(X_i\) of length \(P\). This is a set of pre-treatment covariates that predict \(\pi_i\). The covariates are a mixture of continuous, binary, and categorical data.
+
+The goal is to select a sample of \(n\) sites such that there is balance along \(X_i\) between the sample and the population, indicating that the population is fully represented by the sample. We measure balance using the standardized mean difference (\(SMD\)) between the sample and population for a given covariate. \(SMD\) is calculated as
+
+\begin{align}
+  SMD = \frac{\bar{X}-\mu}{\sigma}
+\end{align}
+where \(\bar{X}\) is a vector of covariate means in the sample, \(\mu\) is the vector of covariate means in the population, and \(\sigma\) is the vector of covariate standard deviations in the population. \(SMD\) values closer to zero indicate greater balance between the sample and the population.
+
+\hypertarget{modeling-selection-bias}{%
+\subsection{Modeling Selection Bias}\label{modeling-selection-bias}}
+
+Selection bias stems from two sources: (1) site participation behavior and (2) researcher recruitment behavior. To model the former we propose a simple participation propensity score. Let \(\pi^P_i\) represent the participation propensity score, or the probability that a site agrees to participate in an RCT if approached for recruitment. Using a simple logistic transformation we model \(\pi^P_i\) as follows:
+
+\begin{align} \label{eq:RGM}
+  log\bigg(\frac{\pi^P_i}{1 - \pi^P_i}\bigg) = \beta_0 + \boldsymbol{X_i \beta}
+\end{align}
+where \(\boldsymbol{X_i}\) is an \(N\) by \(P\) matrix of covariates that predict sample selection for each site, and \(\boldsymbol{\beta}\) is a vector of coefficients associated with those covariates. Participation for site \(i\) will be determined by sampling from a Bernoulli distribution with probability equal to \(\pi^P_i\).
+
+To generate selection bias stemming from researcher recruitment, we propose a \enquote{low hanging fruit} approach to convenience sampling. We assume that researchers have some knowledge of how likely each site is to participate, and prioritize easy to recruit sites as a way of maximizing recruitment efficiency. While there are many other ways to define convenience sampling, we posit this as a first step. Sites are prioritized for recruitment by sequentially sampling from the population of sites using \(\pi^P_i\) as a sampling weight. Once a site is added to the list in order of priority, the probability of choosing the next site is proportional to the weights of the remaining items. In this way, sites that have higher values for \(\pi^P_i\) are more likely to be recruited earlier on.
 
 \hypertarget{simulation-study}{%
 \section{Simulation Study}\label{simulation-study}}

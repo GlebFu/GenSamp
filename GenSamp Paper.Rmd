@@ -91,8 +91,6 @@ save.figures <- function(x, w = 10, h = 6, ...) ggsave(filename = paste("Figs/Pa
   
   RCTs are commonly used in impact evaluations across many fields. Randomized treatment assignment ensures that estimated effects are causal, thus affording a higher level of internal validity. However, these effect estimates may be sample specific. If treatment effects are heterogeneous, then the impact of an intervention cannot be extrapolated beyond the study sample. This is a limiting feature of RCTs since policymakers seeking to implement interventions will have no way of gauging effectiveness in their population of interest.
   
-
-  
   Random sampling overcomes this limitation by selecting sites from a well-defined population with some known probability. When used in conjunction with randomized treatment assignment, this is known as dual randomization. Assuming no refusals during recruitment, and full compliance without attrition after assignment, this design enables unbiased estimation of the sample average treatment effect (SATE). Using the known sampling probabilities, the SATE can then be used to estimate the population average treatment effect (PATE). 
   
   In absence of random sampling, PATE can still be estimated by using propensity score techniques, provided there is sufficient overlap between the sample and the population [@omuircheartaighGeneralizingUnrepresentativeExperiments2014;@tiptonImprovingGeneralizationsExperiments2013; @kernAssessingMethodsGeneralizing2016]. This is especially useful in impact evaluation as probability sampling is rarely used in this context [@shadishExperimentalQuasiexperimentalDesigns2002; @olsenExternalValidityPolicy2013]. Instead, researchers often opt for convenience or purposive samples. These methods much less expensive to implement, but are not usually designed for representative sampling. This makes them susceptible to substantial differences between the sample and target population, referred to as under-coverage [@grovesSurveyMethodology2004]. 
@@ -104,6 +102,70 @@ save.figures <- function(x, w = 10, h = 6, ...) ggsave(filename = paste("Figs/Pa
   Potential advantages of SBS include reducing under-coverage and greater recruitment transparency. However, little methodological work has examined this method’s effectiveness. Schools and districts with certain characteristics are unlikely to participate in large-scale MRTs [@fellersDevelopingApproachDetermine2017; @stuartCharacteristicsSchoolDistricts2017; @tiptonSiteSelectionExperiments2016]. If one or more strata are comprised of difficult schools, researchers may resort to convenience sampling within those strata. Furthermore, the additional resources required to recruit from all strata create concerns regarding practicality.
   
   The goal of the current paper is two-part. First, we propose several methods for modeling two major sources of sampling bias: recruitment and participation. Recruitment refers to how likely a sampling site is to be approached by researchers, and participation refers to how likely the sampling site is to participate if recruited. This step will lay the groundwork for testing sampling methods in the educational context. Second, using the models proposed in the first step, we will compare SBS to several other recruitment models on the method's ability to select a generalizable sample, and the ease with which a full sample can be recruited.
+
+# Stratified Balanced Sampling
+
+  In this section we outline SBS within the context of selecting schools for a large-scale MRT as implemented in the present study. For a more complete overview, see @tiptonStratifiedSamplingUsing2013. SBS applies cluster analysis as a dimension reduction technique to drive bias robust balanced sampling based on a large set of covariates. The ultimate goal is to select a sample that is representative of a population along a set of covariates related to treatment heterogeneity and site selection. This process requires the availability of a rich data set of observed covariates for each site in the population. We first divide the population into heterogeneous strata comprised of homogeneous sites given the set of covariates. @tiptonStratifiedSamplingUsing2013 proposed k-means clustering which assigns sites to strata such that similarity within strata is maximized. After determining the strata, we then use a second distance metric to rank sites in order of how representative the site is of its stratum. We then prioritize site recruitment based on these ranks. In practice, this should encourage the selection of sites from subsections of the population which may otherwise not have been included given typical sampling strategies.
+
+## Distance Metric
+The distance metric is used to summarizes the difference between a pair of sites on a set of covariates in order to maximize the similarity of all sites within a clusters. It is therefore necessary to select a metric that is appropriate given the types of covaraites being used. In educational research, data are likely to contain both continuous and categorical data. For mixed data such as this it is appropriate to use the general similaity measure [@gowerGeneralCoefficientSimilarity1971; @tiptonStratifiedSamplingUsing2013].
+
+This method relies on different calculations of distance depending on the type of covariates. Let $X_{hi}$ and $X_{hi'}$ be the observed value of covariate $h = {1, ..., P}$ for sites $i$ and $i'$ respectively, where $i \ne i'$. Let $d_{ii'h}$ be the distance between observed values of covariate $X_{h}$ for site $i$ and site $i'$. For categorical or dummy coded variables, $d_{ii'h} = 1$ if $X_{hi} = X_{hi'}$ and $d_{ii'h} = 0$ otherwise. For continuous covariates, we use the following formula:
+
+\begin{align}
+  d_{ii'h} = 1 - \frac{|X_{hi} - X_{hi'}|}{R_h}
+\end{align}
+
+where |.| indicates absolute value, and $R_h$ is the range of observations for covariate $X_h$. This equation restricts the range of $d_{ii'h}$ to $[0,1]$. Finally, we calculate the general similarity between each site pair by taking the weighted average of the distances between all covariates. Let $d^{g}_{ii'}$ be the general similarity between site $i$ and site $i'$.  
+
+\begin{align}
+  d^{g}_{ii'} = \frac{\sum^p_{h = 1}w_{ii'h}d_{ii'h}}{\sum^p_{h = 1}w_{ii'h}}
+\end{align}
+
+where $w_{ii'h} = 0$ if $X_h$ is missing for either site and $w_{ii'h} = 1$ otherwise.
+
+## Selecting k Strata
+Next we must determine the number of strata to be generated. A larger set of strata would result in greater homogeneity within each stratam, however in practical applications more strata may also be difficult to manage. For instance, if refusal and non-response rates are fairly high, having fewer sites spread across more strata may make it difficult to adequately recruit from all strata. Resource constraints (e.g. time, funding, recruiters) may also be a factor in the number of strata selected.
+
+Our strategy was to perform the analysis several times generating different numbers of strata, and comparing the proportion of variability between strata. Let $k$ be the number of strata generated where $k = 1, 2, ..., q$ for some maximum allowable number of $q$ strata. Let $\sigma_{wk}^2$ be the total variability within each stratum, and $\sigma_{bk}^2$ be the total variability between each stratum, for all covariates in $X$ and for each set of $k$ strata generated. Let $p_k$ be the proportion of variability that is between strata for each set of $k$ strata generated be defined as follows:
+
+\begin{align} \label{eq:pk}
+  p_k = \sigma_{bk}^2/(\sigma_{wk}^2 + \sigma_{bk}^2)
+\end{align}
+
+As $p_k$ approaches 1, most of the variation is between strata, indicating homogeneity within strata. This increases the possibility of selecting a more balanced sample. Plotting $p_k$ against $k$ allows visual comparison of the results. The $k$ for which the rate of change $p_k$ slows is considered favorable.
+
+[Go into CH and n distribution across strata here?]
+
+## Sample Selection
+The goal of balanced sampling is to recruit in such a way that the expected value of covariate $X_h$ across sites in stratum $j$ is equal to the expected value of covariate $X_h$ across all sites sampled from stratum $j$:
+
+\begin{align}
+  E(X_ih|Z_i = 1, j) = E(X_h|j)
+\end{align}
+
+where $Z_i = 1$ if site $i$ is recruited into the sample and $Z_i = 0$ otherwise. Following @tiptonStratifiedSamplingUsing2013, we implemented balanced sampling by prioritizing the recruitment of sites based on their similarity to the "average" site in each stratum. First the number of sites to be sampled from each stratum must be identified using proportional sample allocation. Each stratum contains $N_j$ sites where $N_1 + N_2 ... + N_k = N$. From each stratum $j$, $n_j$ sites must be sampled such that $n_j = [(N_j/N)n]$, where [.] indicates that each value is rounded to the nearest integer. 
+
+  Next we ranked each site within a stratum using a distance measure, with sites closer to the "center" of the strata ranked higher. We calculated the weighted Euclidean distance to the mean of each covariate:
+
+\begin{align} \label{eq:euclid}
+  d_{ij} = \sqrt{\sum^p_{h=1}w_h[X_{hij} - E(X_h|j)]^2}
+\end{align}
+
+where $w_h$ is the weight assigned to covariate $X_h$, $E(X_h|j)$ is the population mean of covariate $h$ in stratum $j$, and $X_{hij}$ is the value of covariate $h$ for site $i$ in stratum $j$. As with generating the strata, different weights can be used such that distances depend more heavily on covariates thought to be more related to treatment effect heterogeneity. we then use the ranked list to prioritize sites for recruitment, beginning with the highest ranked sites. If a site is unavailable or refuses to participate, a recruitment attempt is made with the next highest ranked site until $n_j$ sites agree to participate.
+
+  
+## Advantages and Limitations
+SBS has only recently proposed and there have not been any large scale implementations of this method reported. Also, beyond the original proposal article, there have not been any methodological investigation into the method. @tiptonStratifiedSamplingUsing2013 illustrated SBS by comparing it to a previous study which did not use a formal sampling method [@roschelleIntegrationTechnologyCurriculum2010]. Data from the previous study was used to generate two hypothetical samples. The first sample was the ideal in which the highest ranked schools in each stratum agreed to participate. The second sample was a "worst case" non-response sample where the first 50 highest ranked schools in each stratum refused to participate, resulting in a non-response rate of at least 83\% in each stratum. These two samples were then compared to the original sample on the first 3 moments of 26 covariates. Both samples achieved with SBS resulted in better balance than the original sample on at least 19 of the 26 covariates in the first two moments, and 14 out of 26 in the third moments. The samples were then compared on how well they would generalize using the method proposed by @stuartUsePropensityScores2011. This final test showed that the samples achieved with SBS resulted in less coverage errors than the original sample and would thus be easier to generalize using the retrospective methods.
+
+Stratified sampling methods offer three key advantages: transparency, non-response analysis, and integration with and improvement of post hoc adjustments. Perhaps the most appealing advantage of this method is the transparency it requires of the recruitment process. Researchers are forced to provide clear documentation and reasoning for targeting sites for recruitment. This allows for a more careful critique of the study and a better justification of the recruitment process for funders and other stakeholders. It also allows for a better analysis of non-responders. By identifying a set of observed covariates which may predict treatment heterogeneity prior to conducting the study, non-responders or refusals can be tracked and later analyzed for any systematic differences from the inference population or study participants. Finally, implementing this method does not preclude the use of the retrospective methods previously discussed. SBS may not alleviate all balancing issues, and additional statistical adjustments may need to be made. Even if balance is only partially improved at the sampling stage, coverage errors will still be reduced and less of the inference population will need to be discarded.
+
+There are, of course, several limitations as well. As with the retrospective methods, SBS depends on the existence of a rich set of observed covariates related to treatment heterogeneity and sample selection for each site in the population. Most readily available data sets primarily consist of demographics and may not contain all of the covariates related to variation in treatment effect, which can result in omitted variable bias [@tiptonStratifiedSamplingUsing2013]. Additionally, SBS requires more resources to implement than a simple convenience sample. Recruiting ranked sites from multiple strata requires a coordinated effort between recruiters [@tiptonImplicationsSmallSamples2017]. This means that recruiters cannot work independently and must rely on a partnership with methodologists implementing this method. 
+
+Although the findings in @tiptonStratifiedSamplingUsing2013 were positive, it is unclear how generalizable they are to other potential studies. The inference population consisted of 1,713 non-charter schools serving seventh graders in Texas. Of these schools, 73 (4.3\%) were selected into the sample across nine strata. In other applications, the inference population may be much larger and more heterogeneous, requiring more strata to be created. Sampling from too many strata is difficult when sample sizes are restricted. Would this method be beneficial to researchers making inferences on a national scale? In order to create a non-response condition, @tiptonStratifiedSamplingUsing2013 selected the first 50 sites in each stratum to be refusals, resulting in smaller strata having higher non response rates. 
+
+Furthermore, what if schools in larger strata had higher non-response rates? How many schools would recruiters have to contact before collecting a full sample? School recruitment is a time consuming and complicated process which requires approval at several levels. Researchers may not want to invest in recruiting schools from strata with particularly high non response rates. Finally, the data came from a single state which happened to provide information on 26 covariates. If a national population was of interest, more states would need to be included, but data reporting is not uniform across all states.
+
 
 # Methods and Models
 
@@ -130,73 +192,6 @@ where $\bar{X}$ is a vector of covariate means in the sample, $\mu$ is the vecto
 where $\boldsymbol{X_i}$ is an $N$ by $P$ matrix of covariates that predict sample selection for each site, and $\boldsymbol{\beta}$ is a vector of coefficients associated with those covariates. Participation for site $i$ will be determined by sampling from a Bernoulli distribution with probability equal to $\pi^P_i$.
 
   To generate selection bias stemming from researcher recruitment, we propose a "low hanging fruit" approach to convenience sampling. We assume that researchers have some knowledge of how likely each site is to participate, and prioritize easy to recruit sites as a way of maximizing recruitment efficiency. While there are many other ways to define convenience sampling, we posit this as a first step. Sites are prioritized for recruitment by sequentially sampling from the population of sites using $\pi^P_i$ as a sampling weight. Once a site is added to the list in order of priority, the probability of choosing the next site is proportional to the weights of the remaining items. In this way, sites that have higher values for $\pi^P_i$ are more likely to be recruited earlier on.
-
-
-# Stratified Balanced Sampling
-
-  In this section we outline SBS as implemented in the present study within the context of selecting schools for a large-scale MRT. For a more complete overview, see @tiptonStratifiedSamplingUsing2013. SBS applies cluster analysis as a dimension reduction technique to drive bias robust balanced sampling based on a large set of covariates. The ultimate goal of SBS is to select a sample that is representative of a population along a set of covariates related to treatment heterogeneity and site selection. This process requires the availability of a rich data set of observed covariates for each site in the population. The population is first divided into heterogeneous strata comprised of homogeneous sites given the set of covariates. This is done using k-means clustering which assigns sites to strata such that similarity within strata is maximized. Once strat are generated, the next step is to select a strategy for recruiting units from within strata. To this end, a second distance metric can be used to rank sites within stata in order of how representative each site is of the strata. These ranks can then be used by researchers to prioritize recruitment. This encourages the selection of sites from subsections of the population which may otherwise not have been included in the sample.
-
-## Distance Metric
-Once data is identified, a distance metric must be selected to summarizes the difference between two sites on a set of covariates. It is then used to maximize the similarity of sites within clusters. Determining which metric to use largely depends on the type of covariates included in $X$ and their relative importance. 
-
-The general similarity measure [@gowerGeneralCoefficientSimilarity1971] was used because $X$ contains both continuous and categorical variables. This method relies on different calculations of distance depending on the type of covariates. Let $X_{ih}$ and $X_{i'h}$ be the observed value of covariate $h = {1, ..., P}$ for sites $i$ and $i'$ respectively, where $i \ne i'$. Let $d_{ii'h}$ be the distance between observed values of covariate $X_{h}$ for site $i$ and site $i'$. For categorical or dummy coded variables, $d_{ii'h} = 1$ if $X_{ih} = X_{i'h}$ and $d_{ii'h} = 0$ otherwise. For continuous covariates, we use the following formula:
-
-\begin{align}
-  d_{ii'h} = 1 - \frac{|X_{ih} - X_{i'h}|}{R_h}
-\end{align}
-
-where |.| indicates absolute value, $X_{ih}$ and $X_{i'h}$ are values of the $h^{th}$ covariate for sites $i$ and $i'$, and $R_h$ is the range of observations for covariate $X_h$. This equation restricts the range of $d_{ii'h}$ to $[0,1]$. Finally, we calculate the general similarity between each site pair by taking the weighted average of the distances between all covariates. Let $d^{g}_{ii'}$ be the general similarity between site $i$ and site $i'$.  
-
-\begin{align}
-  d^{g}_{ii'} = \frac{\sum^p_{h = 1}w_{ii'h}d_{ii'h}}{\sum^p_{h = 1}w_{ii'h}}
-\end{align}
-
-where $w_{ii'h} = 0$ if $X_h$ is missing for either site and $w_{ii'h} = 1$ otherwise.
-
-## Selecting k Strata
-Before applying the clustering method, the number of strata to be generated must be determined. Generating more strata results in more homogeneity within strata, however in practical applications this may be more difficult to manage. For instance, if refusal and non-response rates are fairly high, having fewer sites spread across more strata may make it difficult to adequately recruit from all strata. Resource constraints (e.g. time, funding, recruiters) may also be a factor in the number of strata selected.
-
-Our strategy was to perform the analysis several times generating different numbers of strata, and comparing the proportion of variability between strata. Let $k$ be the number of strata generated where $k = 1, 2, ..., q$ for some maximum allowable number of $q$ strata. Let $\sigma_{wk}^2$ be the total variability within each stratum, and $\sigma_{bk}^2$ be the total variability between each stratum, for all covariates in $X$ and for each set of $k$ strata generated. Let $p_k$ be the proportion of variability that is between strata for each set of $k$ strata generated be defined as follows:
-
-\begin{align} \label{eq:pk}
-  p_k = \sigma_{bk}^2/(\sigma_{wk}^2 + \sigma_{bk}^2)
-\end{align}
-
-As $p_k$ approaches 1, most of the variation is between strata, indicating homogeneity within strata. This increases the possibility of selecting a more balanced sample. Plotting $p_k$ against $k$ allows visual comparison of the results. The $k$ for which the rate of change $p_k$ slows is then selected.
-
-<!-- Go into CH and n distribution across strata here? -->
-
-## Sample Selection
-The goal of balanced sampling is to recruit in such a way that the expected value of covariate $X_h$ across sites in stratum $j$ is equal to the expected value of covariate $X_h$ across all sites sampled from stratum $j$:
-
-\begin{align}
-  E(X_ih|Z_i = 1, j) = E(X_h|j)
-\end{align}
-
-where $Z_i = 1$ if site $i$ is recruited into the sample and $Z_i = 0$ otherwise. We implemented balanced sampling by prioritizing the recruitment of sites based on their similarity to the "average" site in each stratum. First the number of sites to be sampled from each stratum must be identified using proportional sample allocation. Each stratum contains $N_j$ sites where $N_1 + N_2 ... + N_k = N$. From each stratum $j$, $n_j$ sites must be sampled such that $n_j = [(N_j/N)n]$, where [.] indicates that each value is rounded to the nearest integer. 
-
-  Next we ranked each site within a stratum using a distance measure, with sites closer to the "center" of the strata ranked higher. We calculated the weighted Euclidean distance to the mean of each covariate:
-
-\begin{align} \label{eq:euclid}
-  d_{ij} = \sqrt{\sum^p_{h=1}w_h[X_{ijh} - E(X_h|j)]^2}
-\end{align}
-
-where $w_h$ is the weight assigned to covariate $X_h$, $E(X_h|j)$ is the mean of covariate $h$ in stratum $j$, and $X_{ijh}$ is the value of covariate $h$ for site $i$ in stratum $j$. As with generating the strata, different weights can be used such that distances depend more heavily on covariates thought to be more related to treatment effect heterogeneity. The ranked list was then used to prioritize sites for recruitment, beginning with the highest ranked sites. If a site is unavailable or refuses to participate, a recruitment attempt is made with the next highest ranked site until $n_j$ sites agree to participate.
-
-  If there is a high degree of homogeneity within strata, this sampling procedure should be fairly robust to moderate non-participation rate. However a very large non-participation rate may result in a lack of balance[@tiptonStratifiedSamplingUsing2013]. If large differences are detected, post hoc methods described previously can be used to make further adjustments.
-  
-
-
-## Advantages and Limitations
-SBS has only recently proposed and there have not been any large scale implementations of this method reported. Also, beyond the original proposal article, there have not been any methodological investigation into the method. @tiptonStratifiedSamplingUsing2013 illustrated SBS by comparing it to a previous study which did not use a formal sampling method [@roschelleIntegrationTechnologyCurriculum2010]. Data from the previous study was used to generate two hypothetical samples. The first sample was the ideal in which the highest ranked schools in each stratum agreed to participate. The second sample was a "worst case" non-response sample where the first 50 highest ranked schools in each stratum refused to participate, resulting in a non-response rate of at least 83\% in each stratum. These two samples were then compared to the original sample on the first 3 moments of 26 covariates. Both samples achieved with SBS resulted in better balance than the original sample on at least 19 of the 26 covariates in the first two moments, and 14 out of 26 in the third moments. The samples were then compared on how well they would generalize using the method proposed by @stuartUsePropensityScores2011. This final test showed that the samples achieved with SBS resulted in less coverage errors than the original sample and would thus be easier to generalize using the retrospective methods.
-
-Stratified sampling methods offer three key advantages: transparency, non-response analysis, and integration with and improvement of post hoc adjustments. Perhaps the most appealing advantage of this method is the transparency it requires of the recruitment process. Researchers are forced to provide clear documentation and reasoning for targeting sites for recruitment. This allows for a more careful critique of the study and a better justification of the recruitment process for funders and other stakeholders. It also allows for a better analysis of non-responders. By identifying a set of observed covariates which may predict treatment heterogeneity prior to conducting the study, non-responders or refusals can be tracked and later analyzed for any systematic differences from the inference population or study participants. Finally, implementing this method does not preclude the use of the retrospective methods previously discussed. SBS may not alleviate all balancing issues, and additional statistical adjustments may need to be made. Even if balance is only partially improved at the sampling stage, coverage errors will still be reduced and less of the inference population will need to be discarded.
-
-There are, of course, several limitations as well. As with the retrospective methods, SBS depends on the existence of a rich set of observed covariates related to treatment heterogeneity and sample selection for each site in the population. Most readily available data sets primarily consist of demographics and may not contain all of the covariates related to variation in treatment effect, which can result in omitted variable bias [@tiptonStratifiedSamplingUsing2013]. Additionally, SBS requires more resources to implement than a simple convenience sample. Recruiting ranked sites from multiple strata requires a coordinated effort between recruiters [@tiptonImplicationsSmallSamples2017]. This means that recruiters cannot work independently and must rely on a partnership with methodologists implementing this method. 
-
-Although the findings in @tiptonStratifiedSamplingUsing2013 were positive, it is unclear how generalizable they are to other potential studies. The inference population consisted of 1,713 non-charter schools serving seventh graders in Texas. Of these schools, 73 (4.3\%) were selected into the sample across nine strata. In other applications, the inference population may be much larger and more heterogeneous, requiring more strata to be created. Sampling from too many strata is difficult when sample sizes are restricted. Would this method be beneficial to researchers making inferences on a national scale? In order to create a non-response condition, @tiptonStratifiedSamplingUsing2013 selected the first 50 sites in each stratum to be refusals, resulting in smaller strata having higher non response rates. 
-
-Furthermore, what if schools in larger strata had higher non-response rates? How many schools would recruiters have to contact before collecting a full sample? School recruitment is a time consuming and complicated process which requires approval at several levels. Researchers may not want to invest in recruiting schools from strata with particularly high non response rates. Finally, the data came from a single state which happened to provide information on 26 covariates. If a national population was of interest, more states would need to be included, but data reporting is not uniform across all states.
 
 
 # Simulation Study
