@@ -139,13 +139,13 @@ In this section we outline SBS within the context of selecting schools for a lar
 
 The distance metric is used to summarizes the difference between a pair of sites on a set of covariates in order to maximize the similarity of all sites within a clusters. It is therefore necessary to select a metric that is appropriate given the types of covaraites being used. In educational research, data are likely to contain both continuous and categorical data. For mixed data such as this it is appropriate to use the general similaity measure (Gower, 1971; Tipton, 2013b).
 
-This method relies on different calculations of distance depending on the type of covariates. Let \(X_{ih}\) and \(X_{i'h}\) be the observed value of covariate \(h = {1, ..., P}\) for sites \(i\) and \(i'\) respectively, where \(i \ne i'\). Let \(d_{ii'h}\) be the distance between observed values of covariate \(X_{h}\) for site \(i\) and site \(i'\). For categorical or dummy coded variables, \(d_{ii'h} = 1\) if \(X_{ih} = X_{i'h}\) and \(d_{ii'h} = 0\) otherwise. For continuous covariates, we use the following formula:
+This method relies on different calculations of distance depending on the type of covariates. Let \(X_{hi}\) and \(X_{hi'}\) be the observed value of covariate \(h = {1, ..., P}\) for sites \(i\) and \(i'\) respectively, where \(i \ne i'\). Let \(d_{ii'h}\) be the distance between observed values of covariate \(X_{h}\) for site \(i\) and site \(i'\). For categorical or dummy coded variables, \(d_{ii'h} = 1\) if \(X_{hi} = X_{hi'}\) and \(d_{ii'h} = 0\) otherwise. For continuous covariates, we use the following formula:
 
 \begin{align}
-  d_{ii'h} = 1 - \frac{|X_{ih} - X_{i'h}|}{R_h}
+  d_{ii'h} = 1 - \frac{|X_{hi} - X_{hi'}|}{R_h}
 \end{align}
 
-where \textbar{}.\textbar{} indicates absolute value, \(X_{ih}\) and \(X_{i'h}\) are values of the \(h^{th}\) covariate for sites \(i\) and \(i'\), and \(R_h\) is the range of observations for covariate \(X_h\). This equation restricts the range of \(d_{ii'h}\) to \([0,1]\). Finally, we calculate the general similarity between each site pair by taking the weighted average of the distances between all covariates. Let \(d^{g}_{ii'}\) be the general similarity between site \(i\) and site \(i'\).
+where \textbar{}.\textbar{} indicates absolute value, and \(R_h\) is the range of observations for covariate \(X_h\). This equation restricts the range of \(d_{ii'h}\) to \([0,1]\). Finally, we calculate the general similarity between each site pair by taking the weighted average of the distances between all covariates. Let \(d^{g}_{ii'}\) be the general similarity between site \(i\) and site \(i'\).
 
 \begin{align}
   d^{g}_{ii'} = \frac{\sum^p_{h = 1}w_{ii'h}d_{ii'h}}{\sum^p_{h = 1}w_{ii'h}}
@@ -156,7 +156,7 @@ where \(w_{ii'h} = 0\) if \(X_h\) is missing for either site and \(w_{ii'h} = 1\
 \hypertarget{selecting-k-strata}{%
 \subsection{Selecting k Strata}\label{selecting-k-strata}}
 
-Before applying the clustering method, the number of strata to be generated must be determined. Generating more strata results in more homogeneity within strata, however in practical applications this may be more difficult to manage. For instance, if refusal and non-response rates are fairly high, having fewer sites spread across more strata may make it difficult to adequately recruit from all strata. Resource constraints (e.g.~time, funding, recruiters) may also be a factor in the number of strata selected.
+Next we must determine the number of strata to be generated. A larger set of strata would result in greater homogeneity within each stratam, however in practical applications more strata may also be difficult to manage. For instance, if refusal and non-response rates are fairly high, having fewer sites spread across more strata may make it difficult to adequately recruit from all strata. Resource constraints (e.g.~time, funding, recruiters) may also be a factor in the number of strata selected.
 
 Our strategy was to perform the analysis several times generating different numbers of strata, and comparing the proportion of variability between strata. Let \(k\) be the number of strata generated where \(k = 1, 2, ..., q\) for some maximum allowable number of \(q\) strata. Let \(\sigma_{wk}^2\) be the total variability within each stratum, and \(\sigma_{bk}^2\) be the total variability between each stratum, for all covariates in \(X\) and for each set of \(k\) strata generated. Let \(p_k\) be the proportion of variability that is between strata for each set of \(k\) strata generated be defined as follows:
 
@@ -164,7 +164,9 @@ Our strategy was to perform the analysis several times generating different numb
   p_k = \sigma_{bk}^2/(\sigma_{wk}^2 + \sigma_{bk}^2)
 \end{align}
 
-As \(p_k\) approaches 1, most of the variation is between strata, indicating homogeneity within strata. This increases the possibility of selecting a more balanced sample. Plotting \(p_k\) against \(k\) allows visual comparison of the results. The \(k\) for which the rate of change \(p_k\) slows is then selected.
+As \(p_k\) approaches 1, most of the variation is between strata, indicating homogeneity within strata. This increases the possibility of selecting a more balanced sample. Plotting \(p_k\) against \(k\) allows visual comparison of the results. The \(k\) for which the rate of change \(p_k\) slows is considered favorable.
+
+{[}Go into CH and n distribution across strata here?{]}
 
 \hypertarget{sample-selection}{%
 \subsection{Sample Selection}\label{sample-selection}}
@@ -175,63 +177,15 @@ The goal of balanced sampling is to recruit in such a way that the expected valu
   E(X_ih|Z_i = 1, j) = E(X_h|j)
 \end{align}
 
-where \(Z_i = 1\) if site \(i\) is recruited into the sample and \(Z_i = 0\) otherwise. We implemented balanced sampling by prioritizing the recruitment of sites based on their similarity to the \enquote{average} site in each stratum. First the number of sites to be sampled from each stratum must be identified using proportional sample allocation. Each stratum contains \(N_j\) sites where \(N_1 + N_2 ... + N_k = N\). From each stratum \(j\), \(n_j\) sites must be sampled such that \(n_j = [(N_j/N)n]\), where {[}.{]} indicates that each value is rounded to the nearest integer.
+where \(Z_i = 1\) if site \(i\) is recruited into the sample and \(Z_i = 0\) otherwise. Following Tipton (2013b), we implemented balanced sampling by prioritizing the recruitment of sites based on their similarity to the \enquote{average} site in each stratum. First the number of sites to be sampled from each stratum must be identified using proportional sample allocation. Each stratum contains \(N_j\) sites where \(N_1 + N_2 ... + N_k = N\). From each stratum \(j\), \(n_j\) sites must be sampled such that \(n_j = [(N_j/N)n]\), where {[}.{]} indicates that each value is rounded to the nearest integer.
 
 Next we ranked each site within a stratum using a distance measure, with sites closer to the \enquote{center} of the strata ranked higher. We calculated the weighted Euclidean distance to the mean of each covariate:
 
 \begin{align} \label{eq:euclid}
-  d_{ij} = \sqrt{\sum^p_{h=1}w_h[X_{ijh} - E(X_h|j)]^2}
+  d_{ij} = \sqrt{\sum^p_{h=1}w_h[X_{hij} - E(X_h|j)]^2}
 \end{align}
 
-where \(w_h\) is the weight assigned to covariate \(X_h\), \(E(X_h|j)\) is the mean of covariate \(h\) in stratum \(j\), and \(X_{ijh}\) is the value of covariate \(h\) for site \(i\) in stratum \(j\). As with generating the strata, different weights can be used such that distances depend more heavily on covariates thought to be more related to treatment effect heterogeneity. The ranked list was then used to prioritize sites for recruitment, beginning with the highest ranked sites. If a site is unavailable or refuses to participate, a recruitment attempt is made with the next highest ranked site until \(n_j\) sites agree to participate.
-
-If there is a high degree of homogeneity within strata, this sampling procedure should be fairly robust to moderate non-participation rate. However a very large non-participation rate may result in a lack of balance(Tipton, 2013b). If large differences are detected, post hoc methods described previously can be used to make further adjustments.
-
-\hypertarget{advantages-and-limitations}{%
-\subsection{Advantages and Limitations}\label{advantages-and-limitations}}
-
-SBS has only recently proposed and there have not been any large scale implementations of this method reported. Also, beyond the original proposal article, there have not been any methodological investigation into the method. Tipton (2013b) illustrated SBS by comparing it to a previous study which did not use a formal sampling method (Roschelle et al., 2010). Data from the previous study was used to generate two hypothetical samples. The first sample was the ideal in which the highest ranked schools in each stratum agreed to participate. The second sample was a \enquote{worst case} non-response sample where the first 50 highest ranked schools in each stratum refused to participate, resulting in a non-response rate of at least 83\% in each stratum. These two samples were then compared to the original sample on the first 3 moments of 26 covariates. Both samples achieved with SBS resulted in better balance than the original sample on at least 19 of the 26 covariates in the first two moments, and 14 out of 26 in the third moments. The samples were then compared on how well they would generalize using the method proposed by Stuart et al. (2011). This final test showed that the samples achieved with SBS resulted in less coverage errors than the original sample and would thus be easier to generalize using the retrospective methods.
-
-Stratified sampling methods offer three key advantages: transparency, non-response analysis, and integration with and improvement of post hoc adjustments. Perhaps the most appealing advantage of this method is the transparency it requires of the recruitment process. Researchers are forced to provide clear documentation and reasoning for targeting sites for recruitment. This allows for a more careful critique of the study and a better justification of the recruitment process for funders and other stakeholders. It also allows for a better analysis of non-responders. By identifying a set of observed covariates which may predict treatment heterogeneity prior to conducting the study, non-responders or refusals can be tracked and later analyzed for any systematic differences from the inference population or study participants. Finally, implementing this method does not preclude the use of the retrospective methods previously discussed. SBS may not alleviate all balancing issues, and additional statistical adjustments may need to be made. Even if balance is only partially improved at the sampling stage, coverage errors will still be reduced and less of the inference population will need to be discarded.
-
-There are, of course, several limitations as well. As with the retrospective methods, SBS depends on the existence of a rich set of observed covariates related to treatment heterogeneity and sample selection for each site in the population. Most readily available data sets primarily consist of demographics and may not contain all of the covariates related to variation in treatment effect, which can result in omitted variable bias (Tipton, 2013b). Additionally, SBS requires more resources to implement than a simple convenience sample. Recruiting ranked sites from multiple strata requires a coordinated effort between recruiters (Tipton, Hallberg, Hedges, \& Chan, 2017). This means that recruiters cannot work independently and must rely on a partnership with methodologists implementing this method.
-
-Although the findings in Tipton (2013b) were positive, it is unclear how generalizable they are to other potential studies. The inference population consisted of 1,713 non-charter schools serving seventh graders in Texas. Of these schools, 73 (4.3\%) were selected into the sample across nine strata. In other applications, the inference population may be much larger and more heterogeneous, requiring more strata to be created. Sampling from too many strata is difficult when sample sizes are restricted. Would this method be beneficial to researchers making inferences on a national scale? In order to create a non-response condition, Tipton (2013b) selected the first 50 sites in each stratum to be refusals, resulting in smaller strata having higher non response rates.
-
-Furthermore, what if schools in larger strata had higher non-response rates? How many schools would recruiters have to contact before collecting a full sample? School recruitment is a time consuming and complicated process which requires approval at several levels. Researchers may not want to invest in recruiting schools from strata with particularly high non response rates. Finally, the data came from a single state which happened to provide information on 26 covariates. If a national population was of interest, more states would need to be included, but data reporting is not uniform across all states.
-
-\hypertarget{methods-and-models}{%
-\section{Methods and Models}\label{methods-and-models}}
-
-\hypertarget{framework-for-generalizability}{%
-\subsection{Framework for Generalizability}\label{framework-for-generalizability}}
-
-We begin with a data set enumerating a population of \(N\) sites (schools), indexed as \(i = 1 ... N\). We assume that each site has some unobserved probability of participating in a study if approached by recruiters which is represented by the participation propensity score \(\pi_i^P\). Each site also has a vector of observed characteristics \(X_i\) of length \(P\). This is a set of pre-treatment covariates that predict \(\pi_i\). The covariates are a mixture of continuous, binary, and categorical data.
-
-The goal is to select a sample of \(n\) sites such that there is balance along \(X_i\) between the sample and the population, indicating that the population is fully represented by the sample. We measure balance using the standardized mean difference (\(SMD\)) between the sample and population for a given covariate. \(SMD\) is calculated as
-
-\begin{align}
-  SMD = \frac{\bar{X}-\mu}{\sigma}
-\end{align}
-where \(\bar{X}\) is a vector of covariate means in the sample, \(\mu\) is the vector of covariate means in the population, and \(\sigma\) is the vector of covariate standard deviations in the population. \(SMD\) values closer to zero indicate greater balance between the sample and the population.
-
-\hypertarget{modeling-selection-bias}{%
-\subsection{Modeling Selection Bias}\label{modeling-selection-bias}}
-
-Selection bias stems from two sources: (1) site participation behavior and (2) researcher recruitment behavior. To model the former we propose a simple participation propensity score. Let \(\pi^P_i\) represent the participation propensity score, or the probability that a site agrees to participate in an RCT if approached for recruitment. Using a simple logistic transformation we model \(\pi^P_i\) as follows:
-
-\begin{align} \label{eq:RGM}
-  log\bigg(\frac{\pi^P_i}{1 - \pi^P_i}\bigg) = \beta_0 + \boldsymbol{X_i \beta}
-\end{align}
-where \(\boldsymbol{X_i}\) is an \(N\) by \(P\) matrix of covariates that predict sample selection for each site, and \(\boldsymbol{\beta}\) is a vector of coefficients associated with those covariates. Participation for site \(i\) will be determined by sampling from a Bernoulli distribution with probability equal to \(\pi^P_i\).
-
-To generate selection bias stemming from researcher recruitment, we propose a \enquote{low hanging fruit} approach to convenience sampling. We assume that researchers have some knowledge of how likely each site is to participate, and prioritize easy to recruit sites as a way of maximizing recruitment efficiency. While there are many other ways to define convenience sampling, we posit this as a first step. Sites are prioritized for recruitment by sequentially sampling from the population of sites using \(\pi^P_i\) as a sampling weight. Once a site is added to the list in order of priority, the probability of choosing the next site is proportional to the weights of the remaining items. In this way, sites that have higher values for \(\pi^P_i\) are more likely to be recruited earlier on.
-
-\hypertarget{simulation-study}{%
-\section{Simulation Study}\label{simulation-study}}
-
-In this section we describe the simulation study developed to assess the generalizability of the samples selected by SBS relative to several other sampling methods, and the feasibility with which the sampling methods can be employed. Real data was used to inform the population frame.
-Selection bias was generated to account for both self selection as well as researcher bias.
+where \(w_h\) is the weight assigned to covariate \(X_h\), \(E(X_h|j)\) is the population mean of covariate \(h\) in stratum \(j\), and \(X_{hij}\) is the value of covariate \(h\) for site \(i\) in stratum \(j\). As with generating the strata, different weights can be used such that distances depend more heavily on covariates thought to be more related to treatment effect heterogeneity. we then use the ranked list to prioritize sites for recruitment, beginning with the highest ranked sites. If a site is unavailable or refuses to participate, a recruitment attempt is made with the next highest ranked site until \(n_j\) sites agree to participate.
 
 \hypertarget{data}{%
 \subsection{Data}\label{data}}
@@ -249,46 +203,6 @@ Log-transformation was used on school size (number of students), district size (
 \centering
 \includegraphics{GenSamp-Paper_files/figure-latex/plot-dist1-1.pdf}
 \caption{\label{fig:plot-dist1}Distributions of continous covariates.}
-\end{figure}
-
-\hypertarget{participation-propensity-score}{%
-\subsubsection{Participation Propensity Score}\label{participation-propensity-score}}
-
-A response generating model (RGM) was developed to simulate self selection. The RGM creates a propensity score for each school that indicates the probability of the school agreeing to participate if targeted by any of the sampling methods. This model assumes that schools can be recruited directly by researchers. Recall equation \eqref{eq:RGM} where \(\pi^P_i\) is generated for each site \(i\) using a linear tranformtion of the observed covariates with a logit link function. The set of covariates, \(X_i\), was composed of variables described above. The corresponding coefficients, \(B\), were based on work by Fellers (2017) who compared 571 elementary schools that participated in IES funded studies to the full population of U.S. elementary schools. Absolute SMD between the schools that participated and the population were reported. By standardizing \(X_i\) and using the reported SMDs as coeficients, we generated \(\pi^P_i\) values that should on average mimic the samples that Fellers studied.
-
-Intercept values were manipulated to generate different levels of population participation rates. Since these rates are unknown, we selected parameters for 9 levels of participation rates. Table \ref{tab:tab-RGM-Pars} reports the variables, variable codes, and coeficients used in the RGM. Figure \ref{fig:fig-intercepts} plots the intercepts used against the response rates they generated. Covariate coefficients remained constant across response rates.
-
-\begin{table}[tbp]
-\begin{center}
-\begin{threeparttable}
-\caption{\label{tab:tab-RGM-Pars}Odds ratio coeficients for Response Generating Model}
-\begin{tabular}{lll}
-\toprule
-Variables & \multicolumn{1}{c}{vnames} & \multicolumn{1}{c}{log\_odds}\\
-\midrule
-Total District Schools & dSCH & 0.52\\
-\% Black & ethBlack & 0.29\\
-\% Hispanic & ethHisp & 0.40\\
-\% White & ethWhite & -0.54\\
-Total Students & n & 0.37\\
-\% ELL & pELL & 0.41\\
-\% Female & pFem & -0.02\\
-\% FRL & pTotfrl & 0.08\\
-Student/Teacher Ratio & ST.ratio & -0.10\\
-Suburban & Suburban & 0.01\\
-Schoolwide Title I & T1 & 0.02\\
-Town/Rural & ToRu & -0.40\\
-Urban & Urban & 0.43\\
-\bottomrule
-\end{tabular}
-\end{threeparttable}
-\end{center}
-\end{table}
-
-\begin{figure}
-\centering
-\includegraphics{GenSamp-Paper_files/figure-latex/fig-intercepts-1.pdf}
-\caption{\label{fig:fig-intercepts}Intercepts used to generate response rates}
 \end{figure}
 
 \hypertarget{stratification}{%
@@ -327,6 +241,86 @@ Cluster analysis was performed using the \emph{cluster} package (Maechler et al.
 Several methods were used to determine \(k\). Figure \ref{fig:fig-ch} displays the Calinski-Harabasz (CH) index for each \(k\) clusters generated. In this case, generating 2 clusters maximises the CH-index. Figure \ref{fig:fig-ratio} displays the ratio of between-cluster SS to within-cluster SS and plots it against \(k\). Tipton (2013) recommends selecting the number of clusters such that at least 80\% of the variability is between clusters, indicated by the figure as a dashed line. Given this criteria it seems that at least 7 clusters should be generated. However we also see that after a sharp initial increase, the slope of the graph begins to level out. This indicates that as we increase the number of clusters, the benefit of doing so decreases, while the difficulty of sampling from each cluster increases. In that case after 5 or 6 clusters the difficulty of sampling may not be worth such small increases in homogeneity within clusters.
 
 Figure \ref{fig:fig-k-size} plots the sample size that needs to be selected from each cluster to fulfill the proportional allocation requirement such that the number of sites sampled from each cluster is proportional to the size of the cluster in the population. The dashed line indicates the ideal allocation if all clusters were of equal size. We see that the variability in cluster sizes decreases as more clusters are generated. A sensible cutoff may be determined by looking at the size of the smallest cluster. At \(k > 5\) it seems that the smallest clusters would require less than 5 sites being sampled, which may be very difficult in a practical setting. We determined that this would be the most likely criteria to be conisdered in the field, and ultimately decided to generate 5 clusters for this analysis.
+
+\hypertarget{advantages-and-limitations}{%
+\subsection{Advantages and Limitations}\label{advantages-and-limitations}}
+
+SBS has only recently proposed and there have not been any large scale implementations of this method reported. Also, beyond the original proposal article, there have not been any methodological investigation into the method. Tipton (2013b) illustrated SBS by comparing it to a previous study which did not use a formal sampling method (Roschelle et al., 2010). Data from the previous study was used to generate two hypothetical samples. The first sample was the ideal in which the highest ranked schools in each stratum agreed to participate. The second sample was a \enquote{worst case} non-response sample where the first 50 highest ranked schools in each stratum refused to participate, resulting in a non-response rate of at least 83\% in each stratum. These two samples were then compared to the original sample on the first 3 moments of 26 covariates. Both samples achieved with SBS resulted in better balance than the original sample on at least 19 of the 26 covariates in the first two moments, and 14 out of 26 in the third moments. The samples were then compared on how well they would generalize using the method proposed by Stuart et al. (2011). This final test showed that the samples achieved with SBS resulted in less coverage errors than the original sample and would thus be easier to generalize using the retrospective methods.
+
+Stratified sampling methods offer three key advantages: transparency, non-response analysis, and integration with and improvement of post hoc adjustments. Perhaps the most appealing advantage of this method is the transparency it requires of the recruitment process. Researchers are forced to provide clear documentation and reasoning for targeting sites for recruitment. This allows for a more careful critique of the study and a better justification of the recruitment process for funders and other stakeholders. It also allows for a better analysis of non-responders. By identifying a set of observed covariates which may predict treatment heterogeneity prior to conducting the study, non-responders or refusals can be tracked and later analyzed for any systematic differences from the inference population or study participants. Finally, implementing this method does not preclude the use of the retrospective methods previously discussed. SBS may not alleviate all balancing issues, and additional statistical adjustments may need to be made. Even if balance is only partially improved at the sampling stage, coverage errors will still be reduced and less of the inference population will need to be discarded.
+
+There are, of course, several limitations as well. As with the retrospective methods, SBS depends on the existence of a rich set of observed covariates related to treatment heterogeneity and sample selection for each site in the population. Most readily available data sets primarily consist of demographics and may not contain all of the covariates related to variation in treatment effect, which can result in omitted variable bias (Tipton, 2013b). Additionally, SBS requires more resources to implement than a simple convenience sample. Recruiting ranked sites from multiple strata requires a coordinated effort between recruiters (Tipton, Hallberg, Hedges, \& Chan, 2017). This means that recruiters cannot work independently and must rely on a partnership with researchers implementing this method.
+
+Although the findings in Tipton (2013b) were promising, it is unclear how generalizable they are to other potential studies. The inference population consisted of 1,713 non-charter schools serving seventh graders in Texas. Of these schools, 73 (4.3\%) were selected into the sample across nine strata. In other applications, the inference population may be much larger and more heterogeneous, requiring more strata to be created. Sampling from too many strata is difficult when sample sizes are restricted. Would this method be beneficial to researchers making inferences on a national scale? In order to create a non-response condition, Tipton (2013b) selected the first 50 sites in each stratum to be refusals, resulting in smaller strata having higher non response rates.
+
+Furthermore, what if schools in larger strata had higher non-response rates? How many schools would recruiters have to contact before collecting a full sample? School recruitment is a time consuming and complicated process which requires approval at several levels. Researchers may not want to invest in recruiting schools from strata with particularly high non response rates. Finally, the data came from a single state which happened to provide information on 26 covariates. If a national population was of interest, more states would need to be included, but data reporting is not uniform across all states.
+
+\hypertarget{methods-and-models}{%
+\section{Methods and Models}\label{methods-and-models}}
+
+\hypertarget{framework-for-generalizability}{%
+\subsection{Framework for Generalizability}\label{framework-for-generalizability}}
+
+We begin with a data set enumerating a population of \(N\) sites (schools), indexed as \(i = 1 ... N\). We assume that each site has some unobserved probability of participating in a study if approached by recruiters which is represented by the participation propensity score \(\pi_i^P\). Each site also has a vector of observed characteristics \(X_i\) of length \(P\). This is a set of pre-treatment covariates that predict \(\pi_i\). The covariates are a mixture of continuous, binary, and categorical data.
+
+The goal is to select a sample of \(n\) sites such that there is balance along \(X_i\) between the sample and the population, indicating that the population is fully represented by the sample. We measure balance using the standardized mean difference (\(SMD\)) between the sample and population for a given covariate. \(SMD\) is calculated as
+
+\begin{align}
+  SMD = \frac{\bar{X}-\mu}{\sigma}
+\end{align}
+where \(\bar{X}\) is a vector of covariate means in the sample, \(\mu\) is the vector of covariate means in the population, and \(\sigma\) is the vector of covariate standard deviations in the population. \(SMD\) values closer to zero indicate greater balance between the sample and the population.
+
+\hypertarget{modeling-selection-bias}{%
+\subsection{Modeling Selection Bias}\label{modeling-selection-bias}}
+
+Selection bias stems from two sources: (1) site participation behavior and (2) researcher recruitment behavior. To model the former we propose a simple participation propensity score. Let \(\pi^P_i\) represent the participation propensity score, or the probability that a site agrees to participate in an RCT if approached for recruitment. Using a simple logistic transformation we model \(\pi^P_i\) as follows:
+
+\begin{align} \label{eq:RGM}
+  log\bigg(\frac{\pi^P_i}{1 - \pi^P_i}\bigg) = \beta_0 + \boldsymbol{X_i \beta}
+\end{align}
+where \(\boldsymbol{X_i}\) is an \(N\) by \(P\) matrix of covariates that predict sample selection for each site, and \(\boldsymbol{\beta}\) is a vector of coefficients associated with those covariates. Participation for site \(i\) will be determined by sampling from a Bernoulli distribution with probability equal to \(\pi^P_i\).
+
+To generate selection bias stemming from researcher recruitment, we propose a \enquote{low hanging fruit} approach to convenience sampling. We assume that researchers have some knowledge of how likely each site is to participate, and prioritize easy to recruit sites as a way of maximizing recruitment efficiency. While there are many other ways to define convenience sampling, we posit this as a first step. Sites are prioritized for recruitment by sequentially sampling from the population of sites using \(\pi^P_i\) as a sampling weight. Once a site is added to the list in order of priority, the probability of choosing the next site is proportional to the weights of the remaining items. In this way, sites that have higher values for \(\pi^P_i\) are more likely to be recruited earlier on.
+
+\hypertarget{simulation-study}{%
+\section{Simulation Study}\label{simulation-study}}
+
+In this section we describe the simulation study developed to assess the generalizability of the samples selected by SBS relative to several other sampling methods, and the feasibility with which the sampling methods can be employed. Real data was used to inform the population frame.
+Selection bias was generated to account for both self selection as well as researcher bias.
+
+\hypertarget{participation-propensity-score}{%
+\subsubsection{Participation Propensity Score}\label{participation-propensity-score}}
+
+A response generating model (RGM) was developed to simulate self selection. The RGM creates a propensity score for each school that indicates the probability of the school agreeing to participate if targeted by any of the sampling methods. This model assumes that schools can be recruited directly by researchers. Recall equation \eqref{eq:RGM} where \(\pi^P_i\) is generated for each site \(i\) using a linear tranformtion of the observed covariates with a logit link function. The set of covariates, \(X_i\), was composed of variables described above. The corresponding coefficients, \(B\), were based on work by Fellers (2017) who compared 571 elementary schools that participated in IES funded studies to the full population of U.S. elementary schools. Absolute SMD between the schools that participated and the population were reported. By standardizing \(X_i\) and using the reported SMDs as coeficients, we generated \(\pi^P_i\) values that should on average mimic the samples that Fellers studied.
+
+Intercept values were manipulated to generate different levels of population participation rates. Since these rates are unknown, we selected parameters for 9 levels of participation rates. Table \ref{tab:tab-RGM-Pars} reports the variables, variable codes, and coeficients used in the RGM. Covariate coefficients remained constant across response rates.
+
+\begin{table}[tbp]
+\begin{center}
+\begin{threeparttable}
+\caption{\label{tab:tab-RGM-Pars}Odds ratio coeficients for Response Generating Model}
+\begin{tabular}{lll}
+\toprule
+Variables & \multicolumn{1}{c}{vnames} & \multicolumn{1}{c}{log\_odds}\\
+\midrule
+Total District Schools & dSCH & 0.52\\
+\% Black & ethBlack & 0.29\\
+\% Hispanic & ethHisp & 0.40\\
+\% White & ethWhite & -0.54\\
+Total Students & n & 0.37\\
+\% ELL & pELL & 0.41\\
+\% Female & pFem & -0.02\\
+\% FRL & pTotfrl & 0.08\\
+Student/Teacher Ratio & ST.ratio & -0.10\\
+Suburban & Suburban & 0.01\\
+Schoolwide Title I & T1 & 0.02\\
+Town/Rural & ToRu & -0.40\\
+Urban & Urban & 0.43\\
+\bottomrule
+\end{tabular}
+\end{threeparttable}
+\end{center}
+\end{table}
 
 \hypertarget{sampling-methods}{%
 \subsection{Sampling Methods}\label{sampling-methods}}
