@@ -104,8 +104,41 @@ save.figures <- function(x, w = 10, h = 6, ...) ggsave(filename = paste("Figs/Pa
   The goal of the current paper is two-part. First, we propose several methods for modeling two major sources of sampling bias: recruitment and participation. Recruitment refers to how likely a sampling site is to be approached by researchers, and participation refers to how likely the sampling site is to participate if recruited. This step will lay the groundwork for testing sampling methods in the educational context. Second, using the models proposed in the first step, we will compare SBS to several other recruitment models on the method's ability to select a generalizable sample, and the ease with which a full sample can be recruited.
 
 # Stratified Balanced Sampling
+  In this section we demonstrate an SBS within the context of selecting schools for a large-scale MRT. This application will also serve as the basis for the present simulaion study which will be further outlined in a later section. SBS is a flexible method that is adaptble to various data sets, and may therefor require different strategies or methods than presented here depending on study circumstances and goals. The overview presented here is specific to the context we have previously outlined. For a more complete consideration of the various ways in which SBS can be applied, see @tiptonStratifiedSamplingUsing2013. 
+  SBS applies cluster analysis as a dimension reduction technique to drive bias robust balanced sampling based on a large set of covariates. The ultimate goal is to select a sample that is representative of a population along a set of covariates related to treatment heterogeneity and site selection. This process requires the availability of a rich data set of observed covariates for each site in the population. We therefore begin by discussing the data which will serve as the sampling frame and the covariates whe have selected. 
+  Following recomendations proposed by @tiptonStratifiedSamplingUsing2013, we then implement k-means clustering to divide the population into heterogeneous strata comprised of homogeneous sites. K-means clustering assigns sites to strata such that similarity within strata is maximized. This step requires us to specify the number of strata that need to be generated, and may rely on both empirical criteria, as well as subjective appraisals of what is feasible to implement.
+  After determining the strata, we then use a second distance metric to rank sites in order of how representative the site is of its stratum. We then prioritize site recruitment based on these ranks. This step is referred to as "balanced sampling", and, in practice, should encourage the selection of sites from subsections of the population which may otherwise not have been included given typical sampling strategies.
+  Finally, we discuss the advantages and limitations of SBS given our implementation, and the potential difficulties of using this to sample schools in the greater context of educational research.
 
-  In this section we outline SBS within the context of selecting schools for a large-scale MRT as implemented in the present study. For a more complete overview, see @tiptonStratifiedSamplingUsing2013. SBS applies cluster analysis as a dimension reduction technique to drive bias robust balanced sampling based on a large set of covariates. The ultimate goal is to select a sample that is representative of a population along a set of covariates related to treatment heterogeneity and site selection. This process requires the availability of a rich data set of observed covariates for each site in the population. We first divide the population into heterogeneous strata comprised of homogeneous sites given the set of covariates. @tiptonStratifiedSamplingUsing2013 proposed k-means clustering which assigns sites to strata such that similarity within strata is maximized. After determining the strata, we then use a second distance metric to rank sites in order of how representative the site is of its stratum. We then prioritize site recruitment based on these ranks. In practice, this should encourage the selection of sites from subsections of the population which may otherwise not have been included given typical sampling strategies.
+## Population Frame
+  We first identify a population of schools from which we want to select a representative sample. Six States served as the geographic boundries for  this population frame: California, Oregon, Pensilvania, South Carolina, Texas, and Wioming. These six states were selected for arbitrary reasons, blah blah blah.
+  To perform the cluster analysis, the data must not only enumerate all population units, but also provide key characteristics that researchers hypothesize mediate treatment heterogeneity. Since we are only interested in selecting a representative sample, we instead identified covariates that predict school participation in RCTs. Our goal here is that our final sample will include schools not normaly found in large-scale evaluations of interventions. 
+  
+    Characteristics of the population frame were sourced from the Common Core of Data (CCD). The CCD is a comprehensive database housing annually collected statistics of all public schools and districts. Selection of covariates was driven by prior research on district and school participation behavior in RCTs (Stuart et al., 2017; Tipton et al., 2016a; Fellers, 2017). Districts and schools with higher proportions of students who are English language learners (ELL), economically disadvantaged (ED), non-White, and living in urban settings are more likely to participate, as are larger districts and schools. It is important to note, however, that some of these characteristics might also make it more likely that researchers would recruit these districts and schools in the first place. Therefore, the participation behavior outlined here is likely not representative of all schools in the US.
+
+Log-transformation was used on school size (number of students), district size (number of schools) and the student to teacher ratio. This is done to allow proportional comparisons at the extremes of the distributions [@hennigHowFindAppropriate2013]. For instance, the difference between two schools with 4000 and 3000 students should be weighed as much as the difference between two schools with 400 and 300 students when generating clusters. Figure \@ref(fig:plot-dist1) displays the distribution of the continuous variables used. Two categorical covariaets were used as well: urbanicity (urban, suburban, or town/rural) and a binary indicator of school wide title 1 elegibility.
+
+```{r plot-dist1, results = "asis", fig.cap="Distributions of continous covariates."}
+dist_plots <- df %>%
+  select(covariates) %>%
+  select_if(is.numeric) %>%
+  mutate(n = log(n),
+         ST.ratio = log(ST.ratio),
+         dSCH = log(dSCH)) %>%
+  gather(key = vnames, value = val) %>%
+  left_join(df.coefs)
+
+
+dist_plots %>%
+  filter(!(vnames %in% c("Suburban", "Urban", "ToRu"))) %>%
+  ggplot(aes(x = val)) +
+  geom_histogram() +
+  facet_wrap(~ Variables, scales = "free", ncol = 3) +
+  theme_apa() +
+  labs(x = "Value", y = "Count")
+
+if(saveFigs) save.figures("Intro - Covariate Distribution")
+```
 
 ## Distance Metric
 The distance metric is used to summarizes the difference between a pair of sites on a set of covariates in order to maximize the similarity of all sites within a clusters. It is therefore necessary to select a metric that is appropriate given the types of covaraites being used. In educational research, data are likely to contain both continuous and categorical data. For mixed data such as this it is appropriate to use the general similaity measure [@gowerGeneralCoefficientSimilarity1971; @tiptonStratifiedSamplingUsing2013].
@@ -154,35 +187,7 @@ where $Z_i = 1$ if site $i$ is recruited into the sample and $Z_i = 0$ otherwise
 
 where $w_h$ is the weight assigned to covariate $X_h$, $E(X_h|j)$ is the population mean of covariate $h$ in stratum $j$, and $X_{hij}$ is the value of covariate $h$ for site $i$ in stratum $j$. As with generating the strata, different weights can be used such that distances depend more heavily on covariates thought to be more related to treatment effect heterogeneity. we then use the ranked list to prioritize sites for recruitment, beginning with the highest ranked sites. If a site is unavailable or refuses to participate, a recruitment attempt is made with the next highest ranked site until $n_j$ sites agree to participate.
 
-## Data
-In order to model realistic sampling scenarios, extant school data were used to develop the population frame. School characteristics were then used to generate a "participation propensity score" which indicated the probability of a school agreeing to participate if asked. Because the overall participation rate for the population is unknown, this score was generated under several assumed participation rates. 
 
-### Population Frame
-The population frame was sourced from the Common Core of Data (CCD). The CCD is a comprehensive database housing annually collected national statistics of all public schools and districts. Selection of covariates was driven by prior research on district and school participation behavior in RCTs (Stuart et al., 2017; Tipton et al., 2016a; Fellers, 2017). Districts and schools with higher proportions of students who are English language learners (ELL), economically disadvantaged (ED), non-White, and living in urban settings are more likely to participate, as are larger districts and schools. It is important to note, however, that some of these characteristics might also make it more likely that researchers would recruit these districts and schools in the first place. Therefore, the participation behavior outlined here is likely not representative of all schools in the US.
-
-Log-transformation was used on school size (number of students), district size (number of schools) and the student to teacher ratio. This is done to allow proportional comparisons at the extremes of the distributions [@hennigHowFindAppropriate2013]. For instance, the difference between two schools with 4000 and 3000 students should be weighed as much as the difference between two schools with 400 and 300 students when generating clusters. Figure \@ref(fig:plot-dist1) displays the distribution of the continuous variables used. Two categorical covariaets were used as well: urbanicity (urban, suburban, or town/rural) and a binary indicator of school wide title 1 elegibility.
-
-```{r plot-dist1, results = "asis", fig.cap="Distributions of continous covariates."}
-dist_plots <- df %>%
-  select(covariates) %>%
-  select_if(is.numeric) %>%
-  mutate(n = log(n),
-         ST.ratio = log(ST.ratio),
-         dSCH = log(dSCH)) %>%
-  gather(key = vnames, value = val) %>%
-  left_join(df.coefs)
-
-
-dist_plots %>%
-  filter(!(vnames %in% c("Suburban", "Urban", "ToRu"))) %>%
-  ggplot(aes(x = val)) +
-  geom_histogram() +
-  facet_wrap(~ Variables, scales = "free", ncol = 3) +
-  theme_apa() +
-  labs(x = "Value", y = "Count")
-
-if(saveFigs) save.figures("Intro - Covariate Distribution")
-```
 
 ## Stratification
 
@@ -307,6 +312,8 @@ Selection bias was generated to account for both self selection as well as resea
 
 
 ### Participation Propensity Score
+
+
 A response generating model (RGM) was developed to simulate self selection. The RGM creates a propensity score for each school that indicates the probability of the school agreeing to participate if targeted by any of the sampling methods. This model assumes that schools can be recruited directly by researchers. Recall equation \@ref(eq:RGM) where $\pi^P_i$ is generated for each site $i$ using a linear tranformtion of the observed covariates with a logit link function. The set of covariates, $X_i$, was composed of variables described above. The corresponding coefficients, $B$, were based on work by @fellersDevelopingApproachDetermine2017 who compared 571 elementary schools that participated in IES funded studies to the full population of U.S. elementary schools. Absolute SMD between the schools that participated and the population were reported. By standardizing $X_i$ and using the reported SMDs as coeficients, we generated $\pi^P_i$ values that should on average mimic the samples that Fellers studied.
 
 Intercept values were manipulated to generate different levels of population participation rates. Since these rates are unknown, we selected parameters for 9 levels of participation rates. Table \@ref(tab:tab-RGM-Pars) reports the variables, variable codes, and coeficients used in the RGM. Covariate coefficients remained constant across response rates.
