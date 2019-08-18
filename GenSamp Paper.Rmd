@@ -23,7 +23,7 @@ affiliation:
 #   Enter author note here.
 
 abstract: |
-  In order for educational research to be informative to policy makers, studies must be designed to make robust estimates of causal effects at the population level. Large scale multi-site randomized trials (MRT) often rely on vague convenience sampling methodology when recruiting districts and schools, resulting in relatively homogeneous samples that may differ greatly from the intended population of interest. Retrospective methods that quantify and statistically adjust for those differences are promising but have limited effect when the sample differs greatly from the population. Designing sampling methods that focus on generalizability may be a more effective but costly solution, but limited methodological research has been performed to examine their effectiveness in the educational context. This paper examines one promising method, stratified balanced sampling (SBS), in the context of recruiting a representative sample of schools for a large scale MRT. Using simulations based on real data, we compare SBS to stratified and unstratified versions of convenience sampling and probability sampling. Several models for generating school participation and emulating convenience sampling are proposed. Results indicate that SBS and stratified random sampling (SRS) result in highly generalizable samples. These methods are extremely costly to implement, however, especially when the population average willingness to participate is low. Stratified convenience sampling (SCS) is a potential compromise. 
+  <!-- In order for educational research to be informative to policy makers, studies must be designed to make robust estimates of causal effects at the population level. Large scale multi-site randomized trials (MRT) often rely on vague convenience sampling methodology when recruiting districts and schools, resulting in relatively homogeneous samples that may differ greatly from the intended population of interest. Retrospective methods that quantify and statistically adjust for those differences are promising but have limited effect when the sample differs greatly from the population. Designing sampling methods that focus on generalizability may be a more effective but costly solution, but limited methodological research has been performed to examine their effectiveness in the educational context. This paper examines one promising method, stratified balanced sampling (SBS), in the context of recruiting a representative sample of schools for a large scale MRT. Using simulations based on real data, we compare SBS to stratified and unstratified versions of convenience sampling and probability sampling. Several models for generating school participation and emulating convenience sampling are proposed. Results indicate that SBS and stratified random sampling (SRS) result in highly generalizable samples. These methods are extremely costly to implement, however, especially when the population average willingness to participate is low. Stratified convenience sampling (SCS) is a potential compromise. -->
     
 
 keywords          : "generalizability, sampling, MRT"
@@ -105,20 +105,25 @@ save.figures <- function(x, w = 10, h = 6, ...) ggsave(filename = paste("Figs/Pa
 
 # Stratified Balanced Sampling
   In this section we demonstrate an SBS within the context of selecting schools for a large-scale MRT. This application will also serve as the basis for the present simulaion study which will be further outlined in a later section. SBS is a flexible method that is adaptble to various data sets, and may therefor require different strategies or methods than presented here depending on study circumstances and goals. The overview presented here is specific to the context we have previously outlined. For a more complete consideration of the various ways in which SBS can be applied, see @tiptonStratifiedSamplingUsing2013. 
+  
   SBS applies cluster analysis as a dimension reduction technique to drive bias robust balanced sampling based on a large set of covariates. The ultimate goal is to select a sample that is representative of a population along a set of covariates related to treatment heterogeneity and site selection. This process requires the availability of a rich data set of observed covariates for each site in the population. We therefore begin by discussing the data which will serve as the sampling frame and the covariates whe have selected. 
-  Following recomendations proposed by @tiptonStratifiedSamplingUsing2013, we then implement k-means clustering to divide the population into heterogeneous strata comprised of homogeneous sites. K-means clustering assigns sites to strata such that similarity within strata is maximized. This step requires us to specify the number of strata that need to be generated, and may rely on both empirical criteria, as well as subjective appraisals of what is feasible to implement.
-  After determining the strata, we then use a second distance metric to rank sites in order of how representative the site is of its stratum. We then prioritize site recruitment based on these ranks. This step is referred to as "balanced sampling", and, in practice, should encourage the selection of sites from subsections of the population which may otherwise not have been included given typical sampling strategies.
+  
+  Following recomendations proposed by @tiptonStratifiedSamplingUsing2013, we then implement k-means clustering to divide the population into heterogeneous strata comprised of homogeneous sites. K-means clustering assigns sites to strata such that similarity within each stratum is maximized. This step requires us to specify the number of strata that need to be generated. Here we rely on both empirical criteria as well as subjective appraisals of what is feasible to implement.
+  
+  After determining the strata, we then use a second distance metric to rank sites in order of how representative the site is of its stratum. These ranks are later used to drive "balanced sampling" by prioritizing sites for recruitment. In practice, these rankings should encourage the selection of sites from subsections of the population which may otherwise not have been included given typical sampling strategies.
+  
   Finally, we discuss the advantages and limitations of SBS given our implementation, and the potential difficulties of using this to sample schools in the greater context of educational research.
 
-## Population Frame
-  We first identify a population of schools from which we want to select a representative sample. Six States served as the geographic boundries for  this population frame: California, Oregon, Pensilvania, South Carolina, Texas, and Wioming. These six states were selected for arbitrary reasons, blah blah blah.
-  To perform the cluster analysis, the data must not only enumerate all population units, but also provide key characteristics that researchers hypothesize mediate treatment heterogeneity. Since we are only interested in selecting a representative sample, we instead identified covariates that predict school participation in RCTs. Our goal here is that our final sample will include schools not normaly found in large-scale evaluations of interventions. 
+## Sample Frame
+  We first identify a population of schools from which we want to select a representative sample. Six States served as the geographic boundries for  this sample frame: California, Oregon, Pensilvania, South Carolina, Texas, and Wyoming. These six states were selected for arbitrary reasons, ___blah blah blah___.
   
-    Characteristics of the population frame were sourced from the Common Core of Data (CCD). The CCD is a comprehensive database housing annually collected statistics of all public schools and districts. Selection of covariates was driven by prior research on district and school participation behavior in RCTs (Stuart et al., 2017; Tipton et al., 2016a; Fellers, 2017). Districts and schools with higher proportions of students who are English language learners (ELL), economically disadvantaged (ED), non-White, and living in urban settings are more likely to participate, as are larger districts and schools. It is important to note, however, that some of these characteristics might also make it more likely that researchers would recruit these districts and schools in the first place. Therefore, the participation behavior outlined here is likely not representative of all schools in the US.
+  The cluster analysis requires data to enumerate all population units and provide key characteristics that are hypothesized to mediate treatment heterogeneity. Since we are only interested in selecting a representative sample, we instead identified covariates that predict school participation in RCTs. Our goal here is for our final sample to include schools not normaly found in large-scale evaluations of interventions. To this end, selection of covariates was driven by prior research on district and school participation behavior in RCTs (Stuart et al., 2017; Tipton et al., 2016a; Fellers, 2017). These studies found that districts and schools with higher proportions of students who are English language learners (ELL), economically disadvantaged (ED), non-White, and living in urban settings are more likely to participate, as are larger districts and schools. 
+  
+  It is important to note, however, that some of these characteristics might also make it more likely that researchers would recruit these districts and schools in the first place. That is to say, school characteristics may drive selection bias by both impacting the types of schools that agree to participate, as well as by the types of schools that researchers recruit. For instance, the overrepresentation of larger schools in RCTs can mean that larger schools are more likely to agree to participate, are more likely to be recruiterd by researchers, or both. Therefore, the participation behavior outlined here is likely not representative of all schools in the US, rather schools that are likely to be recruited by current practices.
+  
+  Characteristics of the sample frame were sourced from the Common Core of Data (CCD; https://nces.ed.gov/ccd/index.asp). The CCD is a comprehensive database housing annually collected census of all public schools and districts. Log-transformation was used on school size (number of students), district size (number of schools) and the student to teacher ratio. This is done to allow proportional comparisons at the extremes of the distributions [@hennigHowFindAppropriate2013]. For instance, the difference between two schools with 4000 and 3000 students should be weighed as much as the difference between two schools with 400 and 300 students when generating clusters. Figure \@ref(fig:plot-dist1) displays the distribution of the continuous variables used. Two categorical covariaets were used as well: urbanicity (urban, suburban, or town/rural) and a binary indicator of school wide title 1 elegibility. In all, the sample frame consists of 6 states, 2,016 districts and 9,792 schools.
 
-Log-transformation was used on school size (number of students), district size (number of schools) and the student to teacher ratio. This is done to allow proportional comparisons at the extremes of the distributions [@hennigHowFindAppropriate2013]. For instance, the difference between two schools with 4000 and 3000 students should be weighed as much as the difference between two schools with 400 and 300 students when generating clusters. Figure \@ref(fig:plot-dist1) displays the distribution of the continuous variables used. Two categorical covariaets were used as well: urbanicity (urban, suburban, or town/rural) and a binary indicator of school wide title 1 elegibility.
-
-```{r plot-dist1, results = "asis", fig.cap="Distributions of continous covariates."}
+```{r plot-dist1, results = "asis", fig.cap="Distributions of continous covariates. Three covariates were transformed to logs: (1) District Size, (2) N Students, and (3) Student/Teachers"}
 dist_plots <- df %>%
   select(covariates) %>%
   select_if(is.numeric) %>%
@@ -138,9 +143,25 @@ dist_plots %>%
   labs(x = "Value", y = "Count")
 
 if(saveFigs) save.figures("Intro - Covariate Distribution")
+
+
+# df %>%
+#   select(DID, SID) %>%
+#   summarise(Dist = length(unique(DID)),
+#             School = n())
 ```
 
-## Distance Metric
+## Stratification
+Stratification was performed prior to simulation because the population is constant across iterations. Per Tipton's (2013) original recommendation, we use k-means clustering to partition the population into strata. This requires selecting a distance metric, choosing the number of strata, and generating the strata.
+
+### Cluster Analysis
+Cluster analysis was performed using the _cluster_ package (Maechler et al. 2017) in R. First, the _daisy_ function is used to compute an $n$ by $n$ pairwise distance matrix across all observations. This function requires two parameters: (1) the data matrix, and (2) the distance metric. The data matrix included the full set of school level covariates. The metric was set to "gower". Next the _kmeans_ function was used to generate clusters. This method uses an optimization algorithm to classify sites into $k$ clusters by minimizing the total within cluster sum of squares. This function also requires two parameters: (1) the distance matrix, and (2) the number of clusters to generate ($k$). For each $k$, it is recommended to run _kmeans_ at least 10 times, and select the clustering that results in the smallest total within-cluster sum of squares.
+
+Several methods were used to determine $k$. Figure \@ref(fig:fig-ch) displays the Calinski-Harabasz (CH) index for each $k$ clusters generated. In this case, generating 2 clusters maximises the CH-index. Figure \@ref(fig:fig-ratio) displays the ratio of between-cluster SS to within-cluster SS and plots it against $k$. Tipton (2013) recommends selecting the number of clusters such that at least 80% of the variability is between clusters, indicated by the figure as a dashed line. Given this criteria it seems that at least 7 clusters should be generated. However we also see that after a sharp initial increase, the slope of the graph begins to level out. This indicates that as we increase the number of clusters, the benefit of doing so decreases, while the difficulty of sampling from each cluster increases. In that case after 5 or 6 clusters the difficulty of sampling may not be worth such small increases in homogeneity within clusters.
+
+Figure \@ref(fig:fig-k-size) plots the sample size that needs to be selected from each cluster to fulfill the proportional allocation requirement such that the number of sites sampled from each cluster is proportional to the size of the cluster in the population. The dashed line indicates the ideal allocation if all clusters were of equal size. We see that the variability in cluster sizes decreases as more clusters are generated. A sensible cutoff may be determined by looking at the size of the smallest cluster. At $k > 5$ it seems that the smallest clusters would require less than 5 sites being sampled, which may be very difficult in a practical setting. We determined that this would be the most likely criteria to be conisdered in the field, and ultimately decided to generate 5 clusters for this analysis.
+
+### Distance Metric
 The distance metric is used to summarizes the difference between a pair of sites on a set of covariates in order to maximize the similarity of all sites within a clusters. It is therefore necessary to select a metric that is appropriate given the types of covaraites being used. In educational research, data are likely to contain both continuous and categorical data. For mixed data such as this it is appropriate to use the general similaity measure [@gowerGeneralCoefficientSimilarity1971; @tiptonStratifiedSamplingUsing2013].
 
 This method relies on different calculations of distance depending on the type of covariates. Let $X_{hi}$ and $X_{hi'}$ be the observed value of covariate $h = {1, ..., P}$ for sites $i$ and $i'$ respectively, where $i \ne i'$. Let $d_{ii'h}$ be the distance between observed values of covariate $X_{h}$ for site $i$ and site $i'$. For categorical or dummy coded variables, $d_{ii'h} = 1$ if $X_{hi} = X_{hi'}$ and $d_{ii'h} = 0$ otherwise. For continuous covariates, we use the following formula:
@@ -170,30 +191,6 @@ As $p_k$ approaches 1, most of the variation is between strata, indicating homog
 
 [Go into CH and n distribution across strata here?]
 
-## Sample Selection
-The goal of balanced sampling is to recruit in such a way that the expected value of covariate $X_h$ across sites in stratum $j$ is equal to the expected value of covariate $X_h$ across all sites sampled from stratum $j$:
-
-\begin{align}
-  E(X_ih|Z_i = 1, j) = E(X_h|j)
-\end{align}
-
-where $Z_i = 1$ if site $i$ is recruited into the sample and $Z_i = 0$ otherwise. Following @tiptonStratifiedSamplingUsing2013, we implemented balanced sampling by prioritizing the recruitment of sites based on their similarity to the "average" site in each stratum. First the number of sites to be sampled from each stratum must be identified using proportional sample allocation. Each stratum contains $N_j$ sites where $N_1 + N_2 ... + N_k = N$. From each stratum $j$, $n_j$ sites must be sampled such that $n_j = [(N_j/N)n]$, where [.] indicates that each value is rounded to the nearest integer. 
-
-  Next we ranked each site within a stratum using a distance measure, with sites closer to the "center" of the strata ranked higher. We calculated the weighted Euclidean distance to the mean of each covariate:
-
-\begin{align} \label{eq:euclid}
-  d_{ij} = \sqrt{\sum^p_{h=1}w_h[X_{hij} - E(X_h|j)]^2}
-\end{align}
-
-where $w_h$ is the weight assigned to covariate $X_h$, $E(X_h|j)$ is the population mean of covariate $h$ in stratum $j$, and $X_{hij}$ is the value of covariate $h$ for site $i$ in stratum $j$. As with generating the strata, different weights can be used such that distances depend more heavily on covariates thought to be more related to treatment effect heterogeneity. we then use the ranked list to prioritize sites for recruitment, beginning with the highest ranked sites. If a site is unavailable or refuses to participate, a recruitment attempt is made with the next highest ranked site until $n_j$ sites agree to participate.
-
-
-
-## Stratification
-
-Stratification was performed prior to simulation because the population is constant across iterations. Per Tipton's (2013) original recommendation, we use k-means clustering to partition the population into strata. This requires selecting a distance metric, choosing the number of strata, and generating the strata.
-
-### Number of Clusters
 Selecting the number of clusters, $k$, is one of the most difficult problems in cluster analysis (Steinley, 2006). Tipton (2013) states that both statistical and practical criteria should be used in selecting $k$. For instance, a large number of clusters would result in more homogeneous strata and, in turn, a more robust sample. However as strata become smaller, they also become more difficult to adequately sample from. Hennig and Liao (2013) argue that the method of selecting $k$ should depend on the context of the clustering and frame the issue as one of obtaining an appropriate subject-matter-dependent definition rather than a statistical estimation. Ultimately three considerations were used to select the number of clusters: (1) the ratio of variability between clusters to the sum of within and between cluster variability as recommended by Tipton (2013), (2) a generalized form of the Calinski-Harabasz index (Calinski and Harabasz, 1974) proposed by Hennig and Liao (2013), and (3) the practicality of sampling from fewer clusters.
 
 
@@ -260,13 +257,24 @@ if(saveFigs) save.figures("Intro - Cluster Size")
 
 ```
 
-### Cluster Analysis
-Cluster analysis was performed using the _cluster_ package (Maechler et al. 2017) in R. First, the _daisy_ function is used to compute an $n$ by $n$ pairwise distance matrix across all observations. This function requires two parameters: (1) the data matrix, and (2) the distance metric. The data matrix included the full set of school level covariates. The metric was set to "gower". Next the _kmeans_ function was used to generate clusters. This method uses an optimization algorithm to classify sites into $k$ clusters by minimizing the total within cluster sum of squares. This function also requires two parameters: (1) the distance matrix, and (2) the number of clusters to generate ($k$). For each $k$, it is recommended to run _kmeans_ at least 10 times, and select the clustering that results in the smallest total within-cluster sum of squares.
 
-Several methods were used to determine $k$. Figure \@ref(fig:fig-ch) displays the Calinski-Harabasz (CH) index for each $k$ clusters generated. In this case, generating 2 clusters maximises the CH-index. Figure \@ref(fig:fig-ratio) displays the ratio of between-cluster SS to within-cluster SS and plots it against $k$. Tipton (2013) recommends selecting the number of clusters such that at least 80% of the variability is between clusters, indicated by the figure as a dashed line. Given this criteria it seems that at least 7 clusters should be generated. However we also see that after a sharp initial increase, the slope of the graph begins to level out. This indicates that as we increase the number of clusters, the benefit of doing so decreases, while the difficulty of sampling from each cluster increases. In that case after 5 or 6 clusters the difficulty of sampling may not be worth such small increases in homogeneity within clusters.
+## Balanced Sampling
+The goal of balanced sampling is to recruit in such a way that the expected value of covariate $X_h$ across sites in stratum $j$ is equal to the expected value of covariate $X_h$ across all sites sampled from stratum $j$:
 
-Figure \@ref(fig:fig-k-size) plots the sample size that needs to be selected from each cluster to fulfill the proportional allocation requirement such that the number of sites sampled from each cluster is proportional to the size of the cluster in the population. The dashed line indicates the ideal allocation if all clusters were of equal size. We see that the variability in cluster sizes decreases as more clusters are generated. A sensible cutoff may be determined by looking at the size of the smallest cluster. At $k > 5$ it seems that the smallest clusters would require less than 5 sites being sampled, which may be very difficult in a practical setting. We determined that this would be the most likely criteria to be conisdered in the field, and ultimately decided to generate 5 clusters for this analysis.
-  
+\begin{align}
+  E(X_ih|Z_i = 1, j) = E(X_h|j)
+\end{align}
+
+where $Z_i = 1$ if site $i$ is recruited into the sample and $Z_i = 0$ otherwise. Following @tiptonStratifiedSamplingUsing2013, we implemented balanced sampling by prioritizing the recruitment of sites based on their similarity to the "average" site in each stratum. First the number of sites to be sampled from each stratum must be identified using proportional sample allocation. Each stratum contains $N_j$ sites where $N_1 + N_2 ... + N_k = N$. From each stratum $j$, $n_j$ sites must be sampled such that $n_j = [(N_j/N)n]$, where [.] indicates that each value is rounded to the nearest integer. 
+
+  Next we ranked each site within a stratum using a distance measure, with sites closer to the "center" of the strata ranked higher. We calculated the weighted Euclidean distance to the mean of each covariate:
+
+\begin{align} \label{eq:euclid}
+  d_{ij} = \sqrt{\sum^p_{h=1}w_h[X_{hij} - E(X_h|j)]^2}
+\end{align}
+
+where $w_h$ is the weight assigned to covariate $X_h$, $E(X_h|j)$ is the population mean of covariate $h$ in stratum $j$, and $X_{hij}$ is the value of covariate $h$ for site $i$ in stratum $j$. As with generating the strata, different weights can be used such that distances depend more heavily on covariates thought to be more related to treatment effect heterogeneity. we then use the ranked list to prioritize sites for recruitment, beginning with the highest ranked sites. If a site is unavailable or refuses to participate, a recruitment attempt is made with the next highest ranked site until $n_j$ sites agree to participate.
+
 ## Advantages and Limitations
 SBS has only recently proposed and there have not been any large scale implementations of this method reported. Also, beyond the original proposal article, there have not been any methodological investigation into the method. @tiptonStratifiedSamplingUsing2013 illustrated SBS by comparing it to a previous study which did not use a formal sampling method [@roschelleIntegrationTechnologyCurriculum2010]. Data from the previous study was used to generate two hypothetical samples. The first sample was the ideal in which the highest ranked schools in each stratum agreed to participate. The second sample was a "worst case" non-response sample where the first 50 highest ranked schools in each stratum refused to participate, resulting in a non-response rate of at least 83\% in each stratum. These two samples were then compared to the original sample on the first 3 moments of 26 covariates. Both samples achieved with SBS resulted in better balance than the original sample on at least 19 of the 26 covariates in the first two moments, and 14 out of 26 in the third moments. The samples were then compared on how well they would generalize using the method proposed by @stuartUsePropensityScores2011. This final test showed that the samples achieved with SBS resulted in less coverage errors than the original sample and would thus be easier to generalize using the retrospective methods.
 
@@ -279,8 +287,12 @@ Although the findings in @tiptonStratifiedSamplingUsing2013 were promising, it i
 Furthermore, what if schools in larger strata had higher non-response rates? How many schools would recruiters have to contact before collecting a full sample? School recruitment is a time consuming and complicated process which requires approval at several levels. Researchers may not want to invest in recruiting schools from strata with particularly high non response rates. Finally, the data came from a single state which happened to provide information on 26 covariates. If a national population was of interest, more states would need to be included, but data reporting is not uniform across all states.
 
 
-# Methods and Models
 
+# Simulation Study
+In this section we describe the simulation study developed to assess the generalizability of the samples selected by SBS relative to several other sampling methods, and the feasibility with which the sampling methods can be employed. Real data was used to inform the sample frame.
+Selection bias was generated to account for both self selection as well as researcher bias.
+
+# Methods and Models
 
 ## Framework for Generalizability
 
@@ -306,9 +318,7 @@ where $\boldsymbol{X_i}$ is an $N$ by $P$ matrix of covariates that predict samp
   To generate selection bias stemming from researcher recruitment, we propose a "low hanging fruit" approach to convenience sampling. We assume that researchers have some knowledge of how likely each site is to participate, and prioritize easy to recruit sites as a way of maximizing recruitment efficiency. While there are many other ways to define convenience sampling, we posit this as a first step. Sites are prioritized for recruitment by sequentially sampling from the population of sites using $\pi^P_i$ as a sampling weight. Once a site is added to the list in order of priority, the probability of choosing the next site is proportional to the weights of the remaining items. In this way, sites that have higher values for $\pi^P_i$ are more likely to be recruited earlier on.
 
 
-# Simulation Study
-In this section we describe the simulation study developed to assess the generalizability of the samples selected by SBS relative to several other sampling methods, and the feasibility with which the sampling methods can be employed. Real data was used to inform the population frame.
-Selection bias was generated to account for both self selection as well as researcher bias.
+
 
 
 ### Participation Propensity Score
@@ -374,6 +384,7 @@ In UCS we assumed that recruiters have some knowledge of the schools' likelihood
 \end{align}
 
 As with SRS, in SCS this was performed independently within strata, and proportional allocation was used to set the target strata sample size.
+
 
 ## Analysis
 

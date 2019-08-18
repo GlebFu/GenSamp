@@ -153,15 +153,15 @@ df %>%
 df.coefs <- data.frame(Variables = names(DGM.Bs), vnames = names(DGM.Bs), log_odds = DGM.Bs, row.names = NULL) %>%
   arrange(Variables)
 
-levels(df.coefs$Variables) <- c("Total District Schools", 
+levels(df.coefs$Variables) <- c("District Size", 
                                 "% Black",
                                 "% Hispanic",
                                 "% White",
-                                "Total Students",
+                                "N Students",
                                 "% ELL",
                                 "% Female",
-                                "% FRL", # Free Reduced Lunch
-                                "Student/Teacher Ratio",
+                                "% F/RL", # Free Reduced Lunch
+                                "Students/Teachers",
                                 "Suburban",
                                 "Schoolwide Title I",
                                 "Town/Rural",
