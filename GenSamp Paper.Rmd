@@ -57,6 +57,7 @@ library(papaja)
 library(tidyverse)
 # library(colorblindr)
 library(colorspace)
+library(cowplot)
 
 rm(list = ls())
 ```
@@ -123,7 +124,10 @@ save.figures <- function(x, w = 10, h = 6, ...) ggsave(filename = paste("Figs/Pa
   
   Characteristics of the sample frame were sourced from the Common Core of Data (CCD; https://nces.ed.gov/ccd/index.asp). The CCD is a comprehensive database housing annually collected census of all public schools and districts. Log-transformation was used on school size (number of students), district size (number of schools) and the student to teacher ratio. This is done to allow proportional comparisons at the extremes of the distributions [@hennigHowFindAppropriate2013]. For instance, the difference between two schools with 4000 and 3000 students should be weighed as much as the difference between two schools with 400 and 300 students when generating clusters. Figure \@ref(fig:plot-dist1) displays the distribution of the continuous variables used. Two categorical covariaets were used as well: urbanicity (urban, suburban, or town/rural) and a binary indicator of school wide title 1 elegibility. In all, the sample frame consists of 6 states, 2,016 districts and 9,792 schools.
 
-```{r plot-dist1, results = "asis", fig.cap="Distributions of continous covariates. Three covariates were transformed to logs: (1) District Size, (2) N Students, and (3) Student/Teachers"}
+(ref:plot-dist1-caption) Distributions of continous covariates. Three covariates were transformed to logs: (1) District Size, (2) N Students, and (3) Student/Teachers
+
+
+```{r plot-dist1, results = "asis", fig.cap = "(ref:plot-dist1-caption)"}
 dist_plots <- df %>%
   select(covariates) %>%
   select_if(is.numeric) %>%
@@ -174,89 +178,128 @@ where |.| indicates absolute value, and $R_h$ is the range of observations for c
 where $w_{ii'h} = 0$ if $X_h$ is missing for either site and $w_{ii'h} = 1$ otherwise. Setting the distance metric to "gower" in the _daisy_ function performs these calculations.
 
 ### Number of Strata
-Next we used the _kmeans_ function to generate clusters. This method uses an optimization algorithm to classify sites into $k$ clusters by minimizing the total within cluster sum of squares. This function also requires two parameters: (1) the distance matrix (generated in the previous step), and (2) the number of clusters to generate ($k$). 
+Next we used the _kmeans_ function to generate clusters, which uses an optimization algorithm to classify sites into $k$ clusters by minimizing the total within cluster sum of squares. For each $k$, it is recommended to run _kmeans_ at least 10 times, and select the clustering that results in the smallest total within-cluster sum of squares. This function also requires two parameters: (1) the distance matrix (generated in the previous step), and (2) the number of clusters to generate ($k$). 
+
 
 Selecting an appropriate value for $k$ is one of the most difficult problems in cluster analysis [@steinleyKmeansClusteringHalfcentury2006]. @tiptonStratifiedSamplingUsing2013 states that both statistical and practical criteria should be used in selecting $k$. A larger set of strata would result in greater homogeneity within each stratam, however more strata may also be difficult to manage for recruiters. For instance, if refusal and non-response rates are fairly high, having fewer sites spread across more strata may make it difficult to adequately recruit from all strata. Resource constraints (e.g. time, funding, recruiters) may also be a factor in the number of strata selected.
 
-@hennigHowFindAppropriate2013 also argue that the method of selecting $k$ should depend on the context of the clustering and frame the issue as one of obtaining an appropriate subject-matter-dependent definition rather than a statistical estimation. Ultimately we considered three criteria: (1) the ratio of variability between clusters to the sum of within and between cluster variability as recommended by @tiptonStratifiedSamplingUsing2013, (2) a generalized form of the Calinski-Harabasz index [@calinskiDendriteMethodCluster1974] proposed by @hennigHowFindAppropriate2013, and (3) the practicality of sampling from fewer clusters.
+@hennigHowFindAppropriate2013 also argue that the method of selecting $k$ should depend on the context of the clustering and frame the issue as one of obtaining an appropriate subject-matter-dependent definition rather than a statistical estimation. With considerations in mind, we examined three criteria: (1) a generalized form of the Calinski-Harabasz index [@calinskiDendriteMethodCluster1974] proposed by @hennigHowFindAppropriate2013, (2) the proportion of between-cluster variance as recommended by @tiptonStratifiedSamplingUsing2013, and (3) the practicality of sampling from fewer clusters. 
 
-Figure \@ref(fig:fig-ch) displays the Calinski-Harabasz (CH) index for each $k$ clusters generated. In this case, generating 2 clusters maximises the CH-index. Figure \@ref(fig:fig-ratio) displays the ratio of between-cluster SS to within-cluster SS and plots it against $k$. @tiptonStratifiedSamplingUsing2013 recommends selecting the number of clusters such that at least 80% of the variability is between clusters, indicated by the figure as a dashed line. Given this criteria it seems that at least 7 clusters should be generated. However we also see that after a sharp initial increase, the slope of the graph begins to level out. This indicates that as we increase the number of clusters, the benefit of doing so decreases, while the difficulty of sampling from each cluster increases. In that case after 5 or 6 clusters the difficulty of sampling may not be worth such small increases in homogeneity within clusters.
-
-Figure \@ref(fig:fig-k-size) plots the sample size that needs to be selected from each cluster to fulfill the proportional allocation requirement such that the number of sites sampled from each cluster is proportional to the size of the cluster in the population. The dashed line indicates the ideal allocation if all clusters were of equal size. We see that the variability in cluster sizes decreases as more clusters are generated. A sensible cutoff may be determined by looking at the size of the smallest cluster. At $k > 5$ it seems that the smallest clusters would require less than 5 sites being sampled, which may be very difficult in a practical setting. We determined that this would be the most likely criteria to be conisdered in the field, and ultimately decided to generate 5 clusters for this analysis.
+  Our strategy was to perform the analysis several times generating different numbers of strata, and calculating each performance criteria for each number of strata generated (Figure \@ref(fig:fig-k-plots)). We first calculated the Calinski-Harabasz (CH) index using the _cluster.stats_ function from the _fpc_ (Hennig ???) package. Figure \@ref(fig:fig-k-plots)a displays the CH index for each $k$ clusters generated. In this case, generating 2 clusters maximises the CH-index. 
 
 
-Our strategy was to perform the analysis several times generating different numbers of strata, and comparing the proportion of variability between strata. Let $k$ be the number of strata generated where $k = 1, 2, ..., q$ for some maximum allowable number of $q$ strata. Let $\sigma_{wk}^2$ be the total variability within each stratum, and $\sigma_{bk}^2$ be the total variability between each stratum, for all covariates in $X$ and for each set of $k$ strata generated. Let $p_k$ be the proportion of variability that is between strata for each set of $k$ strata generated be defined as follows:
+  The proportion of between-cluster variance was calculated manually. Let $k$ be the number of strata generated where $k = 1, 2, ..., q$ for some maximum allowable number of $q$ strata. Let $\sigma_{wk}^2$ be the total variability within each stratum, and $\sigma_{bk}^2$ be the total variability between each stratum, for all covariates in $X$ and for each set of $k$ strata generated. Let $p_k$ be the proportion of variability that is between strata for each set of $k$ strata generated be defined as follows:
 
 \begin{align} \label{eq:pk}
   p_k = \sigma_{bk}^2/(\sigma_{wk}^2 + \sigma_{bk}^2)
 \end{align}
 
-As $p_k$ approaches 1, most of the variation is between strata, indicating homogeneity within strata. This increases the possibility of selecting a more balanced sample. Plotting $p_k$ against $k$ allows visual comparison of the results. The $k$ for which the rate of change $p_k$ slows is considered favorable.
+As $p_k$ approaches 1, most of the variation is between strata, indicating homogeneity within strata. This increases the possibility of selecting a more balanced sample. Figure \@ref(fig:fig-k-plots)b plots $p_k$ against $k$m allowing visual comparison of the results. The $k$ for which the rate of change $p_k$ slows is considered favorable. @tiptonStratifiedSamplingUsing2013 also recommends selecting the number of clusters such that at least 80% of the variability is between clusters, indicated by the figure as a dashed line. Given this criteria it seems that at least 7 clusters should be generated. However we also see that after a sharp initial increase, the slope of the graph begins to level out. This indicates that as we increase the number of clusters, the benefit of doing so decreases, while the difficulty of sampling from each cluster increases. In that case after 5 or 6 clusters the difficulty of sampling may not be worth such small increases in homogeneity within clusters.
 
-For each $k$, it is recommended to run _kmeans_ at least 10 times, and select the clustering that results in the smallest total within-cluster sum of squares.
+Figure \@ref(fig:fig-k-plots)c plots the sample size that needs to be selected from each cluster to fulfill the proportional allocation requirement such that the number of sites sampled from each cluster is proportional to the size of the cluster in the population. The dashed line indicates the ideal allocation if all clusters were of equal size. We see that the variability in cluster sizes decreases as more clusters are generated. A sensible cutoff may be determined by looking at the size of the smallest cluster. At $k > 8$ it seems that the smallest clusters would require less than 5 sites being sampled, which may be very difficult in a practical setting. We determined that this would be the most likely criteria to be conisdered in the field, and ultimately decided to generate 5 clusters for this analysis.
 
 
 
-```{r fig-ch, results = "asis", fig.cap="Generalized Calinski-Harabasz index"}
-chPlot %>%
+
+(ref:fig-ch-caption) Generalized Calinski-Harabasz index
+
+```{r fig-ch, results = "asis", fig.cap = "(ref:fig-ch-caption)"}
+plt.k <- list()
+
+plt.k$ch <- chPlot %>%
   gather(key = method, value = value, ch) %>%
   ggplot(aes(x = k, y = value)) +
   geom_point() +
   geom_line() +
   theme_apa() +
   scale_x_discrete(limits = c(minK:10)) +
-  labs(y = "Calinski-Harabasz index",
-       x = "Number of Strata (k)")
+  labs(y = "CH index",
+       x = "")
 
 if(saveFigs) save.figures("Intro - Calinski-Harabasz")
 
 ```
 
-```{r fig-ratio, fig.cap="Ratio of between cluster sum of squares to total cluster sum of squares"}
+(ref:fig-ratio-caption) Ratio of between cluster sum of squares to total cluster sum of squares
+
+```{r fig-ratio, fig.cap = "(ref:fig-ratio-caption)"}
 df.vratio <- data.frame(vratio = cluster.vratio, K = names(cluster.vratio), row.names = NULL, stringsAsFactors = F) %>%
   # group_by(subs) %>%
   mutate(min80 = sum(vratio < .8) - .5 + minK,
          K = parse_number(K))
 
-df.vratio %>%
+plt.k$vrat <- df.vratio %>%
   ggplot(aes(x = K, y = vratio)) +
   geom_point() +
-  labs(y = "Between Cluster Variance",
-       x = "Number of Strata (k)") +
+  labs(y = "Variance ratio",
+       x = "") +
   geom_line() +
   geom_vline(aes(xintercept = min80), linetype = "dashed", size = .5) +
   geom_hline(aes(yintercept = .8), linetype = "dashed", size = .5) +
   theme_apa(box = F) +
   scale_x_discrete(limits = c(minK:10)) +
-  scale_y_continuous(breaks = seq(0, 1, .1)) + 
+  scale_y_continuous(breaks = seq(0, 1, .1),
+                     limits = c(.5,1)) + 
   theme(legend.position = "none")
 
 if(saveFigs) save.figures("Intro - SS Ratio")
 
 ```
 
-```{r fig-k-size, fig.cap="Sampling requirements for each cluster"}
-prop_allocations %>%
+(ref:fig-k-size-caption) Sampling requirements for each cluster
+
+```{r fig-k-size, fig.cap = "(ref:fig-k-size-caption)"}
+# plot3 <- prop_allocations %>%
+#   ungroup() %>%
+#   rename(sample = pa, population = n) %>%
+#   mutate(K = parse_number(K)) %>%
+#   ggplot(aes(x = K, y = sample)) +
+#   geom_point(shape = "-", size = 10, alpha = .5) +
+#   theme_apa() +
+#   labs(y = "Allocated Sample Size",
+#        x = "Number of Strata (k)") +
+#   scale_x_discrete(limits = c(minK:10)) +
+#   scale_y_continuous(breaks = seq(0, 35, 5),
+#                      limits = c(0, 35),
+#                      sec.axis = sec_axis(~ . / 60 * 9882, name = "Strata Size")) +
+#   stat_function(fun = function(x) 60/x, geom = "line", linetype = "dashed", size = .5) +
+#   # facet_grid(subs ~ .) +
+#   # theme(text = element_text(size=20)) +
+#   geom_hline(yintercept = 5, linetype = "dotted", size = .5)
+
+plt.k$pa <- prop_allocations %>%
   ungroup() %>%
   rename(sample = pa, population = n) %>%
   mutate(K = parse_number(K)) %>%
   ggplot(aes(x = K, y = sample)) +
-  geom_point(shape = "-", size = 10, alpha = .5) +
+  geom_point(shape = "-", size = 5, alpha = .7) +
   theme_apa() +
-  labs(y = "Allocated Sample Size",
+  labs(y = "Sample size",
        x = "Number of Strata (k)") +
   scale_x_discrete(limits = c(minK:10)) +
   scale_y_continuous(breaks = seq(0, 35, 5),
-                     limits = c(0, 35),
-                     sec.axis = sec_axis(~ . / 60 * 9882, name = "Strata Size")) +
+                     limits = c(0, 35)) +
   stat_function(fun = function(x) 60/x, geom = "line", linetype = "dashed", size = .5) +
-  # facet_grid(subs ~ .) +
-  # theme(text = element_text(size=20)) +
-  geom_hline(yintercept = 5, linetype = "dotted", size = .5) +
-  theme(text = element_text(size=20))
+  geom_hline(yintercept = 5, linetype = "dotted", size = .5)
 
 if(saveFigs) save.figures("Intro - Cluster Size")
 
+
+```
+
+(ref:fig-k-plots-caption) Plots used to determine value for $k$. (_a_) Calinski-Harabasz index - peaks indicate better fit. (_b_) Ratio of between cluster sum of squares to total cluster sum of squares - horizontal line indicates cutoff of .8, vertical line indicates minimum number of clusters needed to achieve cutoff. (_c_) Sampling requirements for each cluster given proportional alocation - horizontal line indicates a cluster sample size requirement of 5 schools.
+
+```{r fig-k-plots, fig.cap= "(ref:fig-k-plots-caption)", fig.height=5, fig.width=4}
+
+
+plot_grid(plotlist = plt.k, 
+                   labels=c("(a)", "(b)", "(c)"), 
+                   ncol = 1, 
+                   nrow = 3, 
+                   label_x = .5,
+                   align = "v",
+                   label_fontface = "plain" ,
+                   label_size = 10)
 
 ```
 
@@ -268,7 +311,7 @@ The goal of balanced sampling is to recruit in such a way that the expected valu
   E(X_ih|Z_i = 1, j) = E(X_h|j)
 \end{align}
 
-where $Z_i = 1$ if site $i$ is recruited into the sample and $Z_i = 0$ otherwise. Following @tiptonStratifiedSamplingUsing2013, we implemented balanced sampling by prioritizing the recruitment of sites based on their similarity to the "average" site in each stratum. First the number of sites to be sampled from each stratum must be identified using proportional sample allocation. Each stratum contains $N_j$ sites where $N_1 + N_2 ... + N_k = N$. From each stratum $j$, $n_j$ sites must be sampled such that $n_j = [(N_j/N)n]$, where [.] indicates that each value is rounded to the nearest integer. 
+where $Z_i = 1$ if site $i$ is recruited into the sample and $Z_i = 0$ otherwise. Following @tiptonStratifiedSamplingUsing2013, we implemented balanced sampling by prioritizing the recruitment of sites based on their similarity to the "average" site in each stratum. First we identified the number of sites to be sampled from each stratum using proportional sample allocation. Each stratum contains $N_j$ sites where $N_1 + N_2 ... + N_k = N$. From each stratum $j$, we calculated the number of sites to be sampled, $n_j$, such that $n_j = [(N_j/N)n]$, where [.] indicates that each value is rounded to the nearest integer. 
 
   Next we ranked each site within a stratum using a distance measure, with sites closer to the "center" of the strata ranked higher. We calculated the weighted Euclidean distance to the mean of each covariate:
 
@@ -276,7 +319,7 @@ where $Z_i = 1$ if site $i$ is recruited into the sample and $Z_i = 0$ otherwise
   d_{ij} = \sqrt{\sum^p_{h=1}w_h[X_{hij} - E(X_h|j)]^2}
 \end{align}
 
-where $w_h$ is the weight assigned to covariate $X_h$, $E(X_h|j)$ is the population mean of covariate $h$ in stratum $j$, and $X_{hij}$ is the value of covariate $h$ for site $i$ in stratum $j$. As with generating the strata, different weights can be used such that distances depend more heavily on covariates thought to be more related to treatment effect heterogeneity. we then use the ranked list to prioritize sites for recruitment, beginning with the highest ranked sites. If a site is unavailable or refuses to participate, a recruitment attempt is made with the next highest ranked site until $n_j$ sites agree to participate.
+where $w_h$ is the weight assigned to covariate $X_h$, $E(X_h|j)$ is the population mean of covariate $h$ in stratum $j$, and $X_{hij}$ is the value of covariate $h$ for site $i$ in stratum $j$. As with generating the strata, different weights can be used such that distances depend more heavily on covariates thought to be more related to treatment effect heterogeneity. We then used the ranked list to prioritize sites for recruitment, beginning with the highest ranked sites. If a site was unavailable or refused to participate, a recruitment attempt was made with the next highest ranked site until $n_j$ sites agreed to participate.
 
 ## Advantages and Limitations
 SBS has only recently proposed and there have not been any large scale implementations of this method reported. Also, beyond the original proposal article, there have not been any methodological investigation into the method. @tiptonStratifiedSamplingUsing2013 illustrated SBS by comparing it to a previous study which did not use a formal sampling method [@roschelleIntegrationTechnologyCurriculum2010]. Data from the previous study was used to generate two hypothetical samples. The first sample was the ideal in which the highest ranked schools in each stratum agreed to participate. The second sample was a "worst case" non-response sample where the first 50 highest ranked schools in each stratum refused to participate, resulting in a non-response rate of at least 83\% in each stratum. These two samples were then compared to the original sample on the first 3 moments of 26 covariates. Both samples achieved with SBS resulted in better balance than the original sample on at least 19 of the 26 covariates in the first two moments, and 14 out of 26 in the third moments. The samples were then compared on how well they would generalize using the method proposed by @stuartUsePropensityScores2011. This final test showed that the samples achieved with SBS resulted in less coverage errors than the original sample and would thus be easier to generalize using the retrospective methods.
@@ -340,7 +383,9 @@ df.coefs %>%
 
 ```
 
-```{r fig-intercepts, results = "asis", fig.cap = "Intercepts used to generate response rates", eval = F}
+(ref:fig-intercepts-caption) Intercepts used to generate response rates
+
+```{r fig-intercepts, results = "asis", fig.cap = "(ref:fig-intercepts-caption)", eval = F}
 data.frame(Intercept = intercepts, RR = names(intercepts), row.names = NULL, stringsAsFactors = F) %>%
   mutate(RR = parse_number(RR)) %>%
   ggplot(aes(x = RR, y = Intercept, group = 1)) +
@@ -446,7 +491,9 @@ scale_y_f <- function(x) {
 }
 ```
 
-```{r fig-SMD-by-Var, results = "asis", eval = T, fig.cap = "Averge Standardized Mean Differences between sample and population", eval = F}
+(ref:fig-SMD-by-Var-caption) Averge Standardized Mean Differences between sample and population
+
+```{r fig-SMD-by-Var, results = "asis", eval = T, fig.cap = "(ref:fig-SMD-by-Var-caption)", eval = F}
 sSMDplot %>%
   ungroup() %>%
   mutate(RR = parse_number(RR)) %>%
@@ -471,7 +518,9 @@ if(saveFigs) save.figures("Results - SMD")
 
 ```
 
-```{r fig-SMD-by-Var-ind, results = "asis", eval = T, fig.cap = "Averge Standardized Mean Differences between sample and population", eval = F}
+(ref:fig-SDM-by-Var-ind-caption) Averge Standardized Mean Differences between sample and population
+
+```{r fig-SMD-by-Var-ind, results = "asis", eval = T, fig.cap = "(ref:fig-SDM-by-Var-ind-caption)", eval = F}
 
 plt.smd <- list()
 
@@ -500,7 +549,9 @@ for(v in unique(sSMDplot$var)) {
 
 ```
 
-```{r fig-SMD-by-Var-example, results = "asis", eval = T, fig.cap = "Averge Standardized Mean Differences between sample and population for select covariates", eval = T}
+(ref:fig-SMD-by-Var-example-caption) Averge Standardized Mean Differences between sample and population for select covariates
+
+```{r fig-SMD-by-Var-example, results = "asis", eval = T, fig.cap = "(ref:fig-SMD-by-Var-example-caption)", eval = T}
 plt.vgood <- c("dSCH", "ethWhite")
 plt.good <- c("ethHisp", "pELL", "pTotfrl", "T1", "Urban", "ToRu")
 plt.bad <- c("ethBlack", "Suburban", "n")
@@ -527,7 +578,9 @@ sSMDplot %>%
 
 ```
 
-```{r fig-avg-Bindex, results = "asis", fig.cap = "Averge $B$-index for varying participation rates, by sampling method", eval = T}
+(ref:fig-avg-Bindex-caption) Averge $B$-index for varying participation rates, by sampling method
+
+```{r fig-avg-Bindex, results = "asis", fig.cap = "(ref:fig-avg-Bindex-caption)", eval = T}
 
 avg_Bindex %>%
   ungroup() %>%
@@ -547,13 +600,13 @@ if(saveFigs) save.figures("Results - B Index")
 ```
 
 
-
-
 ## Feasibility
 
 Figure \@ref(fig:fig-units-contacted) reports the average number of schools that needed to be contacted before a full sample of $N = 60$ schools was selected. At higher response rates differences between methods were negligible. However, as response rates decreased the disparity between the methods became more apparent. Overall, UCS required the least "effort" to recruit a full sample, followed by URS and SCS, SRS, and finally SBS. Figure \@ref(fig:fig-response-rates) plots the response rates of schools approached for recruitment against the population response rates. As expected, URS response rates reflected those in the population. Both UCS and SCS resulted in higher response rates, while SRS and SBS resulted in lower response rates. 
 
-```{r fig-responses, results = "asis", fig.cap = "Sampling statistics", eval = F}
+(ref:fig-responses-caption) Sampling statistics
+
+```{r fig-responses, results = "asis", fig.cap = "(ref:fig-responses-caption)", eval = F}
 samplot %>%
   ungroup() %>%
   mutate(RR = parse_number(RR)) %>%
@@ -565,7 +618,9 @@ samplot %>%
   theme_apa(box = T)
 ```
 
-```{r fig-units-contacted, results = "asis", fig.cap = "Averge number of schools contacted to achieve N = 60", eval = T}
+(ref:fig-units-contacted-caption) Averge number of schools contacted to achieve $N = 60$
+
+```{r fig-units-contacted, results = "asis", fig.cap = "(ref:fig-units-contacted-caption)", eval = T}
 contact_data <- samplot %>%
   filter(measure == "sch.contacted")
 
@@ -591,7 +646,9 @@ contact_data %>%
 if(saveFigs) save.figures("Results - Response Counts")
 ```
 
-```{r fig-response-rates, results = "asis", fig.cap = "Recruitment response rates for each sampling method", eval = T}
+(ref:fig-response-rates-caption) Recruitment response rates for each sampling method
+
+```{r fig-response-rates, results = "asis", fig.cap = "(ref:fig-response-rates-caption)", eval = T}
 response_rate_data <- samplot %>%
   ungroup() %>%
   mutate(level = str_split(measure, "[.]", simplify = T)[,1],
@@ -651,7 +708,9 @@ df.icc %>%
 
 ```
 
-```{r fig-SMD-by-Var-bad, results = "asis", eval = T, fig.cap = "Poor balance for stratfied methods", eval = T, warning = F, message = F}
+(ref:fig-SMD-by-Var-bad-caption) Poor balance for stratfied methods
+
+```{r fig-SMD-by-Var-bad, results = "asis", eval = T, fig.cap = "(ref:fig-SMD-by-Var-bad-caption)", eval = T, warning = F, message = F}
 plt.vgood <- c("dSCH", "ethWhite")
 plt.good <- c("ethHisp", "pELL", "pTotfrl", "T1", "Urban", "ToRu")
 plt.bad <- c("ethBlack", "Suburban", "n")
@@ -680,8 +739,6 @@ sSMDplot %>%
 ```
 
   Our participation model is also speculative. The parameters in our response generating model are based on values from a study that examined the difference between schools participating in large-scale randomized control trials (RCT) and the overall population of schools. However, these RCTs themselves typically rely on some form of convenience sampling. In that sense our parameters reflect participation rates of schools that are likely to participate in RCTs, rather than the full population of schools. Furthermore, the decision of whether a school participates in such a study is multi-leveled. Generally, districts serve as gatekeepers, requiring research requests to be submitted and approved before recruitment can begin. If the request is denied, no schools within that district may be recruited. If approved, schools may be contacted individually. The ultimate decision may then rest with administrators, or they may be passed on to teachers most affected by the study. Despite these limitations, we believe that our findings reasonably represent the relative performance of the various sampling methods we tested in the context of educational research.
-
-
 
 Finally, we hope to make clear the disadvantages of convenience sampling in this context. Large scale MRTs are expensive to implement, however by not investing in robust recruitment strategies researchers severely limit the impact and relevance of of their work. We believe that the increased cost of a sampling method designed for generalizability is greatly outweighed by the benefit of an intervention whose impacts we can estimate more accurately and for a wider population. 
 

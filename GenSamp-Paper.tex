@@ -153,6 +153,8 @@ It is important to note, however, that some of these characteristics might also 
 
 Characteristics of the sample frame were sourced from the Common Core of Data (CCD; \url{https://nces.ed.gov/ccd/index.asp}). The CCD is a comprehensive database housing annually collected census of all public schools and districts. Log-transformation was used on school size (number of students), district size (number of schools) and the student to teacher ratio. This is done to allow proportional comparisons at the extremes of the distributions (Hennig \& Liao, 2013). For instance, the difference between two schools with 4000 and 3000 students should be weighed as much as the difference between two schools with 400 and 300 students when generating clusters. Figure \ref{fig:plot-dist1} displays the distribution of the continuous variables used. Two categorical covariaets were used as well: urbanicity (urban, suburban, or town/rural) and a binary indicator of school wide title 1 elegibility. In all, the sample frame consists of 6 states, 2,016 districts and 9,792 schools.
 
+
+
 \begin{figure}
 \centering
 \includegraphics{GenSamp-Paper_files/figure-latex/plot-dist1-1.pdf}
@@ -188,42 +190,36 @@ where \(w_{ii'h} = 0\) if \(X_h\) is missing for either site and \(w_{ii'h} = 1\
 \hypertarget{number-of-strata}{%
 \subsubsection{Number of Strata}\label{number-of-strata}}
 
-Next we used the \emph{kmeans} function to generate clusters. This method uses an optimization algorithm to classify sites into \(k\) clusters by minimizing the total within cluster sum of squares. This function also requires two parameters: (1) the distance matrix (generated in the previous step), and (2) the number of clusters to generate (\(k\)). For each \(k\), it is recommended to run \emph{kmeans} at least 10 times, and select the clustering that results in the smallest total within-cluster sum of squares.
+Next we used the \emph{kmeans} function to generate clusters, which uses an optimization algorithm to classify sites into \(k\) clusters by minimizing the total within cluster sum of squares. For each \(k\), it is recommended to run \emph{kmeans} at least 10 times, and select the clustering that results in the smallest total within-cluster sum of squares. This function also requires two parameters: (1) the distance matrix (generated in the previous step), and (2) the number of clusters to generate (\(k\)).
 
-Selecting an appropriate value for \(k\) is one of the most difficult problems in cluster analysis (Steinley, 2006). Tipton (2013b) states that both statistical and practical criteria should be used in selecting \(k\). For instance, a large number of clusters would result in more homogeneous strata and, in turn, a more robust sample. However as strata become smaller, they also become more difficult to adequately sample from. Hennig and Liao (2013) argue that the method of selecting \(k\) should depend on the context of the clustering and frame the issue as one of obtaining an appropriate subject-matter-dependent definition rather than a statistical estimation. Ultimately three considerations were used to select the number of clusters: (1) the ratio of variability between clusters to the sum of within and between cluster variability as recommended by Tipton (2013b), (2) a generalized form of the Calinski-Harabasz index (Cali\a'nski \& Harabasz, 1974) proposed by Hennig and Liao (2013), and (3) the practicality of sampling from fewer clusters.
+Selecting an appropriate value for \(k\) is one of the most difficult problems in cluster analysis (Steinley, 2006). Tipton (2013b) states that both statistical and practical criteria should be used in selecting \(k\). A larger set of strata would result in greater homogeneity within each stratam, however more strata may also be difficult to manage for recruiters. For instance, if refusal and non-response rates are fairly high, having fewer sites spread across more strata may make it difficult to adequately recruit from all strata. Resource constraints (e.g.~time, funding, recruiters) may also be a factor in the number of strata selected.
 
-Several methods were used to determine \(k\). Figure \ref{fig:fig-ch} displays the Calinski-Harabasz (CH) index for each \(k\) clusters generated. In this case, generating 2 clusters maximises the CH-index. Figure \ref{fig:fig-ratio} displays the ratio of between-cluster SS to within-cluster SS and plots it against \(k\). Tipton (2013b) recommends selecting the number of clusters such that at least 80\% of the variability is between clusters, indicated by the figure as a dashed line. Given this criteria it seems that at least 7 clusters should be generated. However we also see that after a sharp initial increase, the slope of the graph begins to level out. This indicates that as we increase the number of clusters, the benefit of doing so decreases, while the difficulty of sampling from each cluster increases. In that case after 5 or 6 clusters the difficulty of sampling may not be worth such small increases in homogeneity within clusters.
+Hennig and Liao (2013) also argue that the method of selecting \(k\) should depend on the context of the clustering and frame the issue as one of obtaining an appropriate subject-matter-dependent definition rather than a statistical estimation. With considerations in mind, we examined three criteria: (1) a generalized form of the Calinski-Harabasz index (Cali\a'nski \& Harabasz, 1974) proposed by Hennig and Liao (2013), (2) the proportion of between-cluster variance as recommended by Tipton (2013b), and (3) the practicality of sampling from fewer clusters.
 
-Figure \ref{fig:fig-k-size} plots the sample size that needs to be selected from each cluster to fulfill the proportional allocation requirement such that the number of sites sampled from each cluster is proportional to the size of the cluster in the population. The dashed line indicates the ideal allocation if all clusters were of equal size. We see that the variability in cluster sizes decreases as more clusters are generated. A sensible cutoff may be determined by looking at the size of the smallest cluster. At \(k > 5\) it seems that the smallest clusters would require less than 5 sites being sampled, which may be very difficult in a practical setting. We determined that this would be the most likely criteria to be conisdered in the field, and ultimately decided to generate 5 clusters for this analysis.
+Our strategy was to perform the analysis several times generating different numbers of strata, and calculating each performance criteria for each number of strata generated (Figure \ref{fig:fig-k-plots}). We first calculated the Calinski-Harabasz (CH) index using the \emph{cluster.stats} function from the \emph{fpc} (Hennig ???) package. Figure \ref{fig:fig-k-plots}a displays the CH index for each \(k\) clusters generated. In this case, generating 2 clusters maximises the CH-index.
 
-Next we must determine the number of strata to be generated. A larger set of strata would result in greater homogeneity within each stratam, however in practical applications more strata may also be difficult to manage. For instance, if refusal and non-response rates are fairly high, having fewer sites spread across more strata may make it difficult to adequately recruit from all strata. Resource constraints (e.g.~time, funding, recruiters) may also be a factor in the number of strata selected.
-
-Our strategy was to perform the analysis several times generating different numbers of strata, and comparing the proportion of variability between strata. Let \(k\) be the number of strata generated where \(k = 1, 2, ..., q\) for some maximum allowable number of \(q\) strata. Let \(\sigma_{wk}^2\) be the total variability within each stratum, and \(\sigma_{bk}^2\) be the total variability between each stratum, for all covariates in \(X\) and for each set of \(k\) strata generated. Let \(p_k\) be the proportion of variability that is between strata for each set of \(k\) strata generated be defined as follows:
+The proportion of between-cluster variance was calculated manually. Let \(k\) be the number of strata generated where \(k = 1, 2, ..., q\) for some maximum allowable number of \(q\) strata. Let \(\sigma_{wk}^2\) be the total variability within each stratum, and \(\sigma_{bk}^2\) be the total variability between each stratum, for all covariates in \(X\) and for each set of \(k\) strata generated. Let \(p_k\) be the proportion of variability that is between strata for each set of \(k\) strata generated be defined as follows:
 
 \begin{align} \label{eq:pk}
   p_k = \sigma_{bk}^2/(\sigma_{wk}^2 + \sigma_{bk}^2)
 \end{align}
 
-As \(p_k\) approaches 1, most of the variation is between strata, indicating homogeneity within strata. This increases the possibility of selecting a more balanced sample. Plotting \(p_k\) against \(k\) allows visual comparison of the results. The \(k\) for which the rate of change \(p_k\) slows is considered favorable.
+As \(p_k\) approaches 1, most of the variation is between strata, indicating homogeneity within strata. This increases the possibility of selecting a more balanced sample. Figure \ref{fig:fig-k-plots}b plots \(p_k\) against \(k\)m allowing visual comparison of the results. The \(k\) for which the rate of change \(p_k\) slows is considered favorable. Tipton (2013b) also recommends selecting the number of clusters such that at least 80\% of the variability is between clusters, indicated by the figure as a dashed line. Given this criteria it seems that at least 7 clusters should be generated. However we also see that after a sharp initial increase, the slope of the graph begins to level out. This indicates that as we increase the number of clusters, the benefit of doing so decreases, while the difficulty of sampling from each cluster increases. In that case after 5 or 6 clusters the difficulty of sampling may not be worth such small increases in homogeneity within clusters.
 
-{[}Go into CH and n distribution across strata here?{]}
+Figure \ref{fig:fig-k-plots}c plots the sample size that needs to be selected from each cluster to fulfill the proportional allocation requirement such that the number of sites sampled from each cluster is proportional to the size of the cluster in the population. The dashed line indicates the ideal allocation if all clusters were of equal size. We see that the variability in cluster sizes decreases as more clusters are generated. A sensible cutoff may be determined by looking at the size of the smallest cluster. At \(k > 8\) it seems that the smallest clusters would require less than 5 sites being sampled, which may be very difficult in a practical setting. We determined that this would be the most likely criteria to be conisdered in the field, and ultimately decided to generate 5 clusters for this analysis.
 
-\begin{figure}
-\centering
-\includegraphics{GenSamp-Paper_files/figure-latex/fig-ch-1.pdf}
-\caption{\label{fig:fig-ch}Generalized Calinski-Harabasz index}
-\end{figure}
 
-\begin{figure}
-\centering
-\includegraphics{GenSamp-Paper_files/figure-latex/fig-ratio-1.pdf}
-\caption{\label{fig:fig-ratio}Ratio of between cluster sum of squares to total cluster sum of squares}
-\end{figure}
+
+
+
+
+
+
 
 \begin{figure}
 \centering
-\includegraphics{GenSamp-Paper_files/figure-latex/fig-k-size-1.pdf}
-\caption{\label{fig:fig-k-size}Sampling requirements for each cluster}
+\includegraphics{GenSamp-Paper_files/figure-latex/fig-k-plots-1.pdf}
+\caption{\label{fig:fig-k-plots}Plots used to determine value for \(k\). (\emph{a}) Calinski-Harabasz index - peaks indicate better fit. (\emph{b}) Ratio of between cluster sum of squares to total cluster sum of squares - horizontal line indicates cutoff of .8, vertical line indicates minimum number of clusters needed to achieve cutoff. (\emph{c}) Sampling requirements for each cluster given proportional alocation - horizontal line indicates a cluster sample size requirement of 5 schools.}
 \end{figure}
 
 \hypertarget{balanced-sampling}{%
@@ -235,7 +231,7 @@ The goal of balanced sampling is to recruit in such a way that the expected valu
   E(X_ih|Z_i = 1, j) = E(X_h|j)
 \end{align}
 
-where \(Z_i = 1\) if site \(i\) is recruited into the sample and \(Z_i = 0\) otherwise. Following Tipton (2013b), we implemented balanced sampling by prioritizing the recruitment of sites based on their similarity to the \enquote{average} site in each stratum. First the number of sites to be sampled from each stratum must be identified using proportional sample allocation. Each stratum contains \(N_j\) sites where \(N_1 + N_2 ... + N_k = N\). From each stratum \(j\), \(n_j\) sites must be sampled such that \(n_j = [(N_j/N)n]\), where {[}.{]} indicates that each value is rounded to the nearest integer.
+where \(Z_i = 1\) if site \(i\) is recruited into the sample and \(Z_i = 0\) otherwise. Following Tipton (2013b), we implemented balanced sampling by prioritizing the recruitment of sites based on their similarity to the \enquote{average} site in each stratum. First we identified the number of sites to be sampled from each stratum using proportional sample allocation. Each stratum contains \(N_j\) sites where \(N_1 + N_2 ... + N_k = N\). From each stratum \(j\), we calculated the number of sites to be sampled, \(n_j\), such that \(n_j = [(N_j/N)n]\), where {[}.{]} indicates that each value is rounded to the nearest integer.
 
 Next we ranked each site within a stratum using a distance measure, with sites closer to the \enquote{center} of the strata ranked higher. We calculated the weighted Euclidean distance to the mean of each covariate:
 
@@ -243,7 +239,7 @@ Next we ranked each site within a stratum using a distance measure, with sites c
   d_{ij} = \sqrt{\sum^p_{h=1}w_h[X_{hij} - E(X_h|j)]^2}
 \end{align}
 
-where \(w_h\) is the weight assigned to covariate \(X_h\), \(E(X_h|j)\) is the population mean of covariate \(h\) in stratum \(j\), and \(X_{hij}\) is the value of covariate \(h\) for site \(i\) in stratum \(j\). As with generating the strata, different weights can be used such that distances depend more heavily on covariates thought to be more related to treatment effect heterogeneity. we then use the ranked list to prioritize sites for recruitment, beginning with the highest ranked sites. If a site is unavailable or refuses to participate, a recruitment attempt is made with the next highest ranked site until \(n_j\) sites agree to participate.
+where \(w_h\) is the weight assigned to covariate \(X_h\), \(E(X_h|j)\) is the population mean of covariate \(h\) in stratum \(j\), and \(X_{hij}\) is the value of covariate \(h\) for site \(i\) in stratum \(j\). As with generating the strata, different weights can be used such that distances depend more heavily on covariates thought to be more related to treatment effect heterogeneity. We then used the ranked list to prioritize sites for recruitment, beginning with the highest ranked sites. If a site was unavailable or refused to participate, a recruitment attempt was made with the next highest ranked site until \(n_j\) sites agreed to participate.
 
 \hypertarget{advantages-and-limitations}{%
 \subsection{Advantages and Limitations}\label{advantages-and-limitations}}
@@ -325,6 +321,8 @@ Urban & Urban & 0.43\\
 \end{center}
 \end{table}
 
+
+
 \hypertarget{sampling-methods}{%
 \subsection{Sampling Methods}\label{sampling-methods}}
 
@@ -404,11 +402,19 @@ Figure \ref{fig:fig-SMD-by-Var-example} displays the average SMD between the sam
 
 Figure \ref{fig:fig-avg-Bindex} displays the average \(B\)-index for each method across participation rates. Acceptable values of \(B\) for generalizability vary depending on the size of the sample, the size of the population, and the number of covariates (Tipton, 2014). Given our design a critical value of \(B = .95\) would be needed to indicate generalizability. At population participation rates of 40\% or lower, only SBS consistently generated highly generalizable samples. At 50\% and beyond, SBS samples began to decline slowly in generalizbility, while othe rmehtods increased. Notably, at low response rates unstratified convenience sampling seemed to perform better than stratified convenience sampling.
 
+
+
+
+
+
+
 \begin{figure}
 \centering
 \includegraphics{GenSamp-Paper_files/figure-latex/fig-SMD-by-Var-example-1.pdf}
 \caption{\label{fig:fig-SMD-by-Var-example}Averge Standardized Mean Differences between sample and population for select covariates}
 \end{figure}
+
+
 
 \begin{figure}
 \centering
@@ -421,11 +427,17 @@ Figure \ref{fig:fig-avg-Bindex} displays the average \(B\)-index for each method
 
 Figure \ref{fig:fig-units-contacted} reports the average number of schools that needed to be contacted before a full sample of \(N = 60\) schools was selected. At higher response rates differences between methods were negligible. However, as response rates decreased the disparity between the methods became more apparent. Overall, UCS required the least \enquote{effort} to recruit a full sample, followed by URS and SCS, SRS, and finally SBS. Figure \ref{fig:fig-response-rates} plots the response rates of schools approached for recruitment against the population response rates. As expected, URS response rates reflected those in the population. Both UCS and SCS resulted in higher response rates, while SRS and SBS resulted in lower response rates.
 
+
+
+
+
 \begin{figure}
 \centering
 \includegraphics{GenSamp-Paper_files/figure-latex/fig-units-contacted-1.pdf}
-\caption{\label{fig:fig-units-contacted}Averge number of schools contacted to achieve N = 60}
+\caption{\label{fig:fig-units-contacted}Averge number of schools contacted to achieve \(N = 60\)}
 \end{figure}
+
+
 
 \begin{figure}
 \centering
@@ -472,6 +484,8 @@ Schoolwide Title I & T1 & 0.94 & 0.02 & Good\\
 \end{threeparttable}
 \end{center}
 \end{table}
+
+
 
 \begin{figure}
 \centering
