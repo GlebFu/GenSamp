@@ -23,7 +23,7 @@ affiliation:
 #   Enter author note here.
 
 abstract: |
-  In order for educational research to be informative to policy makers, studies must be designed to make robust estimates of causal effects at the population level. Large scale multi-site randomized trials (MRT) often rely on vague convenience sampling methodology when recruiting districts and schools, resulting in relatively homogeneous samples that may differ greatly from the intended population of interest. Retrospective methods that quantify and statistically adjust for those differences are promising but have limited effect when the sample differs greatly from the population. Designing sampling methods that focus on generalizability may be a more effective but costly solution, but limited methodological research has been performed to examine their effectiveness in the educational context. This paper examines one promising method, stratified balanced sampling (SBS), in the context of recruiting a representative sample of schools for a large scale MRT. Using simulations based on real data, we compare SBS to stratified and unstratified versions of convenience sampling and probability sampling. Several models for generating school participation and emulating convenience sampling are proposed. Results indicate that SBS and stratified random sampling (SRS) result in highly generalizable samples. These methods are extremely costly to implement, however, especially when the population average willingness to participate is low. Stratified convenience sampling (SCS) is a potential compromise.
+  <!-- In order for educational research to be informative to policy makers, studies must be designed to make robust estimates of causal effects at the population level. Large scale multi-site randomized trials (MRT) often rely on vague convenience sampling methodology when recruiting districts and schools, resulting in relatively homogeneous samples that may differ greatly from the intended population of interest. Retrospective methods that quantify and statistically adjust for those differences are promising but have limited effect when the sample differs greatly from the population. Designing sampling methods that focus on generalizability may be a more effective but costly solution, but limited methodological research has been performed to examine their effectiveness in the educational context. This paper examines one promising method, stratified balanced sampling (SBS), in the context of recruiting a representative sample of schools for a large scale MRT. Using simulations based on real data, we compare SBS to stratified and unstratified versions of convenience sampling and probability sampling. Several models for generating school participation and emulating convenience sampling are proposed. Results indicate that SBS and stratified random sampling (SRS) result in highly generalizable samples. These methods are extremely costly to implement, however, especially when the population average willingness to participate is low. Stratified convenience sampling (SCS) is a potential compromise. -->
     
 
 keywords          : "generalizability, sampling, MRT"
@@ -156,10 +156,10 @@ if(saveFigs) save.figures("Intro - Covariate Distribution")
 ```
 
 ## Stratification
-Stratification was performed prior to simulation because the population is constant across iterations. Per @tiptonStratifiedSamplingUsing2013's original recommendation, we use k-means clustering to partition the population into strata. This requires selecting a distance metric, choosing the number of strata, and generating the strata.
+Stratification was performed prior to simulation because the population is constant across iterations. Per @tiptonStratifiedSamplingUsing2013's original recommendation, we use k-means clustering to partition the population into strata. This requires selecting a distance metric, choosing the number of strata, and generating the strata. All analyses were performed in R (R Core Team, 2018).
 
 ### Cluster Analysis
-We performed the cluster analysis _cluster_ package (Maechler et al. 2017) in R. First, the _daisy_ function is used to compute an $n$ by $n$ pairwise distance matrix across all observations. This function requires two parameters: (1) the data matrix, and (2) the distance metric. The data matrix includes the full set of school level covariates used to compare schools for clustering. The distance metric selected for this analysis largly depends on the type of data in the matrix.
+We performed the cluster analysis using the _cluster_ package (Maechler et al., 2017). First, the _daisy_ function is used to compute an $n$ by $n$ pairwise distance matrix across all observations. This function requires two parameters: (1) the data matrix, and (2) the distance metric. The data matrix includes the full set of school level covariates used to compare schools for clustering. The distance metric selected for this analysis largly depends on the type of data in the matrix.
 
 The distance metric summarises the difference between a pair of sites on a set of covariates in order to maximize the similarity of all sites within a cluster. In educational research, as is the case here, data are likely to contain both continuous and categorical variables. For mixed data such as this it is appropriate to use the general similaity measure [@gowerGeneralCoefficientSimilarity1971; @tiptonStratifiedSamplingUsing2013].
 
@@ -178,14 +178,14 @@ where |.| indicates absolute value, and $R_h$ is the range of observations for c
 where $w_{ii'h} = 0$ if $X_h$ is missing for either site and $w_{ii'h} = 1$ otherwise. Setting the distance metric to "gower" in the _daisy_ function performs these calculations.
 
 ### Number of Strata
-Next we used the _kmeans_ function to generate clusters, which uses an optimization algorithm to classify sites into $k$ clusters by minimizing the total within cluster sum of squares. For each $k$, it is recommended to run _kmeans_ at least 10 times, and select the clustering that results in the smallest total within-cluster sum of squares. This function also requires two parameters: (1) the distance matrix (generated in the previous step), and (2) the number of clusters to generate ($k$). 
+Next we used the _kmeans_ function to generate clusters, which employs an optimization algorithm to classify sites into $k$ clusters by minimizing the total within cluster variance. For each $k$, it is recommended to run _kmeans_ at least 10 times, and select the clustering that results in the smallest total within-cluster sum of squares. This function also requires two parameters: (1) the distance matrix from the previous step, and (2) the number of clusters to generate ($k$). 
 
 
-Selecting an appropriate value for $k$ is one of the most difficult problems in cluster analysis [@steinleyKmeansClusteringHalfcentury2006]. @tiptonStratifiedSamplingUsing2013 states that both statistical and practical criteria should be used in selecting $k$. A larger set of strata would result in greater homogeneity within each stratam, however more strata may also be difficult to manage for recruiters. For instance, if refusal and non-response rates are fairly high, having fewer sites spread across more strata may make it difficult to adequately recruit from all strata. Resource constraints (e.g. time, funding, recruiters) may also be a factor in the number of strata selected.
+Selecting an appropriate value for $k$ is one of the most difficult problems in cluster analysis [@steinleyKmeansClusteringHalfcentury2006]. @tiptonStratifiedSamplingUsing2013 states that both empirical and practical criteria should be used in selecting $k$. A larger set of strata would result in greater homogeneity within each stratam, however it may also be more difficult to manage for recruiters. For instance, if refusal and non-response rates are fairly high, having fewer sites spread across more strata may make it difficult to adequately recruit from all strata. Resource constraints (e.g. time, funding, recruiters) may also be a factor in the number of strata selected.
 
-@hennigHowFindAppropriate2013 also argue that the method of selecting $k$ should depend on the context of the clustering and frame the issue as one of obtaining an appropriate subject-matter-dependent definition rather than a statistical estimation. With considerations in mind, we examined three criteria: (1) a generalized form of the Calinski-Harabasz index [@calinskiDendriteMethodCluster1974] proposed by @hennigHowFindAppropriate2013, (2) the proportion of between-cluster variance as recommended by @tiptonStratifiedSamplingUsing2013, and (3) the practicality of sampling from fewer clusters. 
+@hennigHowFindAppropriate2013 also argue that the method of selecting $k$ should depend on the context of the clustering, framing the issue as one of obtaining an appropriate subject-matter-dependent definition rather than a statistical estimation. With considerations in mind, we examined three criteria: (1) a generalized form of the Calinski-Harabasz index [@calinskiDendriteMethodCluster1974] proposed by @hennigHowFindAppropriate2013, (2) the proportion of between-cluster variance as recommended by @tiptonStratifiedSamplingUsing2013, and (3) the practicality of sampling from fewer clusters. 
 
-  Our strategy was to perform the analysis several times generating different numbers of strata, and calculating each performance criteria for each number of strata generated (Figure \@ref(fig:fig-k-plots)). We first calculated the Calinski-Harabasz (CH) index using the _cluster.stats_ function from the _fpc_ (Hennig ???) package. Figure \@ref(fig:fig-k-plots)a displays the CH index for each $k$ clusters generated. In this case, generating 2 clusters maximises the CH-index. 
+  Our strategy was to perform the analysis several times- generating different numbers of strata- and comparing all performance criteria for each number of strata generated (Figure \@ref(fig:fig-k-plots)). We first calculated the Calinski-Harabasz (CH) index using the _cluster.stats_ function from the _fpc_ (Hennig ???) package. Figure \@ref(fig:fig-k-plots)a displays the CH index for each $k$ clusters generated. In this case, generating 2 clusters maximises the CH-index. 
 
 
   The proportion of between-cluster variance was calculated manually. Let $k$ be the number of strata generated where $k = 1, 2, ..., q$ for some maximum allowable number of $q$ strata. Let $\sigma_{wk}^2$ be the total variability within each stratum, and $\sigma_{bk}^2$ be the total variability between each stratum, for all covariates in $X$ and for each set of $k$ strata generated. Let $p_k$ be the proportion of variability that is between strata for each set of $k$ strata generated be defined as follows:
@@ -277,7 +277,7 @@ plt.k$pa <- prop_allocations %>%
   labs(y = "Sample size",
        x = "Number of Strata (k)") +
   scale_x_discrete(limits = c(minK:10)) +
-  scale_y_continuous(breaks = seq(0, 35, 5),
+  scale_y_continuous(breaks = seq(0, 40, 10),
                      limits = c(0, 35)) +
   stat_function(fun = function(x) 60/x, geom = "line", linetype = "dashed", size = .5) +
   geom_hline(yintercept = 5, linetype = "dotted", size = .5)
@@ -289,17 +289,17 @@ if(saveFigs) save.figures("Intro - Cluster Size")
 
 (ref:fig-k-plots-caption) Plots used to determine value for $k$. (_a_) Calinski-Harabasz index - peaks indicate better fit. (_b_) Ratio of between cluster sum of squares to total cluster sum of squares - horizontal line indicates cutoff of .8, vertical line indicates minimum number of clusters needed to achieve cutoff. (_c_) Sampling requirements for each cluster given proportional alocation - horizontal line indicates a cluster sample size requirement of 5 schools.
 
-```{r fig-k-plots, fig.cap= "(ref:fig-k-plots-caption)", fig.height=5, fig.width=4}
+```{r fig-k-plots, fig.cap= "(ref:fig-k-plots-caption)", fig.height=5, fig.width=4, cache = F}
 
 
 plot_grid(plotlist = plt.k, 
-                   labels=c("(a)", "(b)", "(c)"), 
-                   ncol = 1, 
-                   nrow = 3, 
-                   label_x = .5,
-                   align = "v",
-                   label_fontface = "plain" ,
-                   label_size = 10)
+          labels=c("(a)", "(b)", "(c)"), 
+          ncol = 1, 
+          nrow = 3, 
+          label_x = .5,
+          align = "v",
+          label_fontface = "plain" ,
+          label_size = 10)
 
 ```
 

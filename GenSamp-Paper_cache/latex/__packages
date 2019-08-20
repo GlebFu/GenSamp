@@ -10,5 +10,4 @@ dplyr
 stringr
 forcats
 colorspace
-gridExtra
 cowplot
