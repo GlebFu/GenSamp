@@ -218,8 +218,8 @@ Figure \ref{fig:fig-k-plots}c plots the sample size that needs to be selected fr
 \caption{\label{fig:fig-k-plots}Plots used to determine value for \(k\). (\emph{a}) Calinski-Harabasz index - peaks indicate better fit. (\emph{b}) Ratio of between cluster sum of squares to total cluster sum of squares - horizontal line indicates cutoff of .8, vertical line indicates minimum number of clusters needed to achieve cutoff. (\emph{c}) Sampling requirements for each cluster given proportional alocation - horizontal line indicates a cluster sample size requirement of 5 schools.}
 \end{figure}
 
-\hypertarget{balanced-sampling}{%
-\subsection{Balanced Sampling}\label{balanced-sampling}}
+\hypertarget{balanced-samplingo}{%
+\subsection{Balanced Samplingo}\label{balanced-samplingo}}
 
 The goal of balanced sampling is to recruit in such a way that the expected value of covariate \(X_h\) across sites in stratum \(j\) is equal to the expected value of covariate \(X_h\) across all sites sampled from stratum \(j\):
 
@@ -290,31 +290,39 @@ A response generating model (RGM) was developed to simulate self selection. The 
 
 Intercept values were manipulated to generate different levels of population participation rates. Since these rates are unknown, we selected parameters for 9 levels of participation rates. Table \ref{tab:tab-RGM-Pars} reports the variables, variable codes, and coeficients used in the RGM. Covariate coefficients remained constant across response rates.
 
-\begin{table}[tbp]
-\begin{center}
-\begin{threeparttable}
-\caption{\label{tab:tab-RGM-Pars}Odds ratio coeficients for Response Generating Model}
-\begin{tabular}{lll}
-\toprule
-Variables & \multicolumn{1}{c}{vnames} & \multicolumn{1}{c}{log\_odds}\\
-\midrule
-District Size & dSCH & 0.52\\
-\% Black & ethBlack & 0.29\\
-\% Hispanic & ethHisp & 0.40\\
-\% White & ethWhite & -0.54\\
-N Students & n & 0.37\\
-\% ELL & pELL & 0.41\\
-\% Female & pFem & -0.02\\
-\% F/RL & pTotfrl & 0.08\\
-Students/Teachers & ST.ratio & -0.10\\
-Suburban & Suburban & 0.01\\
-Schoolwide Title I & T1 & 0.02\\
-Town/Rural & ToRu & -0.40\\
-Urban & Urban & 0.43\\
-\bottomrule
+\begin{table}[H]
+\centering
+\begin{tabular}{l|r}
+\hline
+Variables & log\_odds\\
+\hline
+District Size & 0.520\\
+\hline
+\% Black & 0.291\\
+\hline
+\% Hispanic & 0.395\\
+\hline
+\% White & -0.538\\
+\hline
+N Students & 0.374\\
+\hline
+\% ELL & 0.412\\
+\hline
+\% Female & -0.019\\
+\hline
+\% F/RL & 0.081\\
+\hline
+Students/Teachers & -0.101\\
+\hline
+Suburban & 0.007\\
+\hline
+Schoolwide Title I & 0.019\\
+\hline
+Town/Rural & -0.403\\
+\hline
+Urban & 0.433\\
+\hline
 \end{tabular}
-\end{threeparttable}
-\end{center}
 \end{table}
 
 
@@ -330,8 +338,8 @@ Five sampling methods were compared: stratified and unstratified random sampling
 
 To select a sample, ranks were generated for each school representing the order in which they are approached for recruitment. Schools were sorted by rank, with the all schools up to and including the 60th school where \(E_j = 1\) were considered \enquote{sampled}. Ranks were determined by the sampling method implemented.
 
-\hypertarget{balanced-sampling-1}{%
-\subsubsection{Balanced Sampling}\label{balanced-sampling-1}}
+\hypertarget{balanced-sampling}{%
+\subsubsection{Balanced Sampling}\label{balanced-sampling}}
 
 SBS is unique in that rankings are directly related to school characteristics and do not change across iterations. Ranks within strata are based on equation \eqref{eq:euclid}, where schools that are closer to the \enquote{center} of the strata are more representative of it. Schools were ranked within strata such that \(r_k= 1\) for the school that is most representative of strata \(k\). The percent of the total sample recruited from each stratum should be proportional to the percentage the population of schools that are in the strata (proportional sample allocation). Therefore, schools were approached independently within each stratum in order of rank until the proportional sample allocation requirements were met:
 \begin{align} \label{eq:rankCASS}
@@ -394,9 +402,28 @@ In order to assess feasibility, the total number of schools approached to achiev
 \hypertarget{generalizability-1}{%
 \subsection{Generalizability}\label{generalizability-1}}
 
-Figure \ref{fig:fig-SMD-by-Var-example} displays the average SMD between the samples and the population for four covariates and at each population participation rate resulting from each sampling method. The dotted horizontal line indicates a cutoff of .25, where SMDs above that indicate large differences between the sample and population for that covariate. For 8 out of the 13 covariates, stratified methods consistently performed better than unstratified methods. For 2 covariates (percent female and student to teacher ratio) all methods resulted in acceptible SMDs. For 3 covariates (percent black, suburban schools, and school size) the unstratified methods performed better than their stratified counterparts. SBS generally performed as well as or better than SRS. URS often resulted in highly unrepresentative samples except in cases where population participation rates were extremely high.
+\hypertarget{b-index}{%
+\subsubsection{B-Index}\label{b-index}}
 
-Figure \ref{fig:fig-avg-Bindex} displays the average \(B\)-index for each method across participation rates. Acceptable values of \(B\) for generalizability vary depending on the size of the sample, the size of the population, and the number of covariates (Tipton, 2014). Given our design a critical value of \(B = .95\) would be needed to indicate generalizability. At population participation rates of 40\% or lower, only SBS consistently generated highly generalizable samples. At 50\% and beyond, SBS samples began to decline slowly in generalizbility, while othe rmehtods increased. Notably, at low response rates unstratified convenience sampling seemed to perform better than stratified convenience sampling.
+Figure \ref{fig:fig-avg-Bindex} displays the average \(B\)-index for each method across participation rates. Acceptable values of \(B\) for generalizability vary depending on the size of the sample, the size of the population, and the number of covariates (Tipton, 2014). Given our design a critical value of \(B = .95\) would be needed to expect full generalizability. At population participation rates below 50\%, only SBS consistently generated highly generalizable samples. This indicates that SBS is successful at sampling schools that are unlikely to participate and therefore tend to be underrepresented by the other sampling methods, particularly when overall participation rates are low. Stratified random sampling also consistantly outperformed simple random sampling, though only slightly.
+
+We also found several trends that were unexpected. At 50\% and beyond, SBS performance slowly degrades, while other methods maintaind a steady increase. We expected a constant positive relationship beteween the population participation rate and the performance of all methods. Furthermore, at low response rates unstratified convenience sampling seemed to perform better than stratified convenience sampling. This seems inconsistant with survey literature which would suggest that stratified samples are more representative. Because the B-index is an overall measure of generalizabilty across many covariates, it is difficult to untangle why these methods preformed as such. The next section will examine the relationship between stratification and likelihood of participation given each covariate.
+
+
+
+\begin{figure}
+\centering
+\includegraphics{GenSamp-Paper_files/figure-latex/fig-avg-Bindex-1.pdf}
+\caption{\label{fig:fig-avg-Bindex}Averge \(B\)-index for varying participation rates, by sampling method. Horizontal dotted line represented index of .95 indicating a high level of generalizability.}
+\end{figure}
+
+\hypertarget{stratification-versus-participation}{%
+\subsubsection{Stratification Versus Participation}\label{stratification-versus-participation}}
+
+\hypertarget{standardized-mean-differences}{%
+\subsubsection{Standardized Mean Differences}\label{standardized-mean-differences}}
+
+Figure \ref{fig:fig-SMD-by-Var-example} displays the average SMD between the samples and the population for four covariates and at each population participation rate resulting from each sampling method. The dotted horizontal line indicates a cutoff of .25, where SMDs above that indicate large differences between the sample and population for that covariate. For 8 out of the 13 covariates, stratified methods consistently performed better than unstratified methods. For 2 covariates (percent female and student to teacher ratio) all methods resulted in acceptible SMDs. For 3 covariates (percent black, suburban schools, and school size) the unstratified methods performed better than their stratified counterparts. SBS generally performed as well as or better than SRS. URS often resulted in highly unrepresentative samples except in cases where population participation rates were extremely high.
 
 
 
@@ -408,14 +435,6 @@ Figure \ref{fig:fig-avg-Bindex} displays the average \(B\)-index for each method
 \centering
 \includegraphics{GenSamp-Paper_files/figure-latex/fig-SMD-by-Var-example-1.pdf}
 \caption{\label{fig:fig-SMD-by-Var-example}Averge Standardized Mean Differences between sample and population for select covariates}
-\end{figure}
-
-
-
-\begin{figure}
-\centering
-\includegraphics{GenSamp-Paper_files/figure-latex/fig-avg-Bindex-1.pdf}
-\caption{\label{fig:fig-avg-Bindex}Averge \(B\)-index for varying participation rates, by sampling method}
 \end{figure}
 
 \hypertarget{feasibility-1}{%
@@ -454,33 +473,6 @@ URS is considered the gold standard for generalizabilty, however it is not typic
 
 Our work uncovered several limitations in designing sampling and participation models. The sampling methods we developed made several assumptions about researcher and recruiter behavior in selecting a sample. First, that recruiters always prioritize schools that are most likely to participate. In truth, many other factors play a role such as proximity of sample sites to the researcher and to each other, existing relationships between the recruiters and the sample sites, and other researcher assumptions about the sample site's characteristics. Second, that recruiters have approximate knowledge of how likely a sampled site is to participate. Though researchers may speculate about sites that are more willing to participate (schools in larger urban districts) and prioritize recruiting such sites, it is not likely that they would estimate willingness as well as we have simulated. Given this, it is possible that the \enquote{feasibility} of the convenience methods is overestimated.
 
-\begin{table}[tbp]
-\begin{center}
-\begin{threeparttable}
-\caption{\label{tab:tab-ICC-Pars}Odds ratio coeficients and strata ICC}
-\begin{tabular}{lllll}
-\toprule
-Variables & \multicolumn{1}{c}{vnames} & \multicolumn{1}{c}{icc} & \multicolumn{1}{c}{log\_odds} & \multicolumn{1}{c}{results}\\
-\midrule
-\% Female & pFem & 0.00 & -0.02 & Neutral\\
-N Students & n & 0.06 & 0.37 & Bad\\
-\% Black & ethBlack & 0.06 & 0.29 & Bad\\
-Students/Teachers & ST.ratio & 0.10 & -0.10 & Neutral\\
-District Size & dSCH & 0.12 & 0.52 & Very Good\\
-Town/Rural & ToRu & 0.27 & -0.40 & Good\\
-\% ELL & pELL & 0.54 & 0.41 & Good\\
-Suburban & Suburban & 0.58 & 0.01 & Bad\\
-\% Hispanic & ethHisp & 0.66 & 0.40 & Good\\
-\% White & ethWhite & 0.67 & -0.54 & Very Good\\
-\% F/RL & pTotfrl & 0.76 & 0.08 & Good\\
-Urban & Urban & 0.91 & 0.43 & Good\\
-Schoolwide Title I & T1 & 0.94 & 0.02 & Good\\
-\bottomrule
-\end{tabular}
-\end{threeparttable}
-\end{center}
-\end{table}
-
 
 
 \begin{figure}
@@ -502,31 +494,31 @@ Finally, we hope to make clear the disadvantages of convenience sampling in this
 
 \hypertarget{refs}{}
 \leavevmode\hypertarget{ref-calinskiDendriteMethodCluster1974}{}%
-Cali\a'nski, T., \& Harabasz, J. (1974). A dendrite method for cluster analysis. \emph{Communications in Statistics}, \emph{3}(1), 1--27. doi:\href{https://doi.org/10.1080/03610927408827101}{10.1080/03610927408827101}
+Cali\a'nski, T., \& Harabasz, J. (1974). A dendrite method for cluster analysis. \emph{Communications in Statistics}, \emph{3}(1), 1--27. \url{https://doi.org/10.1080/03610927408827101}
 
 \leavevmode\hypertarget{ref-fellersDevelopingApproachDetermine2017}{}%
 Fellers, L. (2017). \emph{Developing an approach to determine generalizability: A review of efficacy and effectiveness trials funded by the Institute of Education Sciences} (Ph.D.). Columbia University, United States -- New York. Retrieved from \url{https://search.proquest.com/docview/1865595768/abstract/40FD82F4A0C24535PQ/1}
 
 \leavevmode\hypertarget{ref-gowerGeneralCoefficientSimilarity1971}{}%
-Gower, J. C. (1971). A General Coefficient of Similarity and Some of Its Properties. \emph{Biometrics}, \emph{27}(4), 857--871. doi:\href{https://doi.org/10.2307/2528823}{10.2307/2528823}
+Gower, J. C. (1971). A General Coefficient of Similarity and Some of Its Properties. \emph{Biometrics}, \emph{27}(4), 857--871. \url{https://doi.org/10.2307/2528823}
 
 \leavevmode\hypertarget{ref-grovesSurveyMethodology2004}{}%
 Groves, R. M. (Ed.). (2004). \emph{Survey methodology}. Hoboken, N.J: Wiley-Interscience.
 
 \leavevmode\hypertarget{ref-hennigHowFindAppropriate2013}{}%
-Hennig, C., \& Liao, T. F. (2013). How to find an appropriate clustering for mixed-type variables with application to socio-economic stratification: How to Find an Appropriate Clustering. \emph{Journal of the Royal Statistical Society: Series C (Applied Statistics)}, \emph{62}(3), 309--369. doi:\href{https://doi.org/10.1111/j.1467-9876.2012.01066.x}{10.1111/j.1467-9876.2012.01066.x}
+Hennig, C., \& Liao, T. F. (2013). How to find an appropriate clustering for mixed-type variables with application to socio-economic stratification: How to Find an Appropriate Clustering. \emph{Journal of the Royal Statistical Society: Series C (Applied Statistics)}, \emph{62}(3), 309--369. \url{https://doi.org/10.1111/j.1467-9876.2012.01066.x}
 
 \leavevmode\hypertarget{ref-kernAssessingMethodsGeneralizing2016}{}%
-Kern, H. L., Stuart, E. A., Hill, J., \& Green, D. P. (2016). Assessing Methods for Generalizing Experimental Impact Estimates to Target Populations. \emph{Journal of Research on Educational Effectiveness}, \emph{9}(1), 103--127. doi:\href{https://doi.org/10.1080/19345747.2015.1060282}{10.1080/19345747.2015.1060282}
+Kern, H. L., Stuart, E. A., Hill, J., \& Green, D. P. (2016). Assessing Methods for Generalizing Experimental Impact Estimates to Target Populations. \emph{Journal of Research on Educational Effectiveness}, \emph{9}(1), 103--127. \url{https://doi.org/10.1080/19345747.2015.1060282}
 
 \leavevmode\hypertarget{ref-olsenExternalValidityPolicy2013}{}%
-Olsen, R. B., Orr, L. L., Bell, S. H., \& Stuart, E. A. (2013). External Validity in Policy Evaluations That Choose Sites Purposively. \emph{Journal of Policy Analysis and Management}, \emph{32}(1), 107--121. doi:\href{https://doi.org/10.1002/pam.21660}{10.1002/pam.21660}
+Olsen, R. B., Orr, L. L., Bell, S. H., \& Stuart, E. A. (2013). External Validity in Policy Evaluations That Choose Sites Purposively. \emph{Journal of Policy Analysis and Management}, \emph{32}(1), 107--121. \url{https://doi.org/10.1002/pam.21660}
 
 \leavevmode\hypertarget{ref-omuircheartaighGeneralizingUnrepresentativeExperiments2014}{}%
-O'Muircheartaigh, C., \& Hedges, L. V. (2014). Generalizing from unrepresentative experiments: A stratified propensity score approach. \emph{Journal of the Royal Statistical Society: Series C (Applied Statistics)}, \emph{63}(2), 195--210. doi:\href{https://doi.org/10.1111/rssc.12037}{10.1111/rssc.12037}
+O'Muircheartaigh, C., \& Hedges, L. V. (2014). Generalizing from unrepresentative experiments: A stratified propensity score approach. \emph{Journal of the Royal Statistical Society: Series C (Applied Statistics)}, \emph{63}(2), 195--210. \url{https://doi.org/10.1111/rssc.12037}
 
 \leavevmode\hypertarget{ref-raudenbushStatisticalPowerOptimal2000}{}%
-Raudenbush, S. W., \& Liu, X. (2000). Statistical power and optimal design for multisite randomized trials. \emph{Psychological Methods}, \emph{5}(2), 199--213. doi:\href{https://doi.org/10.1037//1082-989X.5.2.199}{10.1037//1082-989X.5.2.199}
+Raudenbush, S. W., \& Liu, X. (2000). Statistical power and optimal design for multisite randomized trials. \emph{Psychological Methods}, \emph{5}(2), 199--213. \url{https://doi.org/10.1037//1082-989X.5.2.199}
 
 \leavevmode\hypertarget{ref-roschelleIntegrationTechnologyCurriculum2010}{}%
 Roschelle, J., Shechtman, N., Tatar, D., Hegedus, S., Hopkins, B., Empson, S., \ldots{} Gallagher, L. P. (2010). Integration of Technology, Curriculum, and Professional Development for Advancing Middle School Mathematics: Three Large-Scale Studies. \emph{American Educational Research Journal}, \emph{47}(4), 833--878.
@@ -535,28 +527,28 @@ Roschelle, J., Shechtman, N., Tatar, D., Hegedus, S., Hopkins, B., Empson, S., \
 Shadish, W. R., Cook, T. D., \& Campbell, D. T. (2002). \emph{Experimental and quasi-experimental designs for generalized causal inference}. Boston, MA, US: Houghton, Mifflin and Company.
 
 \leavevmode\hypertarget{ref-steinleyKmeansClusteringHalfcentury2006}{}%
-Steinley, D. (2006). K-means clustering: A half-century synthesis. \emph{British Journal of Mathematical and Statistical Psychology}, \emph{59}(1), 1--34. doi:\href{https://doi.org/10.1348/000711005X48266}{10.1348/000711005X48266}
+Steinley, D. (2006). K-means clustering: A half-century synthesis. \emph{British Journal of Mathematical and Statistical Psychology}, \emph{59}(1), 1--34. \url{https://doi.org/10.1348/000711005X48266}
 
 \leavevmode\hypertarget{ref-stuartCharacteristicsSchoolDistricts2017}{}%
-Stuart, E. A., Bell, S. H., Ebnesajjad, C., Olsen, R. B., \& Orr, L. L. (2017). Characteristics of School Districts That Participate in Rigorous National Educational Evaluations. \emph{Journal of Research on Educational Effectiveness}, \emph{10}(1), 168--206. doi:\href{https://doi.org/10.1080/19345747.2016.1205160}{10.1080/19345747.2016.1205160}
+Stuart, E. A., Bell, S. H., Ebnesajjad, C., Olsen, R. B., \& Orr, L. L. (2017). Characteristics of School Districts That Participate in Rigorous National Educational Evaluations. \emph{Journal of Research on Educational Effectiveness}, \emph{10}(1), 168--206. \url{https://doi.org/10.1080/19345747.2016.1205160}
 
 \leavevmode\hypertarget{ref-stuartUsePropensityScores2011}{}%
-Stuart, E. A., Cole, S. R., Bradshaw, C. P., \& Leaf, P. J. (2011). The use of propensity scores to assess the generalizability of results from randomized trials: Use of Propensity Scores to Assess Generalizability. \emph{Journal of the Royal Statistical Society: Series A (Statistics in Society)}, \emph{174}(2), 369--386. doi:\href{https://doi.org/10.1111/j.1467-985X.2010.00673.x}{10.1111/j.1467-985X.2010.00673.x}
+Stuart, E. A., Cole, S. R., Bradshaw, C. P., \& Leaf, P. J. (2011). The use of propensity scores to assess the generalizability of results from randomized trials: Use of Propensity Scores to Assess Generalizability. \emph{Journal of the Royal Statistical Society: Series A (Statistics in Society)}, \emph{174}(2), 369--386. \url{https://doi.org/10.1111/j.1467-985X.2010.00673.x}
 
 \leavevmode\hypertarget{ref-tiptonImprovingGeneralizationsExperiments2013}{}%
 Tipton, E. (2013a). Improving Generalizations From Experiments Using Propensity Score Subclassification: Assumptions, Properties, and Contexts. \emph{Journal of Educational and Behavioral Statistics}, \emph{38}(3), 239--266. Retrieved from \url{https://www.jstor.org/stable/41999424}
 
 \leavevmode\hypertarget{ref-tiptonStratifiedSamplingUsing2013}{}%
-Tipton, E. (2013b). Stratified Sampling Using Cluster Analysis: A Sample Selection Strategy for Improved Generalizations From Experiments. \emph{Evaluation Review}, \emph{37}(2), 109--139. doi:\href{https://doi.org/10.1177/0193841X13516324}{10.1177/0193841X13516324}
+Tipton, E. (2013b). Stratified Sampling Using Cluster Analysis: A Sample Selection Strategy for Improved Generalizations From Experiments. \emph{Evaluation Review}, \emph{37}(2), 109--139. \url{https://doi.org/10.1177/0193841X13516324}
 
 \leavevmode\hypertarget{ref-tiptonHowGeneralizableYour2014}{}%
 Tipton, E. (2014). How Generalizable Is Your Experiment? An Index for Comparing Experimental Samples and Populations. \emph{Journal of Educational and Behavioral Statistics}, \emph{39}(6), 478--501.
 
 \leavevmode\hypertarget{ref-tiptonSiteSelectionExperiments2016}{}%
-Tipton, E., Fellers, L., Caverly, S., Vaden-Kiernan, M., Borman, G., Sullivan, K., \& de Castilla, V. R. (2016). Site Selection in Experiments: An Assessment of Site Recruitment and Generalizability in Two Scale-up Studies. \emph{Journal of Research on Educational Effectiveness}, \emph{9}(sup1), 209--228. doi:\href{https://doi.org/10.1080/19345747.2015.1105895}{10.1080/19345747.2015.1105895}
+Tipton, E., Fellers, L., Caverly, S., Vaden-Kiernan, M., Borman, G., Sullivan, K., \& de Castilla, V. R. (2016). Site Selection in Experiments: An Assessment of Site Recruitment and Generalizability in Two Scale-up Studies. \emph{Journal of Research on Educational Effectiveness}, \emph{9}(sup1), 209--228. \url{https://doi.org/10.1080/19345747.2015.1105895}
 
 \leavevmode\hypertarget{ref-tiptonImplicationsSmallSamples2017}{}%
-Tipton, E., Hallberg, K., Hedges, L. V., \& Chan, W. (2017). Implications of Small Samples for Generalization: Adjustments and Rules of Thumb. \emph{Evaluation Review}, \emph{41}(5), 472--505. doi:\href{https://doi.org/10.1177/0193841X16655665}{10.1177/0193841X16655665}
+Tipton, E., Hallberg, K., Hedges, L. V., \& Chan, W. (2017). Implications of Small Samples for Generalization: Adjustments and Rules of Thumb. \emph{Evaluation Review}, \emph{41}(5), 472--505. \url{https://doi.org/10.1177/0193841X16655665}
 
 \endgroup
 

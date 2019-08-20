@@ -58,8 +58,11 @@ library(tidyverse)
 # library(colorblindr)
 library(colorspace)
 library(cowplot)
+library(kableExtra)
 
 rm(list = ls())
+
+tabs <- list()
 ```
 
 ```{r analysis_preferences}
@@ -289,9 +292,7 @@ if(saveFigs) save.figures("Intro - Cluster Size")
 
 (ref:fig-k-plots-caption) Plots used to determine value for $k$. (_a_) Calinski-Harabasz index - peaks indicate better fit. (_b_) Ratio of between cluster sum of squares to total cluster sum of squares - horizontal line indicates cutoff of .8, vertical line indicates minimum number of clusters needed to achieve cutoff. (_c_) Sampling requirements for each cluster given proportional alocation - horizontal line indicates a cluster sample size requirement of 5 schools.
 
-```{r fig-k-plots, fig.cap= "(ref:fig-k-plots-caption)", fig.height=5, fig.width=4, cache = F}
-
-
+```{r fig-k-plots, fig.cap = "(ref:fig-k-plots-caption)", fig.height = 5, fig.width = 4}
 plot_grid(plotlist = plt.k, 
           labels=c("(a)", "(b)", "(c)"), 
           ncol = 1, 
@@ -304,7 +305,7 @@ plot_grid(plotlist = plt.k,
 ```
 
 
-## Balanced Sampling
+## Balanced Samplingo
 The goal of balanced sampling is to recruit in such a way that the expected value of covariate $X_h$ across sites in stratum $j$ is equal to the expected value of covariate $X_h$ across all sites sampled from stratum $j$:
 
 \begin{align}
@@ -377,9 +378,12 @@ Intercept values were manipulated to generate different levels of population par
 
 
 ```{r tab-RGM-Pars, results = "asis", eval = T}
+tabs$coefs <- df.coefs %>% 
+  select(-vnames)
 
-df.coefs %>%
-  apa_table(caption = "Odds ratio coeficients for Response Generating Model" )
+tabs$coefs %>%
+  kable(escape = T) %>%
+  kable_styling(full_width = F)
 
 ```
 
@@ -468,12 +472,74 @@ In order to assess feasibility, the total number of schools approached to achiev
 ```{r results-data, cache = F}
 load("Data/Paper/Paper Data.rdata")
 
+```
+### B-Index
+Figure \@ref(fig:fig-avg-Bindex) displays the average $B$-index for each method across participation rates. Acceptable values of $B$ for generalizability vary depending on the size of the sample, the size of the population, and the number of covariates [@tiptonHowGeneralizableYour2014]. Given our design a critical value of $B = .95$ would be needed to expect full generalizability. At population participation rates below 50%, only SBS consistently generated highly generalizable samples. This indicates that SBS is successful at sampling schools that are unlikely to participate and therefore tend to be underrepresented by the other sampling methods, particularly when overall participation rates are low. Stratified random sampling also consistantly outperformed simple random sampling, though only slightly.
+
+We also found several trends that were unexpected. At 50% and beyond, SBS performance slowly degrades, while other methods maintaind a steady increase. We expected a constant positive relationship beteween the population participation rate and the performance of all methods. Furthermore, at low response rates unstratified convenience sampling seemed to perform better than stratified convenience sampling. This seems inconsistant with survey literature which would suggest that stratified samples are more representative. Because the B-index is an overall measure of generalizabilty across many covariates, it is difficult to untangle why these methods preformed as such. The next section will examine the relationship between stratification and likelihood of participation given each covariate.
+
+(ref:fig-avg-Bindex-caption) Averge $B$-index for varying participation rates, by sampling method. Horizontal dotted line represented index of .95 indicating a high level of generalizability.
+
+```{r fig-avg-Bindex, results = "asis", fig.cap = "(ref:fig-avg-Bindex-caption)", eval = T}
+
+avg_Bindex %>%
+  ungroup() %>%
+  mutate(RR = parse_number(RR)) %>%
+  ggplot(aes(x = RR, y = M, color = Sampling, linetype = Clustering)) +
+  geom_line(size = 1) +
+  geom_hline(yintercept = .95, linetype = "dotted") +
+  scale_x_continuous(breaks = seq(10, 90, 10)) +
+  scale_y_continuous(limits = c(.5, 1)) +
+  labs(y = "Mean B-index",
+       x = "Population Participation Rate") +
+  theme_apa() +
+  theme(#text = element_text(size=20),
+        legend.position = "bottom")
+
+if(saveFigs) save.figures("Results - B Index")
 
 ```
 
+### Stratification Versus Participation
+
+```{r tab-ICC-Pars, results = "asis", eval = T, message = F, warning = F}
+plt.vgood <- c("dSCH", "ethWhite")
+plt.good <- c("ethHisp", "pELL", "pTotfrl", "T1", "Urban", "ToRu")
+plt.bad <- c("ethBlack", "Suburban", "n")
+plt.neutral <- c("pFem", "ST.ratio")
+
+tabs$ICC.vs.Coefs <- df.icc %>% 
+  select(vnames, icc) %>% 
+  unnest %>%
+  left_join(df.coefs) %>%
+  select(Variables, vnames, icc, log_odds) %>%
+  mutate(icc = round(icc, 3),
+         results = NA,
+         results = ifelse(vnames %in% plt.vgood, "Very Good", results),
+         results = ifelse(vnames %in% plt.good, "Good", results),
+         results = ifelse(vnames %in% plt.neutral, "Neutral", results),
+         results = ifelse(vnames %in% plt.bad, "Bad", results),
+         results = factor(results, 
+                          levels = c("Very Good", "Good", "Neutral", "Bad"), 
+                          ordered = T),
+         log_odds = abs(log_odds)) %>%
+  arrange(results) %>%
+  select(-vnames) 
+
+# tabs$ICC.vs.Coefs %>%
+#   kable_styling() %>%
+#   apa_table(caption = "Odds ratio coeficients and strata ICC",
+#             col.names = c("Variables", "ICC", "RGM Coeficient", "Quality")) %>%
+  
+
+
+
+```
+
+### Standardized Mean Differences
+
 Figure \@ref(fig:fig-SMD-by-Var-example) displays the average SMD between the samples and the population for four covariates and at each population participation rate resulting from each sampling method. The dotted horizontal line indicates a cutoff of .25, where SMDs above that indicate large differences between the sample and population for that covariate. For 8 out of the 13 covariates, stratified methods consistently performed better than unstratified methods. For 2 covariates (percent female and student to teacher ratio) all methods resulted in acceptible SMDs. For 3 covariates (percent black, suburban schools, and school size) the unstratified methods performed better than their stratified counterparts. SBS generally performed as well as or better than SRS. URS often resulted in highly unrepresentative samples except in cases where population participation rates were extremely high.
 
-Figure \@ref(fig:fig-avg-Bindex) displays the average $B$-index for each method across participation rates. Acceptable values of $B$ for generalizability vary depending on the size of the sample, the size of the population, and the number of covariates [@tiptonHowGeneralizableYour2014]. Given our design a critical value of $B = .95$ would be needed to indicate generalizability. At population participation rates of 40% or lower, only SBS consistently generated highly generalizable samples. At 50% and beyond, SBS samples began to decline slowly in generalizbility, while othe rmehtods increased. Notably, at low response rates unstratified convenience sampling seemed to perform better than stratified convenience sampling.
 
 
 ```{r}
@@ -552,10 +618,7 @@ for(v in unique(sSMDplot$var)) {
 (ref:fig-SMD-by-Var-example-caption) Averge Standardized Mean Differences between sample and population for select covariates
 
 ```{r fig-SMD-by-Var-example, results = "asis", eval = T, fig.cap = "(ref:fig-SMD-by-Var-example-caption)", eval = T}
-plt.vgood <- c("dSCH", "ethWhite")
-plt.good <- c("ethHisp", "pELL", "pTotfrl", "T1", "Urban", "ToRu")
-plt.bad <- c("ethBlack", "Suburban", "n")
-plt.neutral <- c("pFem", "ST.ratio")
+
 
 sSMDplot %>%
   rename(vnames = Variable) %>%
@@ -578,26 +641,6 @@ sSMDplot %>%
 
 ```
 
-(ref:fig-avg-Bindex-caption) Averge $B$-index for varying participation rates, by sampling method
-
-```{r fig-avg-Bindex, results = "asis", fig.cap = "(ref:fig-avg-Bindex-caption)", eval = T}
-
-avg_Bindex %>%
-  ungroup() %>%
-  mutate(RR = parse_number(RR)) %>%
-  ggplot(aes(x = RR, y = M, color = Sampling, linetype = Clustering)) +
-  geom_line(size = 1) +
-  scale_x_continuous(breaks = seq(10, 90, 10)) +
-  scale_y_continuous(limits = c(.5, 1)) +
-  labs(y = "Mean B-index",
-       x = "Population Participation Rate") +
-  theme_apa() +
-  theme(#text = element_text(size=20),
-        legend.position = "bottom")
-
-if(saveFigs) save.figures("Results - B Index")
-
-```
 
 
 ## Feasibility
@@ -688,25 +731,7 @@ if(saveFigs) save.figures("Results - Response Rates")
   Our work uncovered several limitations in designing sampling and participation models. The sampling methods we developed made several assumptions about researcher and recruiter behavior in selecting a sample. First, that recruiters always prioritize schools that are most likely to participate. In truth, many other factors play a role such as proximity of sample sites to the researcher and to each other, existing relationships between the recruiters and the sample sites, and other researcher assumptions about the sample site's characteristics. Second, that recruiters have approximate knowledge of how likely a sampled site is to participate. Though researchers may speculate about sites that are more willing to participate (schools in larger urban districts) and prioritize recruiting such sites, it is not likely that they would estimate willingness as well as we have simulated. Given this, it is possible that the "feasibility" of the convenience methods is overestimated.
 
 
-```{r tab-ICC-Pars, results = "asis", eval = T, message = F, warning = F}
 
-df.icc %>% 
-  select(vnames, icc) %>% 
-  unnest %>%
-  left_join(df.coefs) %>%
-  select(Variables, vnames, icc, log_odds) %>%
-  mutate(icc = round(icc, 3),
-         results = NA,
-         results = ifelse(vnames %in% plt.vgood, "Very Good", results),
-         results = ifelse(vnames %in% plt.good, "Good", results),
-         results = ifelse(vnames %in% plt.neutral, "Neutral", results),
-         results = ifelse(vnames %in% plt.bad, "Bad", results)) %>%
-  arrange(icc) %>%
-  apa_table(caption = "Odds ratio coeficients and strata ICC" )
-
-
-
-```
 
 (ref:fig-SMD-by-Var-bad-caption) Poor balance for stratfied methods
 
