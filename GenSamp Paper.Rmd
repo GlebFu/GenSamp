@@ -382,8 +382,7 @@ tabs$coefs <- df.coefs %>%
   select(-vnames)
 
 tabs$coefs %>%
-  kable(escape = T) %>%
-  kable_styling(full_width = F)
+  apa_table(caption = "Ods ratio coefficients for Response Generating Model")
 
 ```
 
@@ -501,6 +500,8 @@ if(saveFigs) save.figures("Results - B Index")
 ```
 
 ### Stratification Versus Participation
+One potential explanation for why stratification may underperform in certain circumstances is if the strata do not explain any variance in a covariate that is related to participation. To examin this we calculated the ICC for each covariate across strata and compared it to the covariates log-odds coeficient in the participation response model. Table \@ref(fig:tab-ICC-Pars) displays these values.
+
 
 ```{r tab-ICC-Pars, results = "asis", eval = T, message = F, warning = F}
 plt.vgood <- c("dSCH", "ethWhite")
@@ -526,12 +527,14 @@ tabs$ICC.vs.Coefs <- df.icc %>%
   arrange(results) %>%
   select(-vnames) 
 
-# tabs$ICC.vs.Coefs %>%
-#   kable_styling() %>%
-#   apa_table(caption = "Odds ratio coeficients and strata ICC",
-#             col.names = c("Variables", "ICC", "RGM Coeficient", "Quality")) %>%
-  
+tabs$ICC.vs.Coefs %>%
+  apa_table(caption = "Odds ratio coeficients and strata ICC",
+            col.names = c("Variables", "ICC", "RGM Coeficient", "Quality"))
 
+tabs$ICC.vs.Coefs %>%
+  ggplot(aes(x = icc, y = log_odds, color = results)) +
+  geom_point() +
+  geom_label(aes(label = Variables))
 
 
 ```
@@ -557,67 +560,13 @@ scale_y_f <- function(x) {
 }
 ```
 
-(ref:fig-SMD-by-Var-caption) Averge Standardized Mean Differences between sample and population
+(ref:fig-SMD-by-Var-good-caption) Good balance for stratfied methods
 
-```{r fig-SMD-by-Var, results = "asis", eval = T, fig.cap = "(ref:fig-SMD-by-Var-caption)", eval = F}
-sSMDplot %>%
-  ungroup() %>%
-  mutate(RR = parse_number(RR)) %>%
-  ggplot(aes(x = RR, y = mSMD, color = Sampling, linetype = Clustering, group = sample_method)) +
-  # geom_point() +
-  geom_line() +
-  geom_hline(yintercept = 0) +
-  geom_hline(yintercept = .25, linetype = "dashed") +
-  facet_wrap( ~ var, scales = "free_y", ncol  = 3) +
-  theme_apa(box = F) +
-  labs(y = "Mean SMD",
-       x = "Population Participation Rate") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1), 
-        legend.position = "right",
-        strip.text.x = element_blank()) +
-  scale_y_continuous(breaks = scale_y_f,
-                     expand = expand_scale(mult = c(0, .6))) +
-  scale_x_continuous(breaks = seq(10, 90, 20)) 
-
-
-if(saveFigs) save.figures("Results - SMD")
-
-```
-
-(ref:fig-SDM-by-Var-ind-caption) Averge Standardized Mean Differences between sample and population
-
-```{r fig-SMD-by-Var-ind, results = "asis", eval = T, fig.cap = "(ref:fig-SDM-by-Var-ind-caption)", eval = F}
-
-plt.smd <- list()
-
-for(v in unique(sSMDplot$var)) {
-  plt.smd[[v]] <- sSMDplot %>%
-    ungroup() %>%
-    filter(var == v) %>%
-    mutate(RR = parse_number(RR)) %>%
-    ggplot(aes(x = RR, y = mSMD, color = Sampling, linetype = Clustering, group = sample_method)) +
-    geom_line() +
-    geom_hline(yintercept = 0) +
-    geom_hline(yintercept = .25, linetype = "dashed") +
-    theme_apa(box = F) +
-    labs(y = "Mean SMD",
-         x = "Population Participation Rate",
-         title = v)
-  
-  if(saveFigs) save.figures(x = paste("Results - SMD", v, sep = "-"), plot = plt.smd[[v]])
-  
-}
-
-
-
-
-
-
-```
-
-(ref:fig-SMD-by-Var-example-caption) Averge Standardized Mean Differences between sample and population for select covariates
-
-```{r fig-SMD-by-Var-example, results = "asis", eval = T, fig.cap = "(ref:fig-SMD-by-Var-example-caption)", eval = T}
+```{r fig-SMD-by-Var-bad, results = "asis", eval = T, fig.cap = "(ref:fig-SMD-by-Var-bad-caption)", eval = T, warning = F, message = F}
+# plt.vgood <- c("dSCH", "ethWhite")
+# plt.good <- c("ethHisp", "pELL", "pTotfrl", "T1", "Urban", "ToRu", "Suburban")
+# plt.bad <- c("ethBlack", "n")
+# plt.neutral <- c("pFem", "ST.ratio")
 
 
 sSMDplot %>%
@@ -625,7 +574,40 @@ sSMDplot %>%
   left_join(df.coefs) %>%
   ungroup() %>%
   mutate(RR = parse_number(RR)) %>%
-  filter(var %in% c(plt.vgood[1], plt.good[1], plt.bad[1], plt.neutral[1])) %>%
+  filter(var %in% plt.good) %>%
+  ggplot(aes(x = RR, y = mSMD, color = Sampling, linetype = Clustering, group = sample_method)) +
+  # geom_point() +
+  geom_line() +
+  geom_hline(yintercept = 0) +
+  geom_hline(yintercept = .25, linetype = "dashed") +
+  facet_wrap( ~ Variables, scales = "free_y", ncol = 3) +
+  theme_apa(box = F) +
+  labs(y = "Mean SMD",
+       x = "Population Participation Rate") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1), 
+        legend.position = "bottom") +
+  # scale_y_continuous(breaks = scale_y_f,
+  #                    expand = expand_scale(mult = c(0, .6))) +
+  scale_x_continuous(breaks = seq(10, 90, 20)) 
+
+
+```
+
+(ref:fig-SMD-by-Var-bad-caption) Poor balance for stratfied methods
+
+```{r fig-SMD-by-Var-bad, results = "asis", eval = T, fig.cap = "(ref:fig-SMD-by-Var-bad-caption)", eval = T, warning = F, message = F}
+# plt.vgood <- c("dSCH", "ethWhite")
+# plt.good <- c("ethHisp", "pELL", "pTotfrl", "T1", "Urban", "ToRu", "Suburban")
+# plt.bad <- c("ethBlack", "n")
+# plt.neutral <- c("pFem", "ST.ratio")
+
+
+sSMDplot %>%
+  rename(vnames = Variable) %>%
+  left_join(df.coefs) %>%
+  ungroup() %>%
+  mutate(RR = parse_number(RR)) %>%
+  filter(var %in% plt.bad) %>%
   ggplot(aes(x = RR, y = mSMD, color = Sampling, linetype = Clustering, group = sample_method)) +
   # geom_point() +
   geom_line() +
@@ -636,10 +618,14 @@ sSMDplot %>%
   labs(y = "Mean SMD",
        x = "Population Participation Rate") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1), 
-        legend.position = "bottom") 
+        legend.position = "bottom") +
+  # scale_y_continuous(breaks = scale_y_f,
+  #                    expand = expand_scale(mult = c(0, .6))) +
+  scale_x_continuous(breaks = seq(10, 90, 10)) 
 
 
 ```
+
 
 
 
@@ -733,35 +719,7 @@ if(saveFigs) save.figures("Results - Response Rates")
 
 
 
-(ref:fig-SMD-by-Var-bad-caption) Poor balance for stratfied methods
 
-```{r fig-SMD-by-Var-bad, results = "asis", eval = T, fig.cap = "(ref:fig-SMD-by-Var-bad-caption)", eval = T, warning = F, message = F}
-plt.vgood <- c("dSCH", "ethWhite")
-plt.good <- c("ethHisp", "pELL", "pTotfrl", "T1", "Urban", "ToRu")
-plt.bad <- c("ethBlack", "Suburban", "n")
-plt.neutral <- c("pFem", "ST.ratio")
-
-
-sSMDplot %>%
-  rename(vnames = Variable) %>%
-  left_join(df.coefs) %>%
-  ungroup() %>%
-  mutate(RR = parse_number(RR)) %>%
-  filter(var %in% plt.bad) %>%
-  ggplot(aes(x = RR, y = mSMD, color = Sampling, linetype = Clustering, group = sample_method)) +
-  # geom_point() +
-  geom_line() +
-  geom_hline(yintercept = 0) +
-  geom_hline(yintercept = .25, linetype = "dashed") +
-  facet_wrap( ~ Variables, scales = "free_y", ncol  = 2) +
-  theme_apa(box = F) +
-  labs(y = "Mean SMD",
-       x = "Population Participation Rate") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1), 
-        legend.position = "bottom") 
-
-
-```
 
   Our participation model is also speculative. The parameters in our response generating model are based on values from a study that examined the difference between schools participating in large-scale randomized control trials (RCT) and the overall population of schools. However, these RCTs themselves typically rely on some form of convenience sampling. In that sense our parameters reflect participation rates of schools that are likely to participate in RCTs, rather than the full population of schools. Furthermore, the decision of whether a school participates in such a study is multi-leveled. Generally, districts serve as gatekeepers, requiring research requests to be submitted and approved before recruitment can begin. If the request is denied, no schools within that district may be recruited. If approved, schools may be contacted individually. The ultimate decision may then rest with administrators, or they may be passed on to teachers most affected by the study. Despite these limitations, we believe that our findings reasonably represent the relative performance of the various sampling methods we tested in the context of educational research.
 

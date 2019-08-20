@@ -290,39 +290,31 @@ A response generating model (RGM) was developed to simulate self selection. The 
 
 Intercept values were manipulated to generate different levels of population participation rates. Since these rates are unknown, we selected parameters for 9 levels of participation rates. Table \ref{tab:tab-RGM-Pars} reports the variables, variable codes, and coeficients used in the RGM. Covariate coefficients remained constant across response rates.
 
-\begin{table}[H]
-\centering
-\begin{tabular}{l|r}
-\hline
-Variables & log\_odds\\
-\hline
-District Size & 0.520\\
-\hline
-\% Black & 0.291\\
-\hline
-\% Hispanic & 0.395\\
-\hline
-\% White & -0.538\\
-\hline
-N Students & 0.374\\
-\hline
-\% ELL & 0.412\\
-\hline
-\% Female & -0.019\\
-\hline
-\% F/RL & 0.081\\
-\hline
-Students/Teachers & -0.101\\
-\hline
-Suburban & 0.007\\
-\hline
-Schoolwide Title I & 0.019\\
-\hline
-Town/Rural & -0.403\\
-\hline
-Urban & 0.433\\
-\hline
+\begin{table}[tbp]
+\begin{center}
+\begin{threeparttable}
+\caption{\label{tab:tab-RGM-Pars}Ods ratio coefficients for Response Generating Model}
+\begin{tabular}{ll}
+\toprule
+Variables & \multicolumn{1}{c}{log\_odds}\\
+\midrule
+District Size & 0.52\\
+\% Black & 0.29\\
+\% Hispanic & 0.40\\
+\% White & -0.54\\
+N Students & 0.37\\
+\% ELL & 0.41\\
+\% Female & -0.02\\
+\% F/RL & 0.08\\
+Students/Teachers & -0.10\\
+Suburban & 0.01\\
+Schoolwide Title I & 0.02\\
+Town/Rural & -0.40\\
+Urban & 0.43\\
+\bottomrule
 \end{tabular}
+\end{threeparttable}
+\end{center}
 \end{table}
 
 
@@ -419,6 +411,35 @@ We also found several trends that were unexpected. At 50\% and beyond, SBS perfo
 
 \hypertarget{stratification-versus-participation}{%
 \subsubsection{Stratification Versus Participation}\label{stratification-versus-participation}}
+
+One potential explanation for why stratification may underperform in certain circumstances is if the strata do not explain any variance in a covariate that is related to participation. To examin this we calculated the ICC for each covariate across strata and compared it to the covariates log-odds coeficient in the participation response model. Table \ref{fig:tab-ICC-Pars} displays these values.
+
+\begin{table}[tbp]
+\begin{center}
+\begin{threeparttable}
+\caption{\label{tab:tab-ICC-Pars}Odds ratio coeficients and strata ICC}
+\begin{tabular}{llll}
+\toprule
+Variables & ICC & RGM Coeficient & Quality\\
+\midrule
+\% White & 0.67 & 0.54 & Very Good\\
+District Size & 0.12 & 0.52 & Very Good\\
+Schoolwide Title I & 0.94 & 0.02 & Good\\
+\% F/RL & 0.76 & 0.08 & Good\\
+Urban & 0.91 & 0.43 & Good\\
+Town/Rural & 0.27 & 0.40 & Good\\
+\% Hispanic & 0.66 & 0.40 & Good\\
+\% ELL & 0.54 & 0.41 & Good\\
+\% Female & 0.00 & 0.02 & Neutral\\
+Students/Teachers & 0.10 & 0.10 & Neutral\\
+N Students & 0.06 & 0.37 & Bad\\
+Suburban & 0.58 & 0.01 & Bad\\
+\% Black & 0.06 & 0.29 & Bad\\
+\bottomrule
+\end{tabular}
+\end{threeparttable}
+\end{center}
+\end{table}
 
 \hypertarget{standardized-mean-differences}{%
 \subsubsection{Standardized Mean Differences}\label{standardized-mean-differences}}
