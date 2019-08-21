@@ -12,3 +12,5 @@ forcats
 colorspace
 cowplot
 kableExtra
+ggalt
+ggrepel

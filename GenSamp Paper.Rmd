@@ -492,21 +492,21 @@ avg_Bindex %>%
   labs(y = "Mean B-index",
        x = "Population Participation Rate") +
   theme_apa() +
-  theme(#text = element_text(size=20),
-        legend.position = "bottom")
+  theme(legend.position = "right") +
+  guides(linetype = guide_legend(ncol = 1, title.position = "top"),
+         color = guide_legend(ncol = 1, title.position = "top"))
 
 if(saveFigs) save.figures("Results - B Index")
 
 ```
 
-### Stratification Versus Participation
-One potential explanation for why stratification may underperform in certain circumstances is if the strata do not explain any variance in a covariate that is related to participation. To examin this we calculated the ICC for each covariate across strata and compared it to the covariates log-odds coeficient in the participation response model. Table \@ref(fig:tab-ICC-Pars) displays these values.
-
+### Standardized Mean Differences
+One potential explanation for why stratification may underperform in certain circumstances is if the strata do not explain any variance in a covariate that is related to participation. To examine this we calculated the ICC for each covariate across strata and compared it to the log-odds coeficients associated with that covariate in the participation response model. Table \@ref(tab:tab-ICC-Pars) displays these values. Examining these along with SMDs uncovered several patterns, summarised in Figure \@ref(fig:fig-ICCvsCoef).
 
 ```{r tab-ICC-Pars, results = "asis", eval = T, message = F, warning = F}
-plt.vgood <- c("dSCH", "ethWhite")
-plt.good <- c("ethHisp", "pELL", "pTotfrl", "T1", "Urban", "ToRu")
-plt.bad <- c("ethBlack", "Suburban", "n")
+plt.good1 <- c("ethHisp", "pELL", "pTotfrl", "T1", "Urban", "ethWhite")
+plt.good2 <- c("ToRu", "Suburban", "dSCH")
+plt.bad <- c("ethBlack", "n")
 plt.neutral <- c("pFem", "ST.ratio")
 
 tabs$ICC.vs.Coefs <- df.icc %>% 
@@ -516,12 +516,13 @@ tabs$ICC.vs.Coefs <- df.icc %>%
   select(Variables, vnames, icc, log_odds) %>%
   mutate(icc = round(icc, 3),
          results = NA,
-         results = ifelse(vnames %in% plt.vgood, "Very Good", results),
-         results = ifelse(vnames %in% plt.good, "Good", results),
+         # results = ifelse(vnames %in% plt.vgood, "Very Good", results),
+         results = ifelse(vnames %in% plt.good1, "Good1", results),
+         results = ifelse(vnames %in% plt.good2, "Good2", results),
          results = ifelse(vnames %in% plt.neutral, "Neutral", results),
          results = ifelse(vnames %in% plt.bad, "Bad", results),
          results = factor(results, 
-                          levels = c("Very Good", "Good", "Neutral", "Bad"), 
+                          levels = c("Good1", "Good2", "Neutral", "Bad"), 
                           ordered = T),
          log_odds = abs(log_odds)) %>%
   arrange(results) %>%
@@ -529,19 +530,33 @@ tabs$ICC.vs.Coefs <- df.icc %>%
 
 tabs$ICC.vs.Coefs %>%
   apa_table(caption = "Odds ratio coeficients and strata ICC",
-            col.names = c("Variables", "ICC", "RGM Coeficient", "Quality"))
-
-tabs$ICC.vs.Coefs %>%
-  ggplot(aes(x = icc, y = log_odds, color = results)) +
-  geom_point() +
-  geom_label(aes(label = Variables))
+            col.names = c("Variables", "ICC", "Absolute Log Odds", "Quality"))
 
 
 ```
 
-### Standardized Mean Differences
+(ref:fig-ICCvsCoef-caption) ICC Values vs absolute log_odds. Shaded areas illustrate potential paterns in generalizability measured by SMDs.
 
-Figure \@ref(fig:fig-SMD-by-Var-example) displays the average SMD between the samples and the population for four covariates and at each population participation rate resulting from each sampling method. The dotted horizontal line indicates a cutoff of .25, where SMDs above that indicate large differences between the sample and population for that covariate. For 8 out of the 13 covariates, stratified methods consistently performed better than unstratified methods. For 2 covariates (percent female and student to teacher ratio) all methods resulted in acceptible SMDs. For 3 covariates (percent black, suburban schools, and school size) the unstratified methods performed better than their stratified counterparts. SBS generally performed as well as or better than SRS. URS often resulted in highly unrepresentative samples except in cases where population participation rates were extremely high.
+```{r fig-ICCvsCoef, results = "asis", eval = T, fig.cap = "(ref:fig-ICCvsCoef-caption)", eval = T, warning = F, message = F}
+library(ggalt)
+library(ggrepel)
+
+tabs$ICC.vs.Coefs %>%
+  ggplot(aes(x = icc, y = log_odds, shape = results, label = Variables)) +
+  geom_point(size = 3) +
+  geom_encircle(aes(fill = results) , alpha = .1, s_shape = 0, expand = 0.1, spread = .1) +
+  geom_text_repel(label.padding = 1, point.padding = .2) +
+  labs(y = "Log Odds",
+       x = "ICC") +
+  # scale_y_continuous(trans='log10') +
+  theme_apa()
+
+
+```
+
+
+First, figure \@ref(fig:fig-SMD-by-Var-good1) displays six covariates where both ICC values and RGM parameters were high. For these covariates, SBS performed as well as or better than all stratified methods, and all stratified methods performed better than their unstratified counterparts. Figure \@ref(fig:fig-SMD-by-Var-neutral) displays two covariates where both ICC values and RGM parameters were low. SBS seemed to perform slightly better than all other methods, however all methods performed well across all population participation rates. 
+
 
 
 
@@ -560,26 +575,21 @@ scale_y_f <- function(x) {
 }
 ```
 
-(ref:fig-SMD-by-Var-good-caption) Good balance for stratfied methods
+(ref:fig-SMD-by-Var-good1-caption) Good balance for stratfied methods. Dotted horizontal line indicates a .25 cutoff.
 
-```{r fig-SMD-by-Var-bad, results = "asis", eval = T, fig.cap = "(ref:fig-SMD-by-Var-bad-caption)", eval = T, warning = F, message = F}
-# plt.vgood <- c("dSCH", "ethWhite")
-# plt.good <- c("ethHisp", "pELL", "pTotfrl", "T1", "Urban", "ToRu", "Suburban")
-# plt.bad <- c("ethBlack", "n")
-# plt.neutral <- c("pFem", "ST.ratio")
-
+```{r fig-SMD-by-Var-good1, results = "asis", eval = T, fig.cap = "(ref:fig-SMD-by-Var-good1-caption)", eval = T, warning = F, message = F}
 
 sSMDplot %>%
   rename(vnames = Variable) %>%
   left_join(df.coefs) %>%
   ungroup() %>%
   mutate(RR = parse_number(RR)) %>%
-  filter(var %in% plt.good) %>%
+  filter(var %in% plt.good1) %>%
   ggplot(aes(x = RR, y = mSMD, color = Sampling, linetype = Clustering, group = sample_method)) +
   # geom_point() +
   geom_line() +
   geom_hline(yintercept = 0) +
-  geom_hline(yintercept = .25, linetype = "dashed") +
+  geom_hline(yintercept = .25, linetype = "dotted") +
   facet_wrap( ~ Variables, scales = "free_y", ncol = 3) +
   theme_apa(box = F) +
   labs(y = "Mean SMD",
@@ -593,14 +603,71 @@ sSMDplot %>%
 
 ```
 
-(ref:fig-SMD-by-Var-bad-caption) Poor balance for stratfied methods
+
+
+(ref:fig-SMD-by-Var-neutral-caption) All methods performed well. Dotted horizontal line indicates a .25 cutoff.
+
+```{r fig-SMD-by-Var-neutral, results = "asis", eval = T, fig.cap = "(ref:fig-SMD-by-Var-neutral-caption)", eval = T, warning = F, message = F}
+sSMDplot %>%
+  rename(vnames = Variable) %>%
+  left_join(df.coefs) %>%
+  ungroup() %>%
+  mutate(RR = parse_number(RR)) %>%
+  filter(var %in% plt.neutral) %>%
+  ggplot(aes(x = RR, y = mSMD, color = Sampling, linetype = Clustering, group = sample_method)) +
+  # geom_point() +
+  geom_line() +
+  geom_hline(yintercept = 0) +
+  geom_hline(yintercept = .25, linetype = "dotted") +
+  facet_wrap( ~ Variables, scales = "free_y", ncol = 3) +
+  theme_apa(box = F) +
+  labs(y = "Mean SMD",
+       x = "Population Participation Rate") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1), 
+        legend.position = "bottom") +
+  # scale_y_continuous(breaks = scale_y_f,
+  #                    expand = expand_scale(mult = c(0, .6))) +
+  scale_x_continuous(breaks = seq(10, 90, 20)) 
+
+
+```
+
+Figure \@ref(fig:fig-SMD-by-Var-good2) reports the first set of unexpected results. For three covariates, stratified random sampling and stratified convenience sampling outperform their unstratified coutnerparts. However, for district size, SBS seems to perform more poorly as the population participation rate increases. For suburban and town/rural indicators, this is the only time where SBS performs poorly using the SMD criteria, but only in lower population participation rates. Examining table \@ref(tab:tab-ICC-Pars) suggests that this pattern emerges when ICC values are moderate and RGM parameters either high or low.
+
+
+(ref:fig-SMD-by-Var-good2-caption) Good balance for stratfied methods. Dotted horizontal line indicates a .25 cutoff.
+
+```{r fig-SMD-by-Var-good2, results = "asis", eval = T, fig.cap = "(ref:fig-SMD-by-Var-good2-caption)", eval = T, warning = F, message = F}
+
+sSMDplot %>%
+  rename(vnames = Variable) %>%
+  left_join(df.coefs) %>%
+  ungroup() %>%
+  mutate(RR = parse_number(RR)) %>%
+  filter(var %in% plt.good2) %>%
+  ggplot(aes(x = RR, y = mSMD, color = Sampling, linetype = Clustering, group = sample_method)) +
+  # geom_point() +
+  geom_line() +
+  geom_hline(yintercept = 0) +
+  geom_hline(yintercept = .25, linetype = "dotted") +
+  facet_wrap( ~ Variables, scales = "free_y", ncol = 3) +
+  theme_apa(box = F) +
+  labs(y = "Mean SMD",
+       x = "Population Participation Rate") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1), 
+        legend.position = "bottom") +
+  # scale_y_continuous(breaks = scale_y_f,
+  #                    expand = expand_scale(mult = c(0, .6))) +
+  scale_x_continuous(breaks = seq(10, 90, 20)) 
+
+
+```
+
+Finally, figure \@ref(fig:fig-SMD-by-Var-bad) reports the second set of unexpected results. For two covariates, SBS seems to perform well. However, stratified random sampling and stratified convenience sampling perform worse than their unstratified coutnerparts. For % black SBS performance also seems to slightly degrade as population participation rates increase. Examining table \@ref(fig:tab-ICC-Pars) suggests that this pattern emerges when ICC values close to zero and RGM parameters are moderate or higher
+
+(ref:fig-SMD-by-Var-bad-caption) Poor balance for stratfied methods. Dotted horizontal line indicates a .25 cutoff.
 
 ```{r fig-SMD-by-Var-bad, results = "asis", eval = T, fig.cap = "(ref:fig-SMD-by-Var-bad-caption)", eval = T, warning = F, message = F}
-# plt.vgood <- c("dSCH", "ethWhite")
-# plt.good <- c("ethHisp", "pELL", "pTotfrl", "T1", "Urban", "ToRu", "Suburban")
-# plt.bad <- c("ethBlack", "n")
-# plt.neutral <- c("pFem", "ST.ratio")
-
 
 sSMDplot %>%
   rename(vnames = Variable) %>%
@@ -612,7 +679,7 @@ sSMDplot %>%
   # geom_point() +
   geom_line() +
   geom_hline(yintercept = 0) +
-  geom_hline(yintercept = .25, linetype = "dashed") +
+  geom_hline(yintercept = .25, linetype = "dotted") +
   facet_wrap( ~ Variables, scales = "free_y", ncol  = 2) +
   theme_apa(box = F) +
   labs(y = "Mean SMD",
