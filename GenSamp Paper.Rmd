@@ -63,6 +63,8 @@ library(kableExtra)
 rm(list = ls())
 
 tabs <- list()
+grey.plots <- F
+
 ```
 
 ```{r analysis_preferences}
@@ -239,11 +241,11 @@ plt.k$vrat <- df.vratio %>%
   geom_line() +
   geom_vline(aes(xintercept = min80), linetype = "dashed", size = .5) +
   geom_hline(aes(yintercept = .8), linetype = "dashed", size = .5) +
-  theme_apa(box = F) +
   scale_x_discrete(limits = c(minK:10)) +
   scale_y_continuous(breaks = seq(0, 1, .1),
                      limits = c(.5,1)) + 
-  theme(legend.position = "none")
+  theme(legend.position = "none") +
+  theme_apa(box = F)
 
 if(saveFigs) save.figures("Intro - SS Ratio")
 
@@ -491,10 +493,13 @@ avg_Bindex %>%
   scale_y_continuous(limits = c(.5, 1)) +
   labs(y = "Mean B-index",
        x = "Population Participation Rate") +
-  theme_apa() +
   theme(legend.position = "right") +
+  theme_apa() + 
+  (if (grey.plots) {scale_colour_grey(start = 0, end = .7)}) +
   guides(linetype = guide_legend(ncol = 1, title.position = "top"),
-         color = guide_legend(ncol = 1, title.position = "top"))
+         color = guide_legend(ncol = 1, title.position = "top"))  +
+  
+  
 
 if(saveFigs) save.figures("Results - B Index")
 
@@ -559,7 +564,8 @@ tabs$ICC.vs.Coefs %>%
   labs(y = "Absolute Log Odds",
        x = "ICC") +
   # scale_y_continuous(trans='log10') +
-  guides(fill = "none") +
+  guides(fill = "none") + 
+  (if (grey.plots) {scale_fill_grey(start = 0, end = .7)}) +
   theme_apa()
 
 
@@ -597,19 +603,17 @@ sSMDplot %>%
   mutate(RR = parse_number(RR)) %>%
   filter(var %in% plt.good1) %>%
   ggplot(aes(x = RR, y = mSMD, color = Sampling, linetype = Clustering, group = sample_method)) +
-  # geom_point() +
   geom_line() +
-  geom_hline(yintercept = 0) +
   geom_hline(yintercept = .25, linetype = "dotted") +
-  facet_wrap( ~ Variables, scales = "free_y", ncol = 3) +
-  theme_apa(box = F) +
+  facet_wrap( ~ Variables, scales = "free", ncol = 3) +
   labs(y = "Mean SMD",
-       x = "Population Participation Rate") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1), 
-        legend.position = "bottom") +
-  # scale_y_continuous(breaks = scale_y_f,
-  #                    expand = expand_scale(mult = c(0, .6))) +
-  scale_x_continuous(breaks = seq(10, 90, 20)) 
+       x = "Population Participation Rate") + 
+  (if (grey.plots) {scale_colour_grey(start = 0, end = .7)}) +
+  scale_x_continuous(breaks = seq(10, 90, 20)) +
+  theme(legend.position = "bottom") +
+  theme_apa() 
+  
+  
 
 
 ```
@@ -619,6 +623,7 @@ sSMDplot %>%
 (ref:fig-SMD-by-Var-neutral-caption) All methods performed well. Dotted horizontal line indicates a .25 cutoff.
 
 ```{r fig-SMD-by-Var-neutral, results = "asis", eval = T, fig.cap = "(ref:fig-SMD-by-Var-neutral-caption)", eval = T, warning = F, message = F}
+
 sSMDplot %>%
   rename(vnames = Variable) %>%
   left_join(df.coefs) %>%
@@ -628,17 +633,16 @@ sSMDplot %>%
   ggplot(aes(x = RR, y = mSMD, color = Sampling, linetype = Clustering, group = sample_method)) +
   # geom_point() +
   geom_line() +
-  geom_hline(yintercept = 0) +
   geom_hline(yintercept = .25, linetype = "dotted") +
-  facet_wrap( ~ Variables, scales = "free_y", ncol = 3) +
-  theme_apa(box = F) +
+  facet_wrap( ~ Variables, scales = "free", ncol = 3) +
   labs(y = "Mean SMD",
-       x = "Population Participation Rate") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1), 
-        legend.position = "bottom") +
-  # scale_y_continuous(breaks = scale_y_f,
-  #                    expand = expand_scale(mult = c(0, .6))) +
-  scale_x_continuous(breaks = seq(10, 90, 20)) 
+       x = "Population Participation Rate") + 
+  (if (grey.plots) {scale_colour_grey(start = 0, end = .7)}) +
+  scale_y_continuous(limits = c(0, NA)) +
+  scale_x_continuous(breaks = seq(10, 90, 20)) +
+  theme_apa(box = F)
+  
+  
 
 
 ```
@@ -659,17 +663,16 @@ sSMDplot %>%
   ggplot(aes(x = RR, y = mSMD, color = Sampling, linetype = Clustering, group = sample_method)) +
   # geom_point() +
   geom_line() +
-  geom_hline(yintercept = 0) +
   geom_hline(yintercept = .25, linetype = "dotted") +
-  facet_wrap( ~ Variables, scales = "free_y", ncol = 3) +
-  theme_apa(box = F) +
+  facet_wrap( ~ Variables, scales = "free_y", ncol = 3)  +
   labs(y = "Mean SMD",
        x = "Population Participation Rate") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1), 
-        legend.position = "bottom") +
-  # scale_y_continuous(breaks = scale_y_f,
-  #                    expand = expand_scale(mult = c(0, .6))) +
-  scale_x_continuous(breaks = seq(10, 90, 20)) 
+  (if (grey.plots) {scale_colour_grey(start = 0, end = .7)}) +
+  scale_y_continuous(limits = c(0, NA)) +
+  scale_x_continuous(breaks = seq(10, 90, 20)) +
+  theme_apa(box = F)
+  
+  
 
 
 ```
@@ -689,17 +692,18 @@ sSMDplot %>%
   ggplot(aes(x = RR, y = mSMD, color = Sampling, linetype = Clustering, group = sample_method)) +
   # geom_point() +
   geom_line() +
-  geom_hline(yintercept = 0) +
   geom_hline(yintercept = .25, linetype = "dotted") +
-  facet_wrap( ~ Variables, scales = "free_y", ncol  = 2) +
-  theme_apa(box = F) +
+  facet_wrap( ~ Variables, scales = "free_y", ncol  = 2)  +
   labs(y = "Mean SMD",
-       x = "Population Participation Rate") +
+       x = "Population Participation Rate") + 
+  (if (grey.plots) {scale_colour_grey(start = 0, end = .7)}) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1), 
         legend.position = "bottom") +
-  # scale_y_continuous(breaks = scale_y_f,
-  #                    expand = expand_scale(mult = c(0, .6))) +
-  scale_x_continuous(breaks = seq(10, 90, 10)) 
+  scale_y_continuous(limits = c(0, NA)) +
+  scale_x_continuous(breaks = seq(10, 90, 10)) +
+  theme_apa(box = F)
+  
+  
 
 
 ```
@@ -709,11 +713,11 @@ sSMDplot %>%
 
 ## Feasibility
 
-Figure \@ref(fig:fig-responses) reports the sampling statistics for each method across population participation rates. Differences between sampling methods were substantial at lower participation rates. As participation rates increased, the differences decreased exponentially and became negligent. It's important to note that the magnitudes of these results are quite extreme. This is likely due to some mispecification on the part of the simulation either the response generating model parameters or the population participation rates. Rather than looking at the raw values, a more meaningful interpretation would be to compare the performance of the models relative to each other.
 
-Overall, UCS required the least "effort" to recruit a full sample, followed by URS and SCS, SRS, and finally SBS. 
+### Recruitment Attempts
+Figure \@ref(fig:fig-responses) reports the sampling statistics for each method across population participation rates. Differences between sampling methods were substantial at lower participation rates. As participation rates increased, the differences decreased exponentially and became negligent. It's important to note that the magnitudes of these results are quite extreme. This is likely due to some mispecification on the part of the simulation either in the response generating model parameters or the population participation rates. Rather than looking at the raw values, a more meaningful interpretation would be to compare the performance of the models relative to each other.
 
-Figure \@ref(fig:fig-response-rates) plots the response rates of schools approached for recruitment against the population participation rates. As expected, URS response rates reflected those in the population. Both UCS and SCS resulted in higher response rates, while SRS and SBS resulted in lower response rates. 
+Overall, UCS required the least "effort" to recruit a full sample, followed by URS and SCS, SRS, and finally SBS. Figure \@ref(fig:fig-comp) plots proportional relative difficult of the models to each other. At a population response rate of 10%, SBS compared to UCS required approximately 22 times the number of schools to be contacted. Relative to URS, SBS required about 7 times as many recruitment attempts. The 10% response rate is likely a severe underestimate of the true population resposne rate and should therefore be read interpreted as an absolute worst case.
 
 (ref:fig-responses-caption) Sampling statistics. The top plot shows the total number of units contacted to achieve a full sample of 60 schools. The bottom plot shows the percent of schools that agreed to participate when recruited.
 
@@ -721,27 +725,62 @@ Figure \@ref(fig:fig-response-rates) plots the response rates of schools approac
 tab.feas <- samplot %>%
   ungroup() %>%
   mutate(RR = parse_number(RR),
-         value = ifelse(measure == "sch.response.rate", value * 100, value)) %>%
-  filter(measure %in% c("sch.contacted", "sch.response.rate"))
+         value = ifelse(measure == "sch.response.rate", value * 100, value))
+  # filter(measure %in% c("sch.contacted", "sch.response.rate"))
 
-tab.feas %>%
+
+plt.feas <- list()
+
+
+plt.feas$count <- tab.feas %>%
+  filter(measure %in% c("sch.response.rate")) %>%
   ggplot(aes(x = RR, y = value, group = sample_method, color = Sampling, linetype = Clustering)) +
   geom_point() +
   geom_line() +
-  facet_wrap( ~ measure, scales = "free_y", ncol = 1, 
-                strip.position = "left", 
-                labeller = as_labeller(c(sch.contacted = "Units Contacted", sch.response.rate = "Response Rate") ) ) +
-  scale_x_continuous(breaks = seq(10, 90, 20)) +
-  expand_limits(y = 0) +
-  labs(x = "Population Participation Rate",
-       y = element_blank()) +
+  scale_x_continuous(breaks = seq(10, 90, 10)) +
+  labs(x = element_blank(),
+       y = "Schools Contacted") + 
+  (if (grey.plots) {scale_colour_grey(start = 0, end = .7)}) +
   theme_apa(box = F) +
-  theme(strip.placement = "outside") +
-  annotate("segment", x=-Inf, xend=Inf, y=-Inf, yend=-Inf)+
-  annotate("segment", x=-Inf, xend=-Inf, y=-Inf, yend=Inf)
+  theme(legend.position = "none") 
+  
+plt.feas$rate <- tab.feas %>%
+  filter(measure %in% c("sch.contacted")) %>%
+  ggplot(aes(x = RR, y = value, group = sample_method, color = Sampling, linetype = Clustering)) +
+  geom_point() +
+  geom_line() +
+  scale_x_continuous(breaks = seq(10, 90, 10)) +
+  labs(x = "Population Participation Rate",
+       y = "Response Rate") + 
+  (if (grey.plots) {scale_colour_grey(start = 0, end = .7)}) +
+  theme_apa(box = F) +
+  theme(legend.position = "none") 
+  
+legend <- get_legend(
+  tab.feas %>%
+  filter(measure %in% c("sch.contacted")) %>%
+  ggplot(aes(x = RR, y = value, group = sample_method, color = Sampling, linetype = Clustering)) +
+  geom_point() +
+  geom_line() +
+  (if (grey.plots) {scale_colour_grey(start = 0, end = .7)}) +
+  theme_apa(box = F) + 
+  theme(legend.box.margin = margin(0, 0, 0, 12))
+)
+
+plot_grid(plotlist = plt.feas, 
+          labels=c("(a)", "(b)"), 
+          ncol = 1, 
+          nrow = 2, 
+          label_x = .5,
+          align = "v",
+          label_fontface = "plain" ,
+          label_size = 10) %>%
+  plot_grid(legend, rel_widths = c(3, .4))
+
+
 ```
 
-(ref:fig-comp-caption) Comparisons.
+(ref:fig-comp-caption) Proportionate comparisons of difficulties between models. The straight horizontal line is the focus of comparison in each panel.
 
 ```{r fig-comp, results = "asis", fig.cap = "(ref:fig-comp-caption)", eval = T}
 tab.feas.comp <- tab.feas %>%
@@ -760,9 +799,12 @@ tab.feas.comp %>%
   theme_apa() +
   labs(y = "Factor",
        x = "Popoulation Response Rate") +
-  scale_x_continuous(breaks = seq(10, 90, 20)) +
+  scale_x_continuous(breaks = seq(10, 90, 20)) + 
+  (if (grey.plots) {scale_colour_grey(start = 0, end = .7)}) +
   theme(strip.background = element_blank(), 
         strip.text.x = element_blank())
+  
+  
 
 ```
 
@@ -784,7 +826,8 @@ contact_data %>%
   # scale_color_brewer(type = "qual", palette = 3)  +
   labs(x = "Population Participation Rate", y = "Units Contacted") +
   # scale_y_log10() +
-  theme_apa() +
+  theme_apa() + 
+  (if (grey.plots) {scale_colour_grey(start = 0, end = .7)}) +
   theme(legend.position = "bottom",
         # text = element_text(size=20),
         panel.spacing = unit(2, "lines")) +
@@ -814,7 +857,8 @@ response_rate_data %>%
   # scale_color_brewer(type = "qual", palette = 3) 
   labs(x = "Population Participation Rate", y = "Recruitment Response Rate") +
   theme_apa() +
-  scale_x_continuous(breaks = seq(10, 90, 10)) +
+  scale_x_continuous(breaks = seq(10, 90, 10)) + 
+  (if (grey.plots) {scale_colour_grey(start = 0, end = .7)}) +
   theme(legend.position = "bottom",
         # text = element_text(size=20),
         panel.spacing = unit(2, "lines")) 
@@ -824,7 +868,44 @@ if(saveFigs) save.figures("Results - Response Rates")
 ```
 
 
-\newpage
+### Gini Plot
+
+```{r fig-gini, results = "asis", fig.cap = "(ref:fig-gini-caption)", eval = T}
+df.gini.coef <- df.gini.count %>%
+  summarise(gini = ineq::Gini(prop.selected) %>% round(2)) %>%
+  group_by(RR) %>%
+  arrange(gini) %>%
+  mutate(y.pos = 1 - (1:n()/n()) / 1.5,
+         x.pos = 1 - y.pos)
+
+
+df.gini.coef %>%
+  ggplot(aes(x = parse_number(RR), y = gini, group = sample_method, color = Sampling, linetype = Clustering)) +
+  geom_point() +
+  geom_line() +
+  scale_x_continuous(breaks = seq(10, 90, 10)) +
+  scale_y_continuous(breaks = seq(0, 1, .1),
+                     limits = c(0, 1)) + 
+  (if (grey.plots) {scale_colour_grey(start = 0, end = .7)}) +
+  theme_apa() 
+
+
+```
+
+```{r fig-gini-curve, results = "asis", fig.cap = "(ref:fig-gini-curve-caption)", eval = T, fig.env = "sidewaysfigure", fig.height = 6, fig.width = 10}
+df.gini.count %>%
+  # filter(RR == "RR_90") %>%
+  # filter(sample_method == "Unstratified_RS") %>%
+  ggplot(aes(x = c.prop.pop, y = c.prop.sel, group = sample_method, color = Sampling, linetype = Clustering)) +
+  geom_line() +
+  geom_abline(slope = 1, intercept = 0, linetype = "dotted") +
+  geom_label(aes(label = gini, x = x.pos, y = y.pos), data = df.gini.coef, size = 3) +
+  facet_wrap(~RR) + 
+  (if (grey.plots) {scale_colour_grey(start = 0, end = .7)}) +
+  theme_apa()
+```
+
+
 
 # Discussion
   The main goal of this study was to lay the groundwork for exploring the effectiveness and feasibility of sampling methods in the educational context. In terms of selecting a generalizable sample, SBS resulted in a considerable improvement compared to UCS. However, given the difficulty with which those samples are recruited, SBS is unlikely to be fully implemented in the ideal form. Instead, SCS may be a reasonable compromise. Our findings indicate that any sampling method is greatly improved by first stratifying the population. We show that, in certain cases, performing a convenience sample within strata (SCS) is comparable to simple random sampling (URS) both in terms of generalizability and feasibility.

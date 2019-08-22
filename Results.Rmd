@@ -462,6 +462,5 @@ save(df,
      df.counts.pop,
      df.icc,
      df.gini.count,
-     df.gini.coef,
      file = "Data/Paper/Paper Data.rdata")
 ```
