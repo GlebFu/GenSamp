@@ -389,6 +389,44 @@ df.counts %>%
 
 ```
 
+### Gini Plot
+```{r}
+df.gini.count <- df.samp.counts %>%
+  group_by(sample_method, Clustering, Sampling, DSID, RR) %>%
+  count(name = "count") %>%
+  group_by(sample_method, Clustering, Sampling, RR) %>%
+  nest() %>%
+  mutate(data = map(data, full_join, df %>% select(DSID))) %>%
+  unnest %>%
+  group_by(sample_method, Clustering, Sampling, RR) %>%
+  mutate(count = ifelse(is.na(count), 0, count),
+         prop.selected = count/sum(count),
+         n = n(),
+         prop.pop = 1/n()) %>%
+  group_by(sample_method, Clustering, Sampling, RR) %>%
+  arrange(prop.selected) %>%
+  mutate(c.prop.sel = cumsum(prop.selected),
+         c.prop.pop = cumsum(prop.pop))
+
+df.gini.coef <- df.gini.count %>%
+  summarise(gini = ineq::Gini(prop.selected) %>% round(2)) %>%
+  group_by(RR) %>%
+  arrange(gini) %>%
+  mutate(y.pos = 1 - (1:n()/n()) / 2,
+         x.pos = 1 - y.pos)
+
+df.gini.count %>%
+  # filter(RR == "RR_90") %>%
+  # filter(sample_method == "Unstratified_RS") %>%
+  ggplot(aes(x = c.prop.pop, y = c.prop.sel, group = sample_method, color = Sampling, linetype = Clustering)) +
+  geom_line() +
+  geom_abline(slope = 1, intercept = 0, linetype = "dotted") +
+  geom_label(aes(label = gini, x = x.pos, y = y.pos), data = df.gini.coef) +
+  facet_wrap(~RR) +
+  theme_apa()
+```
+
+
 ```{r}
 extract_ICC <- function(mlm.model) {
   df.icc <- data.frame(l1.var = insight::get_variance_residual(mlm.model),
@@ -423,5 +461,7 @@ save(df,
      samplot, 
      df.counts.pop,
      df.icc,
+     df.gini.count,
+     df.gini.coef,
      file = "Data/Paper/Paper Data.rdata")
 ```

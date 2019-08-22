@@ -753,10 +753,16 @@ tab.feas.comp <- tab.feas %>%
   mutate(Comp.Times = value / Comp.Value) 
 
 tab.feas.comp %>%
-  filter(Comp.Method != sample_method) %>%
+  # filter(Comp.Method != sample_method) %>%
   ggplot(aes(x = RR, y = Comp.Times, group = sample_method, color = Sampling, linetype = Clustering)) +
   geom_line() +
-  facet_wrap(~ Comp.Method, scales = "free")
+  facet_wrap(~ Comp.Method, scales = "free") +
+  theme_apa() +
+  labs(y = "Factor",
+       x = "Popoulation Response Rate") +
+  scale_x_continuous(breaks = seq(10, 90, 20)) +
+  theme(strip.background = element_blank(), 
+        strip.text.x = element_blank())
 
 ```
 
