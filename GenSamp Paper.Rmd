@@ -292,7 +292,7 @@ if(saveFigs) save.figures("Intro - Cluster Size")
 
 (ref:fig-k-plots-caption) Plots used to determine value for $k$. (_a_) Calinski-Harabasz index - peaks indicate better fit. (_b_) Ratio of between cluster sum of squares to total cluster sum of squares - horizontal line indicates cutoff of .8, vertical line indicates minimum number of clusters needed to achieve cutoff. (_c_) Sampling requirements for each cluster given proportional alocation - horizontal line indicates a cluster sample size requirement of 5 schools.
 
-```{r fig-k-plots, fig.cap = "(ref:fig-k-plots-caption)", fig.height = 5, fig.width = 4}
+```{r fig-k-plots, fig.cap = "(ref:fig-k-plots-caption)"}
 plot_grid(plotlist = plt.k, 
           labels=c("(a)", "(b)", "(c)"), 
           ncol = 1, 
@@ -396,7 +396,7 @@ data.frame(Intercept = intercepts, RR = names(intercepts), row.names = NULL, str
   geom_line() +
   scale_x_continuous(breaks = seq(0, 100, 10)) +
   theme_apa() +
-  labs(x = "Average Population Response Rate (%)")
+  labs(x = "Average Population Participation Rate (%)")
 
 ```
 
@@ -473,9 +473,9 @@ load("Data/Paper/Paper Data.rdata")
 
 ```
 ### B-Index
-Figure \@ref(fig:fig-avg-Bindex) displays the average $B$-index for each method across participation rates. Acceptable values of $B$ for generalizability vary depending on the size of the sample, the size of the population, and the number of covariates [@tiptonHowGeneralizableYour2014]. Given our design a critical value of $B = .95$ would be needed to expect full generalizability. At population participation rates below 50%, only SBS consistently generated highly generalizable samples. This indicates that SBS is successful at sampling schools that are unlikely to participate and therefore tend to be underrepresented by the other sampling methods, particularly when overall participation rates are low. Stratified random sampling also consistantly outperformed simple random sampling, though only slightly.
+Figure \@ref(fig:fig-avg-Bindex) displays the average $B$-index for each method across participation rates. Acceptable values of $B$ for generalizability vary depending on the size of the sample, the size of the population, and the number of covariates [@tiptonHowGeneralizableYour2014]. Given our design a critical value of $B = .95$ would be needed to expect full generalizability, with lower values requiring additional statistical assistance. At population participation rates below 50%, only SBS consistently selected highly generalizable samples. This indicates that SBS is successful at sampling schools that are unlikely to participate and therefore tend to be underrepresented by the other sampling methods, particularly when overall participation rates are low. Stratified random sampling consistantly outperformed simple random sampling across all participation rates, though only slightly.
 
-We also found several trends that were unexpected. At 50% and beyond, SBS performance slowly degrades, while other methods maintaind a steady increase. We expected a constant positive relationship beteween the population participation rate and the performance of all methods. Furthermore, at low response rates unstratified convenience sampling seemed to perform better than stratified convenience sampling. This seems inconsistant with survey literature which would suggest that stratified samples are more representative. Because the B-index is an overall measure of generalizabilty across many covariates, it is difficult to untangle why these methods preformed as such. The next section will examine the relationship between stratification and likelihood of participation given each covariate.
+We also found several trends that were unexpected. At 50% and beyond, SBS performance slowly degrades, while other methods maintain a steady increase. We expected a constant positive relationship beteween the population participation rate and the performance of all methods. Furthermore, at low response rates unstratified convenience sampling seemed to perform better than stratified convenience sampling. This seems counterintuitive, as survey literature suggests that stratified samples are more representative. Because the B-index is an overall measure of generalizabilty across many covariates, it is difficult to untangle why these methods preformed as they did. The next section will examine the models' performance for each covariate.
 
 (ref:fig-avg-Bindex-caption) Averge $B$-index for varying participation rates, by sampling method. Horizontal dotted line represented index of .95 indicating a high level of generalizability.
 
@@ -501,7 +501,7 @@ if(saveFigs) save.figures("Results - B Index")
 ```
 
 ### Standardized Mean Differences
-One potential explanation for why stratification may underperform in certain circumstances is if the strata do not explain any variance in a covariate that is related to participation. To examine this we calculated the ICC for each covariate across strata and compared it to the log-odds coeficients associated with that covariate in the participation response model. Table \@ref(tab:tab-ICC-Pars) displays these values. Examining these along with SMDs uncovered several patterns, summarised in Figure \@ref(fig:fig-ICCvsCoef).
+One potential explanation for why stratification may underperform in certain circumstances is if the strata do not explain any variance in a covariate that is related to participation. To examine this we calculated the ICC for each covariate across strata and compared it to the log-odds coeficients associated with that covariate in the participation response model. Table \@ref(tab:tab-ICC-Pars) displays these values. Examining these along with SMDs uncovered several patterns which are summarised in figure \@ref(fig:fig-ICCvsCoef).
 
 ```{r tab-ICC-Pars, results = "asis", eval = T, message = F, warning = F}
 plt.good1 <- c("ethHisp", "pELL", "pTotfrl", "T1", "Urban", "ethWhite")
@@ -523,8 +523,8 @@ tabs$ICC.vs.Coefs <- df.icc %>%
          results = ifelse(vnames %in% plt.bad, "Bad", results),
          results = factor(results, 
                           levels = c("Good1", "Good2", "Neutral", "Bad"), 
-                          ordered = T),
-         log_odds = abs(log_odds)) %>%
+                          ordered = T)) %>%
+  mutate(log_odds = abs(log_odds)) %>%
   arrange(results) %>%
   select(-vnames) 
 
@@ -535,7 +535,7 @@ tabs$ICC.vs.Coefs %>%
 
 ```
 
-(ref:fig-ICCvsCoef-caption) ICC Values vs absolute log_odds. Shaded areas illustrate potential paterns in generalizability measured by SMDs.
+(ref:fig-ICCvsCoef-caption) ICC Values vs absolute log odds. Shaded areas illustrate potential patterns in generalizability measured by SMDs.
 
 ```{r fig-ICCvsCoef, results = "asis", eval = T, fig.cap = "(ref:fig-ICCvsCoef-caption)", eval = T, warning = F, message = F}
 library(ggalt)
@@ -544,11 +544,22 @@ library(ggrepel)
 tabs$ICC.vs.Coefs %>%
   ggplot(aes(x = icc, y = log_odds, shape = results, label = Variables)) +
   geom_point(size = 3) +
-  geom_encircle(aes(fill = results) , alpha = .1, s_shape = 0, expand = 0.1, spread = .1) +
-  geom_text_repel(label.padding = 1, point.padding = .2) +
-  labs(y = "Log Odds",
+  geom_text_repel(point.padding = .2) +
+  # geom_encircle(aes(fill = results) , alpha = .1, s_shape = 0, expand = 0.1, spread = .1) +
+  geom_encircle(aes(fill = results), 
+                alpha = .1, s_shape = 0, 
+                expand = 0.05, spread = .1, 
+                data = tabs$ICC.vs.Coefs %>% 
+                  filter(Variables == "Suburban")) +
+  geom_encircle(aes(fill = results),
+                alpha = .1, s_shape = 0, 
+                expand = 0.05, spread = .1, 
+                data = tabs$ICC.vs.Coefs %>% 
+                  filter(Variables != "Suburban")) +
+  labs(y = "Absolute Log Odds",
        x = "ICC") +
   # scale_y_continuous(trans='log10') +
+  guides(fill = "none") +
   theme_apa()
 
 
@@ -698,25 +709,60 @@ sSMDplot %>%
 
 ## Feasibility
 
-Figure \@ref(fig:fig-units-contacted) reports the average number of schools that needed to be contacted before a full sample of $N = 60$ schools was selected. At higher response rates differences between methods were negligible. However, as response rates decreased the disparity between the methods became more apparent. Overall, UCS required the least "effort" to recruit a full sample, followed by URS and SCS, SRS, and finally SBS. Figure \@ref(fig:fig-response-rates) plots the response rates of schools approached for recruitment against the population response rates. As expected, URS response rates reflected those in the population. Both UCS and SCS resulted in higher response rates, while SRS and SBS resulted in lower response rates. 
+Figure \@ref(fig:fig-responses) reports the sampling statistics for each method across population participation rates. Differences between sampling methods were substantial at lower participation rates. As participation rates increased, the differences decreased exponentially and became negligent. It's important to note that the magnitudes of these results are quite extreme. This is likely due to some mispecification on the part of the simulation either the response generating model parameters or the population participation rates. Rather than looking at the raw values, a more meaningful interpretation would be to compare the performance of the models relative to each other.
 
-(ref:fig-responses-caption) Sampling statistics
+Overall, UCS required the least "effort" to recruit a full sample, followed by URS and SCS, SRS, and finally SBS. 
 
-```{r fig-responses, results = "asis", fig.cap = "(ref:fig-responses-caption)", eval = F}
-samplot %>%
+Figure \@ref(fig:fig-response-rates) plots the response rates of schools approached for recruitment against the population participation rates. As expected, URS response rates reflected those in the population. Both UCS and SCS resulted in higher response rates, while SRS and SBS resulted in lower response rates. 
+
+(ref:fig-responses-caption) Sampling statistics. The top plot shows the total number of units contacted to achieve a full sample of 60 schools. The bottom plot shows the percent of schools that agreed to participate when recruited.
+
+```{r fig-responses, results = "asis", fig.cap = "(ref:fig-responses-caption)", eval = T}
+tab.feas <- samplot %>%
   ungroup() %>%
-  mutate(RR = parse_number(RR)) %>%
+  mutate(RR = parse_number(RR),
+         value = ifelse(measure == "sch.response.rate", value * 100, value)) %>%
+  filter(measure %in% c("sch.contacted", "sch.response.rate"))
+
+tab.feas %>%
   ggplot(aes(x = RR, y = value, group = sample_method, color = Sampling, linetype = Clustering)) +
   geom_point() +
   geom_line() +
-  facet_wrap( ~ measure, scales = "free_y") +
-  expand_limits(y=0) +
-  theme_apa(box = T)
+  facet_wrap( ~ measure, scales = "free_y", ncol = 1, 
+                strip.position = "left", 
+                labeller = as_labeller(c(sch.contacted = "Units Contacted", sch.response.rate = "Response Rate") ) ) +
+  scale_x_continuous(breaks = seq(10, 90, 20)) +
+  expand_limits(y = 0) +
+  labs(x = "Population Participation Rate",
+       y = element_blank()) +
+  theme_apa(box = F) +
+  theme(strip.placement = "outside") +
+  annotate("segment", x=-Inf, xend=Inf, y=-Inf, yend=-Inf)+
+  annotate("segment", x=-Inf, xend=-Inf, y=-Inf, yend=Inf)
+```
+
+(ref:fig-comp-caption) Comparisons.
+
+```{r fig-comp, results = "asis", fig.cap = "(ref:fig-comp-caption)", eval = T}
+tab.feas.comp <- tab.feas %>%
+  filter(measure %in% c("sch.contacted")) %>%
+  select(-Sampling, -Clustering) %>%
+  spread(key = sample_method, value = value) %>%
+  right_join(tab.feas %>% filter(measure == "sch.contacted")) %>%
+  gather(key = Comp.Method, value = Comp.Value, Stratified_BS:Unstratified_RS) %>%
+  mutate(Comp.Times = value / Comp.Value) 
+
+tab.feas.comp %>%
+  filter(Comp.Method != sample_method) %>%
+  ggplot(aes(x = RR, y = Comp.Times, group = sample_method, color = Sampling, linetype = Clustering)) +
+  geom_line() +
+  facet_wrap(~ Comp.Method, scales = "free")
+
 ```
 
 (ref:fig-units-contacted-caption) Averge number of schools contacted to achieve $N = 60$
 
-```{r fig-units-contacted, results = "asis", fig.cap = "(ref:fig-units-contacted-caption)", eval = T}
+```{r fig-units-contacted, results = "asis", fig.cap = "(ref:fig-units-contacted-caption)", eval = F}
 contact_data <- samplot %>%
   filter(measure == "sch.contacted")
 
@@ -730,7 +776,7 @@ contact_data %>%
   # theme_apa(box = T) +
   # scale_fill_brewer(type = "seq", palette = 4) +
   # scale_color_brewer(type = "qual", palette = 3)  +
-  labs(x = "Population Response Rate", y = "Units Contacted") +
+  labs(x = "Population Participation Rate", y = "Units Contacted") +
   # scale_y_log10() +
   theme_apa() +
   theme(legend.position = "bottom",
@@ -744,7 +790,7 @@ if(saveFigs) save.figures("Results - Response Counts")
 
 (ref:fig-response-rates-caption) Recruitment response rates for each sampling method
 
-```{r fig-response-rates, results = "asis", fig.cap = "(ref:fig-response-rates-caption)", eval = T}
+```{r fig-response-rates, results = "asis", fig.cap = "(ref:fig-response-rates-caption)", eval = F}
 response_rate_data <- samplot %>%
   ungroup() %>%
   mutate(level = str_split(measure, "[.]", simplify = T)[,1],
@@ -760,7 +806,7 @@ response_rate_data %>%
   # theme_apa(box = T) +
   # scale_fill_brewer(type = "seq", palette = 4) +
   # scale_color_brewer(type = "qual", palette = 3) 
-  labs(x = "Population Response Rate", y = "Recruitment Response Rate") +
+  labs(x = "Population Participation Rate", y = "Recruitment Response Rate") +
   theme_apa() +
   scale_x_continuous(breaks = seq(10, 90, 10)) +
   theme(legend.position = "bottom",
@@ -782,11 +828,6 @@ if(saveFigs) save.figures("Results - Response Rates")
   URS is considered the gold standard for generalizabilty, however it is not typically implemented due to it requiring substantial resources and other concerns of practicality. The advantage of SCS here is that it enables researchers to mitigate recruitment costs by targeting schools from the same strata that are in close proximity to each other. Beyond generalizability, stratifying in this manner also offers the additional advantage of transparency by forcing the researcher to make sampling decisions in the study design phase, and to keep track of sampling decisions as recruitment is implemented. 
 
   Our work uncovered several limitations in designing sampling and participation models. The sampling methods we developed made several assumptions about researcher and recruiter behavior in selecting a sample. First, that recruiters always prioritize schools that are most likely to participate. In truth, many other factors play a role such as proximity of sample sites to the researcher and to each other, existing relationships between the recruiters and the sample sites, and other researcher assumptions about the sample site's characteristics. Second, that recruiters have approximate knowledge of how likely a sampled site is to participate. Though researchers may speculate about sites that are more willing to participate (schools in larger urban districts) and prioritize recruiting such sites, it is not likely that they would estimate willingness as well as we have simulated. Given this, it is possible that the "feasibility" of the convenience methods is overestimated.
-
-
-
-
-
 
   Our participation model is also speculative. The parameters in our response generating model are based on values from a study that examined the difference between schools participating in large-scale randomized control trials (RCT) and the overall population of schools. However, these RCTs themselves typically rely on some form of convenience sampling. In that sense our parameters reflect participation rates of schools that are likely to participate in RCTs, rather than the full population of schools. Furthermore, the decision of whether a school participates in such a study is multi-leveled. Generally, districts serve as gatekeepers, requiring research requests to be submitted and approved before recruitment can begin. If the request is denied, no schools within that district may be recruited. If approved, schools may be contacted individually. The ultimate decision may then rest with administrators, or they may be passed on to teachers most affected by the study. Despite these limitations, we believe that our findings reasonably represent the relative performance of the various sampling methods we tested in the context of educational research.
 

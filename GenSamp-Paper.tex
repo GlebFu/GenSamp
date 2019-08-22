@@ -397,9 +397,9 @@ In order to assess feasibility, the total number of schools approached to achiev
 \hypertarget{b-index}{%
 \subsubsection{B-Index}\label{b-index}}
 
-Figure \ref{fig:fig-avg-Bindex} displays the average \(B\)-index for each method across participation rates. Acceptable values of \(B\) for generalizability vary depending on the size of the sample, the size of the population, and the number of covariates (Tipton, 2014). Given our design a critical value of \(B = .95\) would be needed to expect full generalizability. At population participation rates below 50\%, only SBS consistently generated highly generalizable samples. This indicates that SBS is successful at sampling schools that are unlikely to participate and therefore tend to be underrepresented by the other sampling methods, particularly when overall participation rates are low. Stratified random sampling also consistantly outperformed simple random sampling, though only slightly.
+Figure \ref{fig:fig-avg-Bindex} displays the average \(B\)-index for each method across participation rates. Acceptable values of \(B\) for generalizability vary depending on the size of the sample, the size of the population, and the number of covariates (Tipton, 2014). Given our design a critical value of \(B = .95\) would be needed to expect full generalizability, with lower values requiring additional statistical assistance. At population participation rates below 50\%, only SBS consistently selected highly generalizable samples. This indicates that SBS is successful at sampling schools that are unlikely to participate and therefore tend to be underrepresented by the other sampling methods, particularly when overall participation rates are low. Stratified random sampling consistantly outperformed simple random sampling across all participation rates, though only slightly.
 
-We also found several trends that were unexpected. At 50\% and beyond, SBS performance slowly degrades, while other methods maintaind a steady increase. We expected a constant positive relationship beteween the population participation rate and the performance of all methods. Furthermore, at low response rates unstratified convenience sampling seemed to perform better than stratified convenience sampling. This seems inconsistant with survey literature which would suggest that stratified samples are more representative. Because the B-index is an overall measure of generalizabilty across many covariates, it is difficult to untangle why these methods preformed as such. The next section will examine the relationship between stratification and likelihood of participation given each covariate.
+We also found several trends that were unexpected. At 50\% and beyond, SBS performance slowly degrades, while other methods maintain a steady increase. We expected a constant positive relationship beteween the population participation rate and the performance of all methods. Furthermore, at low response rates unstratified convenience sampling seemed to perform better than stratified convenience sampling. This seems counterintuitive, as survey literature suggests that stratified samples are more representative. Because the B-index is an overall measure of generalizabilty across many covariates, it is difficult to untangle why these methods preformed as they did. The next section will examine the models' performance for each covariate.
 
 
 
@@ -412,7 +412,7 @@ We also found several trends that were unexpected. At 50\% and beyond, SBS perfo
 \hypertarget{standardized-mean-differences}{%
 \subsubsection{Standardized Mean Differences}\label{standardized-mean-differences}}
 
-One potential explanation for why stratification may underperform in certain circumstances is if the strata do not explain any variance in a covariate that is related to participation. To examine this we calculated the ICC for each covariate across strata and compared it to the log-odds coeficients associated with that covariate in the participation response model. Table \ref{tab:tab-ICC-Pars} displays these values. Examining these along with SMDs uncovered several patterns, summarised in Figure \ref{fig:fig-ICCvsCoef}.
+One potential explanation for why stratification may underperform in certain circumstances is if the strata do not explain any variance in a covariate that is related to participation. To examine this we calculated the ICC for each covariate across strata and compared it to the log-odds coeficients associated with that covariate in the participation response model. Table \ref{tab:tab-ICC-Pars} displays these values. Examining these along with SMDs uncovered several patterns which are summarised in figure \ref{fig:fig-ICCvsCoef}.
 
 \begin{table}[tbp]
 \begin{center}
@@ -446,7 +446,7 @@ N Students & 0.06 & 0.37 & Bad\\
 \begin{figure}
 \centering
 \includegraphics{GenSamp-Paper_files/figure-latex/fig-ICCvsCoef-1.pdf}
-\caption{\label{fig:fig-ICCvsCoef}ICC Values vs absolute log\_odds. Shaded areas illustrate potential paterns in generalizability measured by SMDs.}
+\caption{\label{fig:fig-ICCvsCoef}ICC Values vs absolute log odds. Shaded areas illustrate potential patterns in generalizability measured by SMDs.}
 \end{figure}
 
 First, figure \ref{fig:fig-SMD-by-Var-good1} displays six covariates where both ICC values and RGM parameters were high. For these covariates, SBS performed as well as or better than all stratified methods, and all stratified methods performed better than their unstratified counterparts. Figure \ref{fig:fig-SMD-by-Var-neutral} displays two covariates where both ICC values and RGM parameters were low. SBS seemed to perform slightly better than all other methods, however all methods performed well across all population participation rates.
@@ -490,25 +490,19 @@ Finally, figure \ref{fig:fig-SMD-by-Var-bad} reports the second set of unexpecte
 \hypertarget{feasibility-1}{%
 \subsection{Feasibility}\label{feasibility-1}}
 
-Figure \ref{fig:fig-units-contacted} reports the average number of schools that needed to be contacted before a full sample of \(N = 60\) schools was selected. At higher response rates differences between methods were negligible. However, as response rates decreased the disparity between the methods became more apparent. Overall, UCS required the least \enquote{effort} to recruit a full sample, followed by URS and SCS, SRS, and finally SBS. Figure \ref{fig:fig-response-rates} plots the response rates of schools approached for recruitment against the population response rates. As expected, URS response rates reflected those in the population. Both UCS and SCS resulted in higher response rates, while SRS and SBS resulted in lower response rates.
-
-
-
-
-
-\begin{figure}
-\centering
-\includegraphics{GenSamp-Paper_files/figure-latex/fig-units-contacted-1.pdf}
-\caption{\label{fig:fig-units-contacted}Averge number of schools contacted to achieve \(N = 60\)}
-\end{figure}
+Figure \ref{fig:fig-responses} reports the average number of schools that needed to be contacted before a full sample of \(N = 60\) schools was selected. At higher response rates differences between methods were negligible. However, as response rates decreased the disparity between the methods became more apparent. Overall, UCS required the least \enquote{effort} to recruit a full sample, followed by URS and SCS, SRS, and finally SBS. Figure \ref{fig:fig-response-rates} plots the response rates of schools approached for recruitment against the population participation rates. As expected, URS response rates reflected those in the population. Both UCS and SCS resulted in higher response rates, while SRS and SBS resulted in lower response rates.
 
 
 
 \begin{figure}
 \centering
-\includegraphics{GenSamp-Paper_files/figure-latex/fig-response-rates-1.pdf}
-\caption{\label{fig:fig-response-rates}Recruitment response rates for each sampling method}
+\includegraphics{GenSamp-Paper_files/figure-latex/fig-responses-1.pdf}
+\caption{\label{fig:fig-responses}Sampling statistics. The top plot shows the total number of units contacted to achieve a full sample of 60 schools. The bottom plot shows the percent of schools that agreed to participate when recruited.}
 \end{figure}
+
+
+
+
 
 \newpage
 
