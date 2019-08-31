@@ -343,7 +343,7 @@ In this section we develope the framework for designing a study that simulates r
 
 ## Framework for Generalizability
 
-  We begin with a data set enumerating a population of $N$ sites (schools), indexed as $i = 1 ... N$. Each site also has a vector of observed characteristics $X_i$ of length $P$. The covariates are a mixture of continuous, binary, and categorical data. The goal is to select a sample of $n$ sites such that there is balance along $X_i$ between the sample and the population, indicating that the population is fully represented by the sample. We measure balance using the standardized mean difference ($SMD$) between the sample and population for a given covariate. $SMD$ is calculated as 
+  Following the framework developed by @tiptonStratifiedSamplingUsing2013, we begin with a data set enumerating a population of $N$ sites (schools), indexed as $i = 1 ... N$. Each site also has a vector of observed characteristics $X_i$ of length $P$. The covariates are a mixture of continuous, binary, and categorical data. The goal is to select a sample of $n$ sites such that there is balance along $X_i$ between the sample and the population, indicating that the population is compositionally represented by the sample. We measure balance using the standardized mean difference ($SMD$) between the sample and population for a given covariate. $SMD$ is calculated as 
 
 \begin{align}
   SMD = \frac{\bar{X}-\mu}{\sigma}
@@ -353,18 +353,71 @@ where $\bar{X}$ is a vector of covariate means in the sample, $\mu$ is the vecto
 
 ## Modeling Selection Bias
 
-  Selection bias stems from two sources: (1) site participation behavior and (2) researcher recruitment behavior. To model the former we propose a simple participation propensity score. Let $\pi^P_i$ represent the participation propensity score, or the probability that a site agrees to participate in an RCT if approached for recruitment. Using a simple logistic transformation we model $\pi^P_i$ as follows:
+  Selection bias stems from two sources: (1) site participation behavior (self-selection) and (2) researcher recruitment behavior. To model the former we propose a simple participation propensity score. Let $\pi^P_i$ represent the participation propensity score, or the probability that a site agrees to participate in an RCT if approached for recruitment. Using a simple logistic transformation we model $\pi^P_i$ as follows:
   
 \begin{align} \label{eq:RGM}
   log\bigg(\frac{\pi^P_i}{1 - \pi^P_i}\bigg) = \beta_0 + \boldsymbol{X_i \beta}
 \end{align}
 where $\boldsymbol{X_i}$ is an $N$ by $P$ matrix of covariates that predict sample selection for each site, and $\boldsymbol{\beta}$ is a vector of coefficients associated with those covariates. Participation for site $i$ will be determined by sampling from a Bernoulli distribution with probability equal to $\pi^P_i$.
 
+  Unilike participation bias which is almost always present, selection bias largly depends on the sampling method being used. Probability or random sampling avoids this by selecting units with known probabilities, which can then be accounted for in the analysis stage. However this is not often feasible in the case of large-scale MRTs. Subsets of schools are likely to be overlooked if samples are too small, or when participation rates are too low. Further, random sampling from a broad population (such as an entire state) is likely to produce samples that are geographically dispersed, creating logistic difficulties for data collection and treatment implementation. As a result, researchers often eschew probability sampling in favor of convenienve sampling [@shadishExperimentalQuasiexperimentalDesigns2002;@gerberFieldExperimentsDesign2012].
+  
+  selection bias can be avoided using empirical sampling techniques such as probability sampling. However, these methods are often difficutl and costly.
+  
   To generate selection bias stemming from researcher recruitment, we propose a "low hanging fruit" approach to convenience sampling. We assume that researchers have some knowledge of how likely each site is to participate, and prioritize easy to recruit sites as a way of maximizing recruitment efficiency. While there are many other ways to define convenience sampling, we posit this as a first step. Sites are prioritized for recruitment by sequentially sampling from the population of sites using $\pi^P_i$ as a sampling weight. Once a site is added to the list in order of priority, the probability of choosing the next site is proportional to the weights of the remaining items. In this way, sites that have higher values for $\pi^P_i$ are more likely to be recruited earlier on.
 
 
 
+## Sampling Methods
+Five sampling methods were compared: stratified and unstratified random sampling, stratified and unstratified convenience sampling, and stratified balanced sampling (SBS). We model the sample selection process in two stages. In the first stage, we generated indicators of _potential participation_---that is, whether a school would participate in the trial _if approached for recruitment_. Let $N$ be the total number of schools in the population, and let schools be indexed by $j = 1, ..., N$. We define $E_j$ as a binary indicator that school $j$ will agree to participate if contacted by recruiters, where $E_j = 1$ if the school agrees, and $E_j = 0$ if the school refuses. Each school was checked for approval by sampling from a Bernoulli distribution with probability equal to $\pi^P_j$ for each school $j$
+\begin{equation}
+\label{eq:Ej}
+E_j \sim B(\pi^P_j)
+\end{equation}
+The potential participation indicators were generated at the begining of each iteration and were therefore common across the five sampling methods examined.
 
+We modeled the sampling process as observing the potential participation indicator for schools in a ranked list, where the order in which schools are contacted is determined by a score $S = S_1,...,S_N$. Let $Z_j(S)$ be an indicator whether school $i$ is sampled based on the score $S$. 
+For the unstratified sampling methods, we determined $Z_1(S),...,Z_N(S)$ by sorting schools according to $S$ and selecting the first 60 schools where $E_j = 1$.
+Specifically, 
+\begin{equation}
+\label{eq:Zj}
+Z_j(S) = I\left[60 \geq \sum_{k=1}^N E_k I\left(S_k \leq S_j\right)\right]
+\end{equation}
+where $I(C)$ denotes the indicator function, equal to 1 if $C$ is true and otherwise equal to 0. Based on the sample selection indicators, we calculated the number of schools contacted as
+\begin{equation}
+\label{eq:R}
+R(S) = \sum_{j=1}^N I(S_j \leq S_{max}),
+\end{equation}
+where $S_{max} = \max \{S_1 Z_1, S_2 Z_2, ..., S_N Z_N\}$. 
+
+For the stratified sampling methods, the above process was applied within each stratum. We determined target sample sizes for each stratum based on a proportional allocation. Letting $N_k$ denote the total number of schools in stratum $k$, we set a target sample size of $n_k = [60 \times N_k / N]$ for stratum $k$, where $[x]$ is the integer nearest to $x$.
+
+### Random Sampling
+
+As previously mentioned, unstratified random sampling (URS) is typically highly impractical in the context of educational MRTs. However, URS is nonetheless interesting as a theoretically simple ideal against which to compare other sampling methods. We simulated URS sampling by ranking each school according to a random number from a uniform distribution, so that their order of recruitment was determined by the score $S_j \sim U(0, 1)$. 
+
+In practice, methods such as cluster sampling, stratified sampling, or a combination of both would likely offer advantages over unstratified random sampling. We therefore also simulated a stratified random sample (SRS), with strata determined by the results of the cluster analysis and using a proportional allocation. 
+
+### Convenience Sampling
+
+We also simulated two convenience sampling methods: unstratified (UCS) and stratified convenience sampling (SCS). Here, we assumed that recruiters have some knowledge of each schools' probability of participating, if approached, and that they prioritize higher probability schools in order to minimize effort.
+To operationalize unstratified convenience sampling, we assumed that schools are approached for recruitment one at a time, with their order determined by sampling without replacement, with probability proportional to participation propensity scores $\pi^P_1,...,\pi^P_N$. 
+Once a school was selected and assigned a rank, the next school was selected with a probability proportional to the weights of the remaining schools. Once all ranks were assigned, schools were again approached until 60 schools agreed to be in the sample
+We implemented stratified convenience sampling using the same process, but with ranks determined independently within each stratum, and using a proportional allocation across strata.
+
+### Balanced Sampling
+
+SBS is unique in that rankings are directly related to school characteristics and do not change across iterations. Scores within strata were based on equation \@ref(eq:euclid) (i.e., $S_j = d_{jk}$), where schools closer to the "center" of the stratum are more representative of it and are therefore a higher priority. Though extremely unlikely, it is possible that several schools could be equidistant from the center of the stratum; in such cases, schools were ordered randomly.
+Because @tiptonStratifiedSamplingUsing2013 proposed balanced sampling in connection with stratification based on a cluster analysis, we only consider the stratified version, SBS.
+
+# Simulation Study
+In this section we describe the simulation study developed to assess the generalizability of the samples selected by SBS relative to several other sampling methods, and the feasibility with which the sampling methods can be employed. Real data was used to inform the sample frame.
+Selection bias was generated to account for both self selection as well as researcher bias.
+
+## Simulation design
+
+
+## Data Generation
 
 ### Participation Propensity Score
 
@@ -400,57 +453,6 @@ data.frame(Intercept = intercepts, RR = names(intercepts), row.names = NULL, str
 
 
 
-
-
-## Sampling Methods
-Five sampling methods were compared: stratified and unstratified random sampling, stratified and unstratified convenience sampling, and stratified balanced sampling (SBS). We model the sample selection process in two stages. In the first stage, we generated indicators of _potential participation_---that is, whether a school would participate in the trial _if approached for recruitment_. Let $N$ be the total number of schools in the population, and let schools be indexed by $j = 1, ..., N$. We define $E_j$ as a binary indicator that school $j$ will agree to participate if contacted by recruiters, where $E_j = 1$ if the school agrees, and $E_j = 0$ if the school refuses. Each school was checked for approval by sampling from a Bernoulli distribution with probability equal to $\pi^P_j$ for each school $j$
-\begin{equation}
-\label{eq:Ej}
-E_j \sim B(\pi^P_j)
-\end{equation}
-The potential participation indicators were generated at the begining of each iteration and were therefore common across the five sampling methods examined.
-
-We modeled the sampling process as observing the potential participation indicator for schools in a ranked list, where the order in which schools are contacted is determined by a score $S = S_1,...,S_N$. Let $Z_j(S)$ be an indicator whether school $i$ is sampled based on the score $S$. 
-For the unstratified sampling methods, we determined $Z_1(S),...,Z_N(S)$ by sorting schools according to $S$ and selecting the first 60 schools where $E_j = 1$.
-Specifically, 
-\begin{equation}
-\label{eq:Zj}
-Z_j(S) = I\left[60 \geq \sum_{k=1}^N E_k I\left(S_k \leq S_j\right)\right]
-\end{equation}
-where $I(C)$ denotes the indicator function, equal to 1 if $C$ is true and otherwise equal to 0. Based on the sample selection indicators, we calculated the number of schools contacted as
-\begin{equation}
-\label{eq:R}
-R(S) = \sum_{j=1}^N I(S_j \leq S_{max}),
-\end{equation}
-where $S_{max} = \max \{S_1 Z_1, S_2 Z_2, ..., S_N Z_N\}$. 
-
-For the stratified sampling methods, the above process was applied within each stratum. We determined target sample sizes for each stratum based on a proportional allocation. Letting $N_k$ denote the total number of schools in stratum $k$, we set a target sample size of $n_k = [60 \times N_k / N]$ for stratum $k$, where $[x]$ is the integer nearest to $x$.
-
-### Random Sampling
-
-In the context of educational MRTs, unstratified random sampling (URS) is typically highly impractical. Large subsets of schools are likely to be overlooked if samples are too small. Further, random sampling from a broad population (such as an entire state) is likely to produce samples that are geographically dispersed), creating logistic difficulties for data collection and treatment implementation. However, URS is nonetheless interesting as a theoretically simple ideal against which to compare other sampling methods. 
-
-We simulated URS sampling by ranking each school according to a random number from a uniform distribution, so that their order of recruitment was determined by the score $S_j \sim U(0, 1)$. 
-
-In practice, methods such as cluster sampling, stratified sampling, or a combination of both would likely offer advantages over unstratified random sampling. We therefore also simulated a stratified random sample (SRS), with strata determined by the results of the cluster analysis and using a proportional allocation. 
-
-### Convenience Sampling
-
-We also simulated two convenience sampling methods: unstratified (UCS) and stratified convenience sampling (SCS). Here, we assumed that recruiters have some knowledge of each schools' probability of participating, if approached, and that they prioritize higher probability schools in order to minimize effort.
-To operationalize unstratified convenience sampling, we assumed that schools are approached for recruitment one at a time, with their order determined by sampling without replacement, with probability proportional to participation propensity scores $\pi^P_1,...,\pi^P_N$. 
-Once a school was selected and assigned a rank, the next school was selected with a probability proportional to the weights of the remaining schools. Once all ranks were assigned, schools were again approached until 60 schools agreed to be in the sample
-We implemented stratified convenience sampling using the same process, but with ranks determined independently within each stratum, and using a proportional allocation across strata.
-
-### Balanced Sampling
-
-SBS is unique in that rankings are directly related to school characteristics and do not change across iterations. Scores within strata were based on equation \@ref(eq:euclid) (i.e., $S_j = d_{jk}$), where schools closer to the "center" of the stratum are more representative of it and are therefore a higher priority. Though extremely unlikely, it is possible that several schools could be equidistant from the center of the stratum; in such cases, schools were ordered randomly.
-Because @tiptonStratifiedSamplingUsing2013 proposed balanced sampling in connection with stratification based on a cluster analysis, we only consider the stratified version, SBS.
-
-# Simulation Study
-In this section we describe the simulation study developed to assess the generalizability of the samples selected by SBS relative to several other sampling methods, and the feasibility with which the sampling methods can be employed. Real data was used to inform the sample frame.
-Selection bias was generated to account for both self selection as well as researcher bias.
-
-## Simulation design
 
 ## Analysis
 
