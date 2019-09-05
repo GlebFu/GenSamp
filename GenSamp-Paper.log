@@ -1,9 +1,9 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.19 (MiKTeX 2.9.6840 64-bit) (preloaded format=pdflatex 2019.2.13)  31 AUG 2019 11:21
+This is pdfTeX, Version 3.14159265-2.6-1.40.19 (MiKTeX 2.9.6840 64-bit) (preloaded format=pdflatex 2018.12.20)  4 SEP 2019 15:32
 entering extended mode
 **./GenSamp-Paper.tex
 (GenSamp-Paper.tex
 LaTeX2e <2018-04-01> patch level 5
-("C:\Program Files\MiKTeX 2.9\tex\latex\apa6\apa6.cls"
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\latex\apa6\apa6.cls
 Document Class: apa6 2018/09/01 v2.33 APA formatting (6th edition)
 ("C:\Program Files\MiKTeX 2.9\tex\latex\base\article.cls"
 Document Class: article 2014/09/29 v1.4h Standard LaTeX document class
@@ -21,7 +21,7 @@ File: size12.clo 2014/09/29 v1.4h Standard LaTeX file (size option)
 \abovecaptionskip=\skip41
 \belowcaptionskip=\skip42
 \bibindent=\dimen102
-) ("C:\Program Files\MiKTeX 2.9\tex\latex\etoolbox\etoolbox.sty"
+) (C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\latex\etoolbox\etoolbox.sty
 Package: etoolbox 2018/08/19 v2.5f e-TeX tools for LaTeX (JAW)
 \etb@tempcnta=\count88
 )
@@ -107,7 +107,7 @@ File: pdftex.def 2018/01/08 v1.0l Graphics/color driver for pdftex
 ))
 \Gin@req@height=\dimen111
 \Gin@req@width=\dimen112
-) ("C:\Program Files\MiKTeX 2.9\tex\latex\booktabs\booktabs.sty"
+) (C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\latex\booktabs\booktabs.sty
 Package: booktabs 2005/04/14 v1.61803 publication quality tables
 \heavyrulewidth=\dimen113
 \lightrulewidth=\dimen114
@@ -126,7 +126,9 @@ Package: booktabs 2005/04/14 v1.61803 publication quality tables
 \@thisruleclass=\count94
 \@lastruleclass=\count95
 \@thisrulewidth=\dimen125
-) ("C:\Program Files\MiKTeX 2.9\tex\latex\threeparttable\threeparttable.sty"
+)
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\latex\threeparttable\threeparttab
+le.sty
 Package: threeparttable 2003/06/13  v 3.0
 \@tempboxb=\box26
 )
@@ -140,9 +142,9 @@ Package: threeparttable 2003/06/13  v 3.0
 \e@level@four@skip=\skip50
 \b@level@five@skip=\skip51
 \e@level@five@skip=\skip52
-("C:\Program Files\MiKTeX 2.9\tex\latex\caption\caption.sty"
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\latex\caption\caption.sty
 Package: caption 2018/10/06 v3.3-154 Customizing captions (AR)
-("C:\Program Files\MiKTeX 2.9\tex\latex\caption\caption3.sty"
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\latex\caption\caption3.sty
 Package: caption3 2018/09/12 v1.8c caption3 kernel (AR)
 Package caption3 Info: TeX engine: e-TeX on input line 64.
 \captionmargin=\dimen126
@@ -171,7 +173,7 @@ LaTeX Font Info:    Redeclaring math alphabet \mathbf on input line 141.
 LaTeX Info: Redefining \bm on input line 207.
 )
 \c@appendix=\count99
-("C:\Program Files\MiKTeX 2.9\tex\latex\fancyhdr\fancyhdr.sty"
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\latex\fancyhdr\fancyhdr.sty
 Package: fancyhdr 2017/06/30 v3.9a Extensive control of page headers and footer
 s
 \f@nch@headwidth=\skip56
@@ -183,7 +185,7 @@ s
 \f@nch@O@erf=\skip62
 \f@nch@O@olf=\skip63
 \f@nch@O@orf=\skip64
-) ("C:\Program Files\MiKTeX 2.9\tex\latex\endfloat\endfloat.sty"
+) (C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\latex\endfloat\endfloat.sty
 Package: endfloat 2018/03/24 v2.6 LaTeX2e package puts figures and tables at en
 d (jdm)
 \c@posttable=\count100
@@ -283,7 +285,7 @@ LaTeX Font Info:    Redeclaring font encoding T1 on input line 48.
 Package: inputenc 2018/04/06 v1.3b Input encoding file
 \inpenc@prehook=\toks24
 \inpenc@posthook=\toks25
-) ("C:\Program Files\MiKTeX 2.9\tex\latex\upquote\upquote.sty"
+) (C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\latex\upquote\upquote.sty
 Package: upquote 2012/04/19 v1.3 upright-quote and grave-accent glyphs in verba
 tim
 ("C:\Program Files\MiKTeX 2.9\tex\latex\base\textcomp.sty"
@@ -440,7 +442,7 @@ Package textcomp Info: Setting pplx sub-encoding to TS1/3 on input line 406.
 Package textcomp Info: Setting pplj sub-encoding to TS1/3 on input line 407.
 Package textcomp Info: Setting ptmx sub-encoding to TS1/4 on input line 408.
 Package textcomp Info: Setting ptmj sub-encoding to TS1/4 on input line 409.
-)) ("C:\Program Files\MiKTeX 2.9\tex\latex\microtype\microtype.sty"
+)) (C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\latex\microtype\microtype.sty
 Package: microtype 2018/01/14 v2.7a Micro-typographical refinements (RS)
 \MT@toks=\toks26
 \MT@count=\count117
@@ -448,7 +450,9 @@ LaTeX Info: Redefining \textls on input line 793.
 \MT@outer@kern=\dimen142
 LaTeX Info: Redefining \textmicrotypecontext on input line 1339.
 \MT@listname@count=\count118
-("C:\Program Files\MiKTeX 2.9\tex\latex\microtype\microtype-pdftex.def"
+
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\latex\microtype\microtype-pdftex.
+def
 File: microtype-pdftex.def 2018/01/14 v2.7a Definitions specific to pdftex (RS)
 
 LaTeX Info: Redefining \lsstyle on input line 913.
@@ -456,7 +460,7 @@ LaTeX Info: Redefining \lslig on input line 913.
 \MT@outer@space=\skip68
 )
 Package microtype Info: Loading configuration file microtype.cfg.
-("C:\Program Files\MiKTeX 2.9\tex\latex\microtype\microtype.cfg"
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\latex\microtype\microtype.cfg
 File: microtype.cfg 2018/01/14 v2.7a microtype main configuration file (RS)
 )) ("C:\Program Files\MiKTeX 2.9\tex\latex\hyperref\hyperref.sty"
 Package: hyperref 2018/09/30 v6.88a Hypertext links for LaTeX
@@ -524,7 +528,7 @@ Package hyperref Info: Backreferencing OFF on input line 4555.
 Package hyperref Info: Implicit mode ON; LaTeX internals redefined.
 Package hyperref Info: Bookmarks ON on input line 4788.
 \c@Hy@tempcnt=\count122
-("C:\Program Files\MiKTeX 2.9\tex\latex\url\url.sty"
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\latex\url\url.sty
 \Urlmuskip=\muskip11
 Package: url 2013/09/16  ver 3.4  Verb mode for urls, etc.
 )
@@ -571,9 +575,9 @@ Package grffile Info: Option `multidot' is set to `true'.
 Package grffile Info: Option `extendedchars' is set to `false'.
 Package grffile Info: Option `space' is set to `true'.
 Package grffile Info: \Gin@ii of package `graphicx' fixed on input line 494.
-) ("C:\Program Files\MiKTeX 2.9\tex\latex\parskip\parskip.sty"
+) (C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\latex\parskip\parskip.sty
 Package: parskip 2018-08-24 v2.0a non-zero parskip adjustments
-) ("C:\Program Files\MiKTeX 2.9\tex\latex\csquotes\csquotes.sty"
+) (C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\latex\csquotes\csquotes.sty
 Package: csquotes 2018/04/13 v5.2d context-sensitive quotations (JAW)
 \csq@reset=\count129
 \csq@gtype=\count130
@@ -582,14 +586,14 @@ Package: csquotes 2018/04/13 v5.2d context-sensitive quotations (JAW)
 \csq@maxlvl=\count133
 \csq@tshold=\count134
 \csq@ltx@everypar=\toks27
-("C:\Program Files\MiKTeX 2.9\tex\latex\csquotes\csquotes.def"
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\latex\csquotes\csquotes.def
 File: csquotes.def 2018/04/13 v5.2d csquotes generic definitions (JAW)
 )
 Package csquotes Info: Trying to load configuration file 'csquotes.cfg'...
 Package csquotes Info: ... configuration file loaded successfully.
-("C:\Program Files\MiKTeX 2.9\tex\latex\csquotes\csquotes.cfg"
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\latex\csquotes\csquotes.cfg
 File: csquotes.cfg 
-)) ("C:\Program Files\MiKTeX 2.9\tex\latex\was\upgreek.sty"
+)) (C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\latex\was\upgreek.sty
 Package: upgreek 2003/02/12 v2.0 (WaS)
 Package upgreek Info: Using Euler Roman for upright Greek on input line 31.
 \symugrf@m=\mathgroup9
@@ -639,11 +643,13 @@ Package: array 2018/04/30 v2.4h Tabular extension package (FMi)
 \TX@delta=\dimen155
 \TX@cols=\count141
 \TX@ftn=\toks30
-) ("C:\Program Files\MiKTeX 2.9\tex\latex\threeparttablex\threeparttablex.sty"
+)
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\latex\threeparttablex\threepartta
+blex.sty
 Package: threeparttablex 2013/07/23 v0.3 by daleif
-("C:\Program Files\MiKTeX 2.9\tex\latex\environ\environ.sty"
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\latex\environ\environ.sty
 Package: environ 2014/05/04 v0.3 A new way to define environments
-("C:\Program Files\MiKTeX 2.9\tex\latex\trimspaces\trimspaces.sty"
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\latex\trimspaces\trimspaces.sty
 Package: trimspaces 2009/09/17 v1.1 Trim spaces around a token list
 ))
 \TPTL@width=\skip78
@@ -725,7 +731,7 @@ File: t1lmr.fd 2009/10/30 v1.6 Font defs for Latin Modern
 * \@reversemarginfalse
 * (1in=72.27pt=25.4mm, 1cm=28.453pt)
 
-("C:\Program Files\MiKTeX 2.9\tex\context\base\supp-pdf.mkii"
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\context\base\supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
 \scratchcounter=\count143
 \scratchdimen=\dimen156
@@ -749,14 +755,15 @@ Package grfext Info: Graphics extension search list:
 (grfext)             [.pdf,.png,.jpg,.mps,.jpeg,.jbig2,.jb2,.PDF,.PNG,.JPG,.JPE
 G,.JBIG2,.JB2,.eps]
 (grfext)             \AppendGraphicsExtensions on input line 456.
-) ("C:\Program Files\MiKTeX 2.9\tex\latex\apa6\config\APAamerican.txt"
+)
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\latex\apa6\config\APAamerican.txt
 File: APAamerican.txt 2012/02/23 v1.25 apa6 configuration for American English
 )
 Package caption Info: Begin \AtBeginDocument code.
 Package caption Info: float package is loaded.
 Package caption Info: hyperref package is loaded.
 Package caption Info: longtable package is loaded.
-("C:\Program Files\MiKTeX 2.9\tex\latex\caption\ltcaption.sty"
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\latex\caption\ltcaption.sty
 Package: ltcaption 2018/08/26 v1.4-95 longtable captions (AR)
 )
 Package caption Info: rotating package is loaded.
@@ -771,7 +778,7 @@ Package microtype Info: Using default expansion set `basictext'.
 Package microtype Info: No adjustment of tracking.
 Package microtype Info: No adjustment of interword spacing.
 Package microtype Info: No adjustment of character kerning.
-("C:\Program Files\MiKTeX 2.9\tex\latex\microtype\mt-cmr.cfg"
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\latex\microtype\mt-cmr.cfg
 File: mt-cmr.cfg 2013/05/19 v2.2 microtype config. file: Computer Modern Roman 
 (RS)
 )
@@ -823,15 +830,15 @@ LaTeX Font Info:    External font `lmex10' loaded for size
 LaTeX Font Info:    Try loading font information for U+msa on input line 100.
 ("C:\Program Files\MiKTeX 2.9\tex\latex\amsfonts\umsa.fd"
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
-) ("C:\Program Files\MiKTeX 2.9\tex\latex\microtype\mt-msa.cfg"
+) (C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\latex\microtype\mt-msa.cfg
 File: mt-msa.cfg 2006/02/04 v1.1 microtype config. file: AMS symbols (a) (RS)
 )
 LaTeX Font Info:    Try loading font information for U+msb on input line 100.
 ("C:\Program Files\MiKTeX 2.9\tex\latex\amsfonts\umsb.fd"
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
-) ("C:\Program Files\MiKTeX 2.9\tex\latex\microtype\mt-msb.cfg"
+) (C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\latex\microtype\mt-msb.cfg
 File: mt-msb.cfg 2005/06/01 v1.0 microtype config. file: AMS symbols (b) (RS)
-) ("C:\Program Files\MiKTeX 2.9\tex\latex\microtype\mt-eur.cfg"
+) (C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\latex\microtype\mt-eur.cfg
 File: mt-eur.cfg 2006/07/31 v1.1 microtype config. file: AMS Euler Roman (RS)
 )
 
@@ -981,10 +988,10 @@ LaTeX Warning: There were undefined references.
 
  ) 
 Here is how much of TeX's memory you used:
- 15552 strings out of 492966
- 231940 string characters out of 3135727
- 350916 words of memory out of 3000000
- 18946 multiletter control sequences out of 15000+200000
+ 15552 strings out of 492970
+ 232866 string characters out of 3135857
+ 350888 words of memory out of 3000000
+ 18945 multiletter control sequences out of 15000+200000
  50791 words of font info for 90 fonts, out of 3000000 for 9000
  1141 hyphenation exceptions out of 8191
  43i,12n,47p,1389b,489s stack positions out of 5000i,500n,10000p,200000b,50000s
@@ -1002,7 +1009,7 @@ mr8.pfb><C:/Program Files/MiKTeX 2.9/fonts/type1/public/lm/lmri12.pfb><C:/Progr
 am Files/MiKTeX 2.9/fonts/type1/public/lm/lmsy10.pfb><C:/Program Files/MiKTeX 2
 .9/fonts/type1/public/lm/lmsy6.pfb><C:/Program Files/MiKTeX 2.9/fonts/type1/pub
 lic/lm/lmsy8.pfb>
-Output written on GenSamp-Paper.pdf (39 pages, 1892801 bytes).
+Output written on GenSamp-Paper.pdf (39 pages, 1892871 bytes).
 PDF statistics:
  593 PDF objects out of 1000 (max. 8388607)
  156 named destinations out of 1000 (max. 500000)
