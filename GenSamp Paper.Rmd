@@ -326,7 +326,7 @@ Though there are very few demonstrations of SBS in the literature, several studi
 
 There are, of course, several limitations as well. SBS depends on the existence of a rich set of observed covariates related to treatment heterogeneity and sample selection for each site in the population. Most readily available extant data primarily consist of demographics and may not contain information on covariates that are more proximily related to variation in treatment effect. This can result in omitted variable bias during the cluster analysis phase [@tiptonStratifiedSamplingUsing2013]. Additionally, SBS requires more resources to implement than a simple convenience sample. Recruiting ranked sites from multiple strata requires a coordinated effort between recruiters [@tiptonImplicationsSmallSamples2017]. This means that recruiters cannot work independently and must rely on a partnership with researchers implementing this method. 
 
-At least one study documents the complete implementation of SBS in a large-scale multi-site educational intervention study [@tiptonImprovedGeneralizabilityImproved2019]. The authors reported that a substantial amount of time had to be dedicated to developing the sampling frame and generating optimal strata. This was compounded by the unavailability of data necessary for identifying the sampling frame (e.g. presence of curriculum related to intervention). The recruitment effort also required a considerable amount of coordination between the researchers and the recruiters. However, the researchers were able to elicity buy-in from the recruiters, who in follow-up interviews reported that the recruitment plan and its benefits were easy to understand. Futhermore, they reported that working with strata constraints did not increase the difficulty of recruitment, though they did find that some strata were more difficult to recruit from than others.
+At least one study documents the complete implementation of SBS in a large-scale multi-site educational intervention study [@tiptonImprovedGeneralizabilityImproved2019]. The authors reported that a substantial amount of time had to be dedicated to developing the sampling frame and generating optimal strata. This was compounded by the unavailability of data necessary for identifying the sampling frame (e.g. presence of curriculum related to intervention). The recruitment effort also required a considerable amount of coordination between the researchers and the recruiters. However, the researchers were able to elicity buy-in from the recruiters, who in follow-up interviews reported that the recruitment plan and its benefits were easy to understand. Futhermore, the recruiters felt that working with strata constraints did not increase the difficulty of recruitment, though they did find that some strata were easier to recruit from than others.
 
 # Methods and Models
 
@@ -351,22 +351,11 @@ where $\bar{X}$ is a vector of covariate means in the sample, $\mu$ is the vecto
 \end{align}
 where $\boldsymbol{X_i}$ is an $N$ by $P$ matrix of covariates that predict sample selection for each site, and $\boldsymbol{\beta}$ is a vector of coefficients associated with those covariates. Participation for site $i$ will be determined by sampling from a Bernoulli distribution with probability equal to $\pi^P_i$.
 
-
-
-3) Convenience sampling is typical. Give the intuition behind the problem with convenience sampling before stating the formal model. 
-
-
-  Modeling recuriment bias is less straightforward. While self-selection is present as long as sites have the ability to choose whether or not to participate, recruitment bias depends largly on whatever strategy is used for selecting sites in the first place. It can be avoided all together by using empirical sampling techniques such as probability sampling, where the probability that a site will be invited to participate is known and can be accounted for in the analysis. However this is not often feasible in the case of large-scale MRTs. Subsets of schools are likely to be overlooked if samples are too small, or when participation rates are too low. Further, random sampling from a broad population (such as an entire country) is likely to produce samples that are geographically dispersed, creating logistic difficulties for data collection and treatment implementation. As a result, researchers often eschew probability sampling in favor of convenience sampling [@shadishExperimentalQuasiexperimentalDesigns2002; @gerberFieldExperimentsDesign2012]. 
+  Modeling recuriment bias is less straightforward. While self-selection is present as long as sites have the ability to choose whether or not to participate, recruitment bias depends largly on whatever strategy is used for selecting sites in the first place. It can be avoided all together by using empirical sampling techniques such as probability sampling, where the probability that a site will be invited to participate is known and can be accounted for in the outcome analysis. However, this is not often feasible in the case of large-scale MRTs. Subsets of schools are likely to be overlooked if samples are too small, or when participation rates are too low. Further, random sampling from a broad population (such as an entire country) is likely to produce samples that are geographically dispersed, creating logistic difficulties for data collection and treatment implementation. As a result, researchers often eschew probability sampling in favor of convenience sampling [@shadishExperimentalQuasiexperimentalDesigns2002; @gerberFieldExperimentsDesign2012]. 
   
-  Since researchers rarely operationalize and report their process for selecting a convenience sample, the question of what drives recruitement bias, and how to account for it, is left largely open-ended.
+  Since researchers rarely operationalize and report their process for selecting a convenience sample, the question of what drives recruitement bias, and how to model it, is left largely open-ended. As a first step, we will make an extreme assumption that the purpose of convenience sampling is to minimize effort. If we further assume that recruiters have some prior knowledge of how likely schools are to participate if approached, then we can model this selection mechanism as recruiters prioritizing schools with a higher propensity to participate.
   
-  
-  
-  To generate recruitment bias we take an extreme stance that the purpose of a convenience sample is to minimize effort and maximize the sample size. We therefore propose a "low hanging fruit" approach to convenience sampling as a preliminary model. This approach assumes that researchers have some knowledge of how likely each site is to participate, and prioritize easy to recruit sites as a way of maximizing recruitment efficiency. 
-  
-  
-  While there are many other ways to define convenience sampling, we posit this as a first step. Sites are prioritized for recruitment by sequentially sampling from the population of sites using $\pi^P_i$ as a sampling weight. Once a site is added to the list in order of priority, the probability of choosing the next site is proportional to the weights of the remaining items. In this way, sites that have higher values for $\pi^P_i$ are more likely to be recruited earlier on.
-
+  We propose the following "low hanging fruit" approach as a preliminary model for convenience sampling. Sites are prioritized for recruitment by sequentially sampling from the population of sites using $\pi^P_i$ as a sampling weight. Once a site is added to the list in order of priority, the probability of choosing the next site is proportional to the weights of the remaining items. In this way, sites that have higher values for $\pi^P_i$ are more likely to be recruited earlier on.
 
 
 ## Sampling Methods
@@ -412,21 +401,16 @@ SBS is unique in that rankings are directly related to school characteristics an
 Because @tiptonStratifiedSamplingUsing2013 proposed balanced sampling in connection with stratification based on a cluster analysis, we only consider the stratified version, SBS.
 
 # Simulation Study
-In this section we describe the simulation study developed to assess the generalizability of the samples selected by SBS relative to several other sampling methods, and the feasibility with which the sampling methods can be employed. Real data was used to inform the sample frame.
-Selection bias was generated to account for both self selection as well as researcher bias.
 
-## Simulation design
-
+  In this section we describe the simulation study developed to assess the generalizability of the samples selected by SBS relative to several other sampling methods, and the feasibility with which the sampling methods can be employed. A simulation study is the most convenient method for comparing multiple sampling techniques in a controlled environment. The external validity of this study largly rests on our ability to accurately model the participation propensity score. By relying on previous work and real data to inform our model, we hope to maximize how well our results represent reality. Nevertheless, given that various sampling techniques can be represented algorithmically, the relative performance of these methods should still be informative.
 
 ## Data Generation
 
 ### Participation Propensity Score
 
+  The first step was to model the participation propenstiy score (equation \@ref(eq:RGM)) using observed covariate values from extant school data. The set of covariates, $X_i$, consisted of the same variables used in the cluster analysis described in Sample Frame section above. The corresponding coefficients, $B$, were based on work by @fellersDevelopingApproachDetermine2017 who compared 571 elementary schools that participated in IES funded studies to the full population of U.S. elementary schools. The authors reported absolute SMD between the schools that participated and the population. We standardized $X_i$ and used reported SMDs as coefficients in equation \@ref(eq:RGM) to generated $\pi^P_i$ values. The covariates along with the coeficient values are reported in table \@ref(tab:tab-RGM-Pars). We generate different levels of population participation rates by manipulating the intercept values. Since these rates are unknown, we selected parameters for 9 levels of participation rates.
 
-A response generating model (RGM) was developed to simulate self selection. The RGM creates a propensity score for each school that indicates the probability of the school agreeing to participate if targeted by any of the sampling methods. This model assumes that schools can be recruited directly by researchers. Recall equation \@ref(eq:RGM) where $\pi^P_i$ is generated for each site $i$ using a linear transformation of the observed covariates with a logit link function. The set of covariates, $X_i$, was composed of variables described above. The corresponding coefficients, $B$, were based on work by @fellersDevelopingApproachDetermine2017 who compared 571 elementary schools that participated in IES funded studies to the full population of U.S. elementary schools. Absolute SMD between the schools that participated and the population were reported. By standardizing $X_i$ and using the reported SMDs as coefficients, we generated $\pi^P_i$ values that should on average mimic the samples that Fellers studied.
-
-Intercept values were manipulated to generate different levels of population participation rates. Since these rates are unknown, we selected parameters for 9 levels of participation rates. Table \@ref(tab:tab-RGM-Pars) reports the variables, variable codes, and coefficients used in the RGM. Covariate coefficients remained constant across response rates.
-
+ 
 
 
 ```{r tab-RGM-Pars, results = "asis", eval = T}
@@ -453,8 +437,6 @@ data.frame(Intercept = intercepts, RR = names(intercepts), row.names = NULL, str
 ```
 
 
-
-
 ## Analysis
 
 ### Generalizability
@@ -479,7 +461,6 @@ where $s^2$ is the pooled variance across the sample and population:
 In order to assess feasibility, the total number of schools approached to achieve a full sample was tracked. The average number of refusals each sample method resulted in prior to selecting the full sample was calculated across replications. Recruiters expend a lot of resources contacting districts and schools, scheduling meetings and traveling between interested locations. A project with limited resources may not be able to afford to go through a large list of potentially uninterested sites. This measure allows us to compare the difficulty with which a full sample is recruited using each method.
 
 # Results
-
 
 ## Generalizability
 
@@ -585,7 +566,7 @@ tabs$ICC.vs.Coefs %>%
 ```
 
 
-First, figure \@ref(fig:fig-SMD-by-Var-good1) displays six covariates where both ICC values and RGM parameters were high. For these covariates, SBS performed as well as or better than all stratified methods, and all stratified methods performed better than their unstratified counterparts. Figure \@ref(fig:fig-SMD-by-Var-neutral) displays two covariates where both ICC values and RGM parameters were low. SBS seemed to perform slightly better than all other methods, however all methods performed well across all population participation rates. 
+First, figure \@ref(fig:fig-SMD-by-Var-good1) displays six covariates where both ICC values and response generating model parameters were high. For these covariates, SBS performed as well as or better than all stratified methods, and all stratified methods performed better than their unstratified counterparts. Figure \@ref(fig:fig-SMD-by-Var-neutral) displays two covariates where both ICC values and response generating model parameters were low. SBS seemed to perform slightly better than all other methods, however all methods performed well across all population participation rates. 
 
 
 
@@ -660,7 +641,7 @@ sSMDplot %>%
 
 ```
 
-Figure \@ref(fig:fig-SMD-by-Var-good2) reports the first set of unexpected results. For three covariates, stratified random sampling and stratified convenience sampling outperform their unstratified counterparts. However, for district size, SBS seems to perform more poorly as the population participation rate increases. For suburban and town/rural indicators, this is the only time where SBS performs poorly using the SMD criteria, but only in lower population participation rates. Examining table \@ref(tab:tab-ICC-Pars) suggests that this pattern emerges when ICC values are moderate and RGM parameters either high or low.
+Figure \@ref(fig:fig-SMD-by-Var-good2) reports the first set of unexpected results. For three covariates, stratified random sampling and stratified convenience sampling outperform their unstratified counterparts. However, for district size, SBS seems to perform more poorly as the population participation rate increases. For suburban and town/rural indicators, this is the only time where SBS performs poorly using the SMD criteria, but only in lower population participation rates. Examining table \@ref(tab:tab-ICC-Pars) suggests that this pattern emerges when ICC values are moderate and response generating model parameters either high or low.
 
 
 (ref:fig-SMD-by-Var-good2-caption) Good balance for stratified methods. Dotted horizontal line indicates a .25 cutoff.
@@ -690,7 +671,7 @@ sSMDplot %>%
 
 ```
 
-Finally, figure \@ref(fig:fig-SMD-by-Var-bad) reports the second set of unexpected results. For two covariates, SBS seems to perform well. However, stratified random sampling and stratified convenience sampling perform worse than their unstratified counterparts. For % black SBS performance also seems to slightly degrade as population participation rates increase. Examining table \@ref(fig:tab-ICC-Pars) suggests that this pattern emerges when ICC values close to zero and RGM parameters are moderate or higher
+Finally, figure \@ref(fig:fig-SMD-by-Var-bad) reports the second set of unexpected results. For two covariates, SBS seems to perform well. However, stratified random sampling and stratified convenience sampling perform worse than their unstratified counterparts. For % black SBS performance also seems to slightly degrade as population participation rates increase. Examining table \@ref(fig:tab-ICC-Pars) suggests that this pattern emerges when ICC values close to zero and response generating model parameters are moderate or higher
 
 (ref:fig-SMD-by-Var-bad-caption) Poor balance for stratified methods. Dotted horizontal line indicates a .25 cutoff.
 
