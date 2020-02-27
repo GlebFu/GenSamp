@@ -270,7 +270,7 @@ if(saveFigs) save.figures("Intro - Cluster Size")
 
 ```
 
-```{r fig-k-plots, fig.width = 7, fig.height = 6, out.width = "0.7\\linewidth", fig.pos = "tbp", fig.cap = "Plots used to determine value for $k$. (a) Calinski-Harabasz index; peaks indicate better fit. (b) Ratio of between cluster sum of squares to total cluster sum of squares; horizontal line indicates cutoff of .8, vertical line indicates minimum number of clusters needed to achieve cutoff. (c) Sampling requirements for each cluster given proportional allocation; horizontal line indicates a cluster sample size requirement of 5 schools."}
+```{r fig-k-plots, fig.width = 7, fig.height = 6, out.width = "1\\linewidth", fig.pos = "tbp", fig.cap = "Plots used to determine value for $k$. (a) Calinski-Harabasz index; peaks indicate better fit. (b) Ratio of between cluster sum of squares to total cluster sum of squares; horizontal line indicates cutoff of .8, vertical line indicates minimum number of clusters needed to achieve cutoff. (c) Sampling requirements for each cluster given proportional allocation; horizontal line indicates a cluster sample size requirement of 5 schools."}
 
 # plot_grid(plotlist = plt.k, 
 #           labels=c("(a)", "(b)", "(c)"), 
