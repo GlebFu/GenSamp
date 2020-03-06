@@ -326,9 +326,9 @@ where $Z_i = 1$ if site $i$ is recruited into the sample and $Z_i = 0$ otherwise
 
 Next we ranked each site within a stratum using a distance measure, with sites closer to the "center" of the strata ranked higher. We calculated the weighted Euclidean distance to the mean of each covariate:
 \begin{align} \label{eq:euclid}
-d_{ij} = \sqrt{\sum^p_{h=1}w_h[X_{hij} - E(X_h|j)]^2}
+d_{ij} = \sqrt{\sum^p_{h=1}w_h(X_{hij} - \mu_{hj})^2}
 \end{align}
-where $w_h$ is the weight assigned to covariate $X_h$, $E(X_h|j)$ is the population mean of covariate $h$ in stratum $j$, and $X_{hij}$ is the value of covariate $h$ for site $i$ in stratum $j$.\JEP{Need to clean up this notation so that $X$ has a consistent set of subscripts.}\GF{Lets discuss} As with generating the strata, different weights can be used such that distances depend more heavily on covariates thought to be more related to treatment effect heterogeneity. To weigh covariates equally, we set the weight weight of a covariate to its precision such that $w_h = 1/V(X_h)$. We then used the ranked list to prioritize sites for recruitment, beginning with the highest ranked sites. If a site was unavailable or refused to participate, a recruitment attempt was made with the next highest ranked site until $n_j$ sites agreed to participate.
+where $w_h$ is the weight assigned to covariate $X_h$, $\mu_{hj}$ is the population mean of covariate $h$ in stratum $j$, and $X_{hij}$ is the value of covariate $h$ for site $i$ in stratum $j$. As with generating the strata, different weights can be used such that distances depend more heavily on covariates thought to be more related to treatment effect heterogeneity. To weigh covariates equally, we set the weight weight of a covariate to the inverse of its population variance as $w_h = 1/\sigma^2_h$. We then used the ranked list to prioritize sites for recruitment, beginning with the highest ranked sites. If a site was unavailable or refused to participate, a recruitment attempt was made with the next highest ranked site until $n_j$ sites agreed to participate.
 
 ## Advantages and Limitations
 
@@ -346,7 +346,7 @@ In this section we develop the framework for designing a simulation study of rec
 
 ## Framework for Generalizability
 
-Following the framework developed by @tiptonStratifiedSamplingUsing2013, we begin with a data set enumerating a population of $N$ sites (schools), indexed as $i = 1 ... N$. Each site also has a vector of observed characteristics $X_i$ of length $P$. The covariates are a mixture of continuous, binary, and categorical data. The goal is to select a sample of $n$ sites such that there is balance along $X_i$ between the sample and the population, indicating that the population is compositionally represented by the sample. We measure balance using the standardized mean difference ($SMD$) between the sample and population for a given covariate. $SMD$ is calculated as 
+Following the framework developed by @tiptonStratifiedSamplingUsing2013, we begin with a data set enumerating a population of $N$ sites (schools), indexed as $i = 1 ... N$. Each site also has a vector of observed characteristics $X_i$ of length $p$. The covariates are a mixture of continuous, binary, and categorical data. The goal is to select a sample of $n$ sites such that there is balance along $X_i$ between the sample and the population, indicating that the population is compositionally represented by the sample. We measure balance using the standardized mean difference ($SMD$) between the sample and population for a given covariate. $SMD$ is calculated as 
 
 \begin{align} \label{eq:SMD}
 SMD = \frac{\bar{X}-\mu}{\sigma}
@@ -456,18 +456,33 @@ data.frame(Intercept = intercepts, RR = names(intercepts), row.names = NULL, str
 
 There are several methods to quantify how generalizable a sample is to a target population. One common method is to compare the sample to the population on a range of covariates by examining SMDs as shown in equation \@ref(eq:SMD). This method is limited as it only provides us with a measure of how close the sample means are to the population means. To have true generalizability, sample variance must also be representative of the population variance. Therefore, in addition to SMDs we also estimated the generalizability index [$B$;@tiptonHowGeneralizableYour2014]. 
 
-The generalizability index is bounded between 0 and 1, with 0 indicating no overlap between the sample and the population, and 1 indicating the sample is representative of the population. First all sites in the population are divided into $b$ bins. Letting $N_j$ be the number of population units in bin $j$ and $n_j$ be the number of sample units in bin $j$, we calculate $B$ as:
+The generalizability index is bounded between 0 and 1, with 0 indicating no overlap between the sample and the population, and 1 indicating the sample is representative of the population. 
+
 \begin{align}
-B = \sum^b_{j=1}\sqrt{\frac{N_j n_j}{N n}}
+B = \int_{\pi_{min}-3h_{max}}^{\pi_{max}-3h_{max}}\sqrt{\hat{f}_s(z)\hat{f}_p(z)}dz
 \end{align}
-Selecting the correct number of bins is important, as too many bins will underestimate the similarity between distributions, and too few will overestimate. @tiptonHowGeneralizableYour2014 recommends generating equal bins of size $h$ calculated as
+
+where $\hat{f}_s(z)$ is a guassian kernel density estimate of sample distribution of propensity scores using bandwith $h_s$, and $\hat{f}_p(z)$ is a guassian kernel density estimate of population distribution of p-scores using bandwith $h_p$. We calculate the bandwith $h$ for the population or sample as follows:
+
+
 \begin{align}
-h = 1.06s(N+n)^{-1/5}
+h(\pi_i,...,\pi_n) = \sigma_{\pi}(\frac{4}{3n})^{1/5}
 \end{align}
-where $s^2$ is the pooled variance across the sample and population:
-\begin{align}
-s^2 = \frac{(n - 1)s^2_s + (N + 1)s^2_p}{(N + n - 2)}.
-\end{align}\JEP{Is this how we determined $h$?}\GF{Lets discuss}
+
+where $\sigma_{\pi}$ is the variance of the propensity scores. \GF{Does this look right? And should it be $\pi_{max}+3h_{max}$?}
+
+<!-- First all sites in the population are divided into $b$ bins. Letting $N_j$ be the number of population units in bin $j$ and $n_j$ be the number of sample units in bin $j$, we calculate $B$ as: -->
+<!-- \begin{align} -->
+<!-- B = \sum^b_{j=1}\sqrt{\frac{N_j n_j}{N n}} -->
+<!-- \end{align} -->
+<!-- Selecting the correct number of bins is important, as too many bins will underestimate the similarity between distributions, and too few will overestimate. @tiptonHowGeneralizableYour2014 recommends generating equal bins of size $h$ calculated as -->
+<!-- \begin{align} -->
+<!-- h = 1.06s(N+n)^{-1/5} -->
+<!-- \end{align} -->
+<!-- where $s^2$ is the pooled variance across the sample and population: -->
+<!-- \begin{align} -->
+<!-- s^2 = \frac{(n - 1)s^2_s + (N + 1)s^2_p}{(N + n - 2)}. -->
+<!-- \end{align}\JEP{Is this how we determined $h$?}\GF{Lets discuss} -->
 
 ### Feasibility
 
@@ -697,7 +712,7 @@ tabs$ICC.vs.Coefs %>%
 
 ### Recruitment Attempts
 
-Figure \@ref(fig:fig-responses)a reports the total number of units that needed to be contacted to recruit a full sample of 60 schools across population participation rates for all sampling methods. Figure \@ref(fig:fig-responses)b reports the percent of schools that agreed to participate across population participation rates for all sampling methods. Differences between sampling methods along these two measures were substantial at lower participation rates. As participation rates increased, the differences decreased exponentially and became negligible. It is important to note that the magnitudes of these results are quite extreme. This is likely due to some misspecification on the part of the simulation either in the response generating model parameters or the population participation rates. Rather than looking at the raw values, a more meaningful interpretation would be to compare the performance of the models relative to each other.
+Figure \@ref(fig:fig-responses)a reports the total number of units that needed to be contacted to recruit a full sample of 60 schools across population participation rates for all sampling methods. Figure \@ref(fig:fig-responses)b reports the percent of schools that agreed to participate across population participation rates for all sampling methods. Differences between sampling methods along these two measures were substantial at lower participation rates. As participation rates increased, the differences decreased exponentially and became negligible. It is important to note that the magnitudes of these results are quite extreme. This is likely due to some misspecification on the part of the simulation either in the response generating model parameters or the population participation rates. Rather than looking at the raw values, a more meaningful interpretation would be to compare the performance of the models relative to each other. Overall, UCS required the least "effort" to recruit a full sample, followed by URS and SCS, SRS, and finally SBS.
 
 ```{r fig-responses, fig.pos = "tb", fig.width = 9, fig.height = 7, fig.cap = "Sample recruitment statistics and response rates. Plot (a) shows the total number of units contacted to achieve a full sample of 60 schools. Plot (b) shows the percent of schools that agreed to participate when recruited."}
 
@@ -761,32 +776,6 @@ plot_grid(plotlist = plt.feas,
 
 ```
 
-Overall, UCS required the least "effort" to recruit a full sample, followed by URS and SCS, SRS, and finally SBS. Figure \@ref(fig:fig-comp) plots proportional relative difficult of the models to each other.\JEP{Having a hard time deciphering this figure. Is it redundant with Figure 9?}\GF{Yes, this is my attempt at examinig relative performance rather than looking at the raw values. I'm fine with deleting this figure and paragraph if it does more harm than good} At a population response rate of 10%, SBS required approximately 22 times the number of schools to be contacted compared to UCS. Relative to URS, SBS required about 7 times as many recruitment attempts. The 10% response rate is likely a severe underestimate of the true population response rate\JEP{Likely? How do you know?} and should therefore be interpreted as an absolute worst case.
-
-```{r fig-comp, fig.pos = "tb", fig.width = 9, fig.height = 5, fig.cap = "Proportionate comparisons of difficulties between models. The straight horizontal line is the focus of comparison in each panel."}
-tab.feas.comp <- tab.feas %>%
-  filter(measure %in% c("sch.contacted")) %>%
-  select(-Sampling, -Clustering) %>%
-  spread(key = sample_method, value = value) %>%
-  right_join(tab.feas %>% filter(measure == "sch.contacted")) %>%
-  gather(key = Comp.Method, value = Comp.Value, Stratified_BS:Unstratified_RS) %>%
-  mutate(Comp.Times = value / Comp.Value) 
-
-tab.feas.comp %>%
-  # filter(Comp.Method != sample_method) %>%
-  ggplot(aes(x = RR, y = Comp.Times, group = sample_method, color = Sampling, linetype = Clustering)) +
-  geom_line() +
-  facet_wrap(~ Comp.Method, scales = "free") +
-  theme_apa() +
-  labs(y = "Factor",
-       x = "Population Response Rate") +
-  scale_x_continuous(breaks = seq(10, 90, 20)) + 
-  (if (grey.plots) {scale_colour_grey(start = 0, end = .7)}) +
-  theme(strip.background = element_blank(), 
-        strip.text.x = element_blank())
-
-
-```
 
 ```{r fig-units-contacted, fig.pos = "tb", fig.width = 7, fig.height = 5, fig.cap = "Average number of schools contacted to achieve $N = 60$", eval = F}
 
@@ -854,7 +843,7 @@ if(saveFigs) save.figures("Results - Response Rates")
 We calculated the Gini coefficient for each sampling method to examine the equality of sampling probabilities across methods.\JEP{Need to explain the calculations in the methods section. Then start this paragraph by explaining why the reader should care about this.} Figure \@ref(fig:fig-gini) displays these for each sampling method across population participation rates. A coefficient of 1 indicates substantial sampling inequality. In the context of the simulation, a high Gini coefficient indicates that across iterations, only a small subset of the population was ever actually recruited.
   Several trends emerged in this analysis. As population participation rates increased, inequality increased when using SBS, but decreased when using any other method. These four other methods also performed consistently relative to one another, with SRS resulting in the least amount of sampling inequality, followed by URS, SCS and UCS. As population rates increased, differences between stratified and unstratified versions of sampling methods seemed to decrease. This finding suggests that stratifying the population results in a larger potential sampling pool when the overall population response rate is low. 
 
-\JEP{Discuss the more detailed figure with cumulative probability plots, or move it to the supplementary materials and note as such.}\GF{I think this should go into supplementary metrials. How should we do that?}
+
 
 ```{r fig-gini, fig.pos = "tb", fig.width = 7, fig.height = 5, fig.cap = "Gini coefficient across participation response rates for each sampling method. A coefficient of 1 indicates major inequality in sampling probability."}
 df.gini.coef <- df.gini.count %>%
@@ -879,22 +868,7 @@ df.gini.coef %>%
 
 ```
 
-```{r fig-gini-curve, fig.pos = "p", fig.width = 10, fig.height = 6, fig.cap = "Cumulative probability plot and Gini coefficients representing the inequality of school sampling across sampling methods and population response rates.", fig.env = "sidewaysfigure"}
 
-df.gini.count %>%
-  # filter(RR == "RR_90") %>%
-  # filter(sample_method == "Unstratified_RS") %>%
-  ggplot(aes(x = c.prop.pop, y = c.prop.sel, group = sample_method, color = Sampling, linetype = Clustering)) +
-  geom_line() +
-  geom_abline(slope = 1, intercept = 0, linetype = "dotted") +
-  geom_label(aes(label = gini, x = x.pos, y = y.pos), 
-             data = df.gini.coef, size = 3) +
-  facet_wrap(~RR) + 
-  (if (grey.plots) {scale_colour_grey(start = 0, end = .7)}) +
-  labs(x = "Cumulative proportion of population",
-         y = "Cumulative percentage of times sampled") +
-  theme_apa()
-```
 
 ## Summary of Trends
 
@@ -937,6 +911,55 @@ Further work also needs to examine the impact of these sampling methods on the b
 Our results can be extrapolated to effect estimation only to the extent that there is complete overlap between covariates that predict sample selection and treatment heterogeneity.\JEP{I don't follow this reasoning.}\GF{I'm trying to say that if pariticpation and heterogeneity are predicted by the same covariates then the relative performance of our models in selecting a balanced sample should mirror the relative performance of our models in getting an unbiased estimate of treatment effect. If that's not true I'm fine with dropping} This is unlikely to be the case in reality, which further complicates the specification of the cluster analysis. How should covariates be weighed relative to each other depending on whether they predict participation, differences in treatment effects, or some combination of both? To address this our work must be extended to study the relationship between sampling methods and bias in treatment effect estimation.
 
 Large scale MRTs are expensive to implement, and resource allocation for such studies presents many difficult trade-offs. Researchers who wish to invest in robust recruitment strategies to amplify the impact and relevance of of their work should be better equipped to anticipate the costs and benefits of various sampling strategies. We hope that by showing the relative performance of these sampling methods, and by demonstrating the implementation of stratified sampling, we have contributed to future researchers being better informed in making these decisions.
+
+# Online Appendix
+
+ Figure \@ref(fig:fig-comp) plots proportional relative difficult of the models to each other.\JEP{Having a hard time deciphering this figure. Is it redundant with Figure 9?}\GF{Yes, this is my attempt at examinig relative performance rather than looking at the raw values. I'm fine with deleting this figure and paragraph if it does more harm than good} At a population response rate of 10%, SBS required approximately 22 times the number of schools to be contacted compared to UCS. Relative to URS, SBS required about 7 times as many recruitment attempts. The 10% response rate is likely a severe underestimate of the true population response rate\JEP{Likely? How do you know?} and should therefore be interpreted as an absolute worst case.
+
+```{r fig-comp, fig.pos = "tb", fig.width = 9, fig.height = 5, fig.cap = "Proportionate comparisons of difficulties between models. The straight horizontal line is the focus of comparison in each panel."}
+tab.feas.comp <- tab.feas %>%
+  filter(measure %in% c("sch.contacted")) %>%
+  select(-Sampling, -Clustering) %>%
+  spread(key = sample_method, value = value) %>%
+  right_join(tab.feas %>% filter(measure == "sch.contacted")) %>%
+  gather(key = Comp.Method, value = Comp.Value, Stratified_BS:Unstratified_RS) %>%
+  mutate(Comp.Times = value / Comp.Value) 
+
+tab.feas.comp %>%
+  # filter(Comp.Method != sample_method) %>%
+  ggplot(aes(x = RR, y = Comp.Times, group = sample_method, color = Sampling, linetype = Clustering)) +
+  geom_line() +
+  facet_wrap(~ Comp.Method, scales = "free") +
+  theme_apa() +
+  labs(y = "Factor",
+       x = "Population Response Rate") +
+  scale_x_continuous(breaks = seq(10, 90, 20)) + 
+  (if (grey.plots) {scale_colour_grey(start = 0, end = .7)}) +
+  theme(strip.background = element_blank(), 
+        strip.text.x = element_blank())
+
+
+```
+
+\JEP{Discuss the more detailed figure with cumulative probability plots.}
+
+```{r fig-gini-curve, fig.pos = "p", fig.width = 10, fig.height = 6, fig.cap = "Cumulative probability plot and Gini coefficients representing the inequality of school sampling across sampling methods and population response rates.", fig.env = "sidewaysfigure"}
+
+df.gini.count %>%
+  # filter(RR == "RR_90") %>%
+  # filter(sample_method == "Unstratified_RS") %>%
+  ggplot(aes(x = c.prop.pop, y = c.prop.sel, group = sample_method, color = Sampling, linetype = Clustering)) +
+  geom_line() +
+  geom_abline(slope = 1, intercept = 0, linetype = "dotted") +
+  geom_label(aes(label = gini, x = x.pos, y = y.pos), 
+             data = df.gini.coef, size = 3) +
+  facet_wrap(~RR) + 
+  (if (grey.plots) {scale_colour_grey(start = 0, end = .7)}) +
+  labs(x = "Cumulative proportion of population",
+         y = "Cumulative percentage of times sampled") +
+  theme_apa()
+```
+
 
 \newpage
 

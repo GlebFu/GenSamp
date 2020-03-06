@@ -136,7 +136,7 @@ In order for educational research to be informative to policy makers, studies mu
 \hypertarget{introduction}{%
 \section{Introduction}\label{introduction}}
 
-The multi-site randomized trial (MRT) has become a common design for evaluating the effectiveness of educational interventions. An MRT is a randomized control trial (RCT) that takes place across multiple distinct sites (e.g., school districts, medical clinics, or geographic areas), with random assignment taking place either at the site or unit level. In education research, implementing an MRT might entail recruiting multiple schools in each of several districts. Once a sample of sites is recruited, students, teachers, classes or whole schools are randomly assigned either to receive an intervention (treatment group) or to continue business as usual (control group).
+The multi-site randomized trial (MRT) has become a common design for evaluating the effectiveness of educational interventions. An MRT is a randomized control trial (RCT) that takes place across multiple distinct sites (e.g., school districts, medical clinics, or geographic areas), with random assignment taking place either at the site or unit level. In education research, implementing an MRT might entail recruiting multiple schools in each of several districts. Once a sample of schools is recruited, students, teachers, classes or whole schools are randomly assigned either to receive an intervention (treatment group) or to continue business as usual (control group).
 
 The advantage of an MRT over a single-site RCT is that it maintains the high level of internal validity via randomized treatment assignment, while also supporting a greater degree of external validity by measuring cross-site variability. Ostensibly, this allows effect estimates to generalize to a larger population than estimates from a single-site design (Raudenbush \& Liu, 2000). However, the ambiguity of how this larger population is defined, and the overall generalizability of large-scale MRTs, has increasingly come under scrutiny.
 
@@ -197,7 +197,7 @@ We sourced the characteristics of the sample frame from the Common Core of Data 
 \hypertarget{stratification}{%
 \subsection{Stratification}\label{stratification}}
 
-Sample stratification is commonly used in survey sampling and large-scale experiments to reduce the variance of an estimate. Often this is done with one or two covariates that lend themselves to categorization (Lohr 1999). Since our purpsoe is to reduce bias in the estimate by controling for potential moderators, we will require a far larger number of covaraites of varying complexity. Traditional stratification at this scale would result in too many strata to handle and overly complicate the recruitment process.
+Sample stratification is commonly used in survey sampling and large-scale experiments to reduce the variance of an estimate. Often this is done with one or two covariates that lend themselves to categorization (Lohr 1999). Since our purpose is to reduce bias in the estimate by controling for potential moderators, we will require a far larger number of covaraites of varying complexity. Traditional stratification at this scale would result in too many strata to handle and an overly complicated recruitment process..
 
 Instead, a dimension reduction tool is used to condense the population into smaller set of homogeneous strata. Per Tipton (2013b)'s original recommendation, we implement k-means clustering to partition the population into a pre-determined number of strata. This requires selecting a distance metric, specifying the number of strata, and generating the strata. All analyses were performed in R (R Core Team, 2018).
 
@@ -223,7 +223,7 @@ Next we used the \emph{kmeans} function to generate clusters, which employs an o
 
 Selecting an appropriate value for \(k\) is one of the most difficult problems in cluster analysis (Steinley, 2006). Tipton (2013b) states that both empirical and practical criteria should be used in selecting \(k\). Hennig and Liao (2013) also argue that the method of selecting \(k\) should depend on the context of the clustering, framing the issue as one of obtaining an appropriate subject-matter-dependent definition rather than a statistical estimation.
 
-Proportional allocation dictats that each stratum should contribute a number of units to the full sample that is proportional to the size of the strata. Having unequal sized strata means that recruiters will need to focus more on larger strata. Generating a larger set of strata would result in greater homogeneity within each stratum, however it may also be more difficult to manage for recruiters. For instance, if refusal and non-response rates are fairly high, having fewer sites spread across more strata may make it difficult to adequately recruit from all strata. Resource constraints (e.g.~time, funding, recruiters) may also be a factor in the number of strata selected.
+Proportional allocation dictates that each stratum should contribute a number of units to the full sample that is proportional to the size of the strata. Having unequal sized strata means that recruiters will need to focus more on larger strata. Generating a larger set of strata would result in greater homogeneity within each stratum, however it may also be more difficult to manage for recruiters. For instance, if refusal and non-response rates are fairly high, having fewer sites spread across more strata may make it difficult to adequately recruit from all strata. Resource constraints (e.g.~time, funding, recruiters) may also be a factor in the number of strata selected.
 
 With these considerations in mind, we examined three criteria: (1) a generalized form of the Calinski-Harabasz index (Cali\a'nski \& Harabasz, 1974) proposed by Hennig and Liao (2013), (2) the proportion of between-cluster variance as recommended by Tipton (2013b), and (3) the practicality of sampling from fewer clusters. Our strategy was to perform the analysis several times for each value of \(k\) and compare all performance criteria for each set of strata generated (Figure \ref{fig:fig-k-plots}).
 
@@ -255,9 +255,9 @@ where \(Z_i = 1\) if site \(i\) is recruited into the sample and \(Z_i = 0\) oth
 
 Next we ranked each site within a stratum using a distance measure, with sites closer to the \enquote{center} of the strata ranked higher. We calculated the weighted Euclidean distance to the mean of each covariate:
 \begin{align} \label{eq:euclid}
-d_{ij} = \sqrt{\sum^p_{h=1}w_h[X_{hij} - E(X_h|j)]^2}
+d_{ij} = \sqrt{\sum^p_{h=1}w_h(X_{hij} - \mu_{hj})^2}
 \end{align}
-where \(w_h\) is the weight assigned to covariate \(X_h\), \(E(X_h|j)\) is the population mean of covariate \(h\) in stratum \(j\), and \(X_{hij}\) is the value of covariate \(h\) for site \(i\) in stratum \(j\).\todo[color=blue!20]{Need to clean up this notation so that $X$ has a consistent set of subscripts.}\todo[color=orange]{Lets discuss} As with generating the strata, different weights can be used such that distances depend more heavily on covariates thought to be more related to treatment effect heterogeneity. To weigh covariates equally, we set the weight weight of a covariate to its precision such that \(w_h = 1/V(X_h)\). We then used the ranked list to prioritize sites for recruitment, beginning with the highest ranked sites. If a site was unavailable or refused to participate, a recruitment attempt was made with the next highest ranked site until \(n_j\) sites agreed to participate.
+where \(w_h\) is the weight assigned to covariate \(X_h\), \(\mu_{hj}\) is the population mean of covariate \(h\) in stratum \(j\), and \(X_{hij}\) is the value of covariate \(h\) for site \(i\) in stratum \(j\). As with generating the strata, different weights can be used such that distances depend more heavily on covariates thought to be more related to treatment effect heterogeneity. To weigh covariates equally, we set the weight weight of a covariate to the inverse of its population variance as \(w_h = 1/\sigma^2_h\). We then used the ranked list to prioritize sites for recruitment, beginning with the highest ranked sites. If a site was unavailable or refused to participate, a recruitment attempt was made with the next highest ranked site until \(n_j\) sites agreed to participate.
 
 \hypertarget{advantages-and-limitations}{%
 \subsection{Advantages and Limitations}\label{advantages-and-limitations}}
@@ -278,7 +278,7 @@ In this section we develop the framework for designing a simulation study of rec
 \hypertarget{framework-for-generalizability}{%
 \subsection{Framework for Generalizability}\label{framework-for-generalizability}}
 
-Following the framework developed by Tipton (2013b), we begin with a data set enumerating a population of \(N\) sites (schools), indexed as \(i = 1 ... N\). Each site also has a vector of observed characteristics \(X_i\) of length \(P\). The covariates are a mixture of continuous, binary, and categorical data. The goal is to select a sample of \(n\) sites such that there is balance along \(X_i\) between the sample and the population, indicating that the population is compositionally represented by the sample. We measure balance using the standardized mean difference (\(SMD\)) between the sample and population for a given covariate. \(SMD\) is calculated as
+Following the framework developed by Tipton (2013b), we begin with a data set enumerating a population of \(N\) sites (schools), indexed as \(i = 1 ... N\). Each site also has a vector of observed characteristics \(X_i\) of length \(p\). The covariates are a mixture of continuous, binary, and categorical data. The goal is to select a sample of \(n\) sites such that there is balance along \(X_i\) between the sample and the population, indicating that the population is compositionally represented by the sample. We measure balance using the standardized mean difference (\(SMD\)) between the sample and population for a given covariate. \(SMD\) is calculated as
 
 \begin{align} \label{eq:SMD}
 SMD = \frac{\bar{X}-\mu}{\sigma}
@@ -408,18 +408,19 @@ Urban & 0.43\\
 
 There are several methods to quantify how generalizable a sample is to a target population. One common method is to compare the sample to the population on a range of covariates by examining SMDs as shown in equation \eqref{eq:SMD}. This method is limited as it only provides us with a measure of how close the sample means are to the population means. To have true generalizability, sample variance must also be representative of the population variance. Therefore, in addition to SMDs we also estimated the generalizability index (\(B\); Tipton, 2014).
 
-The generalizability index is bounded between 0 and 1, with 0 indicating no overlap between the sample and the population, and 1 indicating the sample is representative of the population. First all sites in the population are divided into \(b\) bins. Letting \(N_j\) be the number of population units in bin \(j\) and \(n_j\) be the number of sample units in bin \(j\), we calculate \(B\) as:
+The generalizability index is bounded between 0 and 1, with 0 indicating no overlap between the sample and the population, and 1 indicating the sample is representative of the population.
+
 \begin{align}
-B = \sum^b_{j=1}\sqrt{\frac{N_j n_j}{N n}}
+B = \int_{\pi_{min}-3h_{max}}^{\pi_{max}-3h_{max}}\sqrt{\hat{f}_s(z)\hat{f}_p(z)}dz
 \end{align}
-Selecting the correct number of bins is important, as too many bins will underestimate the similarity between distributions, and too few will overestimate. Tipton (2014) recommends generating equal bins of size \(h\) calculated as
+
+where \(\hat{f}_s(z)\) is a guassian kernel density estimate of sample distribution of propensity scores using bandwith \(h_s\), and \(\hat{f}_p(z)\) is a guassian kernel density estimate of population distribution of p-scores using bandwith \(h_p\). We calculate the bandwith \(h\) for the population or sample as follows:
+
 \begin{align}
-h = 1.06s(N+n)^{-1/5}
+h(\pi_i,...,\pi_n) = \sigma_{\pi}(\frac{4}{3n})^{1/5}
 \end{align}
-where \(s^2\) is the pooled variance across the sample and population:
-\begin{align}
-s^2 = \frac{(n - 1)s^2_s + (N + 1)s^2_p}{(N + n - 2)}.
-\end{align}\todo[color=blue!20]{Is this how we determined $h$?}\todo[color=orange]{Lets discuss}
+
+where \(\sigma_{\pi}\) is the variance of the propensity scores. \todo[color=orange]{Does this look right? And should it be $\pi_{max}+3h_{max}$?}
 
 \hypertarget{feasibility}{%
 \subsubsection{Feasibility}\label{feasibility}}
@@ -492,20 +493,12 @@ We noted several interesting relationships when examining the groups of covariat
 \hypertarget{recruitment-attempts}{%
 \subsubsection{Recruitment Attempts}\label{recruitment-attempts}}
 
-Figure \ref{fig:fig-responses}a reports the total number of units that needed to be contacted to recruit a full sample of 60 schools across population participation rates for all sampling methods. Figure \ref{fig:fig-responses}b reports the percent of schools that agreed to participate across population participation rates for all sampling methods. Differences between sampling methods along these two measures were substantial at lower participation rates. As participation rates increased, the differences decreased exponentially and became negligible. It is important to note that the magnitudes of these results are quite extreme. This is likely due to some misspecification on the part of the simulation either in the response generating model parameters or the population participation rates. Rather than looking at the raw values, a more meaningful interpretation would be to compare the performance of the models relative to each other.
+Figure \ref{fig:fig-responses}a reports the total number of units that needed to be contacted to recruit a full sample of 60 schools across population participation rates for all sampling methods. Figure \ref{fig:fig-responses}b reports the percent of schools that agreed to participate across population participation rates for all sampling methods. Differences between sampling methods along these two measures were substantial at lower participation rates. As participation rates increased, the differences decreased exponentially and became negligible. It is important to note that the magnitudes of these results are quite extreme. This is likely due to some misspecification on the part of the simulation either in the response generating model parameters or the population participation rates. Rather than looking at the raw values, a more meaningful interpretation would be to compare the performance of the models relative to each other. Overall, UCS required the least \enquote{effort} to recruit a full sample, followed by URS and SCS, SRS, and finally SBS.
 
 \begin{figure}
 \centering
 \includegraphics{GenSamp-Paper_files/figure-latex/fig-responses-1.pdf}
 \caption{\label{fig:fig-responses}Sample recruitment statistics and response rates. Plot (a) shows the total number of units contacted to achieve a full sample of 60 schools. Plot (b) shows the percent of schools that agreed to participate when recruited.}
-\end{figure}
-
-Overall, UCS required the least \enquote{effort} to recruit a full sample, followed by URS and SCS, SRS, and finally SBS. Figure \ref{fig:fig-comp} plots proportional relative difficult of the models to each other.\todo[color=blue!20]{Having a hard time deciphering this figure. Is it redundant with Figure 9?}\todo[color=orange]{Yes, this is my attempt at examinig relative performance rather than looking at the raw values. I'm fine with deleting this figure and paragraph if it does more harm than good} At a population response rate of 10\%, SBS required approximately 22 times the number of schools to be contacted compared to UCS. Relative to URS, SBS required about 7 times as many recruitment attempts. The 10\% response rate is likely a severe underestimate of the true population response rate\todo[color=blue!20]{Likely? How do you know?} and should therefore be interpreted as an absolute worst case.
-
-\begin{figure}
-\centering
-\includegraphics{GenSamp-Paper_files/figure-latex/fig-comp-1.pdf}
-\caption{\label{fig:fig-comp}Proportionate comparisons of difficulties between models. The straight horizontal line is the focus of comparison in each panel.}
 \end{figure}
 
 \hypertarget{inequality-of-selected-samples}{%
@@ -514,17 +507,11 @@ Overall, UCS required the least \enquote{effort} to recruit a full sample, follo
 We calculated the Gini coefficient for each sampling method to examine the equality of sampling probabilities across methods.\todo[color=blue!20]{Need to explain the calculations in the methods section. Then start this paragraph by explaining why the reader should care about this.} Figure \ref{fig:fig-gini} displays these for each sampling method across population participation rates. A coefficient of 1 indicates substantial sampling inequality. In the context of the simulation, a high Gini coefficient indicates that across iterations, only a small subset of the population was ever actually recruited.
 Several trends emerged in this analysis. As population participation rates increased, inequality increased when using SBS, but decreased when using any other method. These four other methods also performed consistently relative to one another, with SRS resulting in the least amount of sampling inequality, followed by URS, SCS and UCS. As population rates increased, differences between stratified and unstratified versions of sampling methods seemed to decrease. This finding suggests that stratifying the population results in a larger potential sampling pool when the overall population response rate is low.
 
-\todo[color=blue!20]{Discuss the more detailed figure with cumulative probability plots, or move it to the supplementary materials and note as such.}\todo[color=orange]{I think this should go into supplementary metrials. How should we do that?}
-
 \begin{figure}
 \centering
 \includegraphics{GenSamp-Paper_files/figure-latex/fig-gini-1.pdf}
 \caption{\label{fig:fig-gini}Gini coefficient across participation response rates for each sampling method. A coefficient of 1 indicates major inequality in sampling probability.}
 \end{figure}
-
-\begin{sidewaysfigure}[p]
-\includegraphics{GenSamp-Paper_files/figure-latex/fig-gini-curve-1} \caption{Cumulative probability plot and Gini coefficients representing the inequality of school sampling across sampling methods and population response rates.}\label{fig:fig-gini-curve}
-\end{sidewaysfigure}
 
 \hypertarget{summary-of-trends}{%
 \subsection{Summary of Trends}\label{summary-of-trends}}
@@ -571,6 +558,23 @@ Further work also needs to examine the impact of these sampling methods on the b
 Our results can be extrapolated to effect estimation only to the extent that there is complete overlap between covariates that predict sample selection and treatment heterogeneity.\todo[color=blue!20]{I don't follow this reasoning.}\todo[color=orange]{I'm trying to say that if pariticpation and heterogeneity are predicted by the same covariates then the relative performance of our models in selecting a balanced sample should mirror the relative performance of our models in getting an unbiased estimate of treatment effect. If that's not true I'm fine with dropping} This is unlikely to be the case in reality, which further complicates the specification of the cluster analysis. How should covariates be weighed relative to each other depending on whether they predict participation, differences in treatment effects, or some combination of both? To address this our work must be extended to study the relationship between sampling methods and bias in treatment effect estimation.
 
 Large scale MRTs are expensive to implement, and resource allocation for such studies presents many difficult trade-offs. Researchers who wish to invest in robust recruitment strategies to amplify the impact and relevance of of their work should be better equipped to anticipate the costs and benefits of various sampling strategies. We hope that by showing the relative performance of these sampling methods, and by demonstrating the implementation of stratified sampling, we have contributed to future researchers being better informed in making these decisions.
+
+\hypertarget{online-appendix}{%
+\section{Online Appendix}\label{online-appendix}}
+
+Figure \ref{fig:fig-comp} plots proportional relative difficult of the models to each other.\todo[color=blue!20]{Having a hard time deciphering this figure. Is it redundant with Figure 9?}\todo[color=orange]{Yes, this is my attempt at examinig relative performance rather than looking at the raw values. I'm fine with deleting this figure and paragraph if it does more harm than good} At a population response rate of 10\%, SBS required approximately 22 times the number of schools to be contacted compared to UCS. Relative to URS, SBS required about 7 times as many recruitment attempts. The 10\% response rate is likely a severe underestimate of the true population response rate\todo[color=blue!20]{Likely? How do you know?} and should therefore be interpreted as an absolute worst case.
+
+\begin{figure}
+\centering
+\includegraphics{GenSamp-Paper_files/figure-latex/fig-comp-1.pdf}
+\caption{\label{fig:fig-comp}Proportionate comparisons of difficulties between models. The straight horizontal line is the focus of comparison in each panel.}
+\end{figure}
+
+\todo[color=blue!20]{Discuss the more detailed figure with cumulative probability plots.}
+
+\begin{sidewaysfigure}[p]
+\includegraphics{GenSamp-Paper_files/figure-latex/fig-gini-curve-1} \caption{Cumulative probability plot and Gini coefficients representing the inequality of school sampling across sampling methods and population response rates.}\label{fig:fig-gini-curve}
+\end{sidewaysfigure}
 
 \newpage
 
