@@ -370,7 +370,9 @@ Since researchers rarely operationalize and report their process for selecting a
 We propose the following "low hanging fruit" approach as a preliminary model for convenience sampling. Sites are prioritized for recruitment by sequentially sampling from the population of sites using $\pi^P_i$ as a sampling weight. Once a site is added to the list in order of priority, the probability of choosing the next site is proportional to the weights of the remaining items. In this way, sites that have higher values for $\pi^P_i$ are more likely to be recruited earlier on.
 
 
-## Sampling Methods\JEP{This section reads like part of the simulation methods. But we haven't explained the simulation study at all yet.}\GF{Lets discuss}
+## Sampling Methods
+
+\JEP{This section reads like part of the simulation methods. But we haven't explained the simulation study at all yet.}\GF{Lets discuss}
 
 Five sampling methods were compared: stratified and unstratified random sampling, stratified and unstratified convenience sampling, and stratified balanced sampling (SBS). We model the sample selection process in two stages. In the first stage, we generated indicators of _potential participation_---that is, whether a school would participate in the trial _if approached for recruitment_. Let $N$ be the total number of schools in the population, and let schools be indexed by $j = 1, ..., N$. We define $E_j$ as a binary indicator that school $j$ will agree to participate if contacted by recruiters, where $E_j = 1$ if the school agrees, and $E_j = 0$ if the school refuses. Each school was checked for approval by sampling from a Bernoulli distribution with probability equal to $\pi^P_j$ for each school $j$
 \begin{equation}
@@ -486,7 +488,11 @@ where $\sigma_{\pi}$ is the variance of the propensity scores. \GF{Does this loo
 
 ### Feasibility
 
-In order to assess feasibility, the total number of schools approached to achieve a full sample was tracked. The average number of refusals each sample method resulted in prior to selecting the full sample was calculated across replications. Recruiters expend a lot of resources contacting districts and schools, scheduling meetings and traveling between interested locations. A project with limited resources may not be able to afford to go through a large list of potentially uninterested sites. This measure allows us to compare the difficulty with which a full sample is recruited using each method.
+To assess feasibility, the total number of schools approached to achieve a full sample was tracked. The average number of refusals each sample method resulted in prior to selecting the full sample was calculated across replications. Recruiters expend a lot of resources contacting districts and schools, scheduling meetings and traveling between interested locations. A project with limited resources may not be able to afford to go through a large list of potentially uninterested sites. This measure allows us to compare the difficulty with which a full sample is recruited using each method.
+
+### Sampling Inequality
+
+To assess sampling inequality, we tracked the frequency with which schools were recruited by each sampling method across iterations and conditions. We then summarised this data by calculating the Gini coeficient for each method. This was done in R using the _Gini_ function from the _ineq_ package (Zeileis 2014). The Gini coeficient is typically used in economics to asess the degree of income inequality by showing the disproportionate distribution of wealth across levels of incomes. Similarly it could be used in the context of sampling by identifying how often under-represented schools are recruited to participate in studies. The Gini index ranges from 0 to 1, with 0 indicating perfect equality, and 1 indicating perfect inequality.
 
 # Results
 
@@ -914,9 +920,10 @@ Large scale MRTs are expensive to implement, and resource allocation for such st
 
 # Online Appendix
 
- Figure \@ref(fig:fig-comp) plots proportional relative difficult of the models to each other.\JEP{Having a hard time deciphering this figure. Is it redundant with Figure 9?}\GF{Yes, this is my attempt at examinig relative performance rather than looking at the raw values. I'm fine with deleting this figure and paragraph if it does more harm than good} At a population response rate of 10%, SBS required approximately 22 times the number of schools to be contacted compared to UCS. Relative to URS, SBS required about 7 times as many recruitment attempts. The 10% response rate is likely a severe underestimate of the true population response rate\JEP{Likely? How do you know?} and should therefore be interpreted as an absolute worst case.
+ Figure \@ref(fig:fig-comp) compares each sampling method to a reference method by plotting the factor of increadsed difficulty, calculated as the number of schools contacted by comparison method divided by the number of schools contacted by reference method. This gives us another perspective on the relative difficulty of each method. The straight horizontal line represents the reference method. 
 
-```{r fig-comp, fig.pos = "tb", fig.width = 9, fig.height = 5, fig.cap = "Proportionate comparisons of difficulties between models. The straight horizontal line is the focus of comparison in each panel."}
+```{r fig-comp, fig.pos = "tb", fig.width = 9, fig.height = 5, fig.cap = "Relative sampling difficulty of each method compared to other methods. The straight horizontal line indicates the reference method being compared to."}
+
 tab.feas.comp <- tab.feas %>%
   filter(measure %in% c("sch.contacted")) %>%
   select(-Sampling, -Clustering) %>%
@@ -934,9 +941,7 @@ tab.feas.comp %>%
   labs(y = "Factor",
        x = "Population Response Rate") +
   scale_x_continuous(breaks = seq(10, 90, 20)) + 
-  (if (grey.plots) {scale_colour_grey(start = 0, end = .7)}) +
-  theme(strip.background = element_blank(), 
-        strip.text.x = element_blank())
+  (if (grey.plots) {scale_colour_grey(start = 0, end = .7)})
 
 
 ```
