@@ -492,7 +492,7 @@ To assess feasibility, the total number of schools approached to achieve a full 
 
 ### Sampling Inequality
 
-To assess sampling inequality, we tracked the frequency with which schools were recruited by each sampling method across iterations and conditions. We then summarised this data by calculating the Gini coeficient for each method. This was done in R using the _Gini_ function from the _ineq_ package (Zeileis 2014). The Gini coeficient is typically used in economics to asess the degree of income inequality by showing the disproportionate distribution of wealth across levels of incomes. Similarly it could be used in the context of sampling by identifying how often under-represented schools are recruited to participate in studies. The Gini index ranges from 0 to 1, with 0 indicating perfect equality, and 1 indicating perfect inequality.
+To assess sampling inequality, we tracked the frequency with which schools were recruited by each sampling method across iterations and conditions. We then summarised this data by calculating the Gini coeficient for each method. This was done in R using the _Gini_ function from the _ineq_ package (Zeileis 2014). The Gini coeficient is typically used in economics to assess the degree of income inequality by showing the disproportionate distribution of wealth across levels of incomes. Similarly it could be used in the context of sampling by identifying how often under-represented schools are recruited to participate in studies. The Gini index ranges from 0 to 1, with 0 indicating perfect equality, and 1 indicating perfect inequality.
 
 # Results
 
@@ -920,6 +920,8 @@ Large scale MRTs are expensive to implement, and resource allocation for such st
 
 # Online Appendix
 
+### Sampling Feasibility
+
  Figure \@ref(fig:fig-comp) compares each sampling method to a reference method by plotting the factor of increadsed difficulty, calculated as the number of schools contacted by comparison method divided by the number of schools contacted by reference method. This gives us another perspective on the relative difficulty of each method. The straight horizontal line represents the reference method. 
 
 ```{r fig-comp, fig.pos = "tb", fig.width = 9, fig.height = 5, fig.cap = "Relative sampling difficulty of each method compared to other methods. The straight horizontal line indicates the reference method being compared to."}
@@ -946,7 +948,10 @@ tab.feas.comp %>%
 
 ```
 
-\JEP{Discuss the more detailed figure with cumulative probability plots.}
+### Sampling Inequality
+
+Figure \@ref(fig:fig-gini-curve) displays the Gini curve and coeficient for all sampling methods across participation rates. The index is calculated by computing the area betwen the diagnal line and the curve. Coeficients of 0 indicate uniform equality across all sampling units, i.e. all schools have an equal oppertunity to be sampled. Coeficients of 1 indicate complete inequality, i.e. very few schools are constantly being sampled across iterations. Overall, stratificiation results in lower inequality. However, since balanced sampling prioritizes schools according to set characteristics, the same schools are likely to be sampled each time. 
+
 
 ```{r fig-gini-curve, fig.pos = "p", fig.width = 10, fig.height = 6, fig.cap = "Cumulative probability plot and Gini coefficients representing the inequality of school sampling across sampling methods and population response rates.", fig.env = "sidewaysfigure"}
 
