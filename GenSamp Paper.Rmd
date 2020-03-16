@@ -371,14 +371,14 @@ Since researchers rarely operationalize and report their process for selecting a
 
 \JEP{This section reads like part of the simulation methods. But we haven't explained the simulation study at all yet.}\GF{Lets discuss}
 
-In this section we propose formal models for the sampling procedures to be incorporated in the simulation study. These models are by no means comprehensive, and by formalizing them in this fashion we hope to make them transparent, reproducible, and more easily modified to fit other circumstances which may be of interstate for study.
+In this section we propose formal models for several sampling procedures. These procedures which will be incorporated in the simulation study, and are by no means comprehensive. By formalizing them in this fashion we hope to make the procedures transparent, reproducible, and modifiable to easily fit other circumstances which may be of interest for study.
 
 We will be comparing 5 sampling methods in the simulation study: stratified and unstratified random sampling, stratified and unstratified convenience sampling, and stratified balanced sampling (SBS). We model the sample selection process in two stages. In the first stage, we generate indicators of _potential participation_---that is, whether a school would participate in the trial _if approached for recruitment_. Let $N$ be the total number of schools in the population, and let schools be indexed by $j = 1, ..., N$. We define $E_j$ as a binary indicator that school $j$ will agree to participate if contacted by recruiters, where $E_j = 1$ if the school agrees, and $E_j = 0$ if the school refuses. Each school is checked for approval by sampling from a Bernoulli distribution with probability equal to $\pi^P_j$ for each school $j$
 \begin{equation}
 \label{eq:Ej}
 E_j \sim B(\pi^P_j)
 \end{equation}
-The potential participation indicators should be generated at the beginning of each iteration and are therefore common across the five sampling methods.
+In this manner, $\pi^P_j$ is constant as it represents a school characteristic, and $E_j$ can vary across iterations.
 
 We model the sampling process as observing the potential participation indicator for schools in a ranked list, where the order in which schools are contacted is determined by a score $S = S_1,...,S_N$. Let $Z_j(S)$ be an indicator whether school $i$ is sampled based on the score $S$. 
 For the unstratified sampling methods, we determined $Z_1(S),...,Z_N(S)$ by sorting schools according to $S$ and selecting the first 60 schools where $E_j = 1$.
