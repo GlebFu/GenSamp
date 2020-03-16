@@ -1,9 +1,9 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.19 (MiKTeX 2.9.6840 64-bit) (preloaded format=pdflatex 2019.2.13)  13 MAR 2020 12:41
+This is pdfTeX, Version 3.14159265-2.6-1.40.19 (MiKTeX 2.9.6840 64-bit) (preloaded format=pdflatex 2018.12.20)  16 MAR 2020 12:06
 entering extended mode
 **./GenSamp-Paper.tex
 (GenSamp-Paper.tex
 LaTeX2e <2018-04-01> patch level 5
-("C:\Program Files\MiKTeX 2.9\tex\latex\apa6\apa6.cls"
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\latex\apa6\apa6.cls
 Document Class: apa6 2018/09/01 v2.33 APA formatting (6th edition)
 ("C:\Program Files\MiKTeX 2.9\tex\latex\base\article.cls"
 Document Class: article 2014/09/29 v1.4h Standard LaTeX document class
@@ -21,7 +21,7 @@ File: size12.clo 2014/09/29 v1.4h Standard LaTeX file (size option)
 \abovecaptionskip=\skip41
 \belowcaptionskip=\skip42
 \bibindent=\dimen102
-) ("C:\Program Files\MiKTeX 2.9\tex\latex\etoolbox\etoolbox.sty"
+) (C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\latex\etoolbox\etoolbox.sty
 Package: etoolbox 2018/08/19 v2.5f e-TeX tools for LaTeX (JAW)
 \etb@tempcnta=\count88
 )
@@ -107,7 +107,7 @@ File: pdftex.def 2018/01/08 v1.0l Graphics/color driver for pdftex
 ))
 \Gin@req@height=\dimen111
 \Gin@req@width=\dimen112
-) ("C:\Program Files\MiKTeX 2.9\tex\latex\booktabs\booktabs.sty"
+) (C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\latex\booktabs\booktabs.sty
 Package: booktabs 2005/04/14 v1.61803 publication quality tables
 \heavyrulewidth=\dimen113
 \lightrulewidth=\dimen114
@@ -126,7 +126,9 @@ Package: booktabs 2005/04/14 v1.61803 publication quality tables
 \@thisruleclass=\count94
 \@lastruleclass=\count95
 \@thisrulewidth=\dimen125
-) ("C:\Program Files\MiKTeX 2.9\tex\latex\threeparttable\threeparttable.sty"
+)
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\latex\threeparttable\threeparttab
+le.sty
 Package: threeparttable 2003/06/13  v 3.0
 \@tempboxb=\box26
 )
@@ -140,9 +142,9 @@ Package: threeparttable 2003/06/13  v 3.0
 \e@level@four@skip=\skip50
 \b@level@five@skip=\skip51
 \e@level@five@skip=\skip52
-("C:\Program Files\MiKTeX 2.9\tex\latex\caption\caption.sty"
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\latex\caption\caption.sty
 Package: caption 2018/10/06 v3.3-154 Customizing captions (AR)
-("C:\Program Files\MiKTeX 2.9\tex\latex\caption\caption3.sty"
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\latex\caption\caption3.sty
 Package: caption3 2018/09/12 v1.8c caption3 kernel (AR)
 Package caption3 Info: TeX engine: e-TeX on input line 64.
 \captionmargin=\dimen126
@@ -171,7 +173,7 @@ LaTeX Font Info:    Redeclaring math alphabet \mathbf on input line 141.
 LaTeX Info: Redefining \bm on input line 207.
 )
 \c@appendix=\count99
-("C:\Program Files\MiKTeX 2.9\tex\latex\fancyhdr\fancyhdr.sty"
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\latex\fancyhdr\fancyhdr.sty
 Package: fancyhdr 2017/06/30 v3.9a Extensive control of page headers and footer
 s
 \f@nch@headwidth=\skip56
@@ -183,7 +185,7 @@ s
 \f@nch@O@erf=\skip62
 \f@nch@O@olf=\skip63
 \f@nch@O@orf=\skip64
-) ("C:\Program Files\MiKTeX 2.9\tex\latex\endfloat\endfloat.sty"
+) (C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\latex\endfloat\endfloat.sty
 Package: endfloat 2018/03/24 v2.6 LaTeX2e package puts figures and tables at en
 d (jdm)
 \c@posttable=\count100
@@ -283,7 +285,10 @@ LaTeX Font Info:    Redeclaring font encoding T1 on input line 48.
 Package: inputenc 2018/04/06 v1.3b Input encoding file
 \inpenc@prehook=\toks24
 \inpenc@posthook=\toks25
-) ("C:\Program Files\MiKTeX 2.9\tex\latex\base\textcomp.sty"
+) (C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\latex\upquote\upquote.sty
+Package: upquote 2012/04/19 v1.3 upright-quote and grave-accent glyphs in verba
+tim
+("C:\Program Files\MiKTeX 2.9\tex\latex\base\textcomp.sty"
 Package: textcomp 2017/04/05 v2.0i Standard LaTeX package
 Package textcomp Info: Sub-encoding information:
 (textcomp)               5 = only ISO-Adobe without \textcurrency
@@ -437,10 +442,7 @@ Package textcomp Info: Setting pplx sub-encoding to TS1/3 on input line 406.
 Package textcomp Info: Setting pplj sub-encoding to TS1/3 on input line 407.
 Package textcomp Info: Setting ptmx sub-encoding to TS1/4 on input line 408.
 Package textcomp Info: Setting ptmj sub-encoding to TS1/4 on input line 409.
-) ("C:\Program Files\MiKTeX 2.9\tex\latex\upquote\upquote.sty"
-Package: upquote 2012/04/19 v1.3 upright-quote and grave-accent glyphs in verba
-tim
-) ("C:\Program Files\MiKTeX 2.9\tex\latex\microtype\microtype.sty"
+)) (C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\latex\microtype\microtype.sty
 Package: microtype 2018/01/14 v2.7a Micro-typographical refinements (RS)
 \MT@toks=\toks26
 \MT@count=\count117
@@ -448,7 +450,9 @@ LaTeX Info: Redefining \textls on input line 793.
 \MT@outer@kern=\dimen142
 LaTeX Info: Redefining \textmicrotypecontext on input line 1339.
 \MT@listname@count=\count118
-("C:\Program Files\MiKTeX 2.9\tex\latex\microtype\microtype-pdftex.def"
+
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\latex\microtype\microtype-pdftex.
+def
 File: microtype-pdftex.def 2018/01/14 v2.7a Definitions specific to pdftex (RS)
 
 LaTeX Info: Redefining \lsstyle on input line 913.
@@ -456,25 +460,9 @@ LaTeX Info: Redefining \lslig on input line 913.
 \MT@outer@space=\skip68
 )
 Package microtype Info: Loading configuration file microtype.cfg.
-("C:\Program Files\MiKTeX 2.9\tex\latex\microtype\microtype.cfg"
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\latex\microtype\microtype.cfg
 File: microtype.cfg 2018/01/14 v2.7a microtype main configuration file (RS)
-)) ("C:\Program Files\MiKTeX 2.9\tex\latex\parskip\parskip.sty"
-Package: parskip 2018-08-24 v2.0a non-zero parskip adjustments
-("C:\Program Files\MiKTeX 2.9\tex\latex\oberdiek\kvoptions.sty"
-Package: kvoptions 2016/05/16 v3.12 Key value format for package options (HO)
-("C:\Program Files\MiKTeX 2.9\tex\generic\oberdiek\ltxcmds.sty"
-Package: ltxcmds 2016/05/16 v1.23 LaTeX kernel commands for general use (HO)
-) ("C:\Program Files\MiKTeX 2.9\tex\generic\oberdiek\kvsetkeys.sty"
-Package: kvsetkeys 2016/05/16 v1.17 Key value parser (HO)
-("C:\Program Files\MiKTeX 2.9\tex\generic\oberdiek\infwarerr.sty"
-Package: infwarerr 2016/05/16 v1.4 Providing info/warning/error messages (HO)
-) ("C:\Program Files\MiKTeX 2.9\tex\generic\oberdiek\etexcmds.sty"
-Package: etexcmds 2016/05/16 v1.6 Avoid name clashes with e-TeX commands (HO)
-Package etexcmds Info: Could not find \expanded.
-(etexcmds)             That can mean that you are not using pdfTeX 1.50 or
-(etexcmds)             that some package has redefined \expanded.
-(etexcmds)             In the latter case, load this package earlier.
-)))) ("C:\Program Files\MiKTeX 2.9\tex\latex\hyperref\hyperref.sty"
+)) ("C:\Program Files\MiKTeX 2.9\tex\latex\hyperref\hyperref.sty"
 Package: hyperref 2018/09/30 v6.88a Hypertext links for LaTeX
 ("C:\Program Files\MiKTeX 2.9\tex\generic\oberdiek\hobsub-hyperref.sty"
 Package: hobsub-hyperref 2016/05/16 v1.14 Bundle oberdiek, subset hyperref (HO)
@@ -482,14 +470,18 @@ Package: hobsub-hyperref 2016/05/16 v1.14 Bundle oberdiek, subset hyperref (HO)
 ("C:\Program Files\MiKTeX 2.9\tex\generic\oberdiek\hobsub-generic.sty"
 Package: hobsub-generic 2016/05/16 v1.14 Bundle oberdiek, subset generic (HO)
 Package: hobsub 2016/05/16 v1.14 Construct package bundles (HO)
-Package hobsub Info: Skipping package `infwarerr' (already loaded).
-Package hobsub Info: Skipping package `ltxcmds' (already loaded).
+Package: infwarerr 2016/05/16 v1.4 Providing info/warning/error messages (HO)
+Package: ltxcmds 2016/05/16 v1.23 LaTeX kernel commands for general use (HO)
 Package hobsub Info: Skipping package `ifluatex' (already loaded).
 Package hobsub Info: Skipping package `ifvtex' (already loaded).
 Package: intcalc 2016/05/16 v1.2 Expandable calculations with integers (HO)
 Package hobsub Info: Skipping package `ifpdf' (already loaded).
-Package hobsub Info: Skipping package `etexcmds' (already loaded).
-Package hobsub Info: Skipping package `kvsetkeys' (already loaded).
+Package: etexcmds 2016/05/16 v1.6 Avoid name clashes with e-TeX commands (HO)
+Package etexcmds Info: Could not find \expanded.
+(etexcmds)             That can mean that you are not using pdfTeX 1.50 or
+(etexcmds)             that some package has redefined \expanded.
+(etexcmds)             In the latter case, load this package earlier.
+Package: kvsetkeys 2016/05/16 v1.17 Key value parser (HO)
 Package: kvdefinekeys 2016/05/16 v1.4 Define keys (HO)
 Package: pdftexcmds 2018/09/10 v0.29 Utility functions of pdfTeX for LuaTeX (HO
 )
@@ -513,6 +505,8 @@ Package: refcount 2016/05/16 v3.5 Data extraction from label references (HO)
 Package: hycolor 2016/05/16 v1.8 Color options for hyperref/bookmark (HO)
 ) ("C:\Program Files\MiKTeX 2.9\tex\latex\oberdiek\auxhook.sty"
 Package: auxhook 2016/05/16 v1.4 Hooks for auxiliary files (HO)
+) ("C:\Program Files\MiKTeX 2.9\tex\latex\oberdiek\kvoptions.sty"
+Package: kvoptions 2016/05/16 v3.12 Key value format for package options (HO)
 )
 \@linkdim=\dimen143
 \Hy@linkcounter=\count119
@@ -526,12 +520,6 @@ Now handling font encoding PD1 ...
 ("C:\Program Files\MiKTeX 2.9\tex\latex\00miktex\hyperref.cfg"
 File: hyperref.cfg 2002/06/06 v1.2 hyperref configuration of TeXLive
 )
-Package hyperref Info: Option `unicode' set `true' on input line 4409.
-("C:\Program Files\MiKTeX 2.9\tex\latex\hyperref\puenc.def"
-File: puenc.def 2018/09/30 v6.88a Hyperref: PDF Unicode definition (HO)
-Now handling font encoding PU ...
-... no UTF-8 mapping file for font encoding PU
-)
 Package hyperref Info: Hyper figures OFF on input line 4535.
 Package hyperref Info: Link nesting OFF on input line 4540.
 Package hyperref Info: Hyper index ON on input line 4543.
@@ -540,7 +528,7 @@ Package hyperref Info: Backreferencing OFF on input line 4555.
 Package hyperref Info: Implicit mode ON; LaTeX internals redefined.
 Package hyperref Info: Bookmarks ON on input line 4788.
 \c@Hy@tempcnt=\count122
-("C:\Program Files\MiKTeX 2.9\tex\latex\url\url.sty"
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\latex\url\url.sty
 \Urlmuskip=\muskip11
 Package: url 2013/09/16  ver 3.4  Verb mode for urls, etc.
 )
@@ -574,14 +562,22 @@ Package uniquecounter Info: New unique counter `rerunfilecheck' on input line 2
 )
 \Hy@SectionHShift=\skip69
 )
-Package hyperref Info: Option `breaklinks' set `true' on input line 36.
+Package hyperref Info: Option `unicode' set `true' on input line 30.
+("C:\Program Files\MiKTeX 2.9\tex\latex\hyperref\puenc.def"
+File: puenc.def 2018/09/30 v6.88a Hyperref: PDF Unicode definition (HO)
+Now handling font encoding PU ...
+... no UTF-8 mapping file for font encoding PU
+)
+Package hyperref Info: Option `breaklinks' set `true' on input line 30.
 ("C:\Program Files\MiKTeX 2.9\tex\latex\oberdiek\grffile.sty"
 Package: grffile 2017/06/30 v1.18 Extended file name support for graphics (HO)
 Package grffile Info: Option `multidot' is set to `true'.
 Package grffile Info: Option `extendedchars' is set to `false'.
 Package grffile Info: Option `space' is set to `true'.
 Package grffile Info: \Gin@ii of package `graphicx' fixed on input line 494.
-) ("C:\Program Files\MiKTeX 2.9\tex\latex\csquotes\csquotes.sty"
+) (C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\latex\parskip\parskip.sty
+Package: parskip 2018-08-24 v2.0a non-zero parskip adjustments
+) (C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\latex\csquotes\csquotes.sty
 Package: csquotes 2018/04/13 v5.2d context-sensitive quotations (JAW)
 \csq@reset=\count129
 \csq@gtype=\count130
@@ -590,14 +586,14 @@ Package: csquotes 2018/04/13 v5.2d context-sensitive quotations (JAW)
 \csq@maxlvl=\count133
 \csq@tshold=\count134
 \csq@ltx@everypar=\toks27
-("C:\Program Files\MiKTeX 2.9\tex\latex\csquotes\csquotes.def"
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\latex\csquotes\csquotes.def
 File: csquotes.def 2018/04/13 v5.2d csquotes generic definitions (JAW)
 )
 Package csquotes Info: Trying to load configuration file 'csquotes.cfg'...
 Package csquotes Info: ... configuration file loaded successfully.
-("C:\Program Files\MiKTeX 2.9\tex\latex\csquotes\csquotes.cfg"
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\latex\csquotes\csquotes.cfg
 File: csquotes.cfg 
-)) ("C:\Program Files\MiKTeX 2.9\tex\latex\was\upgreek.sty"
+)) (C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\latex\was\upgreek.sty
 Package: upgreek 2003/02/12 v2.0 (WaS)
 Package upgreek Info: Using Euler Roman for upright Greek on input line 31.
 \symugrf@m=\mathgroup9
@@ -647,11 +643,13 @@ Package: array 2018/04/30 v2.4h Tabular extension package (FMi)
 \TX@delta=\dimen155
 \TX@cols=\count141
 \TX@ftn=\toks30
-) ("C:\Program Files\MiKTeX 2.9\tex\latex\threeparttablex\threeparttablex.sty"
+)
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\latex\threeparttablex\threepartta
+blex.sty
 Package: threeparttablex 2013/07/23 v0.3 by daleif
-("C:\Program Files\MiKTeX 2.9\tex\latex\environ\environ.sty"
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\latex\environ\environ.sty
 Package: environ 2014/05/04 v0.3 A new way to define environments
-("C:\Program Files\MiKTeX 2.9\tex\latex\trimspaces\trimspaces.sty"
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\latex\trimspaces\trimspaces.sty
 Package: trimspaces 2009/09/17 v1.1 Trim spaces around a token list
 ))
 \TPTL@width=\skip78
@@ -667,9 +665,9 @@ Package: ifthen 2014/09/29 v1.1c Standard LaTeX ifthen package (DPC)
 \rotFPbot=\skip81
 \rot@float@box=\box38
 \rot@mess@toks=\toks31
-) ("C:\Program Files\MiKTeX 2.9\tex\latex\todonotes\todonotes.sty"
-Package: todonotes 2015/07/09 .dtx Todonotes source and documentation.
-Package: todonotes 2012/07/25
+) (C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\latex\todonotes\todonotes.sty
+Package: todonotes 2019/01/24 v1.1.2 Todonotes source and documentation.
+Package: todonotes 2018/11/22
 ("C:\Program Files\MiKTeX 2.9\tex\latex\xkeyval\xkeyval.sty"
 Package: xkeyval 2014/12/03 v2.7a package option processing (HA)
 ("C:\Program Files\MiKTeX 2.9\tex\generic\xkeyval\xkeyval.tex" ("C:\Program Fil
@@ -679,7 +677,7 @@ es\MiKTeX 2.9\tex\generic\xkeyval\xkvutils.tex"
 )
 \XKV@depth=\count143
 File: xkeyval.tex 2014/12/03 v2.7a key=value parser (HA)
-)) ("C:\Program Files\MiKTeX 2.9\tex\latex\xcolor\xcolor.sty"
+)) (C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\latex\xcolor\xcolor.sty
 Package: xcolor 2016/05/11 v2.12 LaTeX color extensions (UK)
 ("C:\Program Files\MiKTeX 2.9\tex\latex\graphics-cfg\color.cfg"
 File: color.cfg 2016/01/02 v1.6 sample color configuration
@@ -694,33 +692,42 @@ Package xcolor Info: Model `tHsb' substituted by `hsb' on input line 1368.
 Package xcolor Info: Model `HSB' substituted by `hsb' on input line 1369.
 Package xcolor Info: Model `Gray' substituted by `gray' on input line 1370.
 Package xcolor Info: Model `wave' substituted by `hsb' on input line 1371.
-) ("C:\Program Files\MiKTeX 2.9\tex\latex\pgf\frontendlayer\tikz.sty" ("C:\Prog
-ram Files\MiKTeX 2.9\tex\latex\pgf\basiclayer\pgf.sty" ("C:\Program Files\MiKTe
-X 2.9\tex\latex\pgf\utilities\pgfrcs.sty" ("C:\Program Files\MiKTeX 2.9\tex\gen
-eric\pgf\utilities\pgfutil-common.tex"
+) (C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\latex\pgf\frontendlayer\tikz.st
+y (C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\latex\pgf\basiclayer\pgf.sty (C
+:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\latex\pgf\utilities\pgfrcs.sty
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\generic\pgf\utilities\pgfutil-com
+mon.tex
 \pgfutil@everybye=\toks34
 \pgfutil@tempdima=\dimen156
 \pgfutil@tempdimb=\dimen157
 
-("C:\Program Files\MiKTeX 2.9\tex\generic\pgf\utilities\pgfutil-common-lists.te
-x")) ("C:\Program Files\MiKTeX 2.9\tex\generic\pgf\utilities\pgfutil-latex.def"
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\generic\pgf\utilities\pgfutil-com
+mon-lists.tex))
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\generic\pgf\utilities\pgfutil-lat
+ex.def
 \pgfutil@abb=\box39
-("C:\Program Files\MiKTeX 2.9\tex\latex\ms\everyshi.sty"
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\latex\ms\everyshi.sty
 Package: everyshi 2001/05/15 v3.00 EveryShipout Package (MS)
-)) ("C:\Program Files\MiKTeX 2.9\tex\generic\pgf\utilities\pgfrcs.code.tex"
-Package: pgfrcs 2015/08/07 v3.0.1a (rcs-revision 1.31)
 ))
-Package: pgf 2015/08/07 v3.0.1a (rcs-revision 1.15)
-("C:\Program Files\MiKTeX 2.9\tex\latex\pgf\basiclayer\pgfcore.sty" ("C:\Progra
-m Files\MiKTeX 2.9\tex\latex\pgf\systemlayer\pgfsys.sty" ("C:\Program Files\MiK
-TeX 2.9\tex\generic\pgf\systemlayer\pgfsys.code.tex"
-Package: pgfsys 2014/07/09 v3.0.1a (rcs-revision 1.48)
-("C:\Program Files\MiKTeX 2.9\tex\generic\pgf\utilities\pgfkeys.code.tex"
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\generic\pgf\utilities\pgfrcs.code
+.tex (C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\generic\pgf\pgf.revision.tex
+)
+Package: pgfrcs 2020/01/08 v3.1.5b (3.1.5b)
+))
+Package: pgf 2020/01/08 v3.1.5b (3.1.5b)
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\latex\pgf\basiclayer\pgfcore.sty 
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\latex\pgf\systemlayer\pgfsys.sty
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\generic\pgf\systemlayer\pgfsys.co
+de.tex
+Package: pgfsys 2020/01/08 v3.1.5b (3.1.5b)
+
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\generic\pgf\utilities\pgfkeys.cod
+e.tex
 \pgfkeys@pathtoks=\toks35
 \pgfkeys@temptoks=\toks36
 
-("C:\Program Files\MiKTeX 2.9\tex\generic\pgf\utilities\pgfkeysfiltered.code.te
-x"
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\generic\pgf\utilities\pgfkeysfilt
+ered.code.tex
 \pgfkeys@tmptoks=\toks37
 ))
 \pgf@x=\dimen158
@@ -731,6 +738,8 @@ x"
 \pgf@yb=\dimen163
 \pgf@xc=\dimen164
 \pgf@yc=\dimen165
+\pgf@xd=\dimen166
+\pgf@yd=\dimen167
 \w@pgf@writea=\write5
 \r@pgf@reada=\read1
 \c@pgf@counta=\count144
@@ -740,225 +749,276 @@ x"
 \t@pgf@toka=\toks38
 \t@pgf@tokb=\toks39
 \t@pgf@tokc=\toks40
-("C:\Program Files\MiKTeX 2.9\tex\generic\pgf\systemlayer\pgf.cfg"
-File: pgf.cfg 2008/05/14  (rcs-revision 1.7)
+\pgf@sys@id@count=\count148
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\generic\pgf\systemlayer\pgf.cfg
+File: pgf.cfg 2020/01/08 v3.1.5b (3.1.5b)
 )
 Driver file for pgf: pgfsys-pdftex.def
-("C:\Program Files\MiKTeX 2.9\tex\generic\pgf\systemlayer\pgfsys-pdftex.def"
-File: pgfsys-pdftex.def 2014/10/11  (rcs-revision 1.35)
-("C:\Program Files\MiKTeX 2.9\tex\generic\pgf\systemlayer\pgfsys-common-pdf.def
-"
-File: pgfsys-common-pdf.def 2013/10/10  (rcs-revision 1.13)
+
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\generic\pgf\systemlayer\pgfsys-pd
+ftex.def
+File: pgfsys-pdftex.def 2020/01/08 v3.1.5b (3.1.5b)
+
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\generic\pgf\systemlayer\pgfsys-co
+mmon-pdf.def
+File: pgfsys-common-pdf.def 2020/01/08 v3.1.5b (3.1.5b)
 )))
-("C:\Program Files\MiKTeX 2.9\tex\generic\pgf\systemlayer\pgfsyssoftpath.code.t
-ex"
-File: pgfsyssoftpath.code.tex 2013/09/09  (rcs-revision 1.9)
-\pgfsyssoftpath@smallbuffer@items=\count148
-\pgfsyssoftpath@bigbuffer@items=\count149
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\generic\pgf\systemlayer\pgfsyssof
+tpath.code.tex
+File: pgfsyssoftpath.code.tex 2020/01/08 v3.1.5b (3.1.5b)
+\pgfsyssoftpath@smallbuffer@items=\count149
+\pgfsyssoftpath@bigbuffer@items=\count150
 )
-("C:\Program Files\MiKTeX 2.9\tex\generic\pgf\systemlayer\pgfsysprotocol.code.t
-ex"
-File: pgfsysprotocol.code.tex 2006/10/16  (rcs-revision 1.4)
-)) ("C:\Program Files\MiKTeX 2.9\tex\generic\pgf\basiclayer\pgfcore.code.tex"
-Package: pgfcore 2010/04/11 v3.0.1a (rcs-revision 1.7)
-("C:\Program Files\MiKTeX 2.9\tex\generic\pgf\math\pgfmath.code.tex" ("C:\Progr
-am Files\MiKTeX 2.9\tex\generic\pgf\math\pgfmathcalc.code.tex" ("C:\Program Fil
-es\MiKTeX 2.9\tex\generic\pgf\math\pgfmathutil.code.tex") ("C:\Program Files\Mi
-KTeX 2.9\tex\generic\pgf\math\pgfmathparser.code.tex"
-\pgfmath@dimen=\dimen166
-\pgfmath@count=\count150
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\generic\pgf\systemlayer\pgfsyspro
+tocol.code.tex
+File: pgfsysprotocol.code.tex 2020/01/08 v3.1.5b (3.1.5b)
+))
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\generic\pgf\basiclayer\pgfcore.co
+de.tex
+Package: pgfcore 2020/01/08 v3.1.5b (3.1.5b)
+
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\generic\pgf\math\pgfmath.code.tex
+
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\generic\pgf\math\pgfmathcalc.code
+.tex
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\generic\pgf\math\pgfmathutil.code
+.tex)
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\generic\pgf\math\pgfmathparser.co
+de.tex
+\pgfmath@dimen=\dimen168
+\pgfmath@count=\count151
 \pgfmath@box=\box40
 \pgfmath@toks=\toks41
 \pgfmath@stack@operand=\toks42
 \pgfmath@stack@operation=\toks43
-) ("C:\Program Files\MiKTeX 2.9\tex\generic\pgf\math\pgfmathfunctions.code.tex"
-
-("C:\Program Files\MiKTeX 2.9\tex\generic\pgf\math\pgfmathfunctions.basic.code.
-tex")
-("C:\Program Files\MiKTeX 2.9\tex\generic\pgf\math\pgfmathfunctions.trigonometr
-ic.code.tex")
-("C:\Program Files\MiKTeX 2.9\tex\generic\pgf\math\pgfmathfunctions.random.code
-.tex")
-("C:\Program Files\MiKTeX 2.9\tex\generic\pgf\math\pgfmathfunctions.comparison.
-code.tex")
-("C:\Program Files\MiKTeX 2.9\tex\generic\pgf\math\pgfmathfunctions.base.code.t
-ex")
-("C:\Program Files\MiKTeX 2.9\tex\generic\pgf\math\pgfmathfunctions.round.code.
-tex")
-("C:\Program Files\MiKTeX 2.9\tex\generic\pgf\math\pgfmathfunctions.misc.code.t
-ex")
-("C:\Program Files\MiKTeX 2.9\tex\generic\pgf\math\pgfmathfunctions.integerarit
-hmetics.code.tex"))) ("C:\Program Files\MiKTeX 2.9\tex\generic\pgf\math\pgfmath
-float.code.tex"
-\c@pgfmathroundto@lastzeros=\count151
-)) ("C:\Program Files\MiKTeX 2.9\tex\generic\pgf\basiclayer\pgfcorepoints.code.
-tex"
-File: pgfcorepoints.code.tex 2013/10/07  (rcs-revision 1.27)
-\pgf@picminx=\dimen167
-\pgf@picmaxx=\dimen168
-\pgf@picminy=\dimen169
-\pgf@picmaxy=\dimen170
-\pgf@pathminx=\dimen171
-\pgf@pathmaxx=\dimen172
-\pgf@pathminy=\dimen173
-\pgf@pathmaxy=\dimen174
-\pgf@xx=\dimen175
-\pgf@xy=\dimen176
-\pgf@yx=\dimen177
-\pgf@yy=\dimen178
-\pgf@zx=\dimen179
-\pgf@zy=\dimen180
 )
-("C:\Program Files\MiKTeX 2.9\tex\generic\pgf\basiclayer\pgfcorepathconstruct.c
-ode.tex"
-File: pgfcorepathconstruct.code.tex 2013/10/07  (rcs-revision 1.29)
-\pgf@path@lastx=\dimen181
-\pgf@path@lasty=\dimen182
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\generic\pgf\math\pgfmathfunctions
+.code.tex
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\generic\pgf\math\pgfmathfunctions
+.basic.code.tex)
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\generic\pgf\math\pgfmathfunctions
+.trigonometric.code.tex)
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\generic\pgf\math\pgfmathfunctions
+.random.code.tex)
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\generic\pgf\math\pgfmathfunctions
+.comparison.code.tex)
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\generic\pgf\math\pgfmathfunctions
+.base.code.tex)
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\generic\pgf\math\pgfmathfunctions
+.round.code.tex)
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\generic\pgf\math\pgfmathfunctions
+.misc.code.tex)
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\generic\pgf\math\pgfmathfunctions
+.integerarithmetics.code.tex)))
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\generic\pgf\math\pgfmathfloat.cod
+e.tex
+\c@pgfmathroundto@lastzeros=\count152
+)) (C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\generic\pgf\math\pgfint.code.t
+ex)
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\generic\pgf\basiclayer\pgfcorepoi
+nts.code.tex
+File: pgfcorepoints.code.tex 2020/01/08 v3.1.5b (3.1.5b)
+\pgf@picminx=\dimen169
+\pgf@picmaxx=\dimen170
+\pgf@picminy=\dimen171
+\pgf@picmaxy=\dimen172
+\pgf@pathminx=\dimen173
+\pgf@pathmaxx=\dimen174
+\pgf@pathminy=\dimen175
+\pgf@pathmaxy=\dimen176
+\pgf@xx=\dimen177
+\pgf@xy=\dimen178
+\pgf@yx=\dimen179
+\pgf@yy=\dimen180
+\pgf@zx=\dimen181
+\pgf@zy=\dimen182
 )
-("C:\Program Files\MiKTeX 2.9\tex\generic\pgf\basiclayer\pgfcorepathusage.code.
-tex"
-File: pgfcorepathusage.code.tex 2014/11/02  (rcs-revision 1.24)
-\pgf@shorten@end@additional=\dimen183
-\pgf@shorten@start@additional=\dimen184
-) ("C:\Program Files\MiKTeX 2.9\tex\generic\pgf\basiclayer\pgfcorescopes.code.t
-ex"
-File: pgfcorescopes.code.tex 2015/05/08  (rcs-revision 1.46)
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\generic\pgf\basiclayer\pgfcorepat
+hconstruct.code.tex
+File: pgfcorepathconstruct.code.tex 2020/01/08 v3.1.5b (3.1.5b)
+\pgf@path@lastx=\dimen183
+\pgf@path@lasty=\dimen184
+)
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\generic\pgf\basiclayer\pgfcorepat
+husage.code.tex
+File: pgfcorepathusage.code.tex 2020/01/08 v3.1.5b (3.1.5b)
+\pgf@shorten@end@additional=\dimen185
+\pgf@shorten@start@additional=\dimen186
+)
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\generic\pgf\basiclayer\pgfcoresco
+pes.code.tex
+File: pgfcorescopes.code.tex 2020/01/08 v3.1.5b (3.1.5b)
 \pgfpic=\box41
 \pgf@hbox=\box42
 \pgf@layerbox@main=\box43
-\pgf@picture@serial@count=\count152
+\pgf@picture@serial@count=\count153
 )
-("C:\Program Files\MiKTeX 2.9\tex\generic\pgf\basiclayer\pgfcoregraphicstate.co
-de.tex"
-File: pgfcoregraphicstate.code.tex 2014/11/02  (rcs-revision 1.12)
-\pgflinewidth=\dimen185
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\generic\pgf\basiclayer\pgfcoregra
+phicstate.code.tex
+File: pgfcoregraphicstate.code.tex 2020/01/08 v3.1.5b (3.1.5b)
+\pgflinewidth=\dimen187
 )
-("C:\Program Files\MiKTeX 2.9\tex\generic\pgf\basiclayer\pgfcoretransformations
-.code.tex"
-File: pgfcoretransformations.code.tex 2015/08/07  (rcs-revision 1.20)
-\pgf@pt@x=\dimen186
-\pgf@pt@y=\dimen187
-\pgf@pt@temp=\dimen188
-) ("C:\Program Files\MiKTeX 2.9\tex\generic\pgf\basiclayer\pgfcorequick.code.te
-x"
-File: pgfcorequick.code.tex 2008/10/09  (rcs-revision 1.3)
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\generic\pgf\basiclayer\pgfcoretra
+nsformations.code.tex
+File: pgfcoretransformations.code.tex 2020/01/08 v3.1.5b (3.1.5b)
+\pgf@pt@x=\dimen188
+\pgf@pt@y=\dimen189
+\pgf@pt@temp=\dimen190
 )
-("C:\Program Files\MiKTeX 2.9\tex\generic\pgf\basiclayer\pgfcoreobjects.code.te
-x"
-File: pgfcoreobjects.code.tex 2006/10/11  (rcs-revision 1.2)
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\generic\pgf\basiclayer\pgfcorequi
+ck.code.tex
+File: pgfcorequick.code.tex 2020/01/08 v3.1.5b (3.1.5b)
 )
-("C:\Program Files\MiKTeX 2.9\tex\generic\pgf\basiclayer\pgfcorepathprocessing.
-code.tex"
-File: pgfcorepathprocessing.code.tex 2013/09/09  (rcs-revision 1.9)
-) ("C:\Program Files\MiKTeX 2.9\tex\generic\pgf\basiclayer\pgfcorearrows.code.t
-ex"
-File: pgfcorearrows.code.tex 2015/05/14  (rcs-revision 1.43)
-\pgfarrowsep=\dimen189
-) ("C:\Program Files\MiKTeX 2.9\tex\generic\pgf\basiclayer\pgfcoreshade.code.te
-x"
-File: pgfcoreshade.code.tex 2013/07/15  (rcs-revision 1.15)
-\pgf@max=\dimen190
-\pgf@sys@shading@range@num=\count153
-) ("C:\Program Files\MiKTeX 2.9\tex\generic\pgf\basiclayer\pgfcoreimage.code.te
-x"
-File: pgfcoreimage.code.tex 2013/07/15  (rcs-revision 1.18)
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\generic\pgf\basiclayer\pgfcoreobj
+ects.code.tex
+File: pgfcoreobjects.code.tex 2020/01/08 v3.1.5b (3.1.5b)
+)
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\generic\pgf\basiclayer\pgfcorepat
+hprocessing.code.tex
+File: pgfcorepathprocessing.code.tex 2020/01/08 v3.1.5b (3.1.5b)
+)
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\generic\pgf\basiclayer\pgfcorearr
+ows.code.tex
+File: pgfcorearrows.code.tex 2020/01/08 v3.1.5b (3.1.5b)
+\pgfarrowsep=\dimen191
+)
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\generic\pgf\basiclayer\pgfcoresha
+de.code.tex
+File: pgfcoreshade.code.tex 2020/01/08 v3.1.5b (3.1.5b)
+\pgf@max=\dimen192
+\pgf@sys@shading@range@num=\count154
+\pgf@shadingcount=\count155
+)
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\generic\pgf\basiclayer\pgfcoreima
+ge.code.tex
+File: pgfcoreimage.code.tex 2020/01/08 v3.1.5b (3.1.5b)
 
-("C:\Program Files\MiKTeX 2.9\tex\generic\pgf\basiclayer\pgfcoreexternal.code.t
-ex"
-File: pgfcoreexternal.code.tex 2014/07/09  (rcs-revision 1.21)
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\generic\pgf\basiclayer\pgfcoreext
+ernal.code.tex
+File: pgfcoreexternal.code.tex 2020/01/08 v3.1.5b (3.1.5b)
 \pgfexternal@startupbox=\box44
-)) ("C:\Program Files\MiKTeX 2.9\tex\generic\pgf\basiclayer\pgfcorelayers.code.
-tex"
-File: pgfcorelayers.code.tex 2013/07/18  (rcs-revision 1.7)
+))
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\generic\pgf\basiclayer\pgfcorelay
+ers.code.tex
+File: pgfcorelayers.code.tex 2020/01/08 v3.1.5b (3.1.5b)
 )
-("C:\Program Files\MiKTeX 2.9\tex\generic\pgf\basiclayer\pgfcoretransparency.co
-de.tex"
-File: pgfcoretransparency.code.tex 2013/09/30  (rcs-revision 1.5)
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\generic\pgf\basiclayer\pgfcoretra
+nsparency.code.tex
+File: pgfcoretransparency.code.tex 2020/01/08 v3.1.5b (3.1.5b)
 )
-("C:\Program Files\MiKTeX 2.9\tex\generic\pgf\basiclayer\pgfcorepatterns.code.t
-ex"
-File: pgfcorepatterns.code.tex 2013/11/07  (rcs-revision 1.5)
-))) ("C:\Program Files\MiKTeX 2.9\tex\generic\pgf\modules\pgfmoduleshapes.code.
-tex"
-File: pgfmoduleshapes.code.tex 2014/03/21  (rcs-revision 1.35)
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\generic\pgf\basiclayer\pgfcorepat
+terns.code.tex
+File: pgfcorepatterns.code.tex 2020/01/08 v3.1.5b (3.1.5b)
+)
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\generic\pgf\basiclayer\pgfcorerdf
+.code.tex
+File: pgfcorerdf.code.tex 2020/01/08 v3.1.5b (3.1.5b)
+)))
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\generic\pgf\modules\pgfmoduleshap
+es.code.tex
+File: pgfmoduleshapes.code.tex 2020/01/08 v3.1.5b (3.1.5b)
 \pgfnodeparttextbox=\box45
-) ("C:\Program Files\MiKTeX 2.9\tex\generic\pgf\modules\pgfmoduleplot.code.tex"
-File: pgfmoduleplot.code.tex 2015/08/03  (rcs-revision 1.13)
 )
-("C:\Program Files\MiKTeX 2.9\tex\latex\pgf\compatibility\pgfcomp-version-0-65.
-sty"
-Package: pgfcomp-version-0-65 2007/07/03 v3.0.1a (rcs-revision 1.7)
-\pgf@nodesepstart=\dimen191
-\pgf@nodesepend=\dimen192
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\generic\pgf\modules\pgfmoduleplot
+.code.tex
+File: pgfmoduleplot.code.tex 2020/01/08 v3.1.5b (3.1.5b)
 )
-("C:\Program Files\MiKTeX 2.9\tex\latex\pgf\compatibility\pgfcomp-version-1-18.
-sty"
-Package: pgfcomp-version-1-18 2007/07/23 v3.0.1a (rcs-revision 1.1)
-)) ("C:\Program Files\MiKTeX 2.9\tex\latex\pgf\utilities\pgffor.sty" ("C:\Progr
-am Files\MiKTeX 2.9\tex\latex\pgf\utilities\pgfkeys.sty" ("C:\Program Files\MiK
-TeX 2.9\tex\generic\pgf\utilities\pgfkeys.code.tex")) ("C:\Program Files\MiKTeX
- 2.9\tex\latex\pgf\math\pgfmath.sty" ("C:\Program Files\MiKTeX 2.9\tex\generic\
-pgf\math\pgfmath.code.tex")) ("C:\Program Files\MiKTeX 2.9\tex\generic\pgf\util
-ities\pgffor.code.tex"
-Package: pgffor 2013/12/13 v3.0.1a (rcs-revision 1.25)
-("C:\Program Files\MiKTeX 2.9\tex\generic\pgf\math\pgfmath.code.tex")
-\pgffor@iter=\dimen193
-\pgffor@skip=\dimen194
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\latex\pgf\compatibility\pgfcomp-v
+ersion-0-65.sty
+Package: pgfcomp-version-0-65 2020/01/08 v3.1.5b (3.1.5b)
+\pgf@nodesepstart=\dimen193
+\pgf@nodesepend=\dimen194
+)
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\latex\pgf\compatibility\pgfcomp-v
+ersion-1-18.sty
+Package: pgfcomp-version-1-18 2020/01/08 v3.1.5b (3.1.5b)
+)) (C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\latex\pgf\utilities\pgffor.sty
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\latex\pgf\utilities\pgfkeys.sty
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\generic\pgf\utilities\pgfkeys.cod
+e.tex)) (C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\latex\pgf\math\pgfmath.st
+y
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\generic\pgf\math\pgfmath.code.tex
+))
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\generic\pgf\utilities\pgffor.code
+.tex
+Package: pgffor 2020/01/08 v3.1.5b (3.1.5b)
+
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\generic\pgf\math\pgfmath.code.tex
+)
+\pgffor@iter=\dimen195
+\pgffor@skip=\dimen196
 \pgffor@stack=\toks44
 \pgffor@toks=\toks45
-)) ("C:\Program Files\MiKTeX 2.9\tex\generic\pgf\frontendlayer\tikz\tikz.code.t
-ex"
-Package: tikz 2015/08/07 v3.0.1a (rcs-revision 1.151)
+))
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\generic\pgf\frontendlayer\tikz\ti
+kz.code.tex
+Package: tikz 2020/01/08 v3.1.5b (3.1.5b)
 
-("C:\Program Files\MiKTeX 2.9\tex\generic\pgf\libraries\pgflibraryplothandlers.
-code.tex"
-File: pgflibraryplothandlers.code.tex 2013/08/31 v3.0.1a (rcs-revision 1.20)
-\pgf@plot@mark@count=\count154
-\pgfplotmarksize=\dimen195
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\generic\pgf\libraries\pgflibraryp
+lothandlers.code.tex
+File: pgflibraryplothandlers.code.tex 2020/01/08 v3.1.5b (3.1.5b)
+\pgf@plot@mark@count=\count156
+\pgfplotmarksize=\dimen197
 )
-\tikz@lastx=\dimen196
-\tikz@lasty=\dimen197
-\tikz@lastxsaved=\dimen198
-\tikz@lastysaved=\dimen199
-\tikzleveldistance=\dimen256
-\tikzsiblingdistance=\dimen257
+\tikz@lastx=\dimen198
+\tikz@lasty=\dimen199
+\tikz@lastxsaved=\dimen256
+\tikz@lastysaved=\dimen257
+\tikz@lastmovetox=\dimen258
+\tikz@lastmovetoy=\dimen259
+\tikzleveldistance=\dimen260
+\tikzsiblingdistance=\dimen261
 \tikz@figbox=\box46
 \tikz@figbox@bg=\box47
 \tikz@tempbox=\box48
 \tikz@tempbox@bg=\box49
-\tikztreelevel=\count155
-\tikznumberofchildren=\count156
-\tikznumberofcurrentchild=\count157
-\tikz@fig@count=\count158
-("C:\Program Files\MiKTeX 2.9\tex\generic\pgf\modules\pgfmodulematrix.code.tex"
-File: pgfmodulematrix.code.tex 2013/09/17  (rcs-revision 1.8)
-\pgfmatrixcurrentrow=\count159
-\pgfmatrixcurrentcolumn=\count160
-\pgf@matrix@numberofcolumns=\count161
-)
-\tikz@expandcount=\count162
+\tikztreelevel=\count157
+\tikznumberofchildren=\count158
+\tikznumberofcurrentchild=\count159
+\tikz@fig@count=\count160
 
-("C:\Program Files\MiKTeX 2.9\tex\generic\pgf\frontendlayer\tikz\libraries\tikz
-librarytopaths.code.tex"
-File: tikzlibrarytopaths.code.tex 2008/06/17 v3.0.1a (rcs-revision 1.2)
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\generic\pgf\modules\pgfmodulematr
+ix.code.tex
+File: pgfmodulematrix.code.tex 2020/01/08 v3.1.5b (3.1.5b)
+\pgfmatrixcurrentrow=\count161
+\pgfmatrixcurrentcolumn=\count162
+\pgf@matrix@numberofcolumns=\count163
+)
+\tikz@expandcount=\count164
+
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\generic\pgf\frontendlayer\tikz\li
+braries\tikzlibrarytopaths.code.tex
+File: tikzlibrarytopaths.code.tex 2020/01/08 v3.1.5b (3.1.5b)
 )))
-("C:\Program Files\MiKTeX 2.9\tex\generic\pgf\frontendlayer\tikz\libraries\tikz
-librarypositioning.code.tex"
-File: tikzlibrarypositioning.code.tex 2008/10/06 v3.0.1a (rcs-revision 1.7)
-) ("C:\Program Files\MiKTeX 2.9\tex\latex\tools\calc.sty"
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\generic\pgf\frontendlayer\tikz\li
+braries\tikzlibrarypositioning.code.tex
+File: tikzlibrarypositioning.code.tex 2020/01/08 v3.1.5b (3.1.5b)
+)
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\generic\pgf\frontendlayer\tikz\li
+braries\tikzlibraryshadows.code.tex
+File: tikzlibraryshadows.code.tex 2020/01/08 v3.1.5b (3.1.5b)
+
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\generic\pgf\frontendlayer\tikz\li
+braries\tikzlibraryfadings.code.tex
+File: tikzlibraryfadings.code.tex 2020/01/08 v3.1.5b (3.1.5b)
+
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\generic\pgf\libraries\pgflibraryf
+adings.code.tex
+File: pgflibraryfadings.code.tex 2020/01/08 v3.1.5b (3.1.5b)
+))) ("C:\Program Files\MiKTeX 2.9\tex\latex\tools\calc.sty"
 Package: calc 2017/05/25 v4.3 Infix arithmetic (KKT,FJ)
-\calc@Acount=\count163
-\calc@Bcount=\count164
-\calc@Adimen=\dimen258
-\calc@Bdimen=\dimen259
+\calc@Acount=\count165
+\calc@Bcount=\count166
+\calc@Adimen=\dimen262
+\calc@Bdimen=\dimen263
 \calc@Askip=\skip82
 \calc@Bskip=\skip83
 LaTeX Info: Redefining \setlength on input line 80.
 LaTeX Info: Redefining \addtolength on input line 81.
-\calc@Ccount=\count165
+\calc@Ccount=\count167
 \calc@Cskip=\skip84
 )
-\c@@todonotes@numberoftodonotes=\count166
+\c@@todonotes@numberoftodonotes=\count168
 )
 Package csquotes Info: Checking for multilingual support...
 Package csquotes Info: ... none found.
@@ -1026,18 +1086,18 @@ File: t1lmr.fd 2009/10/30 v1.6 Font defs for Latin Modern
 * \@reversemarginfalse
 * (1in=72.27pt=25.4mm, 1cm=28.453pt)
 
-("C:\Program Files\MiKTeX 2.9\tex\context\base\supp-pdf.mkii"
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\context\base\supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
-\scratchcounter=\count167
-\scratchdimen=\dimen260
+\scratchcounter=\count169
+\scratchdimen=\dimen264
 \scratchbox=\box50
-\nofMPsegments=\count168
-\nofMParguments=\count169
+\nofMPsegments=\count170
+\nofMParguments=\count171
 \everyMPshowfont=\toks46
-\MPscratchCnt=\count170
-\MPscratchDim=\dimen261
-\MPnumerator=\count171
-\makeMPintoPDFobject=\count172
+\MPscratchCnt=\count172
+\MPscratchDim=\dimen265
+\MPnumerator=\count173
+\makeMPintoPDFobject=\count174
 \everyMPtoPDFconversion=\toks47
 ) ("C:\Program Files\MiKTeX 2.9\tex\latex\oberdiek\epstopdf-base.sty"
 Package: epstopdf-base 2016/05/15 v2.6 Base part for package epstopdf
@@ -1050,14 +1110,15 @@ Package grfext Info: Graphics extension search list:
 (grfext)             [.pdf,.png,.jpg,.mps,.jpeg,.jbig2,.jb2,.PDF,.PNG,.JPG,.JPE
 G,.JBIG2,.JB2,.eps]
 (grfext)             \AppendGraphicsExtensions on input line 456.
-) ("C:\Program Files\MiKTeX 2.9\tex\latex\apa6\config\APAamerican.txt"
+)
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\latex\apa6\config\APAamerican.txt
 File: APAamerican.txt 2012/02/23 v1.25 apa6 configuration for American English
 )
 Package caption Info: Begin \AtBeginDocument code.
 Package caption Info: float package is loaded.
 Package caption Info: hyperref package is loaded.
 Package caption Info: longtable package is loaded.
-("C:\Program Files\MiKTeX 2.9\tex\latex\caption\ltcaption.sty"
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\latex\caption\ltcaption.sty
 Package: ltcaption 2018/08/26 v1.4-95 longtable captions (AR)
 )
 Package caption Info: rotating package is loaded.
@@ -1072,7 +1133,7 @@ Package microtype Info: Using default expansion set `basictext'.
 Package microtype Info: No adjustment of tracking.
 Package microtype Info: No adjustment of interword spacing.
 Package microtype Info: No adjustment of character kerning.
-("C:\Program Files\MiKTeX 2.9\tex\latex\microtype\mt-cmr.cfg"
+(C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\latex\microtype\mt-cmr.cfg
 File: mt-cmr.cfg 2013/05/19 v2.2 microtype config. file: Computer Modern Roman 
 (RS)
 )
@@ -1083,7 +1144,7 @@ Package: nameref 2016/05/21 v2.44 Cross-referencing by name of section
 ("C:\Program Files\MiKTeX 2.9\tex\generic\oberdiek\gettitlestring.sty"
 Package: gettitlestring 2016/05/16 v1.5 Cleanup title references (HO)
 )
-\c@section@level=\count173
+\c@section@level=\count175
 )
 LaTeX Info: Redefining \ref on input line 111.
 LaTeX Info: Redefining \pageref on input line 111.
@@ -1122,15 +1183,15 @@ LaTeX Font Info:    External font `lmex10' loaded for size
 LaTeX Font Info:    Try loading font information for U+msa on input line 113.
 ("C:\Program Files\MiKTeX 2.9\tex\latex\amsfonts\umsa.fd"
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
-) ("C:\Program Files\MiKTeX 2.9\tex\latex\microtype\mt-msa.cfg"
+) (C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\latex\microtype\mt-msa.cfg
 File: mt-msa.cfg 2006/02/04 v1.1 microtype config. file: AMS symbols (a) (RS)
 )
 LaTeX Font Info:    Try loading font information for U+msb on input line 113.
 ("C:\Program Files\MiKTeX 2.9\tex\latex\amsfonts\umsb.fd"
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
-) ("C:\Program Files\MiKTeX 2.9\tex\latex\microtype\mt-msb.cfg"
+) (C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\latex\microtype\mt-msb.cfg
 File: mt-msb.cfg 2005/06/01 v1.0 microtype config. file: AMS symbols (b) (RS)
-) ("C:\Program Files\MiKTeX 2.9\tex\latex\microtype\mt-eur.cfg"
+) (C:\Users\Gleb\AppData\Roaming\MiKTeX\2.9\tex\latex\microtype\mt-eur.cfg
 File: mt-eur.cfg 2006/07/31 v1.1 microtype config. file: AMS Euler Roman (RS)
 )
 
@@ -1142,7 +1203,7 @@ Package Fancyhdr Warning: \headheight is too small (15.2pt):
 [1{C:/Users/Gleb/AppData/Local/MiKTeX/2.9/pdftex/config/pdftex.map}
 
 ] [2] [3] [4] [5] [6] [7] [8] [9]
-<GenSamp-Paper_files/figure-latex/plot-dist1-1.pdf, id=212, 505.89pt x 361.35pt
+<GenSamp-Paper_files/figure-latex/plot-dist1-1.pdf, id=240, 505.89pt x 361.35pt
 >
 File: GenSamp-Paper_files/figure-latex/plot-dist1-1.pdf Graphic file (type pdf)
 
@@ -1151,7 +1212,7 @@ Package pdftex.def Info: GenSamp-Paper_files/figure-latex/plot-dist1-1.pdf  use
 d on input line 169.
 (pdftex.def)             Requested size: 458.92482pt x 327.80345pt.
 [10 <./GenSamp-Paper_files/figure-latex/plot-dist1-1.pdf>] [11] [12]
-<GenSamp-Paper_files/figure-latex/fig-k-plots-1.pdf, id=248, 505.89pt x 433.62p
+<GenSamp-Paper_files/figure-latex/fig-k-plots-1.pdf, id=276, 505.89pt x 433.62p
 t>
 File: GenSamp-Paper_files/figure-latex/fig-k-plots-1.pdf Graphic file (type pdf
 )
@@ -1160,254 +1221,127 @@ Package pdftex.def Info: GenSamp-Paper_files/figure-latex/fig-k-plots-1.pdf  us
 ed on input line 211.
 (pdftex.def)             Requested size: 458.92482pt x 393.36415pt.
 [13] [14 <./GenSamp-Paper_files/figure-latex/fig-k-plots-1.pdf>] [15] [16] [17]
-[18] [19]
+[18] [19] [20] [21] [22] [23] [24] [25]
 Package hyperref Info: bookmark level for unknown todo defaults to 0 on input l
-ine 283.
-
-LaTeX Warning: Marginpar on page 20 moved.
-
-[20] [21] [22] [23] [24]
+ine 400.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <5> on input line 398.
-[25]
-<GenSamp-Paper_files/figure-latex/fig-avg-Bindex-1.pdf, id=359, 505.89pt x 289.
+(Font)              <5> on input line 400.
+[26]
+<GenSamp-Paper_files/figure-latex/fig-avg-Bindex-1.pdf, id=389, 505.89pt x 289.
 08pt>
 File: GenSamp-Paper_files/figure-latex/fig-avg-Bindex-1.pdf Graphic file (type 
 pdf)
 <use GenSamp-Paper_files/figure-latex/fig-avg-Bindex-1.pdf>
 Package pdftex.def Info: GenSamp-Paper_files/figure-latex/fig-avg-Bindex-1.pdf 
- used on input line 423.
+ used on input line 425.
 (pdftex.def)             Requested size: 458.92482pt x 262.24275pt.
-[26]
-<GenSamp-Paper_files/figure-latex/fig-SMD-by-Var-good1-1.pdf, id=370, 650.43pt 
+[27]
+<GenSamp-Paper_files/figure-latex/fig-SMD-by-Var-good1-1.pdf, id=400, 650.43pt 
 x 361.35pt>
 File: GenSamp-Paper_files/figure-latex/fig-SMD-by-Var-good1-1.pdf Graphic file 
 (type pdf)
 <use GenSamp-Paper_files/figure-latex/fig-SMD-by-Var-good1-1.pdf>
 Package pdftex.def Info: GenSamp-Paper_files/figure-latex/fig-SMD-by-Var-good1-
-1.pdf  used on input line 436.
+1.pdf  used on input line 438.
 (pdftex.def)             Requested size: 458.93034pt x 254.9613pt.
-[27 <./GenSamp-Paper_files/figure-latex/fig-avg-Bindex-1.pdf>]
-<GenSamp-Paper_files/figure-latex/fig-SMD-by-Var-good2-1.pdf, id=386, 650.43pt 
+[28 <./GenSamp-Paper_files/figure-latex/fig-avg-Bindex-1.pdf>]
+<GenSamp-Paper_files/figure-latex/fig-SMD-by-Var-good2-1.pdf, id=415, 650.43pt 
 x 216.81pt>
 File: GenSamp-Paper_files/figure-latex/fig-SMD-by-Var-good2-1.pdf Graphic file 
 (type pdf)
 <use GenSamp-Paper_files/figure-latex/fig-SMD-by-Var-good2-1.pdf>
 Package pdftex.def Info: GenSamp-Paper_files/figure-latex/fig-SMD-by-Var-good2-
-1.pdf  used on input line 444.
+1.pdf  used on input line 446.
 (pdftex.def)             Requested size: 458.93034pt x 152.97678pt.
-<GenSamp-Paper_files/figure-latex/fig-SMD-by-Var-neutral-1.pdf, id=387, 505.89p
+<GenSamp-Paper_files/figure-latex/fig-SMD-by-Var-neutral-1.pdf, id=416, 505.89p
 t x 216.81pt>
 File: GenSamp-Paper_files/figure-latex/fig-SMD-by-Var-neutral-1.pdf Graphic fil
 e (type pdf)
 <use GenSamp-Paper_files/figure-latex/fig-SMD-by-Var-neutral-1.pdf>
 Package pdftex.def Info: GenSamp-Paper_files/figure-latex/fig-SMD-by-Var-neutra
-l-1.pdf  used on input line 450.
+l-1.pdf  used on input line 452.
 (pdftex.def)             Requested size: 458.92482pt x 196.68207pt.
-<GenSamp-Paper_files/figure-latex/fig-SMD-by-Var-bad-1.pdf, id=388, 505.89pt x 
+<GenSamp-Paper_files/figure-latex/fig-SMD-by-Var-bad-1.pdf, id=417, 505.89pt x 
 216.81pt>
 File: GenSamp-Paper_files/figure-latex/fig-SMD-by-Var-bad-1.pdf Graphic file (t
 ype pdf)
 <use GenSamp-Paper_files/figure-latex/fig-SMD-by-Var-bad-1.pdf>
 Package pdftex.def Info: GenSamp-Paper_files/figure-latex/fig-SMD-by-Var-bad-1.
-pdf  used on input line 456.
+pdf  used on input line 458.
 (pdftex.def)             Requested size: 458.92482pt x 196.68207pt.
-[28 <./GenSamp-Paper_files/figure-latex/fig-SMD-by-Var-good1-1.pdf>] [29 <./Gen
-Samp-Paper_files/figure-latex/fig-SMD-by-Var-good2-1.pdf> <./GenSamp-Paper_file
-s/figure-latex/fig-SMD-by-Var-neutral-1.pdf>]
-<GenSamp-Paper_files/figure-latex/fig-ICCvsCoef-1.pdf, id=415, 505.89pt x 361.3
+[29 <./GenSamp-Paper_files/figure-latex/fig-SMD-by-Var-good1-1.pdf>]
+<GenSamp-Paper_files/figure-latex/fig-ICCvsCoef-1.pdf, id=431, 505.89pt x 361.3
 5pt>
 File: GenSamp-Paper_files/figure-latex/fig-ICCvsCoef-1.pdf Graphic file (type p
 df)
 <use GenSamp-Paper_files/figure-latex/fig-ICCvsCoef-1.pdf>
 Package pdftex.def Info: GenSamp-Paper_files/figure-latex/fig-ICCvsCoef-1.pdf  
-used on input line 466.
+used on input line 468.
 (pdftex.def)             Requested size: 458.92482pt x 327.80345pt.
-[30 <./GenSamp-Paper_files/figure-latex/fig-SMD-by-Var-bad-1.pdf>]
-<GenSamp-Paper_files/figure-latex/fig-responses-1.pdf, id=430, 650.43pt x 505.8
+[30 <./GenSamp-Paper_files/figure-latex/fig-SMD-by-Var-good2-1.pdf>]
+<GenSamp-Paper_files/figure-latex/fig-responses-1.pdf, id=446, 650.43pt x 505.8
 9pt>
 File: GenSamp-Paper_files/figure-latex/fig-responses-1.pdf Graphic file (type p
 df)
 <use GenSamp-Paper_files/figure-latex/fig-responses-1.pdf>
 Package pdftex.def Info: GenSamp-Paper_files/figure-latex/fig-responses-1.pdf  
-used on input line 480.
+used on input line 482.
 (pdftex.def)             Requested size: 458.93034pt x 356.94582pt.
-[31 <./GenSamp-Paper_files/figure-latex/fig-ICCvsCoef-1.pdf>]
-<GenSamp-Paper_files/figure-latex/fig-gini-1.pdf, id=449, 505.89pt x 361.35pt>
+<GenSamp-Paper_files/figure-latex/fig-gini-1.pdf, id=448, 505.89pt x 361.35pt>
 File: GenSamp-Paper_files/figure-latex/fig-gini-1.pdf Graphic file (type pdf)
 <use GenSamp-Paper_files/figure-latex/fig-gini-1.pdf>
 Package pdftex.def Info: GenSamp-Paper_files/figure-latex/fig-gini-1.pdf  used 
-on input line 492.
+on input line 494.
 (pdftex.def)             Requested size: 458.92482pt x 327.80345pt.
-[32 <./GenSamp-Paper_files/figure-latex/fig-responses-1.pdf>] [33 <./GenSamp-Pa
-per_files/figure-latex/fig-gini-1.pdf>] [34] [35] [36] [37]
+[31 <./GenSamp-Paper_files/figure-latex/fig-SMD-by-Var-neutral-1.pdf>] [32 <./G
+enSamp-Paper_files/figure-latex/fig-SMD-by-Var-bad-1.pdf>] [33 <./GenSamp-Paper
+_files/figure-latex/fig-ICCvsCoef-1.pdf>] [34 <./GenSamp-Paper_files/figure-lat
+ex/fig-responses-1.pdf>] [35 <./GenSamp-Paper_files/figure-latex/fig-gini-1.pdf
+>] [36] [37]
 
 LaTeX Warning: Marginpar on page 38 moved.
 
+[38]
 
-LaTeX Warning: Marginpar on page 38 moved.
-
-
-LaTeX Warning: Marginpar on page 38 moved.
+LaTeX Warning: Marginpar on page 39 moved.
 
 
 Package hyperref Warning: Difference (2) between bookmark levels is greater 
-(hyperref)                than one, level fixed on input line 548.
+(hyperref)                than one, level fixed on input line 550.
 
-<GenSamp-Paper_files/figure-latex/fig-comp-1.pdf, id=493, 650.43pt x 361.35pt>
+<GenSamp-Paper_files/figure-latex/fig-comp-1.pdf, id=525, 650.43pt x 361.35pt>
 File: GenSamp-Paper_files/figure-latex/fig-comp-1.pdf Graphic file (type pdf)
 <use GenSamp-Paper_files/figure-latex/fig-comp-1.pdf>
 Package pdftex.def Info: GenSamp-Paper_files/figure-latex/fig-comp-1.pdf  used 
-on input line 552.
+on input line 554.
 (pdftex.def)             Requested size: 458.93034pt x 254.9613pt.
-[38]
-<GenSamp-Paper_files/figure-latex/fig-gini-curve-1.pdf, id=507, 722.7pt x 433.6
+<GenSamp-Paper_files/figure-latex/fig-gini-curve-1.pdf, id=527, 722.7pt x 433.6
 2pt>
 File: GenSamp-Paper_files/figure-latex/fig-gini-curve-1.pdf Graphic file (type 
 pdf)
 <use GenSamp-Paper_files/figure-latex/fig-gini-curve-1.pdf>
 Package pdftex.def Info: GenSamp-Paper_files/figure-latex/fig-gini-curve-1.pdf 
- used on input line 562.
+ used on input line 564.
 (pdftex.def)             Requested size: 650.43501pt x 390.26102pt.
-[39 <./GenSamp-Paper_files/figure-latex/fig-comp-1.pdf>] [40 <./GenSamp-Paper_f
-iles/figure-latex/fig-gini-curve-1.pdf>] [41] [42]pdfTeX warning (ext4): destin
-ation with the same identifier (name{ref-calinskiDendriteMethodCluster1974}) ha
-s been already used, duplicate ignored
-<to be read again> 
-                   \relax 
-l.635 ...{ref-calinskiDendriteMethodCluster1974}{}
-                                                  %pdfTeX warning (ext4): desti
-nation with the same identifier (name{ref-fellersDevelopingApproachDetermine201
-7}) has been already used, duplicate ignored
-<to be read again> 
-                   \relax 
-l.638 ...fellersDevelopingApproachDetermine2017}{}
-                                                  %pdfTeX warning (ext4): desti
-nation with the same identifier (name{ref-gerberFieldExperimentsDesign2012}) ha
-s been already used, duplicate ignored
-<to be read again> 
-                   \relax 
-l.641 ...t{ref-gerberFieldExperimentsDesign2012}{}
-                                                  % [43]pdfTeX warning (ext4): 
-destination with the same identifier (name{ref-gowerGeneralCoefficientSimilarit
-y1971}) has been already used, duplicate ignored
-<to be read again> 
-                   \relax 
-l.644 ...-gowerGeneralCoefficientSimilarity1971}{}
-                                                  %pdfTeX warning (ext4): desti
-nation with the same identifier (name{ref-grovesSurveyMethodology2004}) has bee
-n already used, duplicate ignored
-<to be read again> 
-                   \relax 
-l.647 ...target{ref-grovesSurveyMethodology2004}{}
-                                                  %pdfTeX warning (ext4): desti
-nation with the same identifier (name{ref-hennigHowFindAppropriate2013}) has be
-en already used, duplicate ignored
-<to be read again> 
-                   \relax 
-l.650 ...arget{ref-hennigHowFindAppropriate2013}{}
-                                                  %pdfTeX warning (ext4): desti
-nation with the same identifier (name{ref-kernAssessingMethodsGeneralizing2016}
-) has been already used, duplicate ignored
-<to be read again> 
-                   \relax 
-l.653 ...f-kernAssessingMethodsGeneralizing2016}{}
-                                                  %pdfTeX warning (ext4): desti
-nation with the same identifier (name{ref-olsenExternalValidityPolicy2013}) has
- been already used, duplicate ignored
-<to be read again> 
-                   \relax 
-l.656 ...et{ref-olsenExternalValidityPolicy2013}{}
-                                                  %pdfTeX warning (ext4): desti
-nation with the same identifier (name{ref-omuircheartaighGeneralizingUnrepresen
-tativeExperiments2014}) has been already used, duplicate ignored
-<to be read again> 
-                   \relax 
-l.659 ...alizingUnrepresentativeExperiments2014}{}
-                                                  %pdfTeX warning (ext4): desti
-nation with the same identifier (name{ref-raudenbushStatisticalPowerOptimal2000
-}) has been already used, duplicate ignored
-<to be read again> 
-                   \relax 
-l.662 ...-raudenbushStatisticalPowerOptimal2000}{}
-                                                  %pdfTeX warning (ext4): desti
-nation with the same identifier (name{ref-shadishExperimentalQuasiexperimentalD
-esigns2002}) has been already used, duplicate ignored
-<to be read again> 
-                   \relax 
-l.665 ...perimentalQuasiexperimentalDesigns2002}{}
-                                                  % [44]pdfTeX warning (ext4): 
-destination with the same identifier (name{ref-steinleyKmeansClusteringHalfcent
-ury2006}) has been already used, duplicate ignored
-<to be read again> 
-                   \relax 
-l.668 ...teinleyKmeansClusteringHalfcentury2006}{}
-                                                  %pdfTeX warning (ext4): desti
-nation with the same identifier (name{ref-stuartCharacteristicsSchoolDistricts2
-017}) has been already used, duplicate ignored
-<to be read again> 
-                   \relax 
-l.671 ...uartCharacteristicsSchoolDistricts2017}{}
-                                                  %pdfTeX warning (ext4): desti
-nation with the same identifier (name{ref-stuartUsePropensityScores2011}) has b
-een already used, duplicate ignored
-<to be read again> 
-                   \relax 
-l.674 ...rget{ref-stuartUsePropensityScores2011}{}
-                                                  %pdfTeX warning (ext4): desti
-nation with the same identifier (name{ref-tiptonImprovingGeneralizationsExperim
-ents2013}) has been already used, duplicate ignored
-<to be read again> 
-                   \relax 
-l.677 ...mprovingGeneralizationsExperiments2013}{}
-                                                  %pdfTeX warning (ext4): desti
-nation with the same identifier (name{ref-tiptonStratifiedSamplingUsing2013}) h
-as been already used, duplicate ignored
-<to be read again> 
-                   \relax 
-l.680 ...{ref-tiptonStratifiedSamplingUsing2013}{}
-                                                  %pdfTeX warning (ext4): desti
-nation with the same identifier (name{ref-tiptonHowGeneralizableYour2014}) has 
-been already used, duplicate ignored
-<to be read again> 
-                   \relax 
-l.683 ...get{ref-tiptonHowGeneralizableYour2014}{}
-                                                  % [45]pdfTeX warning (ext4): 
-destination with the same identifier (name{ref-tiptonSiteSelectionExperiments20
-16}) has been already used, duplicate ignored
-<to be read again> 
-                   \relax 
-l.686 ...ref-tiptonSiteSelectionExperiments2016}{}
-                                                  %pdfTeX warning (ext4): desti
-nation with the same identifier (name{ref-tiptonImplicationsSmallSamples2017}) 
-has been already used, duplicate ignored
-<to be read again> 
-                   \relax 
-l.689 ...ref-tiptonImplicationsSmallSamples2017}{}
-                                                  %pdfTeX warning (ext4): desti
-nation with the same identifier (name{ref-tiptonImprovedGeneralizabilityImprove
-d2019}) has been already used, duplicate ignored
-<to be read again> 
-                   \relax 
-l.692 ...onImprovedGeneralizabilityImproved2019}{}
-                                                  % AED endfloat: Processing en
-d Figures and Tables [46]
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 697.
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 697.
+[39] [40 <./GenSamp-Paper_files/figure-latex/fig-comp-1.pdf>] [41 <./GenSamp-Pa
+per_files/figure-latex/fig-gini-curve-1.pdf>] [42] [43] AED endfloat: Processin
+g end Figures and Tables [44]
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 640.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 640.
 (GenSamp-Paper.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 697.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 697.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 640.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 640.
 Package rerunfilecheck Info: File `GenSamp-Paper.out' has not changed.
-(rerunfilecheck)             Checksum: 7FC12E4F7AA8F98FFFDAE95725C0B056;6118.
+(rerunfilecheck)             Checksum: 3F26D575CE6D9061FBC63D2D1ADE55BA;6269.
  ) 
 Here is how much of TeX's memory you used:
- 26117 strings out of 492966
- 456834 string characters out of 3135727
- 570125 words of memory out of 3000000
- 29222 multiletter control sequences out of 15000+200000
+ 26608 strings out of 492970
+ 470960 string characters out of 3135857
+ 580681 words of memory out of 3000000
+ 29708 multiletter control sequences out of 15000+200000
  58027 words of font info for 106 fonts, out of 3000000 for 9000
  1141 hyphenation exceptions out of 8191
- 62i,12n,76p,1669b,721s stack positions out of 5000i,500n,10000p,200000b,50000s
+ 62i,12n,81p,1669b,989s stack positions out of 5000i,500n,10000p,200000b,50000s
 {C:/Program Files/MiKTeX 2.9/fonts/enc/dvips/lm/lm-rm.enc}{C:/Program Files/M
 iKTeX 2.9/fonts/enc/dvips/lm/lm-mathit.enc}{C:/Program Files/MiKTeX 2.9/fonts/e
 nc/dvips/lm/lm-ec.enc}{C:/Program Files/MiKTeX 2.9/fonts/enc/dvips/lm/lm-mathex
@@ -1423,9 +1357,9 @@ Files/MiKTeX 2.9/fonts/type1/public/lm/lmr8.pfb><C:/Program Files/MiKTeX 2.9/fo
 nts/type1/public/lm/lmri12.pfb><C:/Program Files/MiKTeX 2.9/fonts/type1/public/
 lm/lmsy10.pfb><C:/Program Files/MiKTeX 2.9/fonts/type1/public/lm/lmsy6.pfb><C:/
 Program Files/MiKTeX 2.9/fonts/type1/public/lm/lmsy8.pfb>
-Output written on GenSamp-Paper.pdf (46 pages, 1957463 bytes).
+Output written on GenSamp-Paper.pdf (44 pages, 1954205 bytes).
 PDF statistics:
- 702 PDF objects out of 1000 (max. 8388607)
- 182 named destinations out of 1000 (max. 500000)
- 6537 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 701 PDF objects out of 1000 (max. 8388607)
+ 179 named destinations out of 1000 (max. 500000)
+ 6641 words of extra memory for PDF output out of 10000 (max. 10000000)
 

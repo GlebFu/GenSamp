@@ -369,9 +369,7 @@ Since researchers rarely operationalize and report their process for selecting a
 
 ## Sampling Methods
 
-\JEP{This section reads like part of the simulation methods. But we haven't explained the simulation study at all yet.}\GF{Lets discuss}
-
-In this section we propose formal models for several sampling procedures. These procedures which will be incorporated in the simulation study, and are by no means comprehensive. By formalizing them in this fashion we hope to make the procedures transparent, reproducible, and modifiable to easily fit other circumstances which may be of interest for study.
+In this section we propose formal models for several sampling procedures. These procedures, which will be incorporated in the simulation study, are not meant to be comprehesnive. However, by formalizing them in this fashion we hope to make the procedures transparent, reproducible, and modifiable to easily fit other circumstances which may be of interest for study.
 
 We will be comparing 5 sampling methods in the simulation study: stratified and unstratified random sampling, stratified and unstratified convenience sampling, and stratified balanced sampling (SBS). We model the sample selection process in two stages. In the first stage, we generate indicators of _potential participation_---that is, whether a school would participate in the trial _if approached for recruitment_. Let $N$ be the total number of schools in the population, and let schools be indexed by $j = 1, ..., N$. We define $E_j$ as a binary indicator that school $j$ will agree to participate if contacted by recruiters, where $E_j = 1$ if the school agrees, and $E_j = 0$ if the school refuses. Each school is checked for approval by sampling from a Bernoulli distribution with probability equal to $\pi^P_j$ for each school $j$
 \begin{equation}
@@ -404,15 +402,12 @@ In practice, methods such as cluster sampling, stratified sampling, or a combina
 
 ### Convenience Sampling
 
-We also simulate two convenience sampling methods: unstratified (UCS) and stratified convenience sampling (SCS). Here, we assume that recruiters have some knowledge of each schools' probability of participating, if approached, and that they prioritize higher probability schools in order to minimize effort.
-To operationalize unstratified convenience sampling, we assumed that schools are approached for recruitment one at a time, with their order determined by sampling without replacement, with probability proportional to participation propensity scores $\pi^P_1,...,\pi^P_N$. 
-Once a school was selected and assigned a rank, the next school was selected with a probability proportional to the weights of the remaining schools. Once all ranks were assigned, schools were again approached until 60 schools agreed to be in the sample.
-We implemented stratified convenience sampling using the same process, but with ranks determined independently within each stratum, and using a proportional allocation across strata.
+We also simulate two convenience sampling methods: unstratified (UCS) and stratified convenience sampling (SCS). Here, we assume that recruiters have some knowledge of each schools' probability of participating, if approached, and that they prioritize higher probability schools in order to minimize effort. To operationalize unstratified convenience sampling, we assume that schools are approached for recruitment one at a time, with their order determined by sampling without replacement, and with probability proportional to participation propensity scores $\pi^P_1,...,\pi^P_N$. 
+Once a school is selected and assigned a rank, the next school is selected with a probability proportional to the weights of the remaining schools. Once all ranks are assigned, schools are again approached until 60 schools agreed to be in the sample. We implemented stratified convenience sampling using the same process, but with ranks determined independently within each stratum, and using a proportional allocation across strata.
 
 ### Balanced Sampling
 
-SBS is unique in that rankings are directly related to school characteristics and do not change across iterations. Scores within strata were based on equation \@ref(eq:euclid) (i.e., $S_j = d_{jk}$), where schools closer to the "center" of the stratum are more representative of it and are therefore a higher priority. Though extremely unlikely, it is possible that several schools could be equidistant from the center of the stratum; in such cases, schools were ordered randomly.
-Because @tiptonStratifiedSamplingUsing2013 proposed balanced sampling in connection with stratification based on a cluster analysis, we only consider the stratified version, SBS.
+SBS is unique in that rankings are directly related to school characteristics and do not change across iterations. Scores within strata are based on equation \@ref(eq:euclid) (i.e., $S_j = d_{jk}$), where schools closer to the "center" of the stratum are more representative of it and are therefore a higher priority. Though extremely unlikely, it is possible that several schools could be equidistant from the center of the stratum; in such cases, schools are ordered randomly. Because @tiptonStratifiedSamplingUsing2013 proposed balanced sampling in connection with stratification based on a cluster analysis, we only consider the stratified version, SBS.
 
 # Simulation Study
 
@@ -420,9 +415,13 @@ In this section we describe the simulation study developed to assess the general
 
 ## Data Generation
 
+### Strata Assignments
+
+In the Stratification section, we detailed how the cluster analysis was performed and resulted in schools being assigned to one of five strata. Strata are tied diectly to school characteristics, and are independant of any of the simulation study's conditions. Strata assignments are therefore constant accross iterations and conditions.
+
 ### Participation Propensity Score
 
-The first step was to model the participation propensity score (equation \@ref(eq:RGM)) using observed covariate values from extant school data. The set of covariates, $X_i$, consisted of the same variables used in the cluster analysis described in Sample Frame section above. The corresponding coefficients, $B$, were based on work by @fellersDevelopingApproachDetermine2017 who compared 571 elementary schools that participated in IES funded studies to the full population of U.S. elementary schools. The authors reported absolute SMD between the schools that participated and the population. We standardized $X_i$ and used reported SMDs as coefficients in equation \@ref(eq:RGM) to generated $\pi^P_i$ values. The covariates along with the coefficient values are reported in Table \@ref(tab:tab-RGM-Pars). We generate different levels of population participation rates by manipulating the intercept values. Since these rates are unknown, we selected parameters for 9 levels of participation rates.
+We modeled the participation propensity score (equation \@ref(eq:RGM)) using observed covariate values from extant school data. The set of covariates, $X_i$, consisted of the same variables used in the cluster analysis described in Sample Frame section above. The corresponding coefficients, $B$, were based on work by @fellersDevelopingApproachDetermine2017 who compared 571 elementary schools that participated in IES funded studies to the full population of U.S. elementary schools. The authors reported absolute SMD between the schools that participated and the population. We standardized $X_i$ and used reported SMDs as coefficients in equation \@ref(eq:RGM) to generated $\pi^P_i$ values. The covariates along with the coefficient values are reported in Table \@ref(tab:tab-RGM-Pars). We generate different levels of population participation rates by manipulating the intercept values. Since these rates are unknown, we selected parameters for 9 levels of participation rates. As such, participation propensity scores were constant for each school only within each participation rate condition.
 
 ```{r tab-RGM-Pars, results = "asis", eval = T}
 tabs$coefs <- df.coefs %>% 
@@ -449,7 +448,10 @@ data.frame(Intercept = intercepts, RR = names(intercepts), row.names = NULL, str
 
 ## Simulation procedures 
 
-\JEP{Need at least a paragraph or two explaining the procedures involved in simulating samples. What were the steps to get to data that could be analyzed for generalizability and feasibility? How many replications?}
+We designed the simulation to examine the performance of 5 sampling methods across 9 levels of population participation. The population of schools and their assigned strata were constant across all conditions and iterations. The participation propensity score was constant across all sampling methods and iterations within each level of population participation. Within each iteration, all schools were checked for approval (equation (8)) which then remained constant accross each sampling method. That is, if a school was approached by one or more method within an iteration, the school would provide the same response to all three methods (agree or refuse to participate). The order in which schools were approached varied by method and across iterations. The one exception is the balanced sampling method, where the order in which schools are approached is constant since it is tied to strata assignemnt and school characteristics.
+
+In total, 45,000 samples were generated by running 1000 iterations for each of 9 population participation levels, and using 5 sampling methods in each iteration. Each iteration proceded as follows. First, we generated school responses ($E_j$) for all schools. Next, we generated 5 sets of rankings, one for each sampling method, for all schools. We checked each school in order for recruitment until a sample of 60 schools was selected by each method. For each sample we tracked which schools aggreed to participat, which schools refused to participate, and how many schools refused to participate. We also calculated the B-index and the SMD between each sample and the population. If the sampling method was a stratified version, B-indicies and SMDs were calculated within each stratum as well. 
+
 
 ## Analysis
 

@@ -1,6 +1,3 @@
-\PassOptionsToPackage{unicode=true}{hyperref} % options for packages loaded elsewhere
-\PassOptionsToPackage{hyphens}{url}
-%
 \documentclass[man,floatsintext]{apa6}
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -9,26 +6,23 @@
 \ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
   \usepackage[T1]{fontenc}
   \usepackage[utf8]{inputenc}
-  \usepackage{textcomp} % provides euro and other symbols
 \else % if luatex or xelatex
-  \usepackage{unicode-math}
+  \ifxetex
+    \usepackage{mathspec}
+  \else
+    \usepackage{fontspec}
+  \fi
   \defaultfontfeatures{Ligatures=TeX,Scale=MatchLowercase}
 \fi
 % use upquote if available, for straight quotes in verbatim environments
 \IfFileExists{upquote.sty}{\usepackage{upquote}}{}
 % use microtype if available
 \IfFileExists{microtype.sty}{%
-\usepackage[]{microtype}
+\usepackage{microtype}
 \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
 }{}
-\IfFileExists{parskip.sty}{%
-\usepackage{parskip}
-}{% else
-\setlength{\parindent}{0pt}
-\setlength{\parskip}{6pt plus 2pt minus 1pt}
-}
 \usepackage{hyperref}
-\hypersetup{
+\hypersetup{unicode=true,
             pdftitle={Assessing sampling methods for generalization from RCTs: Modeling recruitment and participation},
             pdfauthor={Gleb Furman~\& James E. Pustejovsky},
             pdfkeywords={generalizability, sampling, MRT},
@@ -44,6 +38,12 @@
 % margins by default, and it is still possible to overwrite the defaults
 % using explicit options in \includegraphics[width, height, ...]{}
 \setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+\IfFileExists{parskip.sty}{%
+\usepackage{parskip}
+}{% else
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+}
 \setlength{\emergencystretch}{3em}  % prevent overfull lines
 \providecommand{\tightlist}{%
   \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
@@ -58,11 +58,15 @@
 \renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
 \fi
 
-% set default figure placement to htbp
-\makeatletter
-\def\fps@figure{htbp}
-\makeatother
+%%% Use protect on footnotes to avoid problems with footnotes in titles
+\let\rmarkdownfootnote\footnote%
+\def\footnote{\protect\rmarkdownfootnote}
 
+
+  \title{Assessing sampling methods for generalization from RCTs: Modeling recruitment and participation}
+    \author{Gleb Furman\textsuperscript{1}~\& James E. Pustejovsky\textsuperscript{1}}
+    \date{}
+  
 \shorttitle{Assessing sampling methods for generalization from RCTs}
 \affiliation{
 \vspace{0.5cm}
@@ -93,10 +97,6 @@
 \raggedbottom
 \newcommand{\JEP}[1]{\todo[color=blue!20]{#1}}
 \newcommand{\GF}[1]{\todo[color=orange]{#1}}
-
-\title{Assessing sampling methods for generalization from RCTs: Modeling recruitment and participation}
-\author{Gleb Furman\textsuperscript{1}~\& James E. Pustejovsky\textsuperscript{1}}
-\date{}
 
 \authornote{
 
@@ -199,11 +199,11 @@ where \(w_{ii'h} = 0\) if \(X_h\) is missing for either site and \(w_{ii'h} = 1\
 
 Next we used the \emph{kmeans} function to generate clusters, which employs an optimization algorithm to classify sites into \(k\) clusters by minimizing the total within cluster variance. For each \(k\), it is recommended to run \emph{kmeans} at least 10 times, and select the clustering that results in the smallest total within-cluster sum of squares. This function also requires two parameters: (1) the distance matrix from the previous step, and (2) the number of clusters to generate (\(k\)).
 
-Selecting an appropriate value for \(k\) is one of the most difficult problems in cluster analysis (Steinley, 2006). Tipton (2013b) states that both empirical and practical criteria should be used in selecting \(k\). Hennig \& Liao (2013) also argue that the method of selecting \(k\) should depend on the context of the clustering, framing the issue as one of obtaining an appropriate subject-matter-dependent definition rather than a statistical estimation.
+Selecting an appropriate value for \(k\) is one of the most difficult problems in cluster analysis (Steinley, 2006). Tipton (2013b) states that both empirical and practical criteria should be used in selecting \(k\). Hennig and Liao (2013) also argue that the method of selecting \(k\) should depend on the context of the clustering, framing the issue as one of obtaining an appropriate subject-matter-dependent definition rather than a statistical estimation.
 
 Proportional allocation dictates that each stratum should contribute a number of units to the full sample that is proportional to the size of the strata. Having unequal sized strata means that recruiters will need to focus more on larger strata. Generating a larger set of strata would result in greater homogeneity within each stratum, however it may also be more difficult to manage for recruiters. For instance, if refusal and non-response rates are fairly high, having fewer sites spread across more strata may make it difficult to adequately recruit from all strata. Resource constraints (e.g.~time, funding, recruiters) may also be a factor in the number of strata selected.
 
-With these considerations in mind, we examined three criteria: (1) a generalized form of the Calinski-Harabasz index (Cali\a'nski \& Harabasz, 1974) proposed by Hennig \& Liao (2013), (2) the proportion of between-cluster variance as recommended by Tipton (2013b), and (3) the practicality of sampling from fewer clusters. Our strategy was to perform the analysis several times for each value of \(k\) and compare all performance criteria for each set of strata generated (Figure \ref{fig:fig-k-plots}).
+With these considerations in mind, we examined three criteria: (1) a generalized form of the Calinski-Harabasz index (Cali\a'nski \& Harabasz, 1974) proposed by Hennig and Liao (2013), (2) the proportion of between-cluster variance as recommended by Tipton (2013b), and (3) the practicality of sampling from fewer clusters. Our strategy was to perform the analysis several times for each value of \(k\) and compare all performance criteria for each set of strata generated (Figure \ref{fig:fig-k-plots}).
 
 We first calculated the Calinski-Harabasz (CH) index using the \emph{cluster.stats} function from the \emph{fpc} (Hennig ???) package. Figure \ref{fig:fig-k-plots}a displays the CH index for each \(k\) clusters generated. In this case, generating 2 clusters maximizes the CH-index. Another potential solution is at 5 clusters where there is also a local maxima.
 
@@ -280,16 +280,14 @@ Since researchers rarely operationalize and report their process for selecting a
 \hypertarget{sampling-methods}{%
 \subsection{Sampling Methods}\label{sampling-methods}}
 
-\todo[color=blue!20]{This section reads like part of the simulation methods. But we haven't explained the simulation study at all yet.}\todo[color=orange]{Lets discuss}
-
-In this section we propose formal models for the sampling procedures to be incorporated in the simulation study. These models are by no means comprehensive, and by formalizing them in this fashion we hope to make them transparent, reproducible, and more easily modified to fit other circumstances which may be of interstate for study.
+In this section we propose formal models for several sampling procedures. These procedures, which will be incorporated in the simulation study, are not meant to be comprehesnive. However, by formalizing them in this fashion we hope to make the procedures transparent, reproducible, and modifiable to easily fit other circumstances which may be of interest for study.
 
 We will be comparing 5 sampling methods in the simulation study: stratified and unstratified random sampling, stratified and unstratified convenience sampling, and stratified balanced sampling (SBS). We model the sample selection process in two stages. In the first stage, we generate indicators of \emph{potential participation}---that is, whether a school would participate in the trial \emph{if approached for recruitment}. Let \(N\) be the total number of schools in the population, and let schools be indexed by \(j = 1, ..., N\). We define \(E_j\) as a binary indicator that school \(j\) will agree to participate if contacted by recruiters, where \(E_j = 1\) if the school agrees, and \(E_j = 0\) if the school refuses. Each school is checked for approval by sampling from a Bernoulli distribution with probability equal to \(\pi^P_j\) for each school \(j\)
 \begin{equation}
 \label{eq:Ej}
 E_j \sim B(\pi^P_j)
 \end{equation}
-The potential participation indicators should be generated at the beginning of each iteration and are therefore common across the five sampling methods.
+In this manner, \(\pi^P_j\) is constant as it represents a school characteristic, and \(E_j\) can vary across iterations.
 
 We model the sampling process as observing the potential participation indicator for schools in a ranked list, where the order in which schools are contacted is determined by a score \(S = S_1,...,S_N\). Let \(Z_j(S)\) be an indicator whether school \(i\) is sampled based on the score \(S\).
 For the unstratified sampling methods, we determined \(Z_1(S),...,Z_N(S)\) by sorting schools according to \(S\) and selecting the first 60 schools where \(E_j = 1\).
@@ -317,16 +315,13 @@ In practice, methods such as cluster sampling, stratified sampling, or a combina
 \hypertarget{convenience-sampling}{%
 \subsubsection{Convenience Sampling}\label{convenience-sampling}}
 
-We also simulate two convenience sampling methods: unstratified (UCS) and stratified convenience sampling (SCS). Here, we assume that recruiters have some knowledge of each schools' probability of participating, if approached, and that they prioritize higher probability schools in order to minimize effort.
-To operationalize unstratified convenience sampling, we assumed that schools are approached for recruitment one at a time, with their order determined by sampling without replacement, with probability proportional to participation propensity scores \(\pi^P_1,...,\pi^P_N\).
-Once a school was selected and assigned a rank, the next school was selected with a probability proportional to the weights of the remaining schools. Once all ranks were assigned, schools were again approached until 60 schools agreed to be in the sample.
-We implemented stratified convenience sampling using the same process, but with ranks determined independently within each stratum, and using a proportional allocation across strata.
+We also simulate two convenience sampling methods: unstratified (UCS) and stratified convenience sampling (SCS). Here, we assume that recruiters have some knowledge of each schools' probability of participating, if approached, and that they prioritize higher probability schools in order to minimize effort. To operationalize unstratified convenience sampling, we assume that schools are approached for recruitment one at a time, with their order determined by sampling without replacement, and with probability proportional to participation propensity scores \(\pi^P_1,...,\pi^P_N\).
+Once a school is selected and assigned a rank, the next school is selected with a probability proportional to the weights of the remaining schools. Once all ranks are assigned, schools are again approached until 60 schools agreed to be in the sample. We implemented stratified convenience sampling using the same process, but with ranks determined independently within each stratum, and using a proportional allocation across strata.
 
 \hypertarget{balanced-sampling-1}{%
 \subsubsection{Balanced Sampling}\label{balanced-sampling-1}}
 
-SBS is unique in that rankings are directly related to school characteristics and do not change across iterations. Scores within strata were based on equation \eqref{eq:euclid} (i.e., \(S_j = d_{jk}\)), where schools closer to the \enquote{center} of the stratum are more representative of it and are therefore a higher priority. Though extremely unlikely, it is possible that several schools could be equidistant from the center of the stratum; in such cases, schools were ordered randomly.
-Because Tipton (2013b) proposed balanced sampling in connection with stratification based on a cluster analysis, we only consider the stratified version, SBS.
+SBS is unique in that rankings are directly related to school characteristics and do not change across iterations. Scores within strata are based on equation \eqref{eq:euclid} (i.e., \(S_j = d_{jk}\)), where schools closer to the \enquote{center} of the stratum are more representative of it and are therefore a higher priority. Though extremely unlikely, it is possible that several schools could be equidistant from the center of the stratum; in such cases, schools are ordered randomly. Because Tipton (2013b) proposed balanced sampling in connection with stratification based on a cluster analysis, we only consider the stratified version, SBS.
 
 \hypertarget{simulation-study}{%
 \section{Simulation Study}\label{simulation-study}}
@@ -336,10 +331,15 @@ In this section we describe the simulation study developed to assess the general
 \hypertarget{data-generation}{%
 \subsection{Data Generation}\label{data-generation}}
 
+\hypertarget{strata-assignments}{%
+\subsubsection{Strata Assignments}\label{strata-assignments}}
+
+In the Stratification section, we detailed how the cluster analysis was performed and resulted in schools being assigned to one of five strata. Strata are tied diectly to school characteristics, and are independant of any of the simulation study's conditions. Strata assignments are therefore constant accross iterations and conditions.
+
 \hypertarget{participation-propensity-score}{%
 \subsubsection{Participation Propensity Score}\label{participation-propensity-score}}
 
-The first step was to model the participation propensity score (equation \eqref{eq:RGM}) using observed covariate values from extant school data. The set of covariates, \(X_i\), consisted of the same variables used in the cluster analysis described in Sample Frame section above. The corresponding coefficients, \(B\), were based on work by Fellers (2017) who compared 571 elementary schools that participated in IES funded studies to the full population of U.S. elementary schools. The authors reported absolute SMD between the schools that participated and the population. We standardized \(X_i\) and used reported SMDs as coefficients in equation \eqref{eq:RGM} to generated \(\pi^P_i\) values. The covariates along with the coefficient values are reported in Table \ref{tab:tab-RGM-Pars}. We generate different levels of population participation rates by manipulating the intercept values. Since these rates are unknown, we selected parameters for 9 levels of participation rates.
+We modeled the participation propensity score (equation \eqref{eq:RGM}) using observed covariate values from extant school data. The set of covariates, \(X_i\), consisted of the same variables used in the cluster analysis described in Sample Frame section above. The corresponding coefficients, \(B\), were based on work by Fellers (2017) who compared 571 elementary schools that participated in IES funded studies to the full population of U.S. elementary schools. The authors reported absolute SMD between the schools that participated and the population. We standardized \(X_i\) and used reported SMDs as coefficients in equation \eqref{eq:RGM} to generated \(\pi^P_i\) values. The covariates along with the coefficient values are reported in Table \ref{tab:tab-RGM-Pars}. We generate different levels of population participation rates by manipulating the intercept values. Since these rates are unknown, we selected parameters for 9 levels of participation rates. As such, participation propensity scores were constant for each school only within each participation rate condition.
 
 \begin{table}[tbp]
 \begin{center}
@@ -373,7 +373,9 @@ Urban & 0.43\\
 \hypertarget{simulation-procedures}{%
 \subsection{Simulation procedures}\label{simulation-procedures}}
 
-\todo[color=blue!20]{Need at least a paragraph or two explaining the procedures involved in simulating samples. What were the steps to get to data that could be analyzed for generalizability and feasibility? How many replications?}
+We designed the simulation to examine the performance of 5 sampling methods across 9 levels of population participation. The population of schools and their assigned strata were constant across all conditions and iterations. The participation propensity score was constant across all sampling methods and iterations within each level of population participation. Within each iteration, all schools were checked for approval (equation (8)) which then remained constant accross each sampling method. That is, if a school was approached by one or more method within an iteration, the school would provide the same response to all three methods (agree or refuse to participate). The order in which schools were approached varied by method and across iterations. The one exception is the balanced sampling method, where the order in which schools are approached is constant since it is tied to strata assignemnt and school characteristics.
+
+In total, 45,000 samples were generated by running 1000 iterations for each of 9 population participation levels, and using 5 sampling methods in each iteration. Each iteration proceded as follows. First, we generated school responses (\(E_j\)) for all schools. Next, we generated 5 sets of rankings, one for each sampling method, for all schools. We checked each school in order for recruitment until a sample of 60 schools was selected by each method. For each sample we tracked which schools aggreed to participat, which schools refused to participate, and how many schools refused to participate. We also calculated the B-index and the SMD between each sample and the population. If the sampling method was a stratified version, B-indicies and SMDs were calculated within each stratum as well.
 
 \hypertarget{analysis}{%
 \subsection{Analysis}\label{analysis}}
@@ -632,66 +634,7 @@ Tipton, E., Hallberg, K., Hedges, L. V., \& Chan, W. (2017). Implications of Sma
 \leavevmode\hypertarget{ref-tiptonImprovedGeneralizabilityImproved2019}{}%
 Tipton, E., \& Matlen, B. J. (2019). Improved Generalizability Through Improved Recruitment: Lessons Learned From a Large-Scale Randomized Trial. \emph{American Journal of Evaluation}, \emph{40}(3), 414--430. doi:\href{https://doi.org/10.1177/1098214018810519}{10.1177/1098214018810519}
 
-\leavevmode\hypertarget{ref-calinskiDendriteMethodCluster1974}{}%
-Cali\a'nski, T., \& Harabasz, J. (1974). A dendrite method for cluster analysis. \emph{Communications in Statistics}, \emph{3}(1), 1--27. doi:\href{https://doi.org/10.1080/03610927408827101}{10.1080/03610927408827101}
-
-\leavevmode\hypertarget{ref-fellersDevelopingApproachDetermine2017}{}%
-Fellers, L. (2017). \emph{Developing an approach to determine generalizability: A review of efficacy and effectiveness trials funded by the Institute of Education Sciences} (Ph.D.). Columbia University, United States -- New York. Retrieved from \url{https://search.proquest.com/docview/1865595768/abstract/40FD82F4A0C24535PQ/1}
-
-\leavevmode\hypertarget{ref-gerberFieldExperimentsDesign2012}{}%
-Gerber, A. S., \& Green, D. P. (2012). \emph{Field experiments: Design, analysis, and interpretation} (1st ed.). New York: W. W. Norton.
-
-\leavevmode\hypertarget{ref-gowerGeneralCoefficientSimilarity1971}{}%
-Gower, J. C. (1971). A General Coefficient of Similarity and Some of Its Properties. \emph{Biometrics}, \emph{27}(4), 857--871. doi:\href{https://doi.org/10.2307/2528823}{10.2307/2528823}
-
-\leavevmode\hypertarget{ref-grovesSurveyMethodology2004}{}%
-Groves, R. M. (Ed.). (2004). \emph{Survey methodology}. Hoboken, N.J: Wiley-Interscience.
-
-\leavevmode\hypertarget{ref-hennigHowFindAppropriate2013}{}%
-Hennig, C., \& Liao, T. F. (2013). How to find an appropriate clustering for mixed-type variables with application to socio-economic stratification: How to Find an Appropriate Clustering. \emph{Journal of the Royal Statistical Society: Series C (Applied Statistics)}, \emph{62}(3), 309--369. doi:\href{https://doi.org/10.1111/j.1467-9876.2012.01066.x}{10.1111/j.1467-9876.2012.01066.x}
-
-\leavevmode\hypertarget{ref-kernAssessingMethodsGeneralizing2016}{}%
-Kern, H. L., Stuart, E. A., Hill, J., \& Green, D. P. (2016). Assessing Methods for Generalizing Experimental Impact Estimates to Target Populations. \emph{Journal of Research on Educational Effectiveness}, \emph{9}(1), 103--127. doi:\href{https://doi.org/10.1080/19345747.2015.1060282}{10.1080/19345747.2015.1060282}
-
-\leavevmode\hypertarget{ref-olsenExternalValidityPolicy2013}{}%
-Olsen, R. B., Orr, L. L., Bell, S. H., \& Stuart, E. A. (2013). External Validity in Policy Evaluations That Choose Sites Purposively. \emph{Journal of Policy Analysis and Management}, \emph{32}(1), 107--121. doi:\href{https://doi.org/10.1002/pam.21660}{10.1002/pam.21660}
-
-\leavevmode\hypertarget{ref-omuircheartaighGeneralizingUnrepresentativeExperiments2014}{}%
-O'Muircheartaigh, C., \& Hedges, L. V. (2014). Generalizing from unrepresentative experiments: A stratified propensity score approach. \emph{Journal of the Royal Statistical Society: Series C (Applied Statistics)}, \emph{63}(2), 195--210. doi:\href{https://doi.org/10.1111/rssc.12037}{10.1111/rssc.12037}
-
-\leavevmode\hypertarget{ref-raudenbushStatisticalPowerOptimal2000}{}%
-Raudenbush, S. W., \& Liu, X. (2000). Statistical power and optimal design for multisite randomized trials. \emph{Psychological Methods}, \emph{5}(2), 199--213. doi:\href{https://doi.org/10.1037//1082-989X.5.2.199}{10.1037//1082-989X.5.2.199}
-
-\leavevmode\hypertarget{ref-shadishExperimentalQuasiexperimentalDesigns2002}{}%
-Shadish, W. R., Cook, T. D., \& Campbell, D. T. (2002). \emph{Experimental and quasi-experimental designs for generalized causal inference}. Boston, MA, US: Houghton, Mifflin and Company.
-
-\leavevmode\hypertarget{ref-steinleyKmeansClusteringHalfcentury2006}{}%
-Steinley, D. (2006). K-means clustering: A half-century synthesis. \emph{British Journal of Mathematical and Statistical Psychology}, \emph{59}(1), 1--34. doi:\href{https://doi.org/10.1348/000711005X48266}{10.1348/000711005X48266}
-
-\leavevmode\hypertarget{ref-stuartCharacteristicsSchoolDistricts2017}{}%
-Stuart, E. A., Bell, S. H., Ebnesajjad, C., Olsen, R. B., \& Orr, L. L. (2017). Characteristics of School Districts That Participate in Rigorous National Educational Evaluations. \emph{Journal of Research on Educational Effectiveness}, \emph{10}(1), 168--206. doi:\href{https://doi.org/10.1080/19345747.2016.1205160}{10.1080/19345747.2016.1205160}
-
-\leavevmode\hypertarget{ref-stuartUsePropensityScores2011}{}%
-Stuart, E. A., Cole, S. R., Bradshaw, C. P., \& Leaf, P. J. (2011). The use of propensity scores to assess the generalizability of results from randomized trials: Use of Propensity Scores to Assess Generalizability. \emph{Journal of the Royal Statistical Society: Series A (Statistics in Society)}, \emph{174}(2), 369--386. doi:\href{https://doi.org/10.1111/j.1467-985X.2010.00673.x}{10.1111/j.1467-985X.2010.00673.x}
-
-\leavevmode\hypertarget{ref-tiptonImprovingGeneralizationsExperiments2013}{}%
-Tipton, E. (2013a). Improving Generalizations From Experiments Using Propensity Score Subclassification: Assumptions, Properties, and Contexts. \emph{Journal of Educational and Behavioral Statistics}, \emph{38}(3), 239--266. Retrieved from \url{https://www.jstor.org/stable/41999424}
-
-\leavevmode\hypertarget{ref-tiptonStratifiedSamplingUsing2013}{}%
-Tipton, E. (2013b). Stratified Sampling Using Cluster Analysis: A Sample Selection Strategy for Improved Generalizations From Experiments. \emph{Evaluation Review}, \emph{37}(2), 109--139. doi:\href{https://doi.org/10.1177/0193841X13516324}{10.1177/0193841X13516324}
-
-\leavevmode\hypertarget{ref-tiptonHowGeneralizableYour2014}{}%
-Tipton, E. (2014). How Generalizable Is Your Experiment? An Index for Comparing Experimental Samples and Populations. \emph{Journal of Educational and Behavioral Statistics}, \emph{39}(6), 478--501.
-
-\leavevmode\hypertarget{ref-tiptonSiteSelectionExperiments2016}{}%
-Tipton, E., Fellers, L., Caverly, S., Vaden-Kiernan, M., Borman, G., Sullivan, K., \& de Castilla, V. R. (2016). Site Selection in Experiments: An Assessment of Site Recruitment and Generalizability in Two Scale-up Studies. \emph{Journal of Research on Educational Effectiveness}, \emph{9}(sup1), 209--228. doi:\href{https://doi.org/10.1080/19345747.2015.1105895}{10.1080/19345747.2015.1105895}
-
-\leavevmode\hypertarget{ref-tiptonImplicationsSmallSamples2017}{}%
-Tipton, E., Hallberg, K., Hedges, L. V., \& Chan, W. (2017). Implications of Small Samples for Generalization: Adjustments and Rules of Thumb. \emph{Evaluation Review}, \emph{41}(5), 472--505. doi:\href{https://doi.org/10.1177/0193841X16655665}{10.1177/0193841X16655665}
-
-\leavevmode\hypertarget{ref-tiptonImprovedGeneralizabilityImproved2019}{}%
-Tipton, E., \& Matlen, B. J. (2019). Improved Generalizability Through Improved Recruitment: Lessons Learned From a Large-Scale Randomized Trial. \emph{American Journal of Evaluation}, \emph{40}(3), 414--430. doi:\href{https://doi.org/10.1177/1098214018810519}{10.1177/1098214018810519}
-
 \endgroup
+
 
 \end{document}
