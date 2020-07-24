@@ -25,21 +25,20 @@ DGM.Bs <- c(.019, .374, .081, .433, .007, -.403, -.538, .291, .395, -.019, -.101
 # DGM.exclude <- "ToRu"
 DGM.exclude <- ""
 
-names(DGM.Bs) <- covariates[!(covariates %in% DGM.exclude)]
+names(DGM.Bs) <- c("T1", "n", "pTotfrl", "Urban", "Suburban",  "ToRu", "ethWhite", "ethBlack", "ethHisp", "pFem", "ST.ratio", "dSCH", "pELL")
 
 DGM.Bs
 
 #-----------------------
 # Standardize
 # -----------------------
-df.sim.standardized <-
-  df.sim %>%
-  select(DSID, covariates) %>%
+df.sim.standardized <- df.sim %>%
+  select(DSID, all_of(covariates)) %>%
   mutate_if(is.numeric, stand)
 
 df.pop.stats <- df.sim %>%
   ungroup() %>%
-  select(covariates) %>%
+  select(all_of(covariates)) %>%
   gather(key = var, value = val) %>%
   group_by(var) %>%
   summarise(pop.mean = mean(val),
@@ -116,7 +115,7 @@ prop_allocations %>%
 
 
 df.clusters <- df.sim %>%
-  select(DSID, covariates) %>%
+  select(DSID, all_of(covariates)) %>%
   gather(key = variables, value = value, -DSID) %>%
   left_join(df.clusters) %>%
   gather(key = K, value = strata, -DSID, -variables, -value) %>%
@@ -154,19 +153,19 @@ df.clusters <- df.sim %>%
 #   facet_wrap(~ var, scales = "free")
 
 
-df.strat4 <- df.clusters %>%
-  filter(K == "K_06") %>%
-  full_join(df.PS) %>%
-  filter(strata == 4,
-         RR == "RR_10") %>%
-  left_join(df.sim.standardized %>% mutate(DSID = df.sim$DSID))
-
-X.strat4 <- df.strat4 %>%
-  ungroup() %>%
-  select(covariates) %>%
-  as.matrix
-
-df.strat4$PS == (expit(intercepts["RR_10"] + X.strat4 %*% (DGM.Bs %>% as.matrix())))
+# df.strat4 <- df.clusters %>%
+#   filter(K == "K_06") %>%
+#   full_join(df.PS) %>%
+#   filter(strata == 4,
+#          RR == "RR_10") %>%
+#   left_join(df.sim.standardized %>% mutate(DSID = df.sim$DSID))
+# 
+# X.strat4 <- df.strat4 %>%
+#   ungroup() %>%
+#   select(covariates) %>%
+#   as.matrix
+# 
+# df.strat4$PS == (expit(intercepts["RR_10"] + X.strat4 %*% (DGM.Bs %>% as.matrix())))
 
 
 

@@ -43,7 +43,7 @@ output            : papaja::apa6_pdf
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = F, cache = F, warnings = F, cache = T)
+knitr::opts_chunk$set(echo = F, cache = F, warnings = T, cache = T)
 ```
 
 ```{r load.packages, include = FALSE}
@@ -58,46 +58,52 @@ load("Data/Simulation Data/Sim Data.Rdata")
 load("Data/Cluster Analysis/Clusters k2-10.rdata")
 
 # load(read_file("Data/Results/LastResults.txt"))
-load("Data/Results/1001 Reps - K5.rdata")
+load("Data/Results/1002 Reps - K5 - pam.rdata")
 
 
+```
+
+
+```{r}
 rename_conditions <- function(orig.data) {
   orig.data %>%
     separate(col = sample_method, into = c("Clustering", "Sampling"), remove = F)
 }
 
-df.B.indicies <- df.B.indicies %>% rename_conditions()
-
-df.recruitment.stats <- df.recruitment.stats %>% rename_conditions()
-
-df.samp.counts <- df.samp.counts %>% rename_conditions()
-  
-df.samp.stats <- df.samp.stats %>% rename_conditions()
-
-
-df.k5 <- df.clusters %>%
-  transmute(DSID = DSID,
-            strata = factor(K_05))
-
-df <- left_join(df.sim, df.k5)
-
-### Calculate SMDs using IPSW
-### Estimate variance explaiend by STRATA in covariates
-
-savePlot <- F
-```
-
-
-```{r}
 boxErrors <- function(x) {
   v <- c(min(x), mean(x) - sd(x), mean(x), mean(x) + sd(x), max(x))
   names(v) <- c("ymin", "lower", "middle", "upper", "ymax")
   v
 }
-
 ```
 
 
+
+
+```{r}
+
+df.list <- list()
+results <- list()
+
+
+df.list$k.stats <- cluster.stats
+
+results$B <- df.B.indicies %>% rename_conditions()
+results$r.stats <- df.recruitment.stats %>% rename_conditions()
+results$r.counts <- df.samp.counts %>% rename_conditions()
+results$s.stats <- df.samp.stats %>% rename_conditions()
+
+df.list$strata.id <- df.clusters %>% 
+  transmute(DSID = DSID, 
+            k = K_05, 
+            strata = factor(paste("Strata", k)))
+
+df.list$pop.data <- left_join(df.sim, df.list$strata.id)
+
+savePlot <- F
+
+rm(list = c("cluster.stats", "df.B.indicies", "df.recruitment.stats", "df.samp.counts", "df.samp.stats"))
+```
 
 
 
@@ -106,11 +112,13 @@ boxErrors <- function(x) {
 ## Clustering
 
 ```{r, results = "asis"}
-library(tableone)
+# library(tableone)
 
-tab1 <- df %>%
+tabs <- list()
+
+tabs$cluster.SMD <- df.list$pop.data %>%
   # droplevels() %>% 
-  select(strata, covariates) %>%
+  select(strata, all_of(covariates)) %>%
   gather(key = var, value = val, -strata) %>%
   group_by(strata, var) %>%
   summarise(strat.mean = mean(val)) %>%
@@ -118,20 +126,26 @@ tab1 <- df %>%
   transmute(var = var,
             SMD = round((pop.mean - strat.mean) / pop.sd, 2))
 
-# tab1 %>%
-#   mutate(SMD = cell_spec(SMD, "latex", bold = abs(SMD) > .25)) %>%
-#   kable() %>%
-#   kable_styling()
+```
 
-tab1 %>%
+
+```{r}
+
+tabs$cluster.SMD %>%
   mutate(sig = ifelse(abs(SMD) > .25, "Sig", "Not Sig"),
-         neg = SMD > 0) %>%
-  ggplot(aes(x = strata, y = var, size = abs(SMD), color = neg, alpha = sig)) +
-  geom_point(shape = "-") + 
-  scale_size_continuous(range = c(10,30)) +
-  theme(legend.position = "none") +
-  scale_alpha_discrete(range = c(.5, 1))
-  
+         neg = SMD > 0,
+         k = parse_number(as.character(strata))) %>%
+  ggplot(aes(x = SMD, y = var, color = strata, alpha = sig, label = k)) +
+  geom_text() +
+  geom_vline(xintercept = c(-.25, .25), linetype = "dotted") +
+  theme_bw() +
+  scale_alpha_discrete(guide = "none") +
+  scale_color_brewer(type = "qual", palette = 2, guide = "none")
+
+
+```
+
+```{r}
 
 df %>% 
   select(strata, covariates) %>%
@@ -450,8 +464,7 @@ df.icc <- df %>%
 save(df, 
      df.coefs, 
      intercepts, 
-     chPlot, 
-     cluster.vratio, 
+     cluster.stats, 
      minK, 
      prop_allocations, 
      df.clusters, 

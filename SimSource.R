@@ -130,7 +130,7 @@ Calc_Recruitment_Stats <- function(data, include_strata = F) {
 Calc_Sample_Statistics <- function(sample.data, list.covariates) {
   sample.data %>%
     filter(accepted) %>%
-    select(sample_method, list.covariates) %>%
+    select(sample_method, all_of(list.covariates)) %>%
     gather(key = var, value = val, -sample_method) %>%
     group_by(sample_method, var) %>%
     summarise(samp.mean = mean(val),
@@ -163,7 +163,7 @@ Run_Iteration <- function(sim.data, PS.data, cluster.data, K.condition, RR.condi
     nest() %>%
     mutate(PS_sample = map(data, glm, formula = B.index.formula, family = quasibinomial()),
            PS_sample = map(PS_sample, fitted)) %>%
-    unnest() %>%
+    unnest(cols = c(data, PS_sample)) %>%
     select(sample_method, PS_sample, accepted) %>%
     group_by(sample_method) %>%
     summarise(Bs = Calc_Bindex(PS_sample, accepted))

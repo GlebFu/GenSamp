@@ -86,7 +86,7 @@ df.B.indicies <- df.sampled %>%
   nest() %>%
   mutate(PS_sample = map(data, glm, formula = B.index.formula, family = quasibinomial()),
          PS_sample = map(PS_sample, fitted)) %>%
-  unnest() %>%
+  unnest(cols = c(data, PS_sample)) %>%
   select(sample_method, PS_sample, accepted) %>%
   group_by(sample_method) %>%
   summarise(Bs = Calc_Bindex(PS_sample, accepted))

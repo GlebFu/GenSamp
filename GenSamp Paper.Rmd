@@ -208,34 +208,33 @@ We first calculated the Calinski-Harabasz (CH) index using the _cluster.stats_ f
 ```{r fig-k-prep}
 plt.k <- list()
 
-plt.k$ch <- chPlot %>%
-  gather(key = method, value = value, ch) %>%
-  ggplot(aes(x = k, y = value)) +
+
+
+plt.k$ch <- cluster.stats %>%
+  ggplot(aes(x = K, y = ch)) +
   geom_point() +
   geom_line() +
   theme_apa() +
-  scale_x_discrete(limits = c(minK:10)) +
+  scale_x_continuous(limits = c(minK,10),
+                     breaks = c(minK:10)) +
   labs(y = "CH index",
        x = "")
 
 if(saveFigs) save.figures("Intro - Calinski-Harabasz")
 
-df.vratio <- data.frame(vratio = cluster.vratio, K = names(cluster.vratio), row.names = NULL, stringsAsFactors = F) %>%
-  # group_by(subs) %>%
-  mutate(min80 = sum(vratio < .8) - .5 + minK,
-         K = parse_number(K))
-
-plt.k$vrat <- df.vratio %>%
-  ggplot(aes(x = K, y = vratio)) +
+plt.k$vrat <- cluster.stats %>%
+  mutate(min80 = sum(bt.ss < .8) - .5 + minK) %>%
+  ggplot(aes(x = K, y = bt.ss)) +
   geom_point() +
   labs(y = "Variance ratio",
        x = "") +
   geom_line() +
   geom_vline(aes(xintercept = min80), linetype = "dashed", size = .5) +
   geom_hline(aes(yintercept = .8), linetype = "dashed", size = .5) +
-  scale_x_discrete(limits = c(minK:10)) +
+  scale_x_continuous(limits = c(minK,10),
+                     breaks = c(minK:10)) +
   scale_y_continuous(breaks = seq(0, 1, .1),
-                     limits = c(.5,1)) + 
+                     limits = c(.4, 1)) + 
   theme(legend.position = "none") +
   theme_apa(box = F)
 
@@ -268,7 +267,8 @@ plt.k$pa <- prop_allocations %>%
   theme_apa() +
   labs(y = "Sample size",
        x = "Number of Strata (k)") +
-  scale_x_discrete(limits = c(minK:10)) +
+  scale_x_continuous(limits = c(minK,10),
+                     breaks = c(minK:10)) +
   scale_y_continuous(breaks = seq(0, 40, 10),
                      limits = c(0, 35)) +
   stat_function(fun = function(x) 60/x, geom = "line", linetype = "dashed", size = .5) +
@@ -541,8 +541,10 @@ We also found several trends that were unexpected. At 50% and beyond, SBS perfor
 ### Standardized Mean Differences
 
 ```{r tab-ICC-Pars, results = "asis", eval = T, message = F, warning = F}
-plt.good1 <- c("ethHisp", "pELL", "pTotfrl", "T1", "Urban", "ethWhite")
-plt.good2 <- c("ToRu", "Suburban", "dSCH")
+
+plt.good1 <- c("ethHisp", "pELL", "Urban", "ethWhite", "ToRu")
+plt.good2 <- c("pTotfrl", "T1",  "Suburban")
+plt.bad2 <- c("dSCH")
 plt.bad <- c("ethBlack", "n")
 plt.neutral <- c("pFem", "ST.ratio")
 
@@ -558,8 +560,9 @@ tabs$ICC.vs.Coefs <- df.icc %>%
          results = ifelse(vnames %in% plt.good2, "Group 2", results),
          results = ifelse(vnames %in% plt.neutral, "Group 3", results),
          results = ifelse(vnames %in% plt.bad, "Group 4", results),
+         results = ifelse(vnames %in% plt.bad2, "Group 5", results),
          results = factor(results,
-                          levels = c("Group 1", "Group 2", "Group 3", "Group 4"),
+                          levels = c("Group 1", "Group 2", "Group 3", "Group 4", "Group 5"),
                           ordered = T)) %>%
   mutate(log_odds = abs(log_odds)) %>%
   arrange(results) %>%
@@ -612,7 +615,7 @@ The second group of covariates is displayed in figure \@ref(fig:fig-SMD-by-Var-g
 
 
 
-```{r fig-SMD-by-Var-good2, fig.pos = "tb", fig.width = 9, fig.height = 3, fig.cap = "Group 2: good balance for stratified versions of methods, inconsistent performance by SBS and ScS. Dotted horizontal line indicates a .25 cutoff."}
+```{r fig-SMD-by-Var-good2, fig.pos = "tb", fig.width = 9, fig.height = 3, fig.cap = "Group 2: good balance for stratified versions of methods, inconsistent performance by SBS and SCS. Dotted horizontal line indicates a .25 cutoff."}
 
 sSMDplot %>%
   rename(vnames = Variable) %>%
@@ -660,26 +663,25 @@ sSMDplot %>%
 
 
 
-```{r fig-SMD-by-Var-bad, fig.pos = "tb", fig.width = 7, fig.height = 3, fig.cap = "Group 4 - poor relative performance for stratified convenience sampling and stratified random sampling. Dotted horizontal line indicates a .25 cutoff."}
+```{r fig-SMD-by-Var-bad, fig.pos = "tb", fig.width = 9, fig.height = 3, fig.cap = "Groups 4 and 5: poor relative performance for stratified convenience sampling and stratified random sampling. Dotted horizontal line indicates a .25 cutoff."}
+
 
 sSMDplot %>%
   rename(vnames = Variable) %>%
   left_join(df.coefs) %>%
   ungroup() %>%
   mutate(RR = parse_number(RR)) %>%
-  filter(var %in% plt.bad) %>%
+  filter(var %in% c(plt.bad, plt.bad2)) %>%
   ggplot(aes(x = RR, y = mSMD, color = Sampling, linetype = Clustering, group = sample_method)) +
   # geom_point() +
   geom_line() +
   geom_hline(yintercept = .25, linetype = "dotted") +
-  facet_wrap( ~ Variables, scales = "free_y", ncol  = 2)  +
+  facet_wrap( ~ Variables, scales = "free_y", ncol = 3)  +
   labs(y = "Mean SMD",
-       x = "Population Participation Rate") + 
+       x = "Population Participation Rate") +
   (if (grey.plots) {scale_colour_grey(start = 0, end = .7)}) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1), 
-        legend.position = "bottom") +
   scale_y_continuous(limits = c(0, NA)) +
-  scale_x_continuous(breaks = seq(10, 90, 10)) +
+  scale_x_continuous(breaks = seq(10, 90, 20)) +
   theme_apa(box = F)
 
 ```
@@ -693,27 +695,45 @@ We noted several interesting relationships when examining the groups of covariat
 library(ggalt)
 library(ggrepel)
 
-tabs$ICC.vs.Coefs %>%
-  ggplot(aes(x = icc, y = log_odds, shape = results, label = Variables)) +
+df.var.ratio <- df %>%
+  select(DSID, all_of(covariates), strata) %>%
+  gather(key = vnames, value = value, covariates) %>%
+  group_by(vnames) %>%
+  mutate(T.SS = var(value) * (n() - 1)) %>%
+  group_by(vnames, T.SS, strata) %>%
+  summarise(W.SS = var(value) * (n() - 1)) %>%
+  summarise(W.SS = sum(W.SS)) %>%
+  mutate(B.SS = T.SS - W.SS,
+         vratio = B.SS / T.SS) %>%
+  left_join(df.coefs) %>%
+  mutate(results = NA,
+         results = ifelse(vnames %in% plt.good1, "Group 1", results),
+         results = ifelse(vnames %in% plt.good2, "Group 2", results),
+         results = ifelse(vnames %in% plt.neutral, "Group 3", results),
+         results = ifelse(vnames %in% plt.bad, "Group 4", results),
+         results = ifelse(vnames %in% plt.bad2, "Group 5", results),
+         results = factor(results,
+                          levels = c("Group 1", "Group 2", "Group 3", "Group 4", "Group 5"),
+                          ordered = T)) %>%
+  mutate(log_odds = abs(log_odds)) %>%
+  arrange(results)
+
+df.var.ratio %>%
+  ggplot(aes(x = vratio, y = log_odds, label = Variables, color = results, fill = results)) +
   geom_point(size = 3) +
-  geom_text_repel(point.padding = .2) +
-  # geom_encircle(aes(fill = results) , alpha = .2, s_shape = 0, expand = 0.1, spread = .1) +
-  geom_encircle(aes(fill = results), 
-                alpha = .2, s_shape = 0, 
-                expand = 0.05, spread = .1, 
-                data = tabs$ICC.vs.Coefs %>% 
-                  filter(Variables == "Suburban")) +
-  geom_encircle(aes(fill = results),
-                alpha = .2, s_shape = 0, 
-                expand = 0.05, spread = .1, 
-                data = tabs$ICC.vs.Coefs %>% 
-                  filter(Variables != "Suburban")) +
+  geom_encircle(alpha = .5, s_shape = 0, expand = 0.1, spread = .05, color = "black") +
+  geom_text_repel(point.padding = .2, color = "black") +
   labs(y = "Absolute Log Odds",
-       x = "ICC") +
+       x = "Variance Ratio") +
   # scale_x_continuous(trans='logit') +
   guides(fill = "none") + 
+  scale_color_brewer(type = "qual", palette = 1) +
+  scale_fill_brewer(type= "qual", palette = 1) +
   (if (grey.plots) {scale_fill_grey(start = 0, end = .7)}) +
   theme_apa()
+
+
+
 
 
 ```
@@ -789,66 +809,6 @@ plot_grid(plotlist = plt.feas,
 ```
 
 
-```{r fig-units-contacted, fig.pos = "tb", fig.width = 7, fig.height = 5, fig.cap = "Average number of schools contacted to achieve $N = 60$", eval = F}
-
-# Can we delect this code chunk?
-
-contact_data <- samplot %>%
-  filter(measure == "sch.contacted")
-
-contact_data %>%
-  ungroup() %>%
-  mutate(RR = parse_number(RR)) %>%
-  ggplot(aes(x = RR, y = value, group = sample_method, color = Sampling, linetype = Clustering)) +
-  # geom_point() +
-  geom_line(size = 1) +
-  expand_limits(y=0) +
-  # theme_apa(box = T) +
-  # scale_fill_brewer(type = "seq", palette = 4) +
-  # scale_color_brewer(type = "qual", palette = 3)  +
-  labs(x = "Population Participation Rate", y = "Units Contacted") +
-  # scale_y_log10() +
-  theme_apa() + 
-  (if (grey.plots) {scale_colour_grey(start = 0, end = .7)}) +
-  theme(legend.position = "bottom",
-        # text = element_text(size=20),
-        panel.spacing = unit(2, "lines")) +
-  scale_x_continuous(breaks = seq(10, 90, 10))  
-  # scale_color_OkabeIto()
-
-if(saveFigs) save.figures("Results - Response Counts")
-```
-
-```{r fig-response-rates, fig.pos = "tb", fig.width = 7, fig.height = 5, fig.cap = "Recruitment response rates for each sampling method", eval = F}
-
-# Can we delect this code chunk?
-
-response_rate_data <- samplot %>%
-  ungroup() %>%
-  mutate(level = str_split(measure, "[.]", simplify = T)[,1],
-         measure =  str_split(measure, "[.]", simplify = T)[,2],
-         RR = parse_number(RR)) %>%
-  filter(measure == "response")
-
-response_rate_data %>%
-  ggplot(aes(x = RR, y = value, group = sample_method, color = Sampling, linetype = Clustering)) +
-  # geom_point() +
-  geom_line(size = 1) +
-  expand_limits(y=0) +
-  # theme_apa(box = T) +
-  # scale_fill_brewer(type = "seq", palette = 4) +
-  # scale_color_brewer(type = "qual", palette = 3) 
-  labs(x = "Population Participation Rate", y = "Recruitment Response Rate") +
-  theme_apa() +
-  scale_x_continuous(breaks = seq(10, 90, 10)) + 
-  (if (grey.plots) {scale_colour_grey(start = 0, end = .7)}) +
-  theme(legend.position = "bottom",
-        # text = element_text(size=20),
-        panel.spacing = unit(2, "lines")) 
-  # scale_color_OkabeIto()
-
-if(saveFigs) save.figures("Results - Response Rates")
-```
 
 ### Inequality of selected samples
 
@@ -969,7 +929,7 @@ df.gini.count %>%
   geom_abline(slope = 1, intercept = 0, linetype = "dotted") +
   geom_label(aes(label = gini, x = x.pos, y = y.pos), 
              data = df.gini.coef, size = 3) +
-  facet_wrap(~RR) + 
+  facet_wrap(~RR) +  
   (if (grey.plots) {scale_colour_grey(start = 0, end = .7)}) +
   labs(x = "Cumulative proportion of population",
          y = "Cumulative percentage of times sampled") +

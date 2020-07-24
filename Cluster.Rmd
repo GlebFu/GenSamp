@@ -3,8 +3,11 @@ knitr::opts_chunk$set(echo = F, cache = F)
 ```
 
 ```{r load.packages, include = FALSE}
-library(papaja)
 library(tidyverse)
+library(fpc)
+library(cluster)
+library(tidyverse)
+library(future)
 
 rm(list = ls())
 
@@ -17,66 +20,67 @@ load("Data/Population Data/Cleaned Data.rdata")
 ## SUBS
 
 ```{r SUBS_Funcs}
-library(parallel)
-library(fpc)
-library(cluster)
-library(tidyverse)
+distance_ch <- function(dist, clust ) {
+  d <- as.dist(dist)        # Distance matrix as distance object
+  n <- length(clust)        # Number of observations
+  clustering <- clust       # Cluster assignments
+  cwn <- cn <- max(clust)   # Total number of clusters
+  
+  dmat <- as.matrix(d)        # Distance matrix
+  within.cluster.ss <- 0      # Empty within cluster 
+  nonnoise.ss <- sum(d^2)/n   # Sum of squared distances divided by number of observations
+  cluster.size <- within.dist <- between.dist <- numeric(0) # Empty variables
+  
+  i <- 1
+  
+  for (i in 1:cn) { # for each cluster:
+    cluster.size[i] <- sum(clustering == i) # calculate the cluster size
+    di <- as.dist(dmat[clustering == i, clustering == i]) # pull within cluster distance matrix, save as distance object
+    if (i <= cwn) {
+      within.cluster.ss <- within.cluster.ss + sum(di^2)/cluster.size[i] # calculates sum of squared distances divided by cluster size
+      within.dist <- c(within.dist, di) # store within cluster distance matrix
+    }
+    
+  }
+  
+  between.cluster.ss <- nonnoise.ss - within.cluster.ss
+  
+  ch <- between.cluster.ss * (n - cwn)/(within.cluster.ss * (cwn - 1))
+  
+  tibble(b.ss = between.cluster.ss, 
+         tw.ss = within.cluster.ss, 
+         t.ss = nonnoise.ss, 
+         ch = ch, 
+         bw.ss = between.cluster.ss/within.cluster.ss, 
+         bt.ss = between.cluster.ss/nonnoise.ss)
+}
+
+
+
+genClusters <- function(distance, k) {
+  
+  clust <- pam(x = distance, k = k)
+  clust$stats <- distance_ch(distance, clust$clustering)
+  
+  return(clust)
+  
+  
+}
 
 
 run_clusters <- function(K, distance, minK) {
 
   clusters <- list()
+  kset <- minK:K
   
-  for(k in minK:K) {
-    clusters <- append(clusters, list(genClusters(distance = distance, k = k)))
+  for(i in 1:length(kset)) {
+    clusters[[i]] <- genClusters(distance = distance, k = kset[i])
   }
 
   return(clusters)
 }
 
-genClusters <- function(distance, k, iterations = 10) {
-  clusters <- list()
-  withinss <- NULL
-  # seeds <- NULL
-  
-  for(i in 1:iterations){
-    seed <- round(runif(1, 0, 1) * 10^6,0)
-    set.seed(seed)
-    
-    clust <- kmeans(x = distance, centers = k)
-    clust <- append(clust, list(seed = seed))
-    withinss <- c(withinss, clust$tot.withinss)
-    clusters <- append(clusters, list(clust))
-  }
-  
-  return(clusters[[which(withinss == min(withinss))[1]]])
-  
-}
 
-get_CH <- function(K, distance, clusters, minK) {
-  ch <- list()
-  knumber <- minK:K
-  
-  for(i in 1:length(knumber)) {
-    
-    list.c.stats <- cluster.stats(distance, 
-                        clusters[[i]]$cluster, 
-                        silhouette = F, 
-                        G2 = F, 
-                        G3 = F, 
-                        wgap = F, 
-                        sepindex = F, 
-                        sepprob = 0.1, 
-                        sepwithnoise = F)
-    
-    
-    ch = bind_rows(ch, 
-                   list(k = knumber[i], 
-                        ch = list.c.stats$ch))
-  }
-  
-  return(ch)
-}
 
 ```
 
@@ -92,45 +96,44 @@ minK <- 2
 cluster_vars <- c(covariates[!(covariates %in% c("Urban", "Suburban", "ToRu"))], "urbanicity")
 # cluster_vars <- c("n", "dSCH", "ST.ratio", "urbanicity")
 
-distance <- df.sim[, cluster_vars] %>%
+distance <- df.sim %>%
+  select(all_of(cluster_vars)) %>%
   mutate(n = log(n),
          dSCH = log(dSCH),
          ST.ratio = log(ST.ratio)) %>%
-  # sample_n(500) %>%
+  # sample_n(100) %>%
+  mutate_if(is.numeric, function(x) (x - mean(x))/sd(x)) %>%
   daisy(metric = "gower")
 
 
 
 
 clust_time <- system.time(
-  clusters <- run_clusters(K, distance, minK)
+  cluster.obj <- run_clusters(K, distance, minK)
 )
 
-
-
-ch_time <- system.time(
-  chPlot <- get_CH(K, distance, clusters, minK)
-)
 
 
 K.names <- paste("K_", formatC(minK:K, width = 2, format = "d", flag = "0"), sep = "")
 
-df.clusters <- 
-  bind_cols(lapply(clusters, function(x) data.frame(x$cluster))) %>%
+df.clusters <- cluster.obj %>%
+  lapply(function(x) data.frame(x$clustering)) %>%
+  bind_cols() %>%
   setNames(K.names)
 
-df.clusters <- 
-  df.sim %>%
+df.clusters <- df.sim %>%
   select(DSID) %>%
   cbind(df.clusters)
 
-cluster.vratio <- unlist(lapply(clusters, function(x) x$betweenss / x$totss)) %>%
-  setNames(paste("K", minK:K, sep = "_"))
-
+cluster.stats <- cluster.obj %>%
+  lapply(function(x) x$stats) %>%
+  bind_rows() %>%
+  mutate(K = minK:K)
+  
 
 # undebug(get_CH)
-save(clusters, distance, file =  "Data/Cluster Analysis/cluster analysis data k2-10.rdata")
-save(chPlot, clust_time, ch_time, K, cluster_vars, minK, df.clusters, cluster.vratio, file =  "Data/Cluster Analysis/Clusters k2-10.rdata")
+save(cluster.obj, distance, file =  "Data/Cluster Analysis/cluster analysis data k2-10.rdata")
+save(clust_time, K, cluster_vars, minK, df.clusters, cluster.stats, file =  "Data/Cluster Analysis/Clusters k2-10.rdata")
 
 write_file(x = "Data/Cluster Analysis/Clusters k2-10.rdata", "Data/Cluster Analysis/LastCluster.txt")
 ```
@@ -141,11 +144,11 @@ load("Data/Cluster Analysis/cluster analysis data k2-10.rdata")
 load("Data/Cluster Analysis/Clusters k2-10.rdata")
 
 
-chPlot %>%
-  ggplot(aes(x = k, y = ch)) +
+cluster.stats %>%
+  ggplot(aes(x = K, y = ch)) +
   geom_point() +
   geom_line() +
-  theme_apa() +
+  theme_bw() +
   scale_x_discrete(limits = c(minK:K))
 
 
@@ -154,8 +157,9 @@ chPlot %>%
 
 ```{r SUBS_FULL_SSB/SST}
 
-data.frame(k = minK:K, var = cluster.vratio, min80 = sum(cluster.vratio <= .8) + minK - .5) %>%
-  ggplot(aes(x = k, y = var)) +
+cluster.stats %>%
+  mutate(min80 = sum(bt.ss <= .8) + min(K) - .5) %>%
+  ggplot(aes(x = K, y = bt.ss)) +
   geom_point() +
   # ggtitle("Between cluster variance by number of strata") +
   labs(y = "Between Cluster Variance",
@@ -163,7 +167,7 @@ data.frame(k = minK:K, var = cluster.vratio, min80 = sum(cluster.vratio <= .8) +
   geom_line() +
   geom_vline(aes(xintercept = min80), linetype = "dotted") +
   geom_hline(yintercept = .8, linetype = "dotted") +
-  theme_apa() +
+  theme_bw() +
   scale_x_discrete(limits = c(minK:K)) +
   scale_y_continuous(breaks = seq(0, 1, .1), limits = c(.3, 1)) +
   theme(text = element_text(size=20))
@@ -175,8 +179,6 @@ ggsave(filename ="Figs/AERA Cluster SS.jpg", dpi = 1000, width = 10, height = 7)
 
 ```{r}
 
-
-# rbind(cls_f, cls_ov) %>%
 df.clusters %>%
   gather(key = k, value = cluster, -DSID) %>%
   mutate(k = parse_number(k)) %>%
@@ -186,7 +188,7 @@ df.clusters %>%
   mutate(sample = (n / sum(n)) * 60) %>%
   ggplot(aes(x = k, y = sample)) +
   geom_point(shape = "-", size = 15, alpha = .5) +
-  theme_apa() +
+  theme_bw() +
   labs(y = "Allocated Sample Size",
        x = "Number of Strata (K)") +
   scale_x_continuous(breaks = seq(minK, K, 1)) +

@@ -56,7 +56,7 @@ Run_Sim <- function(reps, RR.list = NULL, K.list = NULL) {
 
 library(parallel)
 
-no_cores <- detectCores() - 1
+no_cores <- detectCores() - 2
 
 reps <- rep((minreps + (no_cores - minreps %% no_cores)) / no_cores, each = no_cores)
 
