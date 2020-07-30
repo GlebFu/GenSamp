@@ -46,10 +46,18 @@ output            : papaja::apa6_pdf
 knitr::opts_chunk$set(echo = F, cache = F, warnings = T, cache = T)
 ```
 
+# Setup
+
+## Packages and Data
+
 ```{r load.packages, include = FALSE}
 library(papaja)
 library(tidyverse)
 library(kableExtra)
+library(ggalt)
+library(ggrepel)
+library(ggforce)
+library(concaveman)
 
 rm(list = ls())
 
@@ -63,8 +71,8 @@ load("Data/Results/1002 Reps - K5 - pam.rdata")
 
 ```
 
-
-```{r}
+## Helper Functions
+```{r functions}
 rename_conditions <- function(orig.data) {
   orig.data %>%
     separate(col = sample_method, into = c("Clustering", "Sampling"), remove = F)
@@ -78,13 +86,16 @@ boxErrors <- function(x) {
 ```
 
 
+## Organize Objects
 
-
-```{r}
+```{r declare-objects}
 
 df.list <- list()
 results <- list()
+lab.vars <- list(k = "Number of strata (k)", vratio = "Variance Ratio (B/T)", ch = "CH Index")
 
+tabs <- list()
+figs <- list()
 
 df.list$k.stats <- cluster.stats
 
@@ -92,6 +103,7 @@ results$B <- df.B.indicies %>% rename_conditions()
 results$r.stats <- df.recruitment.stats %>% rename_conditions()
 results$r.counts <- df.samp.counts %>% rename_conditions()
 results$s.stats <- df.samp.stats %>% rename_conditions()
+results$k <- df.clusters
 
 df.list$strata.id <- df.clusters %>% 
   transmute(DSID = DSID, 
@@ -100,54 +112,153 @@ df.list$strata.id <- df.clusters %>%
 
 df.list$pop.data <- left_join(df.sim, df.list$strata.id)
 
-savePlot <- F
+df.list$pop.stats <- df.pop.stats
 
-rm(list = c("cluster.stats", "df.B.indicies", "df.recruitment.stats", "df.samp.counts", "df.samp.stats"))
+df.list$PS <- df.PS
+
+
+df.list$coefs <- data.frame(Variables = names(DGM.Bs), vnames = names(DGM.Bs), log_odds = DGM.Bs, row.names = NULL) %>%
+  arrange(Variables)
+
+levels(df.list$coefs$Variables) <- c("District Size", 
+                                "% Black",
+                                "% Hispanic",
+                                "% White",
+                                "N Students",
+                                "% ELL",
+                                "% Female",
+                                "% F/R Lunch", # Free Reduced Lunch
+                                "Students/Teachers",
+                                "Suburban",
+                                "Schoolwide Title I",
+                                "Town/Rural",
+                                "Urban")
+
+
+rm(list = c("cluster.stats", 
+            "df.B.indicies", 
+            "df.recruitment.stats", 
+            "df.samp.counts", 
+            "df.samp.stats", 
+            "df.clusters", 
+            "df.pop.stats", 
+            "df.PS"))
+
 ```
 
 
 
 # Methods Summary
 
-## Clustering
+## Cluster Analysis
+
+### Selecting k
+```{r}
+figs$ch <- df.list$k.stats %>%
+  ggplot(aes(x = K, y = ch)) +
+  geom_point() +
+  geom_line() +
+  scale_x_continuous(breaks = c(minK:K)) +
+  scale_y_continuous(breaks = seq(4000, 9000, 1000),
+                     limits = c(4000, 10000)) +
+  labs(y = lab.vars$ch,
+       x = lab.vars$k)
+
+figs$ch
+```
+
+```{r}
+figs$vratio <- df.list$k.stats %>%
+  mutate(min80 = sum(bt.ss <= .8) + min(K) - .5) %>%
+  ggplot(aes(x = K, y = bt.ss)) +
+  geom_point() +
+  geom_vline(aes(xintercept = min80), linetype = "dotted") +
+  geom_hline(yintercept = .8, linetype = "dotted") +
+  scale_x_continuous(breaks = c(minK:K)) +
+  scale_y_continuous(breaks = seq(0, 1, .1), limits = c(.3, 1)) +
+  geom_line() +
+  labs(y = lab.vars$vratio,
+       x = lab.vars$k)
+
+figs$vratio
+```
+
+```{r}
+
+
+lab.vars$n_j <- "Target sample per cluster"
+lab.vars$pop.prop <- "Proportion of population (%)"
+
+tabs$allocation <- results$k %>%
+  gather(key = k, value = strata, -DSID) %>%
+  mutate(k = parse_number(k),
+         strata = paste("Strata", strata)) %>%
+  group_by(k, strata) %>%
+  summarise(n = n()) %>%
+  group_by(k) %>%
+  mutate(sample = (n / sum(n)) * 60)
+
+figs$allocation <- tabs$allocation %>%
+  ggplot(aes(x = k, y = sample)) +
+  geom_point(shape = "-", size = 15, alpha = .5) +
+  labs(y = lab.vars$nj,
+       x = lab.vars$k) +
+  scale_x_continuous(breaks = seq(minK, K, 1)) +
+  scale_y_continuous(breaks = seq(0, 50, 5),
+                     limits = c(0, 35),
+                     sec.axis = sec_axis(~./.6, 
+                                         name = lab.vars$pop.prop,
+                                         breaks = seq(0, 100, 10))) +
+  stat_function(fun = function(x) 60/x, geom = "line", linetype = "dashed", size = .5) +
+  geom_hline(yintercept = 5, linetype = "dotted", size = .5)
+
+figs$allocation
+
+```
 
 ```{r, results = "asis"}
-# library(tableone)
 
-tabs <- list()
-
-tabs$cluster.SMD <- df.list$pop.data %>%
+tabs$cluster.SMD <- df.list$pop.data %>% 
   # droplevels() %>% 
   select(strata, all_of(covariates)) %>%
   gather(key = var, value = val, -strata) %>%
   group_by(strata, var) %>%
   summarise(strat.mean = mean(val)) %>%
-  left_join(df.pop.stats) %>%
-  transmute(var = var,
-            SMD = round((pop.mean - strat.mean) / pop.sd, 2))
+  left_join(df.list$pop.stats) %>%
+  transmute(vnames = var,
+            SMD = round((pop.mean - strat.mean) / pop.sd, 2)) %>%
+  left_join(df.list$coefs)
 
 ```
 
 
 ```{r}
 
-tabs$cluster.SMD %>%
+lab.vars$smd <- "Standardized mean difference"
+lab.vars$vars <- "Participation covariates"
+
+figs$cluster.SMD <- tabs$cluster.SMD %>%
   mutate(sig = ifelse(abs(SMD) > .25, "Sig", "Not Sig"),
          neg = SMD > 0,
          k = parse_number(as.character(strata))) %>%
-  ggplot(aes(x = SMD, y = var, color = strata, alpha = sig, label = k)) +
+  ggplot(aes(x = SMD, y = Variables, color = strata, alpha = sig, label = k)) +
   geom_text() +
+  geom_text(aes(x = 0, y = Variables, label = Variables), color = "black", alpha = 1) +
   geom_vline(xintercept = c(-.25, .25), linetype = "dotted") +
-  theme_bw() +
-  scale_alpha_discrete(guide = "none") +
-  scale_color_brewer(type = "qual", palette = 2, guide = "none")
+  scale_alpha_discrete(guide = "none")  +
+  scale_x_continuous(limits = c(-2,2)) +
+  theme(axis.text.y = element_blank(),
+        axis.ticks.y = element_blank()) +
+  labs(x = lab.vars$smd ,
+       y = lab.vars$vars)
 
-
+figs$cluster.SMD
 ```
+
 
 ```{r}
 
-df %>% 
+df.list$pop.data %>% 
   select(strata, covariates) %>%
   # select(strata, n, dSCH, ST.ratio) %>%
   mutate(n = log(n),
@@ -164,38 +275,23 @@ df %>%
 ## Participation Generating Model
 
 ```{r}
-df.coefs <- data.frame(Variables = names(DGM.Bs), vnames = names(DGM.Bs), log_odds = DGM.Bs, row.names = NULL) %>%
-  arrange(Variables)
 
-levels(df.coefs$Variables) <- c("District Size", 
-                                "% Black",
-                                "% Hispanic",
-                                "% White",
-                                "N Students",
-                                "% ELL",
-                                "% Female",
-                                "% F/RL", # Free Reduced Lunch
-                                "Students/Teachers",
-                                "Suburban",
-                                "Schoolwide Title I",
-                                "Town/Rural",
-                                "Urban")
 
-df.coefs %>%
+df.list$coefs %>%
   kable() %>%
   kable_styling()
 ```
 
 
 ```{r}
-dist_plots <- df %>%
-  select(covariates) %>%
+tabs$dist <- df.list$pop.data %>%
+  select(all_of(covariates)) %>%
   select_if(is.numeric) %>%
   mutate(n = log(n),
          ST.ratio = log(ST.ratio),
          dSCH = log(dSCH)) %>%
   gather(key = vnames, value = val) %>%
-  left_join(df.coefs)
+  left_join(df.list$coefs)
 
 
 
@@ -203,30 +299,37 @@ dist_plots <- df %>%
 
 ```{r}
 
+lab.vars$intercept <- "Participation model intercept"
+lab.vars$rr <- "Population participation \n(generated %)"
 
-data.frame(Intercept = intercepts, RR = names(intercepts), row.names = NULL) %>%
+tabs$intercepts <- tibble(Intercept = intercepts, RR = names(intercepts), row.names = NULL) %>%
+  mutate(RR = parse_number(RR))
+
+tabs$intercepts %>%
   ggplot(aes(x = RR, y = Intercept, group = 1)) +
   geom_point() +
   geom_line() +
-  theme_apa() +
-  labs(title = "Intercept values")
+  scale_x_continuous(breaks = seq(0, 100, 10)) +
+  labs(y = lab.vars$intercept,
+       x = lab.vars$rr)
 ```
 
 
 ```{r, fig.cap = "Distributions of Participation Propensity Scores"}
-df.PS %>% 
+df.list$PS %>% 
   ggplot(aes(x = PS)) + 
   geom_histogram() + 
   facet_wrap(~RR, scales = "free") +
   theme_apa()
 
 
-left_join(df.PS, df.k5) %>%
+
+left_join(df.list$PS, df.list$strata.id) %>%
   ggplot(aes(x = PS, color = strata, group = strata)) +
   geom_density() +
   facet_wrap(~RR, scales = "free_y")
 
-left_join(df.PS, df.k5) %>%
+left_join(df.list$PS, df.list$strata.id) %>%
   ggplot(aes(x = strata, y = PS, color = strata)) +
   geom_boxplot() +
   facet_wrap(~RR, scales = "free_y") + 
@@ -235,95 +338,241 @@ left_join(df.PS, df.k5) %>%
 ```
 
 
-## B Index
+# Results
+
+## Generalizability
+
+### B Index
 
 ```{r, fig.cap = "Averge B-Index"}
 
-avg_Bindex <- df.B.indicies %>%
+lab.vars$B <- "Average B-index"
+
+tabs$B <- results$B %>% 
   group_by(sample_method, RR, Clustering, Sampling) %>%
   summarise(M = mean(Bs, na.rm = T),
             SD = sd(Bs, na.rm = T)) %>%
   mutate(LL = M - SD,
-         UL = M + SD)
+         UL = M + SD,
+         RR = parse_number(RR))
 
-avg_Bindex %>%
+figs$B <- tabs$B %>%
   ggplot(aes(x = RR, y = M, color = Sampling, linetype = Clustering, group = sample_method)) +
   geom_line() +
-  labs(y = "Mean B-index",
-       x = "Population Participation Rate") +
-  theme_apa() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  labs(y = lab.vars$B ,
+       x = lab.vars$rr) +
+  geom_hline(yintercept = .9, linetype = "dashed") +
+  scale_x_continuous(breaks = seq(0, 100, 10))
 
 
-if(savePlot) ggsave(paste("Figs/", file_date, "/Paper B-Index.jpg", sep = ""), dpi = 1000, width = 7, height = 4)
-
-# df.B.indicies %>%
-#   group_by(sample_method, RR, Clustering, Sampling) %>%
-#   summarise(NA.Count = sum(is.na(Bs))) %>%
-#   spread(key = RR, value = NA.Count) 
+figs$B 
 
 
 ```
 
 
 
-## Standardized mean differences
+### Standardized mean differences
 
 ```{r, fig.cap = "Average SMDs", fig.height = 7}
-df.samp.stats <- df.samp.stats %>%
-  left_join(df.pop.stats) %>%
-  mutate(smd = (samp.mean - pop.mean) / pop.sd)
+
+vars <- list()
 
 
-sSMDplot <- df.samp.stats %>%
+vars$plot.groups <- bind_rows(
+  tibble(group = "Group 1", 
+         desc = "good1", 
+         vnames = c("ethHisp", "pELL", "Urban", "ethWhite", "ToRu")),
+  tibble(group = "Group 2", 
+         desc = "good2", 
+         vnames = c("pTotfrl", "T1",  "Suburban")),
+  tibble(group = "Group 3", 
+         desc = "bad", 
+         vnames = c("ethBlack", "n", "dSCH")),
+  tibble(group = "Group 4", 
+         desc = "neutral", 
+         vnames = c("pFem", "ST.ratio"))
+  )
+
+plot_smd <- function(data) {
+  data %>% 
+  ggplot(aes(x = RR, y = mSMD, color = Sampling, linetype = Clustering, group = sample_method)) +
+  geom_line(size = 1) +
+  geom_hline(yintercept = .25, linetype = "dotted") +
+  facet_wrap( ~ Variables, scales = "free", ncol = 3) +
+  labs(y = lab.vars$smd,
+       x = lab.vars$rr) + 
+  scale_x_continuous(breaks = seq(10, 90, 20)) +
+  theme(legend.position = "bottom")
+}
+
+SMDFigs <-  results$s.stats %>%
+  left_join(df.list$pop.stats) %>%
+  mutate(smd = (samp.mean - pop.mean) / pop.sd,
+         RR = parse_number(RR)) %>%
   group_by(sample_method, RR, var, Sampling, Clustering, K) %>%
   summarise(mSMD = mean(abs(smd)),
-            mSMD.sd = sd(abs(smd)))
+            mSMD.sd = sd(abs(smd))) %>%
+  rename(vnames = var) %>%
+  left_join(df.list$coefs) %>%
+  ungroup() %>%
+  left_join(vars$plot.groups ) %>%
+  group_by(group, desc) %>%
+  nest %>%
+  mutate(plots = map(data, plot_smd),
+         plots = set_names(plots, paste("smd.", desc, sep = "")),
+         data = set_names(data, paste("smd.", desc, sep = ""))) %>%
+  ungroup() %>%
+  select(data, plots)
 
-
-
-sSMDplot %>%
-  ggplot(aes(x = RR, y = mSMD, color = Sampling, linetype = Clustering, group = sample_method)) +
-  # geom_point() +
-  geom_line() +
-  geom_hline(yintercept = 0) +
-  geom_hline(yintercept = .25, linetype = "dashed") +
-  facet_wrap( ~ var, scales = "free_y", ncol  = 3) +
-  theme_apa(box = F) +
-  labs(y = "Mean SMD",
-       x = "Population Participation Rate") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-
-if(savePlot)  ggsave(paste("Figs/", file_date, "/All SMDs.jpg", sep = ""), dpi = 1000, width = 7, height = 5)
+tabs <- c(tabs, SMDFigs$data)
+figs <- c(figs, SMDFigs$plots)
 
 
 
 ```
 
 
+```{r}
 
-## Sampling Difficulty
+figs$smd.good1
+
+```
 
 ```{r}
-samplot <- df.recruitment.stats %>%
+figs$smd.good2
+
+```
+
+```{r}
+figs$smd.bad
+
+```
+
+
+```{r}
+figs$smd.neutral
+
+```
+### Examples
+
+```{r, fig.cap = "Average SMDs", fig.height = 7}
+
+plot_smd2 <- function(data) {
+  data %>% 
+  ggplot(aes(x = RR, y = mSMD, color = Sampling, linetype = Clustering, group = sample_method)) +
+  geom_line(size = 1) +
+  geom_hline(yintercept = .25, linetype = "dotted") +
+  labs(y = lab.vars$smd,
+       x = lab.vars$rr) + 
+  scale_x_continuous(breaks = seq(10, 90, 20)) +
+  theme(legend.position = "right")
+}
+
+vars$plot.smd.examples <- bind_rows(
+  tibble(group = "Example", 
+         desc = "each", 
+         vnames = c("pELL", "n", "pFem")),
+  tibble(group = "ELL", 
+         desc = "ell", 
+         vnames = c("pELL")),
+  tibble(group = "N", 
+         desc = "n", 
+         vnames = c("n")),
+  tibble(group = "Fem", 
+         desc = "fem", 
+         vnames = c("pFem"))
+  )
+
+SMDFigs <-  results$s.stats %>%
+  left_join(df.list$pop.stats) %>%
+  mutate(smd = (samp.mean - pop.mean) / pop.sd,
+         RR = parse_number(RR)) %>%
+  group_by(sample_method, RR, var, Sampling, Clustering, K) %>%
+  summarise(mSMD = mean(abs(smd)),
+            mSMD.sd = sd(abs(smd))) %>%
+  rename(vnames = var) %>%
+  left_join(df.list$coefs) %>%
+  ungroup() %>%
+  left_join(vars$plot.smd.examples ) %>%
+  group_by(group, desc) %>%
+  nest %>%
+  mutate(plots = map(data, plot_smd2),
+         plots = set_names(plots, paste("smd.", desc, sep = "")),
+         data = set_names(data, paste("smd.", desc, sep = ""))) %>%
+  ungroup() %>%
+  select(data, plots)
+
+tabs <- c(tabs, SMDFigs$data)
+figs <- c(figs, SMDFigs$plots)
+
+figs$smd.ell
+```
+
+### V-ratio and Log odds
+
+
+```{r}
+
+lab.vars$coef <- "Participation model coeficients \n(absolute log-odds)"
+
+tabs$v.coef <- df.list$pop.data %>%
+  select(DSID, all_of(covariates), strata) %>%
+  gather(key = vnames, value = value, covariates) %>%
+  group_by(vnames) %>%
+  mutate(T.SS = var(value) * (n() - 1)) %>%
+  group_by(vnames, T.SS, strata) %>%
+  summarise(W.SS = var(value) * (n() - 1)) %>%
+  summarise(W.SS = sum(W.SS)) %>%
+  mutate(B.SS = T.SS - W.SS,
+         vratio = B.SS / T.SS) %>%
+  left_join(df.list$coefs) %>%
+  left_join(vars$plot.groups) %>%
+  mutate(log_odds = abs(log_odds)) %>%
+  arrange(group)
+
+figs$v.coef <- tabs$v.coef  %>%
+  ggplot(aes(x = vratio, y = log_odds, color = group, fill = group)) + 
+  geom_mark_rect(expand = 0.04, color = "black") +
+  geom_point(size = 2) +
+  # geom_encircle(alpha = .2, s_shape = 0, expand = .1, spread = .05, color = "black") +
+  geom_text_repel(aes(label = Variables), point.padding = .2, color = "black") +
+  labs(y = lab.vars$coef,
+       x = lab.vars$vratio) +
+  scale_x_continuous(breaks = seq(0, 1, .1)) +
+  scale_y_continuous(breaks = seq(0, .6, .1),
+                     limits = c(0, .6)) +
+  guides(fill = "none", color = "none") 
+
+# figs$v.coef 
+```
+
+
+
+## Feasibility
+
+### Sampling Difficulty
+
+```{r}
+tabs$samples <- results$r.stats %>%
   group_by(sample_method, RR, measure, Sampling, Clustering, K) %>%
-  summarise(value = mean(value))
+  summarise(value = mean(value)) %>%
+  mutate(RR = parse_number(RR))
 
 
 ```
 
 
 ```{r, fig.cap = "Recruitment Counts"}
-samplot %>%
-  ggplot(aes(x = RR, y = value, group = sample_method, color = Sampling, linetype = Clustering)) +
-  geom_point() +
-  geom_line() +
-  facet_wrap( ~ measure, scales = "free_y") +
-  expand_limits(y = 0) +
-  theme_apa(box = T) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-
-
+# figs$samples <- tabs$samples  %>%
+#   ggplot(aes(x = RR, y = value, group = sample_method, color = Sampling, linetype = Clustering)) +
+#   geom_point() +
+#   geom_line() +
+#   facet_wrap( ~ measure, scales = "free_y") +
+#   expand_limits(y = 0) +
+#   theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
+# 
+# figs$samples
 
 
 ```
@@ -333,32 +582,41 @@ samplot %>%
 
 
 ```{r, fig.cap = "Schools Contacted"}
-samplot %>%
+lab.vars$contacts <- "Number of schools contacted"
+
+figs$samples.contacts <- tabs$samples %>%
   filter(measure == "sch.contacted") %>%
   ggplot(aes(x = RR, y = value, group = sample_method, color = Sampling, linetype = Clustering)) +
   geom_point() +
   geom_line() +
-  expand_limits(y = 0) +
-  theme_apa(box = T) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  scale_x_continuous(breaks = seq(0, 100, 10)) +
+  scale_y_continuous(breaks = seq(0, 4000, 500),
+                     limits = c(0, 4000)) +
+  labs(x = lab.vars$rr,
+       y = lab.vars$contacts)
 
-if(savePlot)  ggsave(paste("Figs/", file_date, "/Units Contacted.jpg", sep = ""), dpi = 1000, width = 7, height = 5)
+figs$samples.contacts
+
 
 ```
 
 ```{r, fig.cap = "Sampling response rates"}
-samplot %>%
+lab.vars$rr.o <- "Population participation  \n(observed %)"
+
+figs$samples.response.rates <- tabs$samples %>%
   filter(measure == "sch.response.rate") %>%
+  mutate(value = value * 100) %>%
   ggplot(aes(x = RR, y = value, group = sample_method, color = Sampling, linetype = Clustering)) +
   geom_point() +
   geom_line() +
   expand_limits(y = 0) +
-  theme_apa(box = T) +
-  theme(legend.position = "bottom",
-        panel.spacing = unit(2, "lines"),
-        axis.text.x = element_text(angle = 45, hjust = 1)) +
-  labs(x = "Generating Repsonse Rate", y = "Actual Response Rate") 
+  theme(legend.position = "bottom") +
+  labs(x = lab.vars$rr,
+       y = lab.vars$rr.o) +
+  scale_x_continuous(breaks = seq(0, 100, 10)) +
+  scale_y_continuous(breaks = seq(0, 100, 10)) 
 
+figs$samples.response.rates
 ```
 
 
@@ -366,51 +624,46 @@ samplot %>%
 
 ```{r}
 
-df.counts <- df.samp.counts %>%
-  group_by_all() %>%
-  count(name = "count") %>%
-  ungroup() %>%
-  mutate(perc = count/1001) %>%
-  arrange(-perc) %>%
-  left_join(df.sim) %>%
-  group_by(sample_method, K, RR) %>%
-  mutate(w = count / sum(count))
-
-df.counts.pop <- df.PS %>%
-  left_join(df.k5) %>%
-  left_join(df.sim)
-
-```
-
-```{r}
-df.counts %>%
-  ggplot() +
-  geom_density(aes(x = PS, fill = sample_method, weight = w), alpha = .1) +
-  geom_density(data = df.counts.pop,
-               aes(x = PS)) +
-  facet_grid(RR ~ Sampling, scales = "free")
-
-
-```
-
-```{r}
-df.counts %>%
-  ggplot() +
-  geom_density(aes(x = ethHisp, fill = sample_method, weight = w), alpha = .1) +
-  geom_density(data = df.counts.pop,
-               aes(x = ethHisp)) +
-  facet_grid(RR ~ Sampling, scales = "free")
+# figs$counts.data <- results$r.counts %>%
+#   group_by_all() %>%
+#   count(name = "count") %>%
+#   ungroup() %>%
+#   mutate(perc = count/1001) %>%
+#   arrange(-perc) %>%
+#   left_join(df.sim) %>%
+#   group_by(sample_method, K, RR) %>%
+#   mutate(w = count / sum(count))
+# 
+# figs$counts.pop.data <- df.list$PS %>%
+#   left_join(df.list$strata.id) %>%
+#   left_join(df.list$pop.data)
+# 
+# figs$counts.data  %>%
+#   ggplot() +
+#   geom_density(aes(x = PS, fill = sample_method, weight = w), alpha = .1) +
+#   geom_density(data = figs$counts.pop.data ,
+#                aes(x = PS)) +
+#   facet_grid(RR ~ Sampling, scales = "free")
+# 
+# 
+# 
+# figs$counts.data  %>%
+#   ggplot() +
+#   geom_density(aes(x = ethHisp, fill = sample_method, weight = w), alpha = .1) +
+#   geom_density(data = figs$counts.pop.data ,
+#                aes(x = ethHisp)) +
+#   facet_grid(RR ~ Sampling, scales = "free")
 
 ```
 
 ### Gini Plot
 ```{r}
-df.gini.count <- df.samp.counts %>%
+tabs$gini.count <- results$r.counts %>%
   group_by(sample_method, Clustering, Sampling, DSID, RR) %>%
   count(name = "count") %>%
   group_by(sample_method, Clustering, Sampling, RR) %>%
   nest() %>%
-  mutate(data = map(data, full_join, df %>% select(DSID))) %>%
+  mutate(data = map(data, full_join, df.list$pop.data %>% select(DSID))) %>%
   unnest %>%
   group_by(sample_method, Clustering, Sampling, RR) %>%
   mutate(count = ifelse(is.na(count), 0, count),
@@ -422,58 +675,123 @@ df.gini.count <- df.samp.counts %>%
   mutate(c.prop.sel = cumsum(prop.selected),
          c.prop.pop = cumsum(prop.pop))
 
-df.gini.coef <- df.gini.count %>%
+tabs$gini.coef <- tabs$gini.count %>%
   summarise(gini = ineq::Gini(prop.selected) %>% round(2)) %>%
   group_by(RR) %>%
   arrange(gini) %>%
-  mutate(y.pos = 1 - (1:n()/n()) / 2,
+  mutate(y.pos = 1 - (1:n()/n()) / 1.5,
          x.pos = 1 - y.pos)
 
-df.gini.count %>%
+figs$gini.coef <- tabs$gini.count %>%
   # filter(RR == "RR_90") %>%
   # filter(sample_method == "Unstratified_RS") %>%
   ggplot(aes(x = c.prop.pop, y = c.prop.sel, group = sample_method, color = Sampling, linetype = Clustering)) +
   geom_line() +
   geom_abline(slope = 1, intercept = 0, linetype = "dotted") +
-  geom_label(aes(label = gini, x = x.pos, y = y.pos), data = df.gini.coef) +
+  geom_label(aes(label = gini, x = x.pos, y = y.pos), data = tabs$gini.coef) +
   facet_wrap(~RR) +
   theme_apa()
+
+tabs$gini.count %>%
+  # filter(RR == "RR_90") %>%
+  # filter(sample_method == "Unstratified_RS") %>%
+  ggplot(aes(x = c.prop.pop, y = c.prop.sel, group = sample_method, color = Sampling, linetype = Clustering)) +
+  geom_line() +
+  geom_abline(slope = 1, intercept = 0, linetype = "dotted") +
+  geom_label(aes(label = gini, x = x.pos, y = y.pos), 
+             data = tabs$gini.coef, size = 3) +
+  facet_wrap(~RR) +  
+  # (if (grey.plots) {scale_colour_grey(start = 0, end = .7)}) +
+  labs(x = "Cumulative proportion of population",
+         y = "Cumulative percentage of times sampled") +
+  theme_apa()
+
+ggsave(filename = "Figs/Presentation/GINI.jpg", dpi = 100, width = 10, height = 6)
 ```
 
 
+# Export Plots
+
 ```{r}
-extract_ICC <- function(mlm.model) {
-  df.icc <- data.frame(l1.var = insight::get_variance_residual(mlm.model),
-                       l2.var = insight::get_variance_intercept(mlm.model)) %>%
-    mutate(t.var = sum(l1.var, l2.var))
+figs
+
+# i <- 12
+
+for(i in 1:length(figs)) {
   
-  df.icc %>%
-    mutate(icc = l2.var / t.var)
+  print.fig <- figs[[i]] +
+    scale_color_brewer(type = "qual", palette = 2) +
+    theme_bw() +
+    theme(text = element_text(size = 20)) 
+  
+  f.name <- paste("Figs/Presentation/Fig ", i, " - ", names(figs)[i],".jpg", sep = "")
+  
+  ggsave(plot = print.fig, filename = f.name, dpi = 1000, width = (6*1.6), height = (6))
 }
 
+```
 
-df.icc <- df %>%
-  gather(key = vnames, value = value, covariates) %>%
-  group_by(vnames) %>%
-  nest() %>%
-  mutate(mlm = map(data, lme4::lmer, formula = value ~ (1|strata)),
-         icc = map(mlm, extract_ICC))
+```{r}
+library(cowplot)
 
+fig.SCS <- list(
+  figs$smd.ell +
+    scale_color_brewer(type = "qual", palette = 2) +
+    theme_bw() +
+    theme(text = element_text(size = 10),
+          legend.position = "none",
+          axis.title.x = element_blank(),
+          axis.ticks = element_blank(),
+          axis.text.x = element_blank()) +
+    labs(y = "SMD"),
+  figs$B +
+    scale_color_brewer(type = "qual", palette = 2) +
+    theme_bw() +
+    theme(text = element_text(size = 10),
+          legend.position = "right",
+          axis.title.x = element_blank(),
+          axis.ticks = element_blank(),
+          axis.text.x = element_blank()) +
+    labs(y = "B-Index"),
+  figs$samples.contacts +
+    scale_color_brewer(type = "qual", palette = 2) +
+    theme_bw() +
+    theme(text = element_text(size = 10),
+          legend.position = "none") +
+    labs(y = "Contacts") +
+    scale_y_continuous(breaks = seq(0, 4000, 1000),
+                       limits = c(0, 4000))
+)
 
+plot_grid(plotlist = fig.SCS, 
+          ncol = 1, 
+          nrow = 3, 
+          rel_heights = c(1, 1, 1.3),
+          label_x = .5,
+          align = "v",
+          axis = "lr",
+          label_fontface = "plain" ,
+          label_size = 10)
 
-save(df, 
-     df.coefs, 
-     intercepts, 
-     cluster.stats, 
-     minK, 
-     prop_allocations, 
-     df.clusters, 
-     covariates, 
-     sSMDplot, 
-     avg_Bindex, 
-     samplot, 
-     df.counts.pop,
-     df.icc,
-     df.gini.count,
-     file = "Data/Paper/Paper Data.rdata")
+ ggsave(filename = "Figs/Presentation/Fig Middle.jpg", dpi = 1000, width = (6*1.6), height = (6))
+```
+
+```{r}
+# 
+# 
+# save(df, 
+#      df.coefs, 
+#      intercepts, 
+#      cluster.stats, 
+#      minK, 
+#      prop_allocations, 
+#      df.clusters, 
+#      covariates, 
+#      sSMDplot, 
+#      avg_Bindex, 
+#      samplot, 
+#      df.counts.pop,
+#      df.icc,
+#      df.gini.count,
+#      file = "Data/Paper/Paper Data.rdata")
 ```

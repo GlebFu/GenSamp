@@ -721,7 +721,7 @@ df.var.ratio <- df %>%
 df.var.ratio %>%
   ggplot(aes(x = vratio, y = log_odds, label = Variables, color = results, fill = results)) +
   geom_point(size = 3) +
-  geom_encircle(alpha = .5, s_shape = 0, expand = 0.1, spread = .05, color = "black") +
+  geom_encircle(alpha = .2, s_shape = 0, expand = 0.1, spread = .05, color = "black") +
   geom_text_repel(point.padding = .2, color = "black") +
   labs(y = "Absolute Log Odds",
        x = "Variance Ratio") +

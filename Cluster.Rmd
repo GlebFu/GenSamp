@@ -90,52 +90,52 @@ run_clusters <- function(K, distance, minK) {
 
 
 ```{r SUBS_FULL, eval = F}
-K <- 10
-minK <- 2
-
-cluster_vars <- c(covariates[!(covariates %in% c("Urban", "Suburban", "ToRu"))], "urbanicity")
-# cluster_vars <- c("n", "dSCH", "ST.ratio", "urbanicity")
-
-distance <- df.sim %>%
-  select(all_of(cluster_vars)) %>%
-  mutate(n = log(n),
-         dSCH = log(dSCH),
-         ST.ratio = log(ST.ratio)) %>%
-  # sample_n(100) %>%
-  mutate_if(is.numeric, function(x) (x - mean(x))/sd(x)) %>%
-  daisy(metric = "gower")
-
-
-
-
-clust_time <- system.time(
-  cluster.obj <- run_clusters(K, distance, minK)
-)
-
-
-
-K.names <- paste("K_", formatC(minK:K, width = 2, format = "d", flag = "0"), sep = "")
-
-df.clusters <- cluster.obj %>%
-  lapply(function(x) data.frame(x$clustering)) %>%
-  bind_cols() %>%
-  setNames(K.names)
-
-df.clusters <- df.sim %>%
-  select(DSID) %>%
-  cbind(df.clusters)
-
-cluster.stats <- cluster.obj %>%
-  lapply(function(x) x$stats) %>%
-  bind_rows() %>%
-  mutate(K = minK:K)
-  
-
-# undebug(get_CH)
-save(cluster.obj, distance, file =  "Data/Cluster Analysis/cluster analysis data k2-10.rdata")
-save(clust_time, K, cluster_vars, minK, df.clusters, cluster.stats, file =  "Data/Cluster Analysis/Clusters k2-10.rdata")
-
-write_file(x = "Data/Cluster Analysis/Clusters k2-10.rdata", "Data/Cluster Analysis/LastCluster.txt")
+# K <- 10
+# minK <- 2
+# 
+# cluster_vars <- c(covariates[!(covariates %in% c("Urban", "Suburban", "ToRu"))], "urbanicity")
+# # cluster_vars <- c("n", "dSCH", "ST.ratio", "urbanicity")
+# 
+# distance <- df.sim %>%
+#   select(all_of(cluster_vars)) %>%
+#   mutate(n = log(n),
+#          dSCH = log(dSCH),
+#          ST.ratio = log(ST.ratio)) %>%
+#   # sample_n(100) %>%
+#   mutate_if(is.numeric, function(x) (x - mean(x))/sd(x)) %>%
+#   daisy(metric = "gower")
+# 
+# 
+# 
+# 
+# clust_time <- system.time(
+#   cluster.obj <- run_clusters(K, distance, minK)
+# )
+# 
+# 
+# 
+# K.names <- paste("K_", formatC(minK:K, width = 2, format = "d", flag = "0"), sep = "")
+# 
+# df.clusters <- cluster.obj %>%
+#   lapply(function(x) data.frame(x$clustering)) %>%
+#   bind_cols() %>%
+#   setNames(K.names)
+# 
+# df.clusters <- df.sim %>%
+#   select(DSID) %>%
+#   cbind(df.clusters)
+# 
+# cluster.stats <- cluster.obj %>%
+#   lapply(function(x) x$stats) %>%
+#   bind_rows() %>%
+#   mutate(K = minK:K)
+#   
+# 
+# # undebug(get_CH)
+# save(cluster.obj, distance, file =  "Data/Cluster Analysis/cluster analysis data k2-10.rdata")
+# save(clust_time, K, cluster_vars, minK, df.clusters, cluster.stats, file =  "Data/Cluster Analysis/Clusters k2-10.rdata")
+# 
+# write_file(x = "Data/Cluster Analysis/Clusters k2-10.rdata", "Data/Cluster Analysis/LastCluster.txt")
 ```
 
 ```{r SUBS_FULL_CH}
@@ -149,10 +149,12 @@ cluster.stats %>%
   geom_point() +
   geom_line() +
   theme_bw() +
-  scale_x_discrete(limits = c(minK:K))
+  scale_x_discrete(limits = c(minK:K)) +
+  theme(text = element_text(size=20)) +
+  labs(y = "CH Index")
 
 
-
+ggsave(filename = "Figs/Presentation/CH Plot.jpg", dpi = 1000, width = 7, height = 5)
 ```
 
 ```{r SUBS_FULL_SSB/SST}
@@ -173,7 +175,7 @@ cluster.stats %>%
   theme(text = element_text(size=20))
 
 ggsave(filename ="Figs/AERA Cluster SS.jpg", dpi = 1000, width = 10, height = 7)
-
+ggsave(filename = "Figs/Presentation/Variance Ratio.jpg", dpi = 1000, width = 7, height = 5)
 
 ```
 
@@ -193,8 +195,10 @@ df.clusters %>%
        x = "Number of Strata (K)") +
   scale_x_continuous(breaks = seq(minK, K, 1)) +
   scale_y_continuous(breaks = seq(0, 50, 5),
-                     limits = c(0, 35),
-                     sec.axis = sec_axis(~./60*9882, name = "Strata Size")) +
+                     limits = c(0, 35)) +
+  # scale_y_continuous(breaks = seq(0, 50, 5),
+  #                    limits = c(0, 35),
+  #                    sec.axis = sec_axis(~./60*9882, name = "Strata Size")) +
   stat_function(fun = function(x) 60/x, geom = "line", linetype = "dashed", size = .5) +
   # facet_grid(subs ~ .) +
   # theme(text = element_text(size=20)) +
@@ -203,6 +207,6 @@ df.clusters %>%
 
 ggsave(filename ="Figs/AERA Cluster Size.jpg", dpi = 1000, width = 10, height = 7)
 
-
+ggsave(filename = "Figs/Presentation/Allocation.jpg", dpi = 1000, width = 7, height = 5)
 
 ```
