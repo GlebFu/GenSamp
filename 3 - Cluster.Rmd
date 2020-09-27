@@ -1,0 +1,212 @@
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = F, cache = F)
+```
+
+```{r load.packages, include = FALSE}
+library(tidyverse)
+library(fpc)
+library(cluster)
+library(tidyverse)
+library(future)
+
+rm(list = ls())
+
+load("Data/Population Data/Cleaned Data.rdata")
+
+# df.sim <- df.sim[1:100,]
+# covariates <- covariates[1:3]
+```
+
+## SUBS
+
+```{r SUBS_Funcs}
+distance_ch <- function(dist, clust ) {
+  d <- as.dist(dist)        # Distance matrix as distance object
+  n <- length(clust)        # Number of observations
+  clustering <- clust       # Cluster assignments
+  cwn <- cn <- max(clust)   # Total number of clusters
+  
+  dmat <- as.matrix(d)        # Distance matrix
+  within.cluster.ss <- 0      # Empty within cluster 
+  nonnoise.ss <- sum(d^2)/n   # Sum of squared distances divided by number of observations
+  cluster.size <- within.dist <- between.dist <- numeric(0) # Empty variables
+  
+  i <- 1
+  
+  for (i in 1:cn) { # for each cluster:
+    cluster.size[i] <- sum(clustering == i) # calculate the cluster size
+    di <- as.dist(dmat[clustering == i, clustering == i]) # pull within cluster distance matrix, save as distance object
+    if (i <= cwn) {
+      within.cluster.ss <- within.cluster.ss + sum(di^2)/cluster.size[i] # calculates sum of squared distances divided by cluster size
+      within.dist <- c(within.dist, di) # store within cluster distance matrix
+    }
+    
+  }
+  
+  between.cluster.ss <- nonnoise.ss - within.cluster.ss
+  
+  ch <- between.cluster.ss * (n - cwn)/(within.cluster.ss * (cwn - 1))
+  
+  tibble(b.ss = between.cluster.ss, 
+         tw.ss = within.cluster.ss, 
+         t.ss = nonnoise.ss, 
+         ch = ch, 
+         bw.ss = between.cluster.ss/within.cluster.ss, 
+         bt.ss = between.cluster.ss/nonnoise.ss)
+}
+
+
+
+genClusters <- function(distance, k) {
+  
+  clust <- pam(x = distance, k = k)
+  clust$stats <- distance_ch(distance, clust$clustering)
+  
+  return(clust)
+  
+  
+}
+
+
+run_clusters <- function(K, distance, minK) {
+
+  clusters <- list()
+  kset <- minK:K
+  
+  for(i in 1:length(kset)) {
+    clusters[[i]] <- genClusters(distance = distance, k = kset[i])
+  }
+
+  return(clusters)
+}
+
+
+
+```
+
+### Number of Clusters
+
+### Subs-Full
+
+
+```{r SUBS_FULL, eval = F}
+# K <- 10
+# minK <- 2
+# 
+# cluster_vars <- c(covariates[!(covariates %in% c("Urban", "Suburban", "ToRu"))], "urbanicity")
+# # cluster_vars <- c("n", "dSCH", "ST.ratio", "urbanicity")
+# 
+# distance <- df.sim %>%
+#   select(all_of(cluster_vars)) %>%
+#   mutate(n = log(n),
+#          dSCH = log(dSCH),
+#          ST.ratio = log(ST.ratio)) %>%
+#   # sample_n(100) %>%
+#   mutate_if(is.numeric, function(x) (x - mean(x))/sd(x)) %>%
+#   daisy(metric = "gower")
+# 
+# 
+# 
+# 
+# clust_time <- system.time(
+#   cluster.obj <- run_clusters(K, distance, minK)
+# )
+# 
+# 
+# 
+# K.names <- paste("K_", formatC(minK:K, width = 2, format = "d", flag = "0"), sep = "")
+# 
+# df.clusters <- cluster.obj %>%
+#   lapply(function(x) data.frame(x$clustering)) %>%
+#   bind_cols() %>%
+#   setNames(K.names)
+# 
+# df.clusters <- df.sim %>%
+#   select(DSID) %>%
+#   cbind(df.clusters)
+# 
+# cluster.stats <- cluster.obj %>%
+#   lapply(function(x) x$stats) %>%
+#   bind_rows() %>%
+#   mutate(K = minK:K)
+#   
+# 
+# # undebug(get_CH)
+# save(cluster.obj, distance, file =  "Data/Cluster Analysis/cluster analysis data k2-10.rdata")
+# save(clust_time, K, cluster_vars, minK, df.clusters, cluster.stats, file =  "Data/Cluster Analysis/Clusters k2-10.rdata")
+# 
+# write_file(x = "Data/Cluster Analysis/Clusters k2-10.rdata", "Data/Cluster Analysis/LastCluster.txt")
+```
+
+```{r SUBS_FULL_CH}
+# load("clusters-full.rdata")
+load("Data/Cluster Analysis/cluster analysis data k2-10.rdata")
+load("Data/Cluster Analysis/Clusters k2-10.rdata")
+
+
+cluster.stats %>%
+  ggplot(aes(x = K, y = ch)) +
+  geom_point() +
+  geom_line() +
+  theme_bw() +
+  scale_x_discrete(limits = c(minK:K)) +
+  theme(text = element_text(size=20)) +
+  labs(y = "CH Index")
+
+
+ggsave(filename = "Figs/Presentation/CH Plot.jpg", dpi = 1000, width = 7, height = 5)
+```
+
+```{r SUBS_FULL_SSB/SST}
+
+cluster.stats %>%
+  mutate(min80 = sum(bt.ss <= .8) + min(K) - .5) %>%
+  ggplot(aes(x = K, y = bt.ss)) +
+  geom_point() +
+  # ggtitle("Between cluster variance by number of strata") +
+  labs(y = "Between Cluster Variance",
+       x = "Number of Strata (k)") +
+  geom_line() +
+  geom_vline(aes(xintercept = min80), linetype = "dotted") +
+  geom_hline(yintercept = .8, linetype = "dotted") +
+  theme_bw() +
+  scale_x_discrete(limits = c(minK:K)) +
+  scale_y_continuous(breaks = seq(0, 1, .1), limits = c(.3, 1)) +
+  theme(text = element_text(size=20))
+
+ggsave(filename ="Figs/AERA Cluster SS.jpg", dpi = 1000, width = 10, height = 7)
+ggsave(filename = "Figs/Presentation/Variance Ratio.jpg", dpi = 1000, width = 7, height = 5)
+
+```
+
+```{r}
+
+df.clusters %>%
+  gather(key = k, value = cluster, -DSID) %>%
+  mutate(k = parse_number(k)) %>%
+  group_by(k, cluster) %>%
+  summarise(n = n()) %>%
+  group_by(k) %>%
+  mutate(sample = (n / sum(n)) * 60) %>%
+  ggplot(aes(x = k, y = sample)) +
+  geom_point(shape = "-", size = 15, alpha = .5) +
+  theme_bw() +
+  labs(y = "Allocated Sample Size",
+       x = "Number of Strata (K)") +
+  scale_x_continuous(breaks = seq(minK, K, 1)) +
+  scale_y_continuous(breaks = seq(0, 50, 5),
+                     limits = c(0, 35)) +
+  # scale_y_continuous(breaks = seq(0, 50, 5),
+  #                    limits = c(0, 35),
+  #                    sec.axis = sec_axis(~./60*9882, name = "Strata Size")) +
+  stat_function(fun = function(x) 60/x, geom = "line", linetype = "dashed", size = .5) +
+  # facet_grid(subs ~ .) +
+  # theme(text = element_text(size=20)) +
+  geom_hline(yintercept = 5, linetype = "dotted", size = .5) +
+  theme(text = element_text(size=20))
+
+ggsave(filename ="Figs/AERA Cluster Size.jpg", dpi = 1000, width = 10, height = 7)
+
+ggsave(filename = "Figs/Presentation/Allocation.jpg", dpi = 1000, width = 7, height = 5)
+
+```
