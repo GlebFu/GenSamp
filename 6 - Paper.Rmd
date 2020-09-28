@@ -51,10 +51,30 @@ classoption       : "man"
 output            : papaja::apa6_pdf
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = F, cache = T, eval = T, warning = F, message = F)
+
+```{r setup, include = FALSE}
+rm(list = ls())
+
+# plot and output
+output.screen <- F
+saveFigs <- F
+grey.plots <- F
+
+
+# knitr options
+knitr::opts_chunk$set(echo = F,
+                      cache = F,
+                      message = output.screen,
+                      warning = output.screen,
+                      results = "asis",
+                      knitr.table.format = "latex",
+                      fig.width = 9,
+                      fig.height = 5, 
+                      fig.pos = "tb")
+options(knitr.kable.NA = "-")
 
 ```
+
 
 ```{r load.packages, include = FALSE}
 library(papaja)
@@ -63,8 +83,6 @@ library(tidyverse)
 library(colorspace)
 library(cowplot)
 library(kableExtra)
-
-rm(list = ls())
 
 
 
@@ -82,8 +100,6 @@ load("Data/Paper/Paper Data 09-27-2020.rdata")
 
 source("0 - Functions - Analysis and Paper.R")
 
-saveFigs <- F
-grey.plots <- F
 
 ```
 
@@ -142,10 +158,26 @@ The cluster analysis depends on a complete enumeration of all population units a
 
 It is important to note that some of these characteristics might also make it more likely that researchers would recruit these districts and schools in the first place. That is to say, school characteristics may drive selection bias by both impacting the types of schools that agree to participate, as well as by the types of schools that researchers recruit. For instance, the over-representation of larger schools in RCTs can mean that schools with more students are: (a) more likely to agree to participate, (b) more likely to be recruited by researchers, or (c) some combination of both (a) and (b). Therefore, the participation behavior outlined here is likely not representative of all schools in the US, rather only schools that are likely to be recruited by current practices.
 
-```{r plot-dist1, fig.width = 7, fig.height = 5, fig.pos = "tbh", fig.cap = "Distributions of continuous covariates. Three covariates were transformed to logs: District Size, N Students, and Student/Teachers"}
+```{r tab-RGM-Pars}
+tabs$pop.desc %>%
+  mutate(M = round(M, 2),
+         SD = round(SD, 2)) %>%
+  select(-Category) %>%
+  kable(booktabs = T,
+        caption = "Population descriptives and log odds of participation associated with covariate (Fellers, 2017)") %>%
+  kable_styling(latex_options = c("HOLD_position"),
+                full_width = F) %>%
+  pack_rows(index =tabs$pop.desc$Category %>% row_groups) 
+
+```
+
+(ref:fig-dist1-caption) Distributions of continuous covariates. Three covariates were transformed to logs: District Size, N Students, and Student/Teachers.
+
+```{r fig-dist1, fig.pos = "tbh", fig.cap = "(ref:fig-dist1-caption)"}
 
 
-figs$dist
+figs$dist %>%
+  apa_style_plot()
 
 if(saveFigs) save.figures("Intro - Covariate Distribution")
 
@@ -156,7 +188,7 @@ if(saveFigs) save.figures("Intro - Covariate Distribution")
 #             School = n())
 ```
 
-We sourced the characteristics of the sample frame from the Common Core of Data (CCD; https://nces.ed.gov/ccd/index.asp). The CCD is a comprehensive database housing annually collected census data of all public schools and districts. We calculated log-transformations of school size (number of students), district size (number of schools) and the student to teacher ratio. This was done to allow proportional comparisons at the extremes of the distributions [@hennigHowFindAppropriate2013]. For instance, the difference between two schools with 4000 and 3000 students was weighed as much as the difference between two schools with 400 and 300 students when generating clusters. Figure \@ref(fig:plot-dist1) displays the distribution of the continuous variables used. Two categorical covariates were used as well: urbanicity (urban, suburban, or town/rural) and a binary indicator of school wide title 1 eligibility. In all, the sample frame consists of 6 states, 2,016 districts and 9,792 schools.
+We sourced the characteristics of the sample frame from the Common Core of Data (CCD; https://nces.ed.gov/ccd/index.asp). The CCD is a comprehensive database housing annually collected census data of all public schools and districts. Table \@ref(tab:tab-RGM-Pars) displays population descriptives based on the covariates we selected. We calculated log-transformations of school size (number of students), district size (number of schools) and the student to teacher ratio. This was done to allow proportional comparisons at the extremes of the distributions [@hennigHowFindAppropriate2013]. For instance, the difference between two schools with 4000 and 3000 students was weighed as much as the difference between two schools with 400 and 300 students when generating clusters. Figure \@ref(fig:fig-dist1) displays the distribution of the continuous variables used. Two categorical covariates were used as well: urbanicity (urban, suburban, or town/rural) and a binary indicator of school wide title 1 eligibility. In all, the sample frame consists of 6 states, 2,016 districts and 9,792 schools.
 
 ## Stratification
 
@@ -191,9 +223,32 @@ With these considerations in mind, we examined three criteria: (1) a generalized
 
 We first calculated the Calinski-Harabasz (CH) index using the _cluster.stats_ function from the _fpc_ (Hennig ???) package. Figure \@ref(fig:fig-k-plots)a displays the CH index for each $k$ clusters generated. In this case, generating 2 clusters maximizes the CH-index. Another potential solution is at 5 clusters where there is also a local maxima. 
 
-```{r fig-k-plots, fig.width = 7, fig.height = 6, out.width = "1\\linewidth", fig.pos = "tbp", fig.cap = "Plots used to determine value for $k$. (a) Calinski-Harabasz index; peaks indicate better fit. (b) Ratio of between cluster sum of squares to total cluster sum of squares; horizontal line indicates cutoff of .8, vertical line indicates minimum number of clusters needed to achieve cutoff. (c) Sampling requirements for each cluster given proportional allocation; horizontal line indicates a cluster sample size requirement of 5 schools."}
+(ref:fig-k-plots-caption) Plots used to determine value for $k$. (a) Calinski-Harabasz index; peaks indicate better fit. (b) Ratio of between cluster sum of squares to total cluster sum of squares; horizontal line indicates cutoff of .8, vertical line indicates minimum number of clusters needed to achieve cutoff. (c) Sampling requirements for each cluster given proportional allocation; horizontal line indicates a cluster sample size requirement of 5 schools.
 
-figs$joint.cluster.stats
+```{r fig-k-plots, out.width = "1\\linewidth", fig.pos = "tbp", fig.cap = "(ref:fig-k-plots-caption) "}
+
+figs$joint.cluster.stats <- 
+  plot_grid(plotlist = list(figs$ch %>% apa_style_plot,
+                            figs$vratio %>% apa_style_plot), 
+          labels=c("(a)", "(b)"), 
+          ncol = 2, 
+          nrow = 1, 
+          rel_heights = c(1, 1),
+          label_x = .5,
+          align = "h",
+          label_fontface = "plain" ,
+          label_size = 10) %>%
+  plot_grid(figs$allocation  %>% apa_style_plot, 
+            ncol = 1,
+            nrow = 2, 
+            labels = c("", "(c)"),
+            label_x = .5,
+            # align = "v",
+            # axis = "r",
+            label_fontface = "plain" ,
+            label_size = 10)
+
+figs$joint.cluster.stats 
 
 ```
 
@@ -315,13 +370,7 @@ In the Stratification section, we detailed how the cluster analysis was performe
 
 We modeled the participation propensity score (equation \@ref(eq:RGM)) using observed covariate values from extant school data. The set of covariates, $X_i$, consisted of the same variables used in the cluster analysis described in Sample Frame section above. The corresponding coefficients, $B$, were based on work by @fellersDevelopingApproachDetermine2017 who compared 571 elementary schools that participated in IES funded studies to the full population of U.S. elementary schools. The authors reported absolute SMD between the schools that participated and the population. We standardized $X_i$ and used reported SMDs as coefficients in equation \@ref(eq:RGM) to generated $\pi^P_i$ values. The covariates along with the coefficient values are reported in Table \@ref(tab:tab-RGM-Pars). We generate different levels of population participation rates by manipulating the intercept values. Since these rates are unknown, we selected parameters for 9 levels of participation rates. As such, participation propensity scores were constant for each school only within each participation rate condition.
 
-```{r tab-RGM-Pars, results = "asis", eval = T}
-df.list$coefs %>%
-  select(-vnames) %>%
-  kable(booktabs = T) %>%
-  kable_styling()
 
-```
 
 ## Simulation procedures 
 
@@ -376,25 +425,18 @@ To assess sampling inequality, we tracked the frequency with which schools were 
 
 ## Generalizability
 
-```{r results-data, cache = F}
-load("Data/Paper/Paper Data.rdata")
-
-```
-
 ### B-Index
 
-Figure \@ref(fig:fig-avg-Bindex) displays the average $B$-index for each method across participation rates. Acceptable values of $B$ for generalizability vary depending on the size of the sample, the size of the population, and the number of covariates [@tiptonHowGeneralizableYour2014]. Given our design, a value of $B = .95$ would be needed to expect full generalizability, with lower values requiring additional statistical adjustment. At population participation rates below 50%, only SBS consistently selected highly generalizable samples. This indicates that SBS is successful at sampling schools that are unlikely to participate and therefore tend to be underrepresented by the other sampling methods---particularly when overall participation propensities are low. Stratified random sampling consistently outperformed simple random sampling across all participation rates, though only slightly.
+Figure \@ref(fig:fig-avg-B) displays the average $B$-index for each method across participation rates. Acceptable values of $B$ for generalizability vary depending on the size of the sample, the size of the population, and the number of covariates [@tiptonHowGeneralizableYour2014]. Given our design, a value of $B = .95$ would be needed to expect full generalizability, with lower values requiring additional statistical adjustment. At population participation rates below 50%, only SBS consistently selected highly generalizable samples. This indicates that SBS is successful at sampling schools that are unlikely to participate and therefore tend to be underrepresented by the other sampling methods---particularly when overall participation propensities are low. Stratified random sampling consistently outperformed simple random sampling across all participation rates, though only slightly.
 
-```{r fig-avg-Bindex, fig.width = 7, fig.height = 4, fig.pos = "tb", fig.cap = "Average $B$-index for varying participation rates, by sampling method. Horizontal dotted line represented index of .95 indicating a high level of generalizability."}
+(ref:fig-avg-B-caption) Average $B$-index for varying participation rates, by sampling method. Horizontal dotted line represented index of .95 indicating a high level of generalizability.
 
-figs$B +
-  theme(legend.position = "right") +
-  theme_apa() + 
-  (if (grey.plots) {scale_colour_grey(start = 0, end = .7)}) +
-  guides(linetype = guide_legend(ncol = 1, title.position = "top"),
-         color = guide_legend(ncol = 1, title.position = "top"))  +
+```{r fig-avg-B, fig.cap = "(ref:fig-avg-B-caption)"}
+
+figs$B %>%
+  apa_style_plot
   
-  
+
 
 if(saveFigs) save.figures("Results - B Index")
 ```
@@ -403,117 +445,59 @@ We also found several trends that were unexpected. At 50% and beyond, SBS perfor
 
 ### Standardized Mean Differences
 
-```{r tab-ICC-Pars, results = "asis", eval = T, message = F, warning = F}
-
-plt.good1 <- c("ethHisp", "pELL", "Urban", "ethWhite", "ToRu")
-plt.good2 <- c("pTotfrl", "T1",  "Suburban")
-plt.bad2 <- c("dSCH")
-plt.bad <- c("ethBlack", "n")
-plt.neutral <- c("pFem", "ST.ratio")
-
-tabs$ICC.vs.Coefs <- df.icc %>%
-  select(vnames, icc) %>%
-  unnest %>%
-  left_join(df.coefs) %>%
-  select(Variables, vnames, icc, log_odds) %>%
-  mutate(icc = round(icc, 3),
-         results = NA,
-         # results = ifelse(vnames %in% plt.vgood, "Very Good", results),
-         results = ifelse(vnames %in% plt.good1, "Group 1", results),
-         results = ifelse(vnames %in% plt.good2, "Group 2", results),
-         results = ifelse(vnames %in% plt.neutral, "Group 3", results),
-         results = ifelse(vnames %in% plt.bad, "Group 4", results),
-         results = ifelse(vnames %in% plt.bad2, "Group 5", results),
-         results = factor(results,
-                          levels = c("Group 1", "Group 2", "Group 3", "Group 4", "Group 5"),
-                          ordered = T)) %>%
-  mutate(log_odds = abs(log_odds)) %>%
-  arrange(results) %>%
-  select(-vnames)
-
-# tabs$ICC.vs.Coefs %>%
-#   apa_table(caption = "Odds ratio coefficients and strata ICC",
-#             col.names = c("Variables", "ICC", "Absolute Log Odds", "Quality"))
+We began this analysis by plotting mean SMDs for each covariate across all sampling methods against the population participation rate. Sampling methods were considered to perform well if they resulted in an average SMD value below .25 across iterations. The relative performance of the sampling methods were used to group covariates into four patterns of performance. The first group of covariates is displayed in figure \@ref(fig:fig-SMD-group1), where all stratified methods resulted in good balance along these covariates, while unstratified methods resulted in poor balance, especially in lower population participation rates. Notably, SBS always performed better or as well as the other stratified methods. 
 
 
-sSMDplot$Variable <- as.factor(sSMDplot$var)
+(ref:fig-SMD-group1-caption) Group 1, good balance for stratified methods, poor balance for unstratified methods at low participation rates. Dotted horizontal line indicates a .25 cutoff.
 
+```{r fig-SMD-group1, fig.cap = "(ref:fig-SMD-group1-caption)"}
 
-scale_y_f <- function(x) {
-  b <- 1
-  if(x[2] <= 2) b <- .5
-  if(x[2] <= 1) b <- .25
-  if(x[2] <= .25) b <- .1
-  
-  seq(0,b*4,b)
-
-}
-```
-
-
-We began this analysis by plotting mean SMDs for each covariate across all sampling methods against the population participation rate. Sampling methods were considered to perform well if they resulted in an average SMD value below .25 across iterations. The relative performance of the sampling methods were used to group covariates into four patterns of performance. The first group of covariates is displayed in figure \@ref(fig:fig-SMD-by-Var-good1), where all stratified methods resulted in good balance along these covariates, while unstratified methods resulted in poor balance, especially in lower population participation rates. Notably, SBS always performed better or as well as the other stratified methods. 
-
-```{r fig-SMD-by-Var-good1, fig.pos = "tb", fig.width = 9, fig.height = 5, fig.cap = "Group 1, good balance for stratified methods, poor balance for unstratified methods at low participation rates. Dotted horizontal line indicates a .25 cutoff.", warning = F, message = F}
-
-figs$smd.good1 + 
-  (if (grey.plots) {scale_colour_grey(start = 0, end = .7)}) +
-  scale_x_continuous(breaks = seq(10, 90, 20)) +
-  theme(legend.position = "bottom") +
-  theme_apa() 
+figs$smd.good1 %>%
+  apa_style_plot()
   
 ```
 
-The second group of covariates is displayed in figure \@ref(fig:fig-SMD-by-Var-good2). Here, the stratified sampling methods consistently outperform their unstratified counterparts. However, in some conditions, SCS performed worse than URS, or even SBS. Also, SBS was outperformed by SCS and SRS in certain conditions. The third group of covariates is displayed in figure \@ref(fig:fig-SMD-by-Var-neutral). Here, all sampling methods resulted in good balance across all population participation rates. SBS seemed to perform slightly better than all other methods, while differences between the other methods seems negligible. Finally, the fourth group of covariates is displayed in figure \@ref(fig:fig-SMD-by-Var-bad). For these covariates, SBS performed consistently well across population participation rates. However, URS and UCS performed better than their stratified counterparts. 
+The second group of covariates is displayed in figure \@ref(fig:fig-SMD-group2). Here, the stratified sampling methods consistently outperform their unstratified counterparts. However, in some conditions, SCS performed worse than URS, or even SBS. Also, SBS was outperformed by SCS and SRS in certain conditions. The third group of covariates is displayed in figure \@ref(fig:fig-SMD-group3). Here, all sampling methods resulted in good balance across all population participation rates. SBS seemed to perform slightly better than all other methods, while differences between the other methods seems negligible. Finally, the fourth group of covariates is displayed in figure \@ref(fig:fig-SMD-group4). For these covariates, SBS performed consistently well across population participation rates. However, URS and UCS performed better than their stratified counterparts. 
 
+(ref:fig-SMD-group2-caption) Group 2: good balance for stratified versions of methods, inconsistent performance by SBS and SCS. Dotted horizontal line indicates a .25 cutoff.
 
+```{r fig-SMD-group2, fig.height = 3, fig.cap = "(ref:fig-SMD-group2-caption)"}
 
-```{r fig-SMD-by-Var-good2, fig.pos = "tb", fig.width = 9, fig.height = 3, fig.cap = "Group 2: good balance for stratified versions of methods, inconsistent performance by SBS and SCS. Dotted horizontal line indicates a .25 cutoff."}
-
-figs$smd.good2 +
-  (if (grey.plots) {scale_colour_grey(start = 0, end = .7)}) +
-  scale_y_continuous(limits = c(0, NA)) +
-  scale_x_continuous(breaks = seq(10, 90, 20)) +
-  theme_apa(box = F)
+figs$smd.good2  %>%
+  apa_style_plot()
   
 ```
 
+(ref:fig-SMD-group3-caption) Group 3: all methods performed well, with SBS performing slightly better. Dotted horizontal line indicates a .25 cutoff.
 
+```{r fig-SMD-group3, fig.height = 3, fig.cap = "(ref:fig-SMD-group3-caption)"}
 
-```{r fig-SMD-by-Var-neutral, fig.pos = "tb", fig.width = 7, fig.height = 3, fig.cap = "Group 3: all methods performed well, with SBS performing slightly better. Dotted horizontal line indicates a .25 cutoff."}
-
-figs$smd.neutral + 
-  (if (grey.plots) {scale_colour_grey(start = 0, end = .7)}) +
-  scale_y_continuous(limits = c(0, NA)) +
-  scale_x_continuous(breaks = seq(10, 90, 20)) +
-  theme_apa(box = F)
+figs$smd.neutral  %>%
+  apa_style_plot()
 
 ```
 
 
+(ref:fig-SMD-group4-caption) Group 4: poor relative performance for stratified convenience sampling and stratified random sampling. Dotted horizontal line indicates a .25 cutoff.
 
-```{r fig-SMD-by-Var-bad, fig.pos = "tb", fig.width = 9, fig.height = 3, fig.cap = "Group 4: poor relative performance for stratified convenience sampling and stratified random sampling. Dotted horizontal line indicates a .25 cutoff."}
+```{r fig-SMD-group4, fig.height = 3, fig.cap = "(ref:fig-SMD-group4-caption)"}
 
 
-figs$smd.bad +
-  (if (grey.plots) {scale_colour_grey(start = 0, end = .7)}) +
-  scale_y_continuous(limits = c(0, NA)) +
-  scale_x_continuous(breaks = seq(10, 90, 20)) +
-  theme_apa(box = F)
-
+figs$smd.bad%>%
+  apa_style_plot()
 ```
 
-One potential explanation for why including stratification in a sampling design may result in poorer balance is that the strata are poorly specified. This may occur if the strata do not explain any variance in a covariate that is related to participation. To examine this we calculated the ICC for each covariate (i.e., the proportion of variance in the covariate that was between strata) and compared it to the log-odds coefficients associated with that covariate in the participation propensity model. We then plotted these values in figure \@ref(fig:fig-ICCvsCoef).
+One potential explanation for why including stratification in a sampling design may result in poorer balance is that the strata are poorly specified. This may occur if the strata do not explain any variance in a covariate that is related to participation. To examine this we calculated the ICC for each covariate (i.e., the proportion of variance in the covariate that was between strata) and compared it to the log-odds coefficients associated with that covariate in the participation propensity model. We then plotted these values in figure \@ref(fig:fig-Var-Coef).
 
 We noted several interesting relationships when examining the groups of covariate previously described,. Group 3, where all sampling methods performed well, consisted of covariates that were fairly unrelated to participation, and which played almost no role in generating strata. Group 4, where stratification seemed to reduce the performance of sampling methods, consisted of covariates that were predictive of participation, but were also overlooked by the strata generation process. 
 
+(ref:fig-Var-Coef-caption) ICC Values vs absolute log odds. Shaded areas illustrate potential patterns in generalizability measured by SMDs.
 
-```{r fig-ICCvsCoef, fig.pos = "tb", fig.width = 7, fig.height = 5, fig.cap = "ICC Values vs absolute log odds. Shaded areas illustrate potential patterns in generalizability measured by SMDs.", warning = F, message = F}
-figs$v.coef +
-  guides(fill = "none") + 
-  scale_color_brewer(type = "qual", palette = 1) +
-  scale_fill_brewer(type= "qual", palette = 1) +
-  (if (grey.plots) {scale_fill_grey(start = 0, end = .7)}) +
-  theme_apa()
+```{r fig-Var-Coef, fig.cap = "(ref:fig-Var-Coef-caption)"}
+figs$v.coef %>%
+  apa_style_plot() +
+  guides(fill = "none",
+         color = "none")
 
 ```
 
@@ -525,27 +509,12 @@ figs$v.coef +
 
 Figure \@ref(fig:fig-responses)a reports the total number of units that needed to be contacted to recruit a full sample of 60 schools across population participation rates for all sampling methods. Figure \@ref(fig:fig-responses)b reports the percent of schools that agreed to participate across population participation rates for all sampling methods. Differences between sampling methods along these two measures were substantial at lower participation rates. As participation rates increased, the differences decreased exponentially and became negligible. It is important to note that the magnitudes of these results are quite extreme. This is likely due to some misspecification on the part of the simulation either in the response generating model parameters or the population participation rates. Rather than looking at the raw values, a more meaningful interpretation would be to compare the performance of the models relative to each other. Overall, UCS required the least "effort" to recruit a full sample, followed by URS and SCS, SRS, and finally SBS.
 
-```{r fig-responses, fig.pos = "tb", fig.width = 9, fig.height = 7, fig.cap = "Sample recruitment statistics and response rates. Plot (a) shows the total number of units contacted to achieve a full sample of 60 schools. Plot (b) shows the percent of schools that agreed to participate when recruited."}
+(ref:fig-responses-caption) Sample recruitment statistics and response rates. Plot (a) shows the total number of units contacted to achieve a full sample of 60 schools. Plot (b) shows the percent of schools that agreed to participate when recruited.
 
+```{r fig-responses, fig.cap = "(ref:fig-responses-caption)"}
 
-plt.feas <- list()
-
-  
-plt.feas$count <- figs$samples.contacts + 
-  (if (grey.plots) {scale_colour_grey(start = 0, end = .7)}) +
-  theme_apa(box = F) +
-  theme(legend.position = "none") 
-  
-plt.feas$rate <- figs$samples.response.rates + 
-  (if (grey.plots) {scale_colour_grey(start = 0, end = .7)}) +
-  theme_apa(box = F) +
-  theme(legend.position = "none") 
-
-legend <- get_legend(
-  plt.feas$count + theme(legend.position = "right") 
-)
-
-plot_grid(plotlist = plt.feas, 
+plot_grid(plotlist = list(figs$samples.contacts %>% apa_style_plot() + theme(legend.position = "none"),
+                          figs$samples.response.rates %>% apa_style_plot() + theme(legend.position = "none")), 
           labels=c("(a)", "(b)"), 
           ncol = 1, 
           nrow = 2, 
@@ -553,42 +522,34 @@ plot_grid(plotlist = plt.feas,
           align = "v",
           label_fontface = "plain" ,
           label_size = 10) %>%
-  plot_grid(legend, rel_widths = c(3, .4))
+  plot_grid(get_legend(figs$samples.contacts %>% apa_style_plot()), 
+            rel_widths = c(3, .4))
 
 
 ```
 
 
 
-### Inequality of selected samples
+### Sampling Inequality
 
 We calculated the Gini coefficient for each sampling method to examine the equality of sampling probabilities across methods. Figure \@ref(fig:fig-gini) displays these for each sampling method across population participation rates. A coefficient of 1 indicates substantial sampling inequality. In the context of the simulation, a high Gini coefficient indicates that across iterations, only a small subset of the population was ever actually recruited.
   Several trends emerged in this analysis. As population participation rates increased, inequality increased when using SBS, but decreased when using any other method. These four other methods also performed consistently relative to one another, with SRS resulting in the least amount of sampling inequality, followed by URS, SCS and UCS. As population rates increased, differences between stratified and unstratified versions of sampling methods seemed to decrease. This finding suggests that stratifying the population results in a larger potential sampling pool when the overall population response rate is low. 
 
 
+(ref:fig-gini-caption) Gini coefficient across participation response rates for each sampling method. A coefficient of 1 indicates major inequality in sampling probability.
 
-```{r fig-gini, fig.pos = "tb", fig.width = 7, fig.height = 5, fig.cap = "Gini coefficient across participation response rates for each sampling method. A coefficient of 1 indicates major inequality in sampling probability."}
-tabs$gini.coef %>%
-  ggplot(aes(x = parse_number(RR), y = gini, group = sample_method, color = Sampling, linetype = Clustering)) +
-  geom_point() +
-  geom_line() +
-  scale_x_continuous(breaks = seq(10, 90, 10)) +
-  scale_y_continuous(breaks = seq(0, 1, .1),
-                     limits = c(0, 1)) + 
-  (if (grey.plots) {scale_colour_grey(start = 0, end = .7)}) +
-  labs(x = "Population response rate",
-       y = "Gini coefficient") +
-  theme_apa() 
+```{r fig-gini, fig.cap = "(ref:fig-gini-caption) "}
+
+figs$gini %>%
+  apa_style_plot()
 
 ```
-
-
 
 ## Summary of Trends
 
 In terms of selecting a generalizable sample, SBS resulted in a considerable improvement compared to UCS. However, given the difficulty with which those samples are recruited, SBS is unlikely to be fully implemented in the ideal form. Instead, SCS may be a reasonable compromise. Our findings indicate that convenience and probability sampling methods are often improved by first stratifying the population. In certain cases, convenience sampling within strata (SCS) is comparable to simple random sampling (URS) both in terms of generalizability and feasibility.
 
-An important observation which has not yet been addressed in the literature relates the specification of the clustering method to the response model. For instance, in Figure \@ref(fig:fig-SMD-by-Var-bad) we see that all methods of sampling result in balance on percentage of Black students, except for stratified convenience sampling. This is likely a result of the covariate having a strong relationship with participation, but not being weighed enough in the cluster analysis used in determining the strata. Figure \@ref(fig:fig-ICCvsCoef) displays the calculated intraclass correlation coefficient (ICC) for each covariate along the strata, and the coefficient for each covariate in the response generating model. For covariates where one value (ICC or coefficient) is high, while the other is low, stratified sampling techniques resulted in poorer balance.
+An important observation which has not yet been addressed in the literature relates the specification of the clustering method to the response model. For instance, in Figure \@ref(fig:fig-SMD-group4) we see that all methods of sampling result in balance on percentage of Black students, except for stratified convenience sampling. This is likely a result of the covariate having a strong relationship with participation, but not being weighed enough in the cluster analysis used in determining the strata. Figure \@ref(fig:fig-Var-Coef) displays the calculated intraclass correlation coefficient (ICC) for each covariate along the strata, and the coefficient for each covariate in the response generating model. For covariates where one value (ICC or coefficient) is high, while the other is low, stratified sampling techniques resulted in poorer balance.
 
 # Discussion
 
@@ -630,9 +591,11 @@ Large scale MRTs are expensive to implement, and resource allocation for such st
 
 ### Sampling Feasibility
 
- Figure \@ref(fig:fig-comp) compares each sampling method to a reference method by plotting the factor of increased difficulty, calculated as the number of schools contacted by comparison method divided by the number of schools contacted by reference method. This gives us another perspective on the relative difficulty of each method. The straight horizontal line represents the reference method. 
+ Figure \@ref(fig:fig-rel-per) compares each sampling method to a reference method by plotting the factor of increased difficulty, calculated as the number of schools contacted by comparison method divided by the number of schools contacted by reference method. This gives us another perspective on the relative difficulty of each method. The straight horizontal line represents the reference method. 
 
-```{r fig-comp, fig.pos = "tb", fig.width = 9, fig.height = 5, fig.cap = "Relative sampling difficulty of each method compared to other methods. The straight horizontal line indicates the reference method being compared to."}
+(ref:fig-rel-per-caption) Relative sampling difficulty of each method compared to other methods. The straight horizontal line indicates the reference method being compared to.
+
+```{r fig-rel-per, fig.cap = "(ref:fig-rel-per-caption)"}
 
 figs$relative.counts + 
   (if (grey.plots) {scale_colour_grey(start = 0, end = .7)}) +
@@ -648,8 +611,9 @@ figs$relative.counts +
 
 Figure \@ref(fig:fig-gini-curve) displays the Gini curve and coefficient for all sampling methods across participation rates. The index is calculated by computing the area between the diagonal line and the curve. Coefficients of 0 indicate uniform equality across all sampling units, i.e. all schools have an equal opportunity to be sampled. Coefficients of 1 indicate complete inequality, i.e. very few schools are constantly being sampled across iterations. Overall, stratification results in lower inequality. However, since balanced sampling prioritizes schools according to set characteristics, the same schools are likely to be sampled each time. 
 
+(ref:fig-gini-curve-caption) Cumulative probability plot and Gini coefficients representing the inequality of school sampling across sampling methods and population response rates.
 
-```{r fig-gini-curve, fig.pos = "p", fig.width = 10, fig.height = 6, fig.cap = "Cumulative probability plot and Gini coefficients representing the inequality of school sampling across sampling methods and population response rates.", fig.env = "sidewaysfigure"}
+```{r fig-gini-curve, fig.pos = "p", fig.width = 10, fig.height = 6, fig.cap = "(ref:fig-gini-curve-caption)", fig.env = "sidewaysfigure"}
 
 figs$gini.coef +  
   (if (grey.plots) {scale_colour_grey(start = 0, end = .7)}) +

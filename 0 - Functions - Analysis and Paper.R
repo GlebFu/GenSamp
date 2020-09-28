@@ -16,6 +16,14 @@ boxErrors <- function(x) {
 
 save.figures <- function(x, w = 10, h = 6, ...) ggsave(filename = paste("Figs/Paper/", x, ".jpg", sep = ""), width = w, height = h, ...)
 
+row_groups <- function(x, blank = F) { 
+  index <- table(x)[unique(x)]
+  
+  if(blank){names(index) <- lapply(1:length(index), function(x) rep(" ", x) %>% paste(collapse = ""))}
+  
+  return(index)
+}
+
 ###################
 # PLOT FUNCTIONS
 ###################
@@ -40,5 +48,14 @@ plot_smd2 <- function(data) {
     labs(y = lab.vars$smd,
          x = lab.vars$rr) + 
     scale_x_continuous(breaks = seq(10, 90, 20)) +
+    theme(legend.position = "right")
+}
+
+apa_style_plot <- function(x) {
+  x +
+    theme_apa() + 
+    (if (grey.plots) {scale_colour_grey(start = 0, end = .7)}) +
+    guides(linetype = guide_legend(ncol = 1, title.position = "top"),
+           color = guide_legend(ncol = 1, title.position = "top")) +
     theme(legend.position = "right")
 }

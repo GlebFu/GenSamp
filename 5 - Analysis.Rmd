@@ -42,8 +42,20 @@ classoption       : "man"
 output            : papaja::apa6_pdf
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = F, cache = F, warnings = T, cache = T)
+
+```{r setup, include = FALSE}
+rm(list = ls())
+
+output.screen <- T
+
+knitr::opts_chunk$set(echo = F,
+                      cache = F,
+                      message = output.screen,
+                      warning = output.screen,
+                      results = "asis",
+                      knitr.table.format = "latex")
+options(knitr.kable.NA = "-")
+
 ```
 
 # Setup
@@ -58,6 +70,7 @@ library(ggalt)
 library(ggrepel)
 library(ggforce)
 library(concaveman)
+library(cowplot)
 
 rm(list = ls())
 
@@ -79,10 +92,7 @@ source("0 - Functions - Analysis and Paper.R")
 
 df.list <- list()
 results <- list()
-
-lab.vars <- list(k = "Number of strata (k)", 
-                 vratio = "Variance Ratio (B/T)", 
-                 ch = "CH Index")
+vars <- list()
 
 tabs <- list()
 figs <- list()
@@ -106,24 +116,12 @@ df.list$pop.stats <- df.pop.stats
 
 df.list$PS <- df.PS
 
+df.list$cluster.vars <- read_csv("Data/Paper/Clustering Variables.csv")
 
-df.list$coefs <- data.frame(Variables = names(DGM.Bs), vnames = names(DGM.Bs), log_odds = DGM.Bs, row.names = NULL) %>%
-  arrange(Variables)
-
-levels(df.list$coefs$Variables) <- c("District Size", 
-                                "% Black",
-                                "% Hispanic",
-                                "% White",
-                                "N Students",
-                                "% ELL",
-                                "% Female",
-                                "% F/R Lunch", # Free Reduced Lunch
-                                "Students/Teachers",
-                                "Suburban",
-                                "Schoolwide Title I",
-                                "Town/Rural",
-                                "Urban")
-
+df.list$coefs <- data.frame(vnames = names(DGM.Bs), 
+                            log_odds = DGM.Bs, 
+                            row.names = NULL) %>%
+  full_join(read_csv("Data/Paper/Clustering Variables.csv"))
 
 rm(list = c("cluster.stats", 
             "df.B.indicies", 
@@ -134,15 +132,49 @@ rm(list = c("cluster.stats",
             "df.pop.stats", 
             "df.PS"))
 
+vars$cluster <- list(mixed = cluster_vars, dummy = covariates)
+
+lab.vars <- list(k = "Number of strata (k)", 
+                 vratio = expression(paste("Variance Ratio (",
+                                           sigma[B]^2/sigma[T]^2,
+                                           ")")), 
+                 ch = expression("CH index (" ~ 10^3 ~ ")"),
+                 n_j = "Target sample per cluster",
+                 pop.prop = "Proportion of population (%)",
+                 smd = "Standardized mean difference",
+                 vars = "Participation covariates",
+                 intercept = "Participation model intercept",
+                 rr = "Population participation \n(generated %)",
+                 B = "Average B-index",
+                 coef = "Participation model coeficients \n(absolute log-odds)",
+                 contacts = expression("Schools contacted (" ~ 10^2 ~ ")"),
+                 rr.o = "Population participation  \n(observed %)")
 ```
 
 # Data Summary
 
+## Covaraite Statistics
+```{r}
+tabs$pop.desc <- df.list$pop.data %>%
+  select(all_of(vars$cluster$dummy)) %>%
+  gather(key = vnames, value = val) %>%
+  group_by(vnames) %>%
+  summarise(M = mean(val), 
+            SD = sd(val)) %>%
+  left_join(df.list$coefs) %>%
+  left_join(df.list$cluster.vars) %>%
+  arrange(Category, Sub) %>%
+  select(Category, Variables, M, SD, log_odds)
+
+```
+
 ## Continuous variable distributions
 ```{r}
 
+
+
 tabs$dist <- df.list$pop.data %>%
-  select(all_of(covariates)) %>%
+  select(all_of(vars$cluster$mixed)) %>%
   select_if(is.numeric) %>%
   mutate(n = log(n),
          ST.ratio = log(ST.ratio),
@@ -153,9 +185,9 @@ tabs$dist <- df.list$pop.data %>%
 figs$dist <- tabs$dist %>%
   ggplot(aes(x = val)) +
   geom_histogram() +
+  scale_y_continuous(labels = function(x) x / 100) +
   facet_wrap(~ Variables, scales = "free", ncol = 3) +
-  theme_apa() +
-  labs(x = "", y = "Schools")
+  labs(x = "", y = "Schools (10^2)")
 
 figs$dist
 
@@ -168,13 +200,16 @@ figs$dist
 
 ### Selecting k
 ```{r}
+
+
 figs$ch <- df.list$k.stats %>%
   ggplot(aes(x = K, y = ch)) +
   geom_point() +
   geom_line() +
-  scale_x_continuous(breaks = c(minK:K)) +
-  scale_y_continuous(breaks = seq(4000, 9000, 1000),
-                     limits = c(4000, 10000)) +
+  scale_x_continuous(breaks = c(2:10)) +
+  scale_y_continuous(breaks = seq(5000, 8500, 1000),
+                     limits = c(5000, 8500),
+                     labels = function(x) x / 1000) +
   labs(y = lab.vars$ch,
        x = lab.vars$k)
 
@@ -182,14 +217,18 @@ figs$ch
 ```
 
 ```{r}
+
+
+
 figs$vratio <- df.list$k.stats %>%
+  bind_rows(summarise(., K = 1, bt.ss = 0)) %>%
   mutate(min80 = sum(bt.ss <= .8) + min(K) - .5) %>%
   ggplot(aes(x = K, y = bt.ss)) +
   geom_point() +
   geom_vline(aes(xintercept = min80), linetype = "dotted") +
   geom_hline(yintercept = .8, linetype = "dotted") +
-  scale_x_continuous(breaks = c(minK:K)) +
-  scale_y_continuous(breaks = seq(0, 1, .1), limits = c(.3, 1)) +
+  scale_x_continuous(breaks = 1:10) +
+  scale_y_continuous(breaks = seq(0, 1, .25), limits = c(0, 1)) +
   geom_line() +
   labs(y = lab.vars$vratio,
        x = lab.vars$k)
@@ -200,8 +239,7 @@ figs$vratio
 ```{r}
 
 
-lab.vars$n_j <- "Target sample per cluster"
-lab.vars$pop.prop <- "Proportion of population (%)"
+
 
 tabs$allocation <- results$k %>%
   gather(key = k, value = strata, -DSID) %>%
@@ -215,7 +253,7 @@ tabs$allocation <- results$k %>%
 figs$allocation <- tabs$allocation %>%
   ggplot(aes(x = k, y = sample)) +
   geom_point(shape = "-", size = 15, alpha = .5) +
-  labs(y = lab.vars$nj,
+  labs(y = lab.vars$n_j,
        x = lab.vars$k) +
   scale_x_continuous(breaks = seq(minK, K, 1)) +
   scale_y_continuous(breaks = seq(0, 50, 5),
@@ -231,6 +269,7 @@ figs$allocation
 ```
 
 ```{r}
+
 figs$joint.cluster.stats <- 
   plot_grid(plotlist = list(figs$ch,
                             figs$vratio), 
@@ -272,8 +311,6 @@ tabs$cluster.SMD <- df.list$pop.data %>%
 
 ```{r}
 
-lab.vars$smd <- "Standardized mean difference"
-lab.vars$vars <- "Participation covariates"
 
 figs$cluster.SMD <- tabs$cluster.SMD %>%
   mutate(sig = ifelse(abs(SMD) > .25, "Sig", "Not Sig"),
@@ -326,8 +363,6 @@ df.list$coefs %>%
 
 ```{r}
 
-lab.vars$intercept <- "Participation model intercept"
-lab.vars$rr <- "Population participation \n(generated %)"
 
 tabs$intercepts <- tibble(Intercept = intercepts, RR = names(intercepts), row.names = NULL) %>%
   mutate(RR = parse_number(RR))
@@ -373,7 +408,6 @@ left_join(df.list$PS, df.list$strata.id) %>%
 
 ```{r, fig.cap = "Averge B-Index"}
 
-lab.vars$B <- "Average B-index"
 
 tabs$B <- results$B %>% 
   group_by(sample_method, RR, Clustering, Sampling) %>%
@@ -403,7 +437,6 @@ figs$B
 
 ```{r, fig.cap = "Average SMDs", fig.height = 7}
 
-vars <- list()
 
 
 vars$plot.groups <- bind_rows(
@@ -520,8 +553,6 @@ figs$smd.ell
 
 ```{r}
 
-lab.vars$coef <- "Participation model coeficients \n(absolute log-odds)"
-
 tabs$v.coef <- df.list$pop.data %>%
   select(DSID, all_of(covariates), strata) %>%
   gather(key = vnames, value = value, covariates) %>%
@@ -588,17 +619,18 @@ tabs$samples <- results$r.stats %>%
 
 
 ```{r, fig.cap = "Schools Contacted"}
-lab.vars$contacts <- "Number of schools \ncontacted"
+
 
 figs$samples.contacts <- tabs$samples %>%
   filter(measure == "sch.contacted") %>%
   ggplot(aes(x = RR, y = value, group = sample_method, color = Sampling, linetype = Clustering)) +
   geom_point() +
   geom_line() +
-  theme(legend.position = "right") +
+  theme(legend.position = "none") +
   scale_x_continuous(breaks = seq(0, 100, 10)) +
   scale_y_continuous(breaks = seq(0, 4000, 500),
-                     limits = c(0, 4000)) +
+                     limits = c(0, 4000),
+                     labels = function(x) x / 100) +
   labs(x = lab.vars$rr,
        y = lab.vars$contacts)
 
@@ -608,7 +640,7 @@ figs$samples.contacts
 ```
 
 ```{r, fig.cap = "Sampling response rates"}
-lab.vars$rr.o <- "Population participation  \n(observed %)"
+
 
 figs$samples.response.rates <- tabs$samples %>%
   filter(measure == "sch.response.rate") %>%
@@ -617,7 +649,7 @@ figs$samples.response.rates <- tabs$samples %>%
   geom_point() +
   geom_line() +
   expand_limits(y = 0) +
-  theme(legend.position = "right") +
+  theme(legend.position = "none") +
   labs(x = lab.vars$rr,
        y = lab.vars$rr.o) +
   scale_x_continuous(breaks = seq(0, 100, 10)) +
@@ -697,16 +729,21 @@ tabs$gini.coef <- tabs$gini.count %>%
   arrange(gini) %>%
   mutate(y.pos = 1 - (1:n()/n()) / 1.5,
          x.pos = 1 - y.pos)
-# 
-# figs$gini.coef <- tabs$gini.count %>%
-#   # filter(RR == "RR_90") %>%
-#   # filter(sample_method == "Unstratified_RS") %>%
-#   ggplot(aes(x = c.prop.pop, y = c.prop.sel, group = sample_method, color = Sampling, linetype = Clustering)) +
-#   geom_line() +
-#   geom_abline(slope = 1, intercept = 0, linetype = "dotted") +
-#   geom_label(aes(label = gini, x = x.pos, y = y.pos), data = tabs$gini.coef) +
-#   facet_wrap(~RR) +
-#   theme_apa()
+
+
+lab.vars$gini <- "Gini Coeficient"
+
+
+figs$gini <- tabs$gini.coef %>%
+  mutate(RR = parse_number(RR)) %>%
+  ggplot(aes(x = RR, y = gini, group = sample_method, color = Sampling, linetype = Clustering)) +
+  geom_point() +
+  geom_line() +
+  scale_x_continuous(breaks = seq(10, 90, 10)) +
+  scale_y_continuous(breaks = seq(0, 1, .1),
+                     limits = c(0, 1)) +
+  labs(x = lab.vars$rr,
+      y = lab.vars$gini)
 
 figs$gini.coef <- tabs$gini.count %>%
   # filter(RR == "RR_90") %>%

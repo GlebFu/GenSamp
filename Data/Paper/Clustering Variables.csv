@@ -1,0 +1,14 @@
+vnames,Variables,Sub,Category,Type
+n,School Size,Enrollment,School Data,Mean
+ST.ratio,Student/Teacher Ratio,Enrollment,School Data,Mean
+dSCH,District Size,District,School Data,Mean
+T1,Schoolwide Title I,Status,School Data,Prop
+pTotfrl,Free/Reduced Lunch,Status,Student Data,Mean
+pELL,English Language Learners,Status,Student Data,Mean
+ethWhite,% White,Ethnicity,Student Data,Mean
+ethBlack,% Black,Ethnicity,Student Data,Mean
+ethHisp,% Hispanic,Ethnicity,Student Data,Mean
+pFem,% Female,Gender,Student Data,Mean
+Urban,Urban,Urbanicity,School Data,Prop
+Suburban,Suburban,Urbanicity,School Data,Prop
+ToRu,Town/Rural,Urbanicity,School Data,Prop
