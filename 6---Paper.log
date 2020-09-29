@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.19 (MiKTeX 2.9.6840 64-bit) (preloaded format=pdflatex 2018.12.20)  28 SEP 2020 12:48
+This is pdfTeX, Version 3.14159265-2.6-1.40.19 (MiKTeX 2.9.6840 64-bit) (preloaded format=pdflatex 2018.12.20)  29 SEP 2020 12:38
 entering extended mode
 **./6---Paper.tex
 (6---Paper.tex
@@ -1306,7 +1306,7 @@ Package pdftex.def Info: 6---Paper_files/figure-latex/fig-Var-Coef-1.pdf  used
 on input line 507.
 (pdftex.def)             Requested size: 458.93034pt x 254.9613pt.
 [30 <./6---Paper_files/figure-latex/fig-SMD-group2-1.pdf>]
-<6---Paper_files/figure-latex/fig-responses-1.pdf, id=441, 650.43pt x 361.35pt>
+<6---Paper_files/figure-latex/fig-responses-1.pdf, id=443, 650.43pt x 361.35pt>
 
 File: 6---Paper_files/figure-latex/fig-responses-1.pdf Graphic file (type pdf)
 <use 6---Paper_files/figure-latex/fig-responses-1.pdf>
@@ -1328,14 +1328,14 @@ s/figure-latex/fig-gini-1.pdf>] [35] [36] [37] [38]
 Package hyperref Warning: Difference (2) between bookmark levels is greater 
 (hyperref)                than one, level fixed on input line 593.
 
-[39]
-<6---Paper_files/figure-latex/fig-rel-per-1.pdf, id=526, 650.43pt x 361.35pt>
+<6---Paper_files/figure-latex/fig-rel-per-1.pdf, id=520, 650.43pt x 361.35pt>
 File: 6---Paper_files/figure-latex/fig-rel-per-1.pdf Graphic file (type pdf)
 <use 6---Paper_files/figure-latex/fig-rel-per-1.pdf>
 Package pdftex.def Info: 6---Paper_files/figure-latex/fig-rel-per-1.pdf  used o
 n input line 599.
 (pdftex.def)             Requested size: 458.93034pt x 254.9613pt.
-<6---Paper_files/figure-latex/fig-gini-curve-1.pdf, id=528, 722.7pt x 433.62pt>
+[39]
+<6---Paper_files/figure-latex/fig-gini-curve-1.pdf, id=529, 722.7pt x 433.62pt>
 
 File: 6---Paper_files/figure-latex/fig-gini-curve-1.pdf Graphic file (type pdf)
 
@@ -1346,20 +1346,20 @@ d on input line 611.
 [40 <./6---Paper_files/figure-latex/fig-rel-per-1.pdf>] [41 <./6---Paper_files/
 figure-latex/fig-gini-curve-1.pdf>] [42] [43] AED endfloat: Processing end Figu
 res and Tables [44]
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 687.
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 687.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 690.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 690.
 (6---Paper.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 687.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 687.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 690.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 690.
 Package rerunfilecheck Info: File `6---Paper.out' has not changed.
 (rerunfilecheck)             Checksum: E5EFCF13E62840A71D05E6DDD2644815;5576.
  ) 
 Here is how much of TeX's memory you used:
- 27091 strings out of 492970
- 477536 string characters out of 3135857
- 585215 words of memory out of 3000000
+ 27094 strings out of 492970
+ 477567 string characters out of 3135857
+ 585209 words of memory out of 3000000
  30157 multiletter control sequences out of 15000+200000
- 58156 words of font info for 107 fonts, out of 3000000 for 9000
+ 58285 words of font info for 108 fonts, out of 3000000 for 9000
  1141 hyphenation exceptions out of 8191
  62i,12n,81p,2250b,986s stack positions out of 5000i,500n,10000p,200000b,50000s
 {C:/Program Files/MiKTeX 2.9/fonts/enc/dvips/lm/lm-rm.enc}{C:/Program Files/M
@@ -1377,9 +1377,9 @@ Files/MiKTeX 2.9/fonts/type1/public/lm/lmr8.pfb><C:/Program Files/MiKTeX 2.9/fo
 nts/type1/public/lm/lmri12.pfb><C:/Program Files/MiKTeX 2.9/fonts/type1/public/
 lm/lmsy10.pfb><C:/Program Files/MiKTeX 2.9/fonts/type1/public/lm/lmsy6.pfb><C:/
 Program Files/MiKTeX 2.9/fonts/type1/public/lm/lmsy8.pfb>
-Output written on 6---Paper.pdf (44 pages, 1954025 bytes).
+Output written on 6---Paper.pdf (44 pages, 1954034 bytes).
 PDF statistics:
- 694 PDF objects out of 1000 (max. 8388607)
- 176 named destinations out of 1000 (max. 500000)
+ 696 PDF objects out of 1000 (max. 8388607)
+ 177 named destinations out of 1000 (max. 500000)
  6625 words of extra memory for PDF output out of 10000 (max. 10000000)
 

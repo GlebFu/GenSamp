@@ -166,15 +166,15 @@ The first section will provide an overview of SBS by demonstrating how it can ap
 \hypertarget{stratified-balanced-sampling}{%
 \section{Stratified Balanced Sampling}\label{stratified-balanced-sampling}}
 
-The goal of SBS is to recruit a study sample that is compositionally similar to a population of interest, such that treatment effects detected in the study can be generalized to that population. Covariates that potentially explain variation in treatment effects should be used to determine similarity. The multi-step process includes dividing the population into smaller homogeneous subgroups, prioritizing units representative of each subgroup for sampling, and refreshing the priority list after each round of recruitment. As such, SBS is an iterative process requiring collaboration between researchers and recruiters.
+The goal of SBS is to recruit a study sample that is compositionally similar to a population of interest, such that treatment effects detected in the study can be generalized to that population. Specifically, similarity here is defined as balance on a set of covariates that potentially explain variation in treatment effects. The multi-step process includes dividing the population into smaller homogeneous subgroups, prioritizing units representative of each subgroup for sampling, and refreshing the priority list after each round of recruitment. As such, SBS is an iterative process requiring collaboration between researchers and recruiters.
 
 In this section we demonstrate SBS within the context of selecting schools for a large-scale MRT. This application will also serve as the basis for the subsequent simulation study. SBS is a flexible method that is adaptable to various data sets and, depending on study circumstances and design, may require different strategies or methods than presented here. For a more complete consideration of SBS, see Tipton (2013b).
 
 SBS applies cluster analysis as a dimension reduction technique to drive bias-robust balanced sampling based on a large set of covariates. The ultimate goal is to select a sample that is representative of a population with respect to a set of covariates related to treatment heterogeneity and site participation. This process requires the availability of a rich data set of observed covariates for each site in the population. We therefore begin by discussing the data which will serve as the sampling frame and the covariates we have selected.
 
-Following recommendations proposed by Tipton (2013b), we then implement k-means clustering to divide the population into heterogeneous strata comprised of homogeneous sites. K-means clustering assigns sites to strata such that similarity within each stratum is maximized. This step requires us to specify the number of strata that need to be generated. Here we rely on empirical criteria as well as subjective appraisals of what is feasible to implement.
+We then implement k-medoids clustering to divide the population into heterogeneous strata comprised of homogeneous sites, generally following recommendations put foth by Tipton (2013b). K-medoids clustering assigns sites to strata such that similarity within each stratum is maximized. This step consists of: (1) selecting a distance metric to compute a dissimilarity matrix, and (2) to specify the number of strata that need to be generated. Here we rely on empirical criteria as well as subjective appraisals of what is feasible to implement.
 
-After determining the strata, we then use a second distance metric to rank sites in order of how representative each site is of its stratum. These ranks are later used to drive \enquote{balanced sampling} by prioritizing sites for recruitment. In practice, these rankings should encourage the selection of sites from subsets of the population which may otherwise not have been included given typical sampling strategies.
+After generating the strata, we then use a second distance metric to rank sites within each stratum in order of within stratum representation. These ranks are later used to drive \enquote{balanced sampling} by prioritizing sites for recruitment. In practice, these rankings should encourage the selection of sites from subsets of the population which may otherwise not have been included given typical sampling strategies.
 
 Finally, we discuss the advantages and limitations of SBS given our implementation, and the potential difficulties of using this to sample schools in the greater context of educational research.
 
@@ -224,14 +224,14 @@ Variables & M & SD & log\_odds\\
 \caption{\label{fig:fig-dist1}Distributions of continuous covariates. Three covariates were transformed to logs: District Size, N Students, and Student/Teachers.}
 \end{figure}
 
-We sourced the characteristics of the sample frame from the Common Core of Data (CCD; \url{https://nces.ed.gov/ccd/index.asp}). The CCD is a comprehensive database housing annually collected census data of all public schools and districts. Table \ref{tab:tab-RGM-Pars} displays population descriptives based on the covariates we selected. We calculated log-transformations of school size (number of students), district size (number of schools) and the student to teacher ratio. This was done to allow proportional comparisons at the extremes of the distributions (Hennig \& Liao, 2013). For instance, the difference between two schools with 4000 and 3000 students was weighed as much as the difference between two schools with 400 and 300 students when generating clusters. Figure \ref{fig:fig-dist1} displays the distribution of the continuous variables used. Two categorical covariates were used as well: urbanicity (urban, suburban, or town/rural) and a binary indicator of school wide title 1 eligibility. In all, the sample frame consists of 6 states, 2,016 districts and 9,792 schools.
+We identified the population using data from the Common Core of Data (CCD; \url{https://nces.ed.gov/ccd/index.asp}). The CCD is a comprehensive database housing annually collected census data of all public schools and districts. Table \ref{tab:tab-RGM-Pars} displays population descriptives based on the covariates we selected. Prior to stratification, we calculated log-transformations of school size (number of students), district size (number of schools) and the student to teacher ratio. This was done to allow proportional comparisons at the extremes of the distributions (Hennig \& Liao, 2013). For instance, the difference between two schools with 4000 and 3000 students was weighed as much as the difference between two schools with 400 and 300 students when generating clusters. Figure \ref{fig:fig-dist1} displays the distribution of the continuous variables used in the cluster analysis. In all, the population frame consisted of 6 states, 2,016 districts and 9,792 schools.
 
 \hypertarget{stratification}{%
 \subsection{Stratification}\label{stratification}}
 
-Sample stratification is commonly used in survey sampling and large-scale experiments to reduce the variance of an estimate. Often this is done with one or two covariates that lend themselves to categorization (Lohr 1999). Since our purpose is to reduce bias in the estimate by controlling for potential moderators, we will require a far larger number of covaraites of varying complexity. Traditional stratification at this scale would result in too many strata to handle and an overly complicated recruitment process..
+Sample stratification is commonly used in survey sampling and large-scale experiments to reduce the variance of an estimate. Often this is done with one or two covariates that lend themselves to categorization (Lohr 1999). Since our purpose is to reduce bias in the estimate by controlling for potential moderators, we will require a far larger number of covaraites of varying complexity. Traditional stratification at this scale would result in too many strata to handle and an overly complicated recruitment process.
 
-Instead, a dimension reduction tool is used to condense the population into smaller set of homogeneous strata. Per Tipton (2013b)'s original recommendation, we implement k-means clustering to partition the population into a pre-determined number of strata. This requires selecting a distance metric, specifying the number of strata, and generating the strata. All analyses were performed in R (R Core Team, 2018).
+Instead, cluster analysis serves as a dimension reduction tool to condense the population into smaller set of homogeneous strata. Given our covariates included categorical variabes, we first computed a dissimilarity matrix per Tipton (2013b)'s original recommendation, which necessitated the use of k-medoids instead of k-means. We then performed hte cluster analysis to partition the population into a pre-determined number of strata. This requires selecting a distance metric, specifying the number of strata, and generating the strata. All analyses were performed in R (R Core Team, 2018).
 
 \hypertarget{cluster-analysis}{%
 \subsubsection{Cluster Analysis}\label{cluster-analysis}}
@@ -251,7 +251,7 @@ where \(w_{ii'h} = 0\) if \(X_h\) is missing for either site and \(w_{ii'h} = 1\
 \hypertarget{number-of-strata}{%
 \subsubsection{Number of Strata}\label{number-of-strata}}
 
-Next we used the \emph{kmeans} function to generate clusters, which employs an optimization algorithm to classify sites into \(k\) clusters by minimizing the total within cluster variance. For each \(k\), it is recommended to run \emph{kmeans} at least 10 times, and select the clustering that results in the smallest total within-cluster sum of squares. This function also requires two parameters: (1) the distance matrix from the previous step, and (2) the number of clusters to generate (\(k\)).
+Next we used the \emph{pam} function to generate clusters, which employs an optimization algorithm to classify sites into \(k\) clusters by minimizing the total within cluster variance. This function also requires two parameters: (1) the distance matrix from the previous step, and (2) the number of clusters to generate (\(k\)).
 
 Selecting an appropriate value for \(k\) is one of the most difficult problems in cluster analysis (Steinley, 2006). Tipton (2013b) states that both empirical and practical criteria should be used in selecting \(k\). Hennig and Liao (2013) also argue that the method of selecting \(k\) should depend on the context of the clustering, framing the issue as one of obtaining an appropriate subject-matter-dependent definition rather than a statistical estimation.
 
@@ -259,7 +259,7 @@ Proportional allocation dictates that each stratum should contribute a number of
 
 With these considerations in mind, we examined three criteria: (1) a generalized form of the Calinski-Harabasz index (Cali\a'nski \& Harabasz, 1974) proposed by Hennig and Liao (2013), (2) the proportion of between-cluster variance as recommended by Tipton (2013b), and (3) the practicality of sampling from fewer clusters. Our strategy was to perform the analysis several times for each value of \(k\) and compare all performance criteria for each set of strata generated (Figure \ref{fig:fig-k-plots}).
 
-We first calculated the Calinski-Harabasz (CH) index using the \emph{cluster.stats} function from the \emph{fpc} (Hennig ???) package. Figure \ref{fig:fig-k-plots}a displays the CH index for each \(k\) clusters generated. In this case, generating 2 clusters maximizes the CH-index. Another potential solution is at 5 clusters where there is also a local maxima.
+We first calculated the Calinski-Harabasz (CH) index using the \emph{cluster.stats} function from the \emph{fpc} (Hennig, 2019) package. Figure \ref{fig:fig-k-plots}a displays the CH index for each \(k\) clusters generated. In this case, generating 2 clusters maximizes the CH-index. Another potential solution is at 4 clusters where there is also a local maxima.
 
 
 
@@ -635,6 +635,9 @@ Gower, J. C. (1971). A General Coefficient of Similarity and Some of Its Propert
 
 \leavevmode\hypertarget{ref-grovesSurveyMethodology2004}{}%
 Groves, R. M. (Ed.). (2004). \emph{Survey methodology}. Hoboken, N.J: Wiley-Interscience.
+
+\leavevmode\hypertarget{ref-R-fpc}{}%
+Hennig, C. (2019). \emph{Fpc: Flexible procedures for clustering}. Retrieved from \url{https://CRAN.R-project.org/package=fpc}
 
 \leavevmode\hypertarget{ref-hennigHowFindAppropriate2013}{}%
 Hennig, C., \& Liao, T. F. (2013). How to find an appropriate clustering for mixed-type variables with application to socio-economic stratification: How to Find an Appropriate Clustering. \emph{Journal of the Royal Statistical Society: Series C (Applied Statistics)}, \emph{62}(3), 309--369. \url{https://doi.org/10.1111/j.1467-9876.2012.01066.x}
