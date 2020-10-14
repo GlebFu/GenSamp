@@ -172,7 +172,7 @@ In this section we demonstrate SBS within the context of selecting schools for a
 
 SBS applies cluster analysis as a dimension reduction technique to drive bias-robust balanced sampling based on a large set of covariates. The ultimate goal is to select a sample that is representative of a population with respect to a set of covariates related to treatment heterogeneity and site participation. This process requires the availability of a rich data set of observed covariates for each site in the population. We therefore begin by discussing the data which will serve as the sampling frame and the covariates we have selected.
 
-We then implement k-medoids clustering to divide the population into heterogeneous strata comprised of homogeneous sites, generally following recommendations put foth by Tipton (2013b). K-medoids clustering assigns sites to strata such that similarity within each stratum is maximized. This step consists of: (1) selecting a distance metric to compute a dissimilarity matrix, and (2) to specify the number of strata that need to be generated. Here we rely on empirical criteria as well as subjective appraisals of what is feasible to implement.
+We then implement k-medoids clustering to divide the population into heterogeneous strata comprised of homogeneous sites, generally following recommendations put forth by Tipton (2013b). K-medoids clustering assigns sites to strata such that similarity within each stratum is maximized. This step consists of: (1) selecting a distance metric to compute a dissimilarity matrix, and (2) to specify the number of strata that need to be generated. Here we rely on empirical criteria as well as subjective appraisals of what is feasible to implement.
 
 After generating the strata, we then use a second distance metric to rank sites within each stratum in order of within stratum representation. These ranks are later used to drive \enquote{balanced sampling} by prioritizing sites for recruitment. In practice, these rankings should encourage the selection of sites from subsets of the population which may otherwise not have been included given typical sampling strategies.
 
@@ -229,9 +229,9 @@ We identified the population using data from the Common Core of Data (CCD; \url{
 \hypertarget{stratification-with-cluster-analysis}{%
 \subsection{Stratification with Cluster Analysis}\label{stratification-with-cluster-analysis}}
 
-Sample stratification is commonly used in survey sampling and large-scale experiments to reduce the variance of an estimate. Often this is done with one or two covariates that lend themselves to categorization (Lohr 1999). Since our purpose is to reduce bias in the estimate by controlling for potential moderators, we will require a far larger number of covaraites of varying complexity. Traditional stratification at this scale would result in too many strata to handle and an overly complicated recruitment process.
+Sample stratification is commonly used in survey sampling and large-scale experiments to reduce the variance of an estimate. Often this is done with one or two covariates that lend themselves to categorization (Lohr 1999). Since our purpose is to reduce bias in the estimate by controlling for potential moderators, we will require a far larger number of covariates of varying complexity. Traditional stratification at this scale would result in too many strata to handle and an overly complicated recruitment process.
 
-Instead, cluster analysis serves as a dimension reduction tool to condense the population into smaller set of homogeneous strata. Given our covariates included categorical variabes, we first computed a dissimilarity matrix per Tipton (2013b)'s original recommendation, which necessitated the use of k-medoids instead of k-means. We then performed hte cluster analysis to partition the population into a pre-determined number of strata. This requires selecting a distance metric, specifying the number of strata, and generating the strata. All analyses were performed in R (R Core Team, 2018).
+Instead, cluster analysis serves as a dimension reduction tool to condense the population into smaller set of homogeneous strata. Given our covariates included categorical variables, we first computed a dissimilarity matrix per Tipton (2013b)'s original recommendation, which necessitated the use of k-medoids instead of k-means. We then performed the cluster analysis to partition the population into a pre-determined number of strata. This requires selecting a distance metric, specifying the number of strata, and generating the strata. All analyses were performed in R (R Core Team, 2018).
 
 \hypertarget{distance-metric}{%
 \subsubsection{Distance metric}\label{distance-metric}}
@@ -264,7 +264,7 @@ We first calculated the Calinski-Harabasz (CH) index using the \emph{cluster.sta
 
 
 \begin{figure}[tbp]
-\includegraphics[width=1\linewidth]{6---Paper_files/figure-latex/fig-k-plots-1} \caption{Plots used to determine value for \(k\). (a) Calinski-Harabasz index; peaks indicate better fit. (b) Ratio of between cluster sum of squares to total cluster sum of squares; horizontal line indicates cutoff of .8, vertical line indicates minimum number of clusters needed to achieve cutoff. (c) Sampling requirements for each cluster given proportional allocation; horizontal dotted line indicates a cluster mimimum sample size requirement of 5 schools. }\label{fig:fig-k-plots}
+\includegraphics[width=1\linewidth]{6---Paper_files/figure-latex/fig-k-plots-1} \caption{Plots used to determine value for \(k\). (a) Calinski-Harabasz index; peaks indicate better fit. (b) Ratio of between cluster sum of squares to total cluster sum of squares; horizontal line indicates cutoff of .8, vertical line indicates minimum number of clusters needed to achieve cutoff. (c) Sampling requirements for each cluster given proportional allocation; horizontal dotted line indicates a cluster minimum sample size requirement of 5 schools. }\label{fig:fig-k-plots}
 \end{figure}
 
 The proportion of between-cluster variance was calculated manually. Let \(k\) be the number of strata generated where \(k = 1, 2, ..., q\) for some maximum allowable number of \(q\) strata. For each set of \(k\) strata, we compute the between and within cluster variability for each covariate. Summing these values across all covariates gives us the total variability within strata (\(\sigma_{wk}^2\)) and the total variability between strata (\(\sigma_{wk}^2\)). We then calculate the proportion of variability that is between strata for each set of \(k\) strata as:
@@ -329,7 +329,7 @@ log\bigg(\frac{\pi^P_i}{1 - \pi^P_i}\bigg) = \beta_0 + \boldsymbol{x_i \beta}
 \end{align}
 where \(\boldsymbol{x_i}\) is an \(1\) by \(p\) matrix of covariates that predict sample selection for each site, and \(\boldsymbol{\beta}\) is a vector of coefficients associated with those covariates. Participation for site \(i\) will be determined by sampling from a Bernoulli distribution with probability equal to \(\pi^P_i\).
 
-Modeling recruitment bias is less straightforward. While self-selection is present as long as sites have the ability to choose whether or not to participate, recruitment bias depends largely on whatever strategy is used for selecting sites in the first place. It can be avoided all together by using probability sampling techniques, where the probability that a site will be invited to participate is known and can be accounted for in the outcome analysis. However, this is not often feasible in the case of large-scale MRTs. Subsets of schools are likely to be overlooked if samples are too small, or when participation rates are too low. Further, random sampling from a broad population (such as an entire country) is likely to produce samples that are geographically dispersed, creating logistic difficulties for data collection and treatment implementation. As a result, researchers often eschew probability sampling in favor of convenience sampling (Gerber \& Green, 2012; Shadish et al., 2002).
+Modeling recruitment bias is less straightforward. Self-selection is present as long as sites have the ability to choose whether or not to participate. On the other hand, recruitment bias depends on whatever strategy is used for selecting sites in the first place. It can be avoided all together by using probability sampling techniques, where the probability that a site will be invited to participate is known and can be accounted for in the outcome analysis. However, this is not often feasible in the case of large-scale MRTs. Subsets of schools are likely to be overlooked if samples are too small, or when participation rates are too low. Further, random sampling from a broad population (such as an entire country) is likely to produce samples that are geographically dispersed, creating logistic difficulties for data collection and treatment implementation. As a result, researchers often eschew probability sampling in favor of convenience sampling (Gerber \& Green, 2012; Shadish et al., 2002).
 
 Since researchers rarely operationalize and report their process for selecting a convenience sample, the question of what drives recruitment bias, and how to model it, is left largely open-ended. As a first step, we will entertain the strong assumption that the purpose of convenience sampling is to minimize effort. If we further assume that recruiters have some prior knowledge of how likely schools are to participate if approached, then we can model this selection mechanism as recruiters prioritizing schools with a higher propensity to participate. We refer to this as the \enquote{low hanging fruit} approach to convenience sampling.
 
@@ -445,7 +445,7 @@ To assess sampling inequality, we tracked the frequency with which schools were 
 \hypertarget{b-index}{%
 \subsubsection{B-Index}\label{b-index}}
 
-Figure \ref{fig:fig-avg-B} displays the average \(B\)-index for each method across participation rates. Acceptable values of \(B\) for generalizability vary depending on the size of the sample, the size of the population, and the number of covariates (Tipton, 2014). Given our design, a value of \(B = .95\) would be needed to expect full generalizability, with lower values requiring additional statistical adjustment. At population participation rates below 50\%, only SBS consistently selected highly generalizable samples. This indicates that SBS is successful at sampling schools that are unlikely to participate and therefore tend to be underrepresented by the other sampling methods---particularly when overall participation propensities are low. Stratified random sampling consistently outperformed simple random sampling across all participation rates, though only slightly.
+Figure \ref{fig:fig-avg-B} displays the average \(B\)-index for each method across participation rates. Acceptable values of \(B\) for generalizability vary depending on the size of the sample, the size of the population, and the number of covariates (Tipton, 2014). Given our design, a value of \(B = .95\) would indicate very good overlap with no need to adjust estimates. Generally \(B >= .80\) still supports generalizability with adjustment and likely no need to redefine the population. At population participation rates below 40\%, only SBS consistently performs better than other models. Across population response rates it also never results in a \(B\) value below .85. This indicates that SBS is successful at sampling schools that are unlikely to participate and therefore tend to be underrepresented by the other sampling methods---particularly when overall participation propensities are low. Stratified random sampling consistently outperformed simple random sampling across all participation rates, though only slightly.
 
 
 
@@ -460,52 +460,24 @@ We also found several trends that were unexpected. At 50\% and beyond, SBS perfo
 \hypertarget{standardized-mean-differences}{%
 \subsubsection{Standardized Mean Differences}\label{standardized-mean-differences}}
 
-We began this analysis by plotting mean SMDs for each covariate across all sampling methods against the population participation rate. Sampling methods were considered to perform well if they resulted in an average SMD value below .25 across iterations. The relative performance of the sampling methods were used to group covariates into four patterns of performance. The first group of covariates is displayed in figure \ref{fig:fig-SMD-group1}. For this set of covariates, stratified methods always resulted in better balance than non stratified methods, where all stratified methods resulted better balance than non stratified methods. Notably, SBS almost always outperformed all other mehtods.
+We began this analysis by plotting mean SMDs for each covariate across all sampling methods against the population participation rate. Sampling methods were considered to perform well if they resulted in an average SMD value below .25 across iterations. The relative performance of sampling methods varied across covariates. Several patterns did emerge, however, which allowed us to designate three groups of covariates. Figure \ref{fig:fig-SMD-group1} displays an example of each pattern. Group 1 represents nine covariates where stratified methods outperformed unstratified methods across population participation rates. Group 2 represents two covariates where all sampling methods resulted good balance. Group 3 represents three covariates where stratified methods performed worse than their unstratified counterparts, or where at least one unstratified method performed better than a stratified method. Across all groups, stratified balanced sampling almost always resulted in good balance and generally outperformed all other sampling methods.
 
 
 
 \begin{figure}
 \centering
-\includegraphics{6---Paper_files/figure-latex/fig-SMD-group1-1.pdf}
-\caption{\label{fig:fig-SMD-group1}Group 1, good balance for stratified methods, poor balance for unstratified methods at low participation rates. Dotted horizontal line indicates a .25 cutoff.}
+\includegraphics{6---Paper_files/figure-latex/fig-SMD-groups-1.pdf}
+\caption{\label{fig:fig-SMD-groups}Patterns of relative performance based on standardized mean differences. The dotted horizontal line represents a cut off of .25 under which good balance is achieved.}
 \end{figure}
 
-The second group of covariates is displayed in figure \ref{fig:fig-SMD-group2}. Here, the stratified sampling methods consistently outperform their unstratified counterparts and almost always resulted in SMDs below .25. However, in some conditions, SCS performed worse than URS, or even SBS. Also, SBS was outperformed by SCS and SRS in certain conditions. The third group of covariates is displayed in figure \ref{fig:fig-SMD-group3}. Here, all sampling methods resulted in good balance across all population participation rates. SBS seemed to perform slightly better than all other methods, while differences between the other methods seems negligible. Finally, the fourth group of covariates is displayed in figure \ref{fig:fig-SMD-group4}. For these covariates, SBS performed consistently well across population participation rates. However, URS and UCS performed better than their stratified counterparts.
-
-
-
-\begin{figure}
-\centering
-\includegraphics{6---Paper_files/figure-latex/fig-SMD-group2-1.pdf}
-\caption{\label{fig:fig-SMD-group2}Group 2: good balance for stratified versions of methods, inconsistent performance by SBS and SCS. Dotted horizontal line indicates a .25 cutoff.}
-\end{figure}
-
-
-
-\begin{figure}
-\centering
-\includegraphics{6---Paper_files/figure-latex/fig-SMD-group3-1.pdf}
-\caption{\label{fig:fig-SMD-group3}Group 3: all methods performed well, with SBS performing slightly better. Dotted horizontal line indicates a .25 cutoff.}
-\end{figure}
-
-
-
-\begin{figure}
-\centering
-\includegraphics{6---Paper_files/figure-latex/fig-SMD-group4-1.pdf}
-\caption{\label{fig:fig-SMD-group4}Group 4: poor relative performance for stratified convenience sampling and stratified random sampling. Dotted horizontal line indicates a .25 cutoff.}
-\end{figure}
-
-One potential explanation for why including stratification in a sampling design may result in poorer balance is that the strata are poorly specified. This may occur if the strata do not explain any variance in a covariate that is related to participation. To examine this we calculated the ICC for each covariate (i.e., the proportion of variance in the covariate that was between strata) and compared it to the log-odds coefficients associated with that covariate in the participation propensity model. We then plotted these values in figure \ref{fig:fig-Var-Coef}.
-
-We noted several interesting relationships when examining the groups of covariate previously described,. Group 3, where all sampling methods performed well, consisted of covariates that were fairly unrelated to participation, and which played almost no role in generating strata. Group 4, where stratification seemed to reduce the performance of sampling methods, consisted of covariates that were predictive of participation, but were also overlooked by the strata generation process.
+One potential explanation the patterns found in groups 2 and 3 is that the strata were poorly specified for these covariates. To examine this we calculated the the proportion of variance explained by the strata for each covariate and compared it to the log-odds coefficients associated with that covariate in the participation propensity model. We then plotted these values in figure \ref{fig:fig-Var-Coef}. Several patterns emerged here as well. Group 1 consisted of covariates where at least 45\% of the variance was between clusters. Groups 2 and 3 both consisted of covariates that were poorly clustered, with no more than 15\% of variance between clusters. The major difference between groups 2 and 3 appears to be the relationship between the covariates and the likelihood of participation.
 
 
 
 \begin{figure}
 \centering
 \includegraphics{6---Paper_files/figure-latex/fig-Var-Coef-1.pdf}
-\caption{\label{fig:fig-Var-Coef}ICC Values vs absolute log odds. Shaded areas illustrate potential patterns in generalizability measured by SMDs.}
+\caption{\label{fig:fig-Var-Coef}Variance explained by clustering vs absolute log odds. Shaded areas illustrate patterns in generalizability measured by SMDs.}
 \end{figure}
 
 \hypertarget{feasibility-1}{%

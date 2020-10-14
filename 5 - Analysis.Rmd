@@ -446,30 +446,32 @@ figs$B
 
 vars$plot.groups <- bind_rows(
   tibble(group = "Group 1", 
-         desc = "good1", 
-         vnames = c("ethHisp", "pELL", "Urban", "ethWhite", "ToRu")),
-  tibble(group = "Group 2", 
-         desc = "good2", 
-         vnames = c("pTotfrl", "T1",  "Suburban")),
+         desc = "good", 
+         vnames = c("ethHisp", "pELL", "Urban", "ethWhite", 
+                    "ToRu", "pTotfrl", "T1",  "Suburban")),
   tibble(group = "Group 3", 
          desc = "bad", 
          vnames = c("ethBlack", "n", "dSCH")),
-  tibble(group = "Group 4", 
+  tibble(group = "Group 2", 
          desc = "neutral", 
          vnames = c("pFem", "ST.ratio"))
   )
 
 
-SMDFigs <-  results$s.stats %>%
+df.list$smd.results <- results$s.stats %>%
   left_join(df.list$pop.stats) %>%
   mutate(smd = (samp.mean - pop.mean) / pop.sd,
          RR = parse_number(RR)) %>%
-  group_by(sample_method, RR, var, Sampling, Clustering, K) %>%
-  summarise(mSMD = mean(abs(smd)),
-            mSMD.sd = sd(abs(smd))) %>%
+  group_by(sample_method, RR, var, Sampling, Clustering) %>%
+  summarise(mSMD = mean(smd),
+            mSMD.sd = sd(smd),
+            mASMD = mean(abs(smd)),
+            mASMD.sd = sd(abs(smd))) %>%
   rename(vnames = var) %>%
   left_join(df.list$coefs) %>%
-  ungroup() %>%
+  ungroup()
+
+SMDFigs <- df.list$smd.results  %>%
   left_join(vars$plot.groups ) %>%
   group_by(group, desc) %>%
   nest %>%
@@ -483,74 +485,75 @@ tabs <- c(tabs, SMDFigs$data)
 figs <- c(figs, SMDFigs$plots)
 
 
+tabs$smd.examples <- df.list$smd.results %>% 
+  filter(vnames %in% c("pELL", "pFem", "n")) %>% 
+  mutate(Variables = factor(vnames, 
+                            labels = c("Group 3", "Group 1", "Group 2")),
+         Variables = ordered(Variables, levels =  c("Group 1", "Group 2", "Group 3"))) %>%
+  arrange(Variables) 
+
+figs$smd.examples <- tabs$smd.examples %>%
+  plot_smd()
+
 
 ```
 
 
 ```{r}
 
-figs$smd.good1
+figs$smd.good
 
 ```
 
-```{r}
-figs$smd.good2
-
-```
-
-```{r}
-figs$smd.bad
-
-```
 
 
 ```{r}
 figs$smd.neutral
 
 ```
-### Examples
+### Examples for presentations
 
 ```{r, fig.cap = "Average SMDs", fig.height = 7}
 
 
-vars$plot.smd.examples <- bind_rows(
-  tibble(group = "Example", 
-         desc = "each", 
-         vnames = c("pELL", "n", "pFem")),
-  tibble(group = "ELL", 
-         desc = "ell", 
-         vnames = c("pELL")),
-  tibble(group = "N", 
-         desc = "n", 
-         vnames = c("n")),
-  tibble(group = "Fem", 
-         desc = "fem", 
-         vnames = c("pFem"))
-  )
-
-SMDFigs <-  results$s.stats %>%
-  left_join(df.list$pop.stats) %>%
-  mutate(smd = (samp.mean - pop.mean) / pop.sd,
-         RR = parse_number(RR)) %>%
-  group_by(sample_method, RR, var, Sampling, Clustering, K) %>%
-  summarise(mSMD = mean(abs(smd)),
-            mSMD.sd = sd(abs(smd))) %>%
-  rename(vnames = var) %>%
-  left_join(df.list$coefs) %>%
-  ungroup() %>%
-  left_join(vars$plot.smd.examples ) %>%
-  group_by(group, desc) %>%
-  nest %>%
-  mutate(plots = map(data, plot_smd2),
-         plots = set_names(plots, paste("smd.", desc, sep = "")),
-         data = set_names(data, paste("smd.", desc, sep = ""))) %>%
-  ungroup() %>%
-  select(data, plots)
-
-tabs <- c(tabs, SMDFigs$data)
-figs <- c(figs, SMDFigs$plots)
-
-figs$smd.ell
+# vars$plot.smd.examples <- bind_rows(
+#   tibble(group = "Example", 
+#          desc = "each", 
+#          vnames = c("pELL", "n", "pFem")),
+#   tibble(group = "ELL", 
+#          desc = "ell", 
+#          vnames = c("pELL")),
+#   tibble(group = "N", 
+#          desc = "n", 
+#          vnames = c("n")),
+#   tibble(group = "Fem", 
+#          desc = "fem", 
+#          vnames = c("pFem"))
+#   )
+# 
+# SMDFigs <-  results$s.stats %>%
+#   left_join(df.list$pop.stats) %>%
+#   mutate(smd = (samp.mean - pop.mean) / pop.sd,
+#          RR = parse_number(RR)) %>%
+#   group_by(sample_method, RR, var, Sampling, Clustering, K) %>%
+#   summarise(mSMD = mean(abs(smd)),
+#             mSMD.sd = sd(abs(smd))) %>%
+#   rename(vnames = var) %>%
+#   left_join(df.list$coefs) %>%
+#   ungroup() %>%
+#   left_join(vars$plot.smd.examples ) %>%
+#   group_by(group, desc) %>%
+#   nest %>%
+#   mutate(plots = map(data, plot_smd2),
+#          plots = set_names(plots, paste("smd.", desc, sep = "")),
+#          data = set_names(data, paste("smd.", desc, sep = ""))) %>%
+#   ungroup() %>%
+#   select(data, plots)
+# 
+# tabs <- c(tabs, SMDFigs$data)
+# figs <- c(figs, SMDFigs$plots)
+# 
+# figs$smd.ell
 ```
 
 ### V-ratio and Log odds
@@ -570,11 +573,13 @@ tabs$v.coef <- df.list$pop.data %>%
          vratio = B.SS / T.SS) %>%
   left_join(df.list$coefs) %>%
   left_join(vars$plot.groups) %>%
-  mutate(log_odds = abs(log_odds)) %>%
+  mutate(abs_log_odds = abs(log_odds),
+         odds = exp(log_odds),
+         prob = odds / (1 + odds))%>%
   arrange(group)
 
 figs$v.coef <- tabs$v.coef  %>%
-  ggplot(aes(x = vratio, y = log_odds, color = group, fill = group)) + 
+  ggplot(aes(x = vratio, y = abs_log_odds, color = group, fill = group)) + 
   geom_mark_rect(expand = 0.04, color = "black") +
   geom_point(size = 2) +
   # geom_encircle(alpha = .2, s_shape = 0, expand = .1, spread = .05, color = "black") +
@@ -583,37 +588,141 @@ figs$v.coef <- tabs$v.coef  %>%
        x = lab.vars$vratio) +
   scale_x_continuous(breaks = seq(0, 1, .1)) +
   scale_y_continuous(breaks = seq(0, .6, .1),
-                     limits = c(0, .6)) +
-  guides(fill = "none", color = "none") 
-
+  limits = c(0, .6)) 
 figs$v.coef
 ```
 
 
 
 ### Test
+
+
+
+
 ```{r}
 
-df.test <- bind_rows(tabs$smd.bad, tabs$smd.good1, tabs$smd.good2, tabs$smd.neutral) %>%
-  select(sample_method:mSMD) %>%
-  left_join(tabs$v.coef %>% select(vnames, vratio, log_odds)) %>%
-  mutate(rat1 = vratio/abs(log_odds) %>% log,
-         rat2 = abs(log_odds)/vratio)
+df.test <- df.list$smd.results %>%
+  left_join(tabs$v.coef %>% 
+              select(vnames, vratio, log_odds, abs_log_odds:prob))
+
+```
+
+
+```{r}
+df.test %>%
+  ggplot(aes(x = abs_log_odds, y = mASMD, color = Clustering)) +
+  geom_point() +
+  geom_hline(yintercept = .25, linetype = "dotted") +
+  geom_hline(yintercept = 0) +
+  geom_smooth(method = "lm", se = F) +
+  facet_grid(Sampling~RR)
 
 df.test %>%
-  ggplot(aes(x = RR, y = mSMD, color = Clustering, group = sample_method)) +
-  geom_line() +
-  facet_wrap(~ rat1) +
+  ggplot(aes(x = log_odds, y = mSMD, color = Clustering)) +
+  geom_point() +
+  geom_hline(yintercept = .25, linetype = "dotted") +
+  geom_hline(yintercept = 0) +
+  geom_smooth(method = "lm", se = F) +
+  facet_grid(Sampling~RR)
+
+```
+
+```{r}
+df.test %>%
+  ggplot(aes(x = Sampling, y = mASMD, color = Clustering)) +
+  geom_boxplot(alpha = .5,
+               position = "dodge2") +
+  facet_grid(~ RR) +
+  geom_hline(yintercept = 0) +
   geom_hline(yintercept = .25, linetype = "dotted")
 
+```
 
-df.test %>%
-  ggplot(aes(x = vratio, y = mSMD, alpha = log_odds, color = Clustering)) +
+
+```{r}
+
+df.plot <- df.test %>%
+  nest(data = everything())  %>%
+  mutate(m1 = map(data, lm, formula = mSMD ~ RR),
+         m2 = map(data, lm, formula = mSMD ~ log_odds + vratio + RR),
+         m3 = map(data, lm, formula = mSMD ~ log_odds * vratio * RR)) %>%
+  gather(model, fit, -data) %>%
+  mutate(res = map(fit, function(x) x$residuals),
+         plot.data = map2(data, 
+                          res, 
+                          function(x, y) x %>% mutate(res = y)))
+
+
+
+anova(df.plot$fit[[1]], df.plot$fit[[2]], df.plot$fit[[3]])
+
+texreg::screenreg(df.plot$fit)
+
+df.plot %>%
+  select(model, plot.data) %>%
+  unnest(plot.data) %>%
+  ggplot(aes(x = RR, y = res, color = Sampling, linetype = Clustering)) +
+  # geom_point(alpha = .5) +
+  geom_smooth() +
+  facet_wrap(~model)
+
+df.plot %>%
+  select(model, plot.data) %>%
+  unnest(plot.data) %>%
+  ggplot(aes(x = RR, y = res, color = Sampling, linetype = Clustering)) +
   geom_point() +
-  facet_grid( ~ RR) +
+  geom_line() + 
+  geom_hline(yintercept = 0) + 
   geom_hline(yintercept = .25, linetype = "dotted") +
-  scale_y_log10()
+  facet_grid(vnames ~ model, scale = "free_y")
+  
+```
 
+
+```{r}
+
+df.plot %>%
+  select(model, plot.data) %>%
+  unnest(plot.data) %>%
+  ggplot(aes(x = vratio, y = res, color = Clustering)) +
+  geom_point() +
+  geom_hline(yintercept = 0) +
+  facet_grid(model ~ RR)
+
+```
+### Test 2
+
+```{r}
+df.test.2 <- results$s.stats %>%
+  ungroup() %>%
+  left_join(df.list$pop.stats) %>%
+  mutate(smd = (samp.mean - pop.mean) / pop.sd,
+         a_smd = abs(smd),
+         RR = parse_number(RR))
+
+df.test.2.sum <- df.test.2 %>%
+  ungroup() %>%
+  group_by(sample_method, RR, var, Sampling, Clustering) %>%
+  summarise(mSMD = mean(smd),
+            mSMD.sd = sd(smd),
+            mASMD = mean(a_smd),
+            mASMD.sd = sd(a_smd))
+
+df.test.2.sum %>%
+  ggplot(aes(x = mSMD, y = mSMD, color = sample_method)) +
+  geom_point() +
+  geom_vline(xintercept = 0)+
+  facet_wrap(~RR)
+
+df.test.2 %>%
+  filter(var == "ethWhite") %>%
+  ggplot(aes(x = RR, y = a_smd, color = sample_method)) +
+  geom_smooth(method = "lm", formula = y ~ poly(x, 3))
+
+df.test.2 %>%
+  filter(var == "ethWhite") %>%
+  ggplot(aes(x = RR, y = smd, color = sample_method)) +
+  geom_smooth(method = "lm", formula = y ~ poly(x, 3))
 ```
 
 ## Feasibility
@@ -815,46 +924,46 @@ ggsave(filename = "Figs/Presentation/GINI.jpg", dpi = 100, width = 10, height = 
 ```
 
 ```{r}
-library(cowplot)
-
-fig.SCS <- list(
-  figs$smd.ell +
-    scale_color_brewer(type = "qual", palette = 2) +
-    theme_bw() +
-    theme(text = element_text(size = 10),
-          legend.position = "none",
-          axis.title.x = element_blank(),
-          axis.ticks = element_blank(),
-          axis.text.x = element_blank()) +
-    labs(y = "SMD"),
-  figs$B +
-    scale_color_brewer(type = "qual", palette = 2) +
-    theme_bw() +
-    theme(text = element_text(size = 10),
-          legend.position = "right",
-          axis.title.x = element_blank(),
-          axis.ticks = element_blank(),
-          axis.text.x = element_blank()) +
-    labs(y = "B-Index"),
-  figs$samples.contacts +
-    scale_color_brewer(type = "qual", palette = 2) +
-    theme_bw() +
-    theme(text = element_text(size = 10),
-          legend.position = "none") +
-    labs(y = "Contacts") +
-    scale_y_continuous(breaks = seq(0, 4000, 1000),
-                       limits = c(0, 4000))
-)
-
-plot_grid(plotlist = fig.SCS, 
-          ncol = 1, 
-          nrow = 3, 
-          rel_heights = c(1, 1, 1.3),
-          label_x = .5,
-          align = "v",
-          axis = "lr",
-          label_fontface = "plain" ,
-          label_size = 10)
+# library(cowplot)
+# 
+# fig.SCS <- list(
+#   figs$smd.ell +
+#     scale_color_brewer(type = "qual", palette = 2) +
+#     theme_bw() +
+#     theme(text = element_text(size = 10),
+#           legend.position = "none",
+#           axis.title.x = element_blank(),
+#           axis.ticks = element_blank(),
+#           axis.text.x = element_blank()) +
+#     labs(y = "SMD"),
+#   figs$B +
+#     scale_color_brewer(type = "qual", palette = 2) +
+#     theme_bw() +
+#     theme(text = element_text(size = 10),
+#           legend.position = "right",
+#           axis.title.x = element_blank(),
+#           axis.ticks = element_blank(),
+#           axis.text.x = element_blank()) +
+#     labs(y = "B-Index"),
+#   figs$samples.contacts +
+#     scale_color_brewer(type = "qual", palette = 2) +
+#     theme_bw() +
+#     theme(text = element_text(size = 10),
+#           legend.position = "none") +
+#     labs(y = "Contacts") +
+#     scale_y_continuous(breaks = seq(0, 4000, 1000),
+#                        limits = c(0, 4000))
+# )
+# 
+# plot_grid(plotlist = fig.SCS, 
+#           ncol = 1, 
+#           nrow = 3, 
+#           rel_heights = c(1, 1, 1.3),
+#           label_x = .5,
+#           align = "v",
+#           axis = "lr",
+#           label_fontface = "plain" ,
+#           label_size = 10)
 
  # ggsave(filename = "Figs/Presentation/Fig Middle.jpg", dpi = 1000, width = (6*1.6), height = (6))
 ```

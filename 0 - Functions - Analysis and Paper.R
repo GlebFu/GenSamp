@@ -28,9 +28,9 @@ row_groups <- function(x, blank = F) {
 # PLOT FUNCTIONS
 ###################
 
-plot_smd <- function(data) {
+plot_smd <- function(data, yvar = "mASMD") {
   data %>% 
-    ggplot(aes(x = RR, y = mSMD, color = Sampling, linetype = Clustering, group = sample_method)) +
+    ggplot(aes(x = RR, y = get(yvar), color = Sampling, linetype = Clustering, group = sample_method)) +
     geom_line(size = 1) +
     geom_hline(yintercept = .25, linetype = "dotted") +
     facet_wrap( ~ Variables, scales = "free", ncol = 3) +
@@ -40,9 +40,9 @@ plot_smd <- function(data) {
     theme(legend.position = "bottom")
 }
 
-plot_smd2 <- function(data) {
+plot_smd2 <- function(data, yvar = "mASMD") {
   data %>% 
-    ggplot(aes(x = RR, y = mSMD, color = Sampling, linetype = Clustering, group = sample_method)) +
+    ggplot(aes(x = RR, y = yvar, color = Sampling, linetype = Clustering, group = sample_method)) +
     geom_line(size = 1) +
     geom_hline(yintercept = .25, linetype = "dotted") +
     labs(y = lab.vars$smd,
