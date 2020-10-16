@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.21 (TeX Live 2020/W32TeX) (preloaded format=pdflatex 2020.10.11)  16 OCT 2020 16:12
+This is pdfTeX, Version 3.14159265-2.6-1.40.21 (TeX Live 2020/W32TeX) (preloaded format=pdflatex 2020.10.11)  16 OCT 2020 16:34
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1234,38 +1234,38 @@ nput line 542.
 LaTeX Warning: Reference `fig:fig-SMD-group4' on page 30 undefined on input lin
 e 551.
 
-[30 <./6---Paper_files/figure-latex/fig-gini-1.pdf>] [31] [32] [33] [34]
+[30 <./6---Paper_files/figure-latex/fig-gini-1.pdf>] [31] [32] [33] [34] [35] [
+36] [37] [38]
 
 Package hyperref Warning: Difference (2) between bookmark levels is greater 
-(hyperref)                than one, level fixed on input line 598.
+(hyperref)                than one, level fixed on input line 681.
 
-<6---Paper_files/figure-latex/fig-rel-per-1.pdf, id=499, 650.43pt x 361.35pt>
+<6---Paper_files/figure-latex/fig-rel-per-1.pdf, id=560, 650.43pt x 361.35pt>
 File: 6---Paper_files/figure-latex/fig-rel-per-1.pdf Graphic file (type pdf)
 <use 6---Paper_files/figure-latex/fig-rel-per-1.pdf>
 Package pdftex.def Info: 6---Paper_files/figure-latex/fig-rel-per-1.pdf  used o
-n input line 604.
+n input line 687.
 (pdftex.def)             Requested size: 458.93034pt x 254.9613pt.
-[35]
-<6---Paper_files/figure-latex/fig-gini-curve-1.pdf, id=509, 722.7pt x 433.62pt>
+<6---Paper_files/figure-latex/fig-gini-curve-1.pdf, id=562, 722.7pt x 433.62pt>
 
 File: 6---Paper_files/figure-latex/fig-gini-curve-1.pdf Graphic file (type pdf)
 
 <use 6---Paper_files/figure-latex/fig-gini-curve-1.pdf>
 Package pdftex.def Info: 6---Paper_files/figure-latex/fig-gini-curve-1.pdf  use
-d on input line 616.
+d on input line 699.
 (pdftex.def)             Requested size: 650.43501pt x 390.26102pt.
-[36 <./6---Paper_files/figure-latex/fig-rel-per-1.pdf>] [37 <./6---Paper_files/
-figure-latex/fig-gini-curve-1.pdf>] [38] [39] AED endfloat: Processing end Figu
-res and Tables [40] (./6---Paper.aux)
+[39 <./6---Paper_files/figure-latex/fig-rel-per-1.pdf>] AED endfloat: Processin
+g end Figures and Tables [40] [41 <./6---Paper_files/figure-latex/fig-gini-curv
+e-1.pdf>] (./6---Paper.aux)
 Package rerunfilecheck Info: File `6---Paper.out' has not changed.
-(rerunfilecheck)             Checksum: 5816166044F4DE4437FE74EA05FEDF3A;5761.
+(rerunfilecheck)             Checksum: 4DE025BDBC35517617D8D0936901EFD5;5761.
 
 LaTeX Warning: There were undefined references.
 
  ) 
 Here is how much of TeX's memory you used:
- 25739 strings out of 481886
- 465205 string characters out of 5930463
+ 25740 strings out of 481886
+ 465212 string characters out of 5930463
  764016 words of memory out of 5000000
  41321 multiletter control sequences out of 15000+600000
  584516 words of font info for 76 fonts, out of 8000000 for 9000
@@ -1292,10 +1292,10 @@ mes/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/lm/lmri12.pfb><c:/Use
 rs/James/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy10.pfb><c
 :/Users/James/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy8.pf
 b>
-Output written on 6---Paper.pdf (40 pages, 1858812 bytes).
+Output written on 6---Paper.pdf (41 pages, 1859227 bytes).
 PDF statistics:
- 683 PDF objects out of 1000 (max. 8388607)
- 587 compressed objects within 6 object streams
- 185 named destinations out of 1000 (max. 500000)
+ 687 PDF objects out of 1000 (max. 8388607)
+ 590 compressed objects within 6 object streams
+ 186 named destinations out of 1000 (max. 500000)
  474 words of extra memory for PDF output out of 10000 (max. 10000000)
 

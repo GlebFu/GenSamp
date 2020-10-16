@@ -572,6 +572,23 @@ Earlier we stated that if treatment effects are constant across units in a popul
 
 Large scale MRTs are expensive to implement, and resource allocation for such studies presents many difficult trade-offs. Researchers who wish to invest in robust recruitment strategies to amplify the impact and relevance of of their work should be better equipped to anticipate the costs and benefits of various sampling strategies. We hope that by showing the relative performance of these sampling methods, and by demonstrating the implementation of stratified sampling, we have contributed to future researchers being better informed in making these decisions.
 
+\newpage
+
+# References
+
+```{r create_r-references}
+r_refs(file = "references.bib")
+```
+
+\begingroup
+\setlength{\parindent}{-0.5in}
+\setlength{\leftskip}{0.5in}
+
+<div id = "refs"></div>
+\endgroup
+
+\newpage 
+
 # Online Appendix
 
 ### Sampling Feasibility
@@ -608,17 +625,3 @@ figs$gini.coef +
 ```
 
 
-\newpage
-
-# References
-
-```{r create_r-references}
-r_refs(file = "references.bib")
-```
-
-\begingroup
-\setlength{\parindent}{-0.5in}
-\setlength{\leftskip}{0.5in}
-
-<div id = "refs"></div>
-\endgroup
