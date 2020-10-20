@@ -422,13 +422,15 @@ tabs$B <- results$B %>%
          RR = parse_number(RR))
 
 figs$B <- tabs$B %>%
-  ggplot(aes(x = RR, y = M, color = Sampling, linetype = Clustering, group = sample_method)) +
+  ggplot(aes(x = RR, y = M, color = Sampling, 
+             linetype = Clustering, group = sample_method)) +
   geom_line() +
   labs(y = lab.vars$B ,
        x = lab.vars$rr) +
   geom_hline(yintercept = .95, linetype = "dashed") +
   geom_hline(yintercept = .8, linetype = "dotted") +
-  scale_x_continuous(breaks = seq(0, 100, 10))
+  scale_x_continuous(breaks = seq(0, 100, 10)) + 
+  scale_y_continuous(limits = c(0.5, 1.0), expand = c(0,0))
 
 
 figs$B 
@@ -485,16 +487,20 @@ tabs <- c(tabs, SMDFigs$data)
 figs <- c(figs, SMDFigs$plots)
 
 
-tabs$smd.examples <- df.list$smd.results %>% 
+tabs$smd.examples <- 
+  df.list$smd.results %>% 
   filter(vnames %in% c("pELL", "pFem", "n")) %>% 
   mutate(Variables = factor(vnames, 
                             labels = c("Group 3", "Group 1", "Group 2")),
          Variables = ordered(Variables, levels =  c("Group 1", "Group 2", "Group 3"))) %>%
   arrange(Variables) 
 
-figs$smd.examples <- tabs$smd.examples %>%
-  plot_smd()
+figs$smd.examples <- 
+  tabs$smd.examples %>%
+  plot_smd() + 
+  facet_wrap(~ Variables, ncol = 2)
 
+figs$smd.examples
 
 ```
 
@@ -588,7 +594,9 @@ figs$v.coef <- tabs$v.coef  %>%
        x = lab.vars$vratio) +
   scale_x_continuous(breaks = seq(0, 1, .1)) +
   scale_y_continuous(breaks = seq(0, .6, .1),
-  limits = c(0, .6)) 
+  limits = c(0, .6)) + 
+  theme(legend.position =)
+
 figs$v.coef
 ```
 
@@ -880,7 +888,7 @@ figs$gini <- tabs$gini.coef %>%
   geom_line() +
   scale_x_continuous(breaks = seq(10, 90, 10)) +
   scale_y_continuous(breaks = seq(0, 1, .1),
-                     limits = c(0, 1)) +
+                     limits = c(0, 1), expand = c(0,0)) +
   labs(x = lab.vars$rr,
       y = lab.vars$gini)
 
