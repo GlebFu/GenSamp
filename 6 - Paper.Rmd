@@ -418,9 +418,9 @@ B = \int_{\hat\psi_{min}-3h_{max}}^{\hat\psi_{max}+3h_{max}}\sqrt{\hat{f}_s(z)\h
 \end{align}
 where $\hat\psi_{min}$ and $\hat\psi_{max}$ are \JEP{define}, $\hat{f}_s(z)$ is a Gaussian kernel density estimate of the distribution of propensity scores in the sample, calculated using bandwidth $h_s$, and $\hat{f}_p(z)$ is a Gaussian kernel density estimate of the distribution of propensity scores in the non-sampled population, calculated using bandwidth $h_p$. We calculated the bandwidth $h$ for the population or sample as follows:
 \begin{align}
-h = \sigma_{\pi}(\frac{4}{3n})^{1/5}
+h = \sigma_{\pi}\left(\frac{4}{3n}\right)^{1/5}
 \end{align}
-where $\sigma_{\pi}$ is the variance of the propensity scores. \GF{Do these equations look right?}\JEP{Could you point me to the lines in the code?}
+where $\sigma_{\pi}$ is the standard deviation of the propensity scores. \GF{Do these equations look right?}\JEP{Could you point me to the lines in the code?}
 
 ### Feasibility
 
