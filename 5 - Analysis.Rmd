@@ -419,21 +419,34 @@ tabs$B <- results$B %>%
             SD = sd(Bs, na.rm = T)) %>%
   mutate(LL = M - SD,
          UL = M + SD,
-         RR = parse_number(RR))
+         RR = parse_number(RR),
+         Label = paste(str_sub(Clustering, end = 1), Sampling, sep = ""))
+
+tabs$B.label <- tabs$B %>%
+  filter(RR == 10) %>%
+  mutate(RR = 0)
 
 figs$B <- tabs$B %>%
-  ggplot(aes(x = RR, y = M, color = Sampling, 
-             linetype = Clustering, group = sample_method)) +
+  ggplot(aes(x = RR, y = M, color = Label, 
+             linetype = Label, group = Label)) +
   geom_line() +
+  # geom_label(data = tabs$B.label, aes(label = Label)) +
+  geom_label_repel(data = tabs$B.label, 
+                   aes(label = Label), 
+                   direction = "y",
+                   point.padding = .1,
+                   force = .2,
+                   ylim = c(.5, .95)) +
   labs(y = lab.vars$B ,
        x = lab.vars$rr) +
   geom_hline(yintercept = .95, linetype = "dashed") +
   geom_hline(yintercept = .8, linetype = "dotted") +
   scale_x_continuous(breaks = seq(0, 100, 10)) + 
-  scale_y_continuous(limits = c(0.5, 1.0), expand = c(0,0))
+  scale_y_continuous(limits = c(0.5, 1.0), expand = c(0,0)) +
+  scale_color_brewer(type = "qual", palette = 6)
 
 
-figs$B 
+figs$B
 
 
 ```
@@ -463,8 +476,9 @@ vars$plot.groups <- bind_rows(
 df.list$smd.results <- results$s.stats %>%
   left_join(df.list$pop.stats) %>%
   mutate(smd = (samp.mean - pop.mean) / pop.sd,
-         RR = parse_number(RR)) %>%
-  group_by(sample_method, RR, var, Sampling, Clustering) %>%
+         RR = parse_number(RR),
+         Label = paste(str_sub(Clustering, end = 1), Sampling, sep = "")) %>%
+  group_by(sample_method, RR, var, Sampling, Clustering, Label) %>%
   summarise(mSMD = mean(smd),
             mSMD.sd = sd(smd),
             mASMD = mean(abs(smd)),
@@ -483,8 +497,8 @@ SMDFigs <- df.list$smd.results  %>%
   ungroup() %>%
   select(data, plots)
 
-tabs <- c(tabs, SMDFigs$data)
-figs <- c(figs, SMDFigs$plots)
+tabs[names(SMDFigs$data)] <- SMDFigs$data
+figs[names(SMDFigs$plots)] <- SMDFigs$plots
 
 
 tabs$smd.examples <- 
