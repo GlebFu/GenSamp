@@ -381,7 +381,7 @@ Figure \@ref(fig:fig-k-plots)c plots the required sample size from each cluster 
 
 ## Variation explained by the strata
 
-The strata resulting from the cluster analysis range in size from XX to XX schools. The strata explain XX% of the variation across all covariates (Figure \@ref(fig:fig-k-plots)b), with a CH-index of XX (Figure \@ref(fig:fig-k-plots)a).\JEP{Complete this sub-section with details about variation explained in individual covariates. This should set up Figure 5 in the results.}
+The strata resulting from the cluster analysis range in size from XX to XX schools. The strata explain XX% of the variation across all covariates (Figure \@ref(fig:fig-k-plots)b), with a CH-index of XX (Figure \@ref(fig:fig-k-plots)a).\JEP{Complete this sub-section with details about variation explained in individual covariates. This should set up Figure 5 in the results.} 
 
 # Simulating sample recruitment
 
@@ -389,7 +389,7 @@ Using the formal models for unit participation and sample recruitment that we ha
 Monte Carlo simulations, such as the one we now describe, are a flexible method for assessing the performance of different sample recruitment methods under controlled conditions.
 Here, we use simulation to assess the generalizability of samples recruited through SBS relative to probability sampling or convenience sampling methods. We also examine the feasibility and equity with which the sampling methods can be employed. 
 
-The validity and utility of a simulation study rests on whether the models and assumptions employed are reasonable approximations to the processes involved in collecting real data. In particular, our simulation findings rest on the assumptions of the participation propensity model and recruitment models. By relying on previous work and real data to inform our modeling assumption, we hope tos capture realistic trends in the performance of different recruitment methods.\JEP{I would not claim that we are representing reality here. Need a big "however" to conclude this paragraph...}
+The validity and utility of a simulation study rests on whether the models and assumptions employed are reasonable approximations to the processes involved in collecting real data. In particular, our simulation findings rest on the assumptions of the participation propensity model and recruitment models. By relying on previous work and real data to inform our modeling assumption, we hope to reasonably represent trends in the performance of different recruitment methods. That said, given the speculative nature of some aspects of the simulation our conclusions are tentative.\JEP{I would not claim that we are representing reality here. Need a big "however" to conclude this paragraph...} \GF{Added}
 
 ## Data Generation
 
@@ -402,7 +402,7 @@ Because these strata are a function of the characteristics of the full populatio
 
 We modeled the participation propensity score (Equation \@ref(eq:RGM)) using parameter estimates from extant school data. The set of covariates consisted of the same variables used in the cluster analysis. The corresponding coefficients were based on work by @fellersDevelopingApproachDetermine2017 who compared 571 elementary schools that participated in IES funded studies to the full population of U.S. elementary schools. The authors reported absolute SMD between the schools that participated and the population. We standardized the covariates and used reported SMDs as coefficients in Equation \@ref(eq:RGM) to generated $\pi_j$ values. The coefficient values are reported in Table \@ref(tab:tab-RGM-Pars). 
 
-The results of @fellersDevelopingApproachDetermine2017 do not provide any information about the overall average participation propensity across the full population--that is, the fraction of the full population of schools that would agree to participate in a study, if approached. This is a key parameter of the simulation that has a strong influence on the performance of all recruitment methods. We therefore varied the overall participation propensity over a wide range, by manipulating the intercept term in Equation \@ref(eq:RGM). We considered nine different levels of participation rates, ranging from XX to XX.\JEP{Fill in.} 
+The results of @fellersDevelopingApproachDetermine2017 do not provide any information about the overall average participation propensity across the full population--that is, the fraction of the full population of schools that would agree to participate in a study, if approached. This is a key parameter of the simulation that has a strong influence on the performance of all recruitment methods. We therefore varied the overall participation propensity over a wide range, by manipulating the intercept term in Equation \@ref(eq:RGM). We considered nine different levels of participation rates, ranging from 10% to 90%.
 
 ## Simulation procedures 
 
@@ -414,19 +414,33 @@ The order in which schools were approached varied by recruitment method and acro
 
 ### Generalizability
 
-There are several methods to quantify how generalizable a sample is to a target population. One common method is to compare the sample to the population on a range of covariates by examining SMDs as shown in Equation \@ref(eq:SMD). This method is limited as it only provides us with a measure of how close the sample means are to the population means. To have true generalizability, sample variance must also be representative of the population variance.\JEP{Couldn't we just compare variance ratios then? More positive justification for the B index?} Therefore, in addition to SMDs we also estimated the generalizability index [$B$;@tiptonHowGeneralizableYour2014].
+There are several methods to quantify how generalizable a sample is to a target population. One common method is to compare the sample to the population on a range of covariates by examining SMDs as shown in Equation \@ref(eq:SMD). This method is limited as it only provides us with a measure of how close the sample means are to the population means. 
+To have true generalizability, however, we must also account variance representation. \JEP{Couldn't we just compare variance ratios then? More positive justification for the B index?} \GF{added}
 
+A more comprehensive method is to calculate a generalizability index  [$B$;@tiptonHowGeneralizableYour2014] which provides a single score summary of overlap between two groups. This index offeres several advantages, First, it takes into account both the variance and distribution of the variables in each group by measuring the overlap of multiple density plots. Second, it quantives what is typically a visual comparison and provides an intuitive interpretation. Third, it simulatniously compares two groups across a range of covariates and can easily be scaled to include various interactions and transformations. This is done using propensity score analysis to estimating a summary statistic that represents differences between groups.
+
+The first step is to perform a propensity score analysis. Let $\hat\psi_j$ represent the sample propensity score, or the probability that school $j$ was included in a given sample. We estimate $\hat\psi_j$ using a basic logistic regression:
+
+
+\begin{align}
+\label{eq:PSA}
+\hat\psi_j = \log\left(\frac{\pi_j}{1 - \pi_j}\right) = \beta_0 + \mathbf{x}_j \boldsymbol\beta + e_j
+\end{align}
+
+This is essentially the reverse of the participation generation model (equation \@ref(eq:RGM)) where instead of generating a propensity to participate for each school, we are now estimating the propensity of each school actually participating when implementing a given sampling method. Here, $\hat\psi_j$ serves as a scalar summary of differences across all covaraites in $\mathbf{x}_j$. \JEP{Details about estimated propensity score.}\GF{added, please look over}
+
+
+We then calculate the generalizability index to compare the distribution of $\hat\psi_j$ in the sample to that of the population.
 The generalizability index is bounded between 0 and 1, with 0 indicating no overlap between the sample and the population, and 1 indicating the sample is representative of the population. 
-We calculated the index by first estimating a population propensity score.\JEP{Details about estimated propensity score.}
 Given the estimated propensity scores $\hat\psi_1,...,\hat\psi_N$, we calculated the $B$ index as 
 \begin{align}
 B = \int_{\hat\psi_{min}-3h_{max}}^{\hat\psi_{max}+3h_{max}}\sqrt{\hat{f}_s(z)\hat{f}_p(z)}dz
 \end{align}
-where $\hat\psi_{min}$ and $\hat\psi_{max}$ are \JEP{define}, $\hat{f}_s(z)$ is a Gaussian kernel density estimate of the distribution of propensity scores in the sample, calculated using bandwidth $h_s$, and $\hat{f}_p(z)$ is a Gaussian kernel density estimate of the distribution of propensity scores in the non-sampled population, calculated using bandwidth $h_p$. We calculated the bandwidth $h$ for the population or sample as follows:
+where $\hat\psi_{min}$ and $\hat\psi_{max}$ are the minimum and maximum values of $\hat\psi$ respectively, $\hat{f}_s(z)$ is a Gaussian kernel density estimate of the distribution of propensity scores in the sample, calculated using bandwidth $h_s$, and $\hat{f}_p(z)$ is a Gaussian kernel density estimate of the distribution of propensity scores in the non-sampled population, calculated using bandwidth $h_p$. We calculated the bandwidth $h$ for the population or sample as follows:
 \begin{align}
 h = \sigma_{\pi}\left(\frac{4}{3n}\right)^{1/5}
 \end{align}
-where $\sigma_{\pi}$ is the standard deviation of the propensity scores. \GF{Do these equations look right?}\JEP{Could you point me to the lines in the code?}
+where $\sigma_{\pi}$ is the standard deviation of the propensity scores.
 
 ### Feasibility
 
@@ -434,7 +448,11 @@ Recruiters expend a lot of resources contacting districts and schools, schedulin
 
 ### Sampling Inequity
 
-\JEP{Start with the rationale/motivation for looking at inequity.} To assess sampling inequity, we tracked the frequency with which schools were recruited by each method. We then summarized these data by calculating a Gini coefficient for each recruitment method and each population participation rate. This index ranges from 0 to 1, with 0 indicating perfect equity, and 1 indicating total inequity. In economic contexts, the Gini coefficient is used to describe the degree of income inequality by showing the disproportionate distribution of wealth across levels of incomes. Similarly it could be used in the context of sampling by identifying how often under-represented schools are recruited to participate in studies. We calculated Gini coefficients using the _Gini_ function from the _ineq_ package (Zeileis 2014).
+This simulation design also enables us to study sampling inequality. The distribution of oppertunities to participate in research is an important issue when considering federally funded research. 
+Non-random sampling for such studies create the possibility of systemic underrepresentation of schools that rarely benefit from such research, or a systemic overrepresentation of schools that must constantly bear the burden of participation in such research. \JEP{Start with the rationale/motivation for looking at inequity.} \GF{added}
+
+To assess sampling inequity, we tracked the frequency with which schools were recruited by each method. We then summarized these data by calculating a Gini coefficient for each recruitment method and each population participation rate. This index ranges from 0 to 1, with 0 indicating perfect equity, and 1 indicating total inequity. 
+In economic contexts, the Gini coefficient is used to describe the degree of income inequality by showing the disproportionate distribution of wealth across levels of incomes. Similarly it could be used in the context of sampling by identifying how often under-represented schools are recruited to participate in studies. We calculated Gini coefficients using the _Gini_ function from the _ineq_ package [@ineq].
 
 # Results
 
@@ -442,7 +460,7 @@ Recruiters expend a lot of resources contacting districts and schools, schedulin
 
 ### B-Index
 
-Figure \@ref(fig:fig-avg-B) displays the average $B$-index for each method across participation rates.\JEP{Couldn't figure out how to get the Figure to the top of the page.} Acceptable values of $B$ for generalizability vary depending on the size of the sample, the size of the population, and the number of covariates [@tiptonHowGeneralizableYour2014]. Given our design, a value of $B = .95$ would indicate very good overlap with no need to adjust estimates. Generally $B >= .80$ still supports generalizability with adjustment and likely no need to redefine the population. At population participation rates below 40%, SBS consistently out-performed the other recruitment methods. Further, across population response rates, SBS never resulted in a $B$ value below .85. This indicates that SBS is successful at sampling schools that are unlikely to participate and therefore tend to be underrepresented by the other sampling methods---particularly when overall participation propensities are low. Stratified random sampling consistently outperformed simple random sampling across all participation rates, though only slightly.\JEP{For all of the figures in this section, I think it would better to combine the two dimensions of the legends so that color AND line have values of SBS, SRS, URS, SCS, UCS. Double encoding will help with black-and-white legibility. Might also need to add geom\_point with shape corresponding to recruitment method, and/or get rid of the legend and just directly label the lines (try geom\_label\_rapel from ggrepel pkg).}
+Figure \@ref(fig:fig-avg-B) displays the average $B$-index for each method across participation rates.\JEP{Couldn't figure out how to get the Figure to the top of the page.} Acceptable values of $B$ for generalizability vary depending on the size of the sample, the size of the population, and the number of covariates [@tiptonHowGeneralizableYour2014]. Given our design, a value of $B = .95$ would indicate very good overlap with no need to adjust estimates. Generally $B >= .80$ still supports generalizability with adjustment and likely no need to redefine the population. At population participation rates below 40%, SBS consistently out-performed the other recruitment methods. Further, across population response rates, SBS never resulted in a $B$ value below .85. This indicates that SBS is successful at sampling schools that are unlikely to participate and therefore tend to be underrepresented by the other sampling methods---particularly when overall participation propensities are low. Stratified random sampling consistently outperformed simple random sampling across all participation rates, though only slightly.\JEP{For all of the figures in this section, I think it would better to combine the two dimensions of the legends so that color AND line have values of SBS, SRS, URS, SCS, UCS. Double encoding will help with black-and-white legibility. Might also need to add geom\_point with shape corresponding to recruitment method, and/or get rid of the legend and just directly label the lines (try geom\_label\_rapel from ggrepel pkg).}\GF{added}
 
 (ref:fig-avg-B-caption) Average $B$-index for varying participation rates, by sampling method. Horizontal dotted and dashed lines represented indices of .80 and .95, respectively, indicating acceptable or high levels of generalizability.
 
@@ -467,10 +485,79 @@ We began this analysis by plotting mean SMDs for each recruitment method on each
 
 ```{r fig-SMD-groups, fig.height = 5, fig.width = 7, fig.cap = "(ref:fig-SMD-groups-caption)"}
 
-figs$smd.examples %>%
-  apa_style_plot() + 
-  theme(legend.position = c(0.85, 0.07))
-  
+# figs$smd.examples %>%
+#   apa_style_plot() + 
+#   theme(legend.position = c(0.85, 0.07))
+
+tfun <- function(x) {
+  x %>% 
+    apa_style_plot() + 
+    theme(legend.position = "none",
+          axis.title.x = element_blank(),
+          axis.title.y = element_blank())
+} 
+
+legend_plot <- function(x) {
+   x %>%
+    apa_style_plot() +
+    theme(legend.position = "none",
+          axis.ticks.x = element_blank(),
+          axis.ticks.y = element_blank(),
+          axis.line.x = element_blank(),
+          axis.line.y = element_blank()) +
+    labs(x = "", y = "") +
+  scale_x_continuous(labels = rep("", 5), breaks = 1:5) +
+  scale_y_continuous(labels = rep("", 5), breaks = 1:5)
+    
+}
+
+
+```
+
+```{r}
+
+smd.fig.list <- list(plot_grid(plotlist = list(tfun(figs$smd.Group1), tfun(figs$smd.Group2)), 
+                               labels = c("Group 1", "Group 2"), 
+                               ncol = 2, 
+                               nrow = 1, 
+                               rel_heights = c(1, 1),
+                               label_x = .2,
+                               align = "h",
+                               label_fontface = "plain" ,
+                               label_size = 10), 
+                     plot_grid(plotlist = list(tfun(figs$smd.Group3), legend_plot(figs$smd.label)),
+                               labels = c("Group 3", "Legend"), 
+                               ncol = 2, 
+                               nrow = 1, 
+                               rel_heights = c(1, 1),
+                               label_x = .2,
+                               align = "h",
+                               label_fontface = "plain" ,
+                               label_size = 10)
+
+)
+
+test <- plot_grid(plotlist = smd.fig.list,
+                    ncol = 1, 
+                    nrow = 2, 
+                    rel_heights = c(1, 1),
+                    label_x = .5,
+                    align = "v",
+                    label_fontface = "plain" ,
+                    label_size = 10,
+                  scale = .9) 
+
+test + #perhaps reduce this for a bit more space
+  draw_label(lab.vars$rr,
+             x= 0.5,
+             y = 0,
+             vjust = -0.25,
+             angle = 0) +
+  draw_label(lab.vars$smd,
+             x = 0,
+             y = 0.5,
+             vjust = 1.5,
+             angle = 90)
 ```
 
 
@@ -492,7 +579,7 @@ figs$v.coef %>%
 
 Figure \@ref(fig:fig-responses)a depicts the total number of schools contacted to recruit a full sample of 60 schools versus the population participation rate, for each recruitment method. Figure \@ref(fig:fig-responses)b depicts the response rate, or percentage of schools that agreed to participate among those where recruitment was attempted, versus the population participation rate, for each recruitment method.\JEP{Vertical axis should be "Participation response rate."} For each of these metrics, there were substantial differences between methods at lower population participation rates.\JEP{Add a few sentences summarizing differences between methods. How does BS compare to CS, CS to RS, stratified versus not, etc.?} At higher participation rates, the differences were less pronounced, becoming negligible at population participation rates of 60% or more. 
 
-It is important to note that the magnitudes of these results are quite extreme.\JEP{What aspect of the results?} This is likely due to some mis-specification on the part of the simulation either in the response generating model parameters or the population participation rates. Rather than looking at the raw values, a more meaningful interpretation would be to compare the relative performance of the recruitment methods. Overall, UCS required the smallest recruitment effort to obtain a full sample, followed by URS and SCS, SRS, and finally SBS.\JEP{Let's discuss this paragraph. Not sure about suggesting mis-specification here.}
+It is important to note that, particularly in the lower population participation rates, the total schools contacted values are quite extreme. Due to the speculative nature of the simulation, a more meaningful interpretation would be to compare the relative performance of the recruitment methods. Overall, UCS required the smallest recruitment effort to obtain a full sample, followed by URS and SCS, SRS, and finally SBS.
 
 (ref:fig-responses-caption) Sample recruitment statistics and response rates. Plot (a) shows the total number of units contacted to achieve a full sample of 60 schools. Plot (b) shows the percent of schools that agreed to participate when recruited.
 

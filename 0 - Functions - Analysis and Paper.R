@@ -30,7 +30,7 @@ row_groups <- function(x, blank = F) {
 
 plot_smd <- function(data, yvar = "mASMD") {
   data %>% 
-    ggplot(aes(x = RR, y = get(yvar), color = Label, linetype = Label, group = sample_method)) +
+    ggplot(aes(x = RR, y = get(yvar), color = Label, linetype = Label, group = Label)) +
     geom_line(size = 1) +
     geom_hline(yintercept = .25, linetype = "dotted") +
     facet_wrap( ~ Variables, scales = "free", ncol = 3) +
@@ -42,7 +42,7 @@ plot_smd <- function(data, yvar = "mASMD") {
 
 plot_smd2 <- function(data, yvar = "mASMD") {
   data %>% 
-    ggplot(aes(x = RR, y = yvar, color = Label, linetype = Label, group = sample_method)) +
+    ggplot(aes(x = RR, y = get(yvar), color = Label, linetype = Label, group = Label)) +
     geom_line(size = 1) +
     geom_hline(yintercept = .25, linetype = "dotted") +
     labs(y = lab.vars$smd,

@@ -409,7 +409,7 @@ Using the formal models for unit participation and sample recruitment that we ha
 Monte Carlo simulations, such as the one we now describe, are a flexible method for assessing the performance of different sample recruitment methods under controlled conditions.
 Here, we use simulation to assess the generalizability of samples recruited through SBS relative to probability sampling or convenience sampling methods. We also examine the feasibility and equity with which the sampling methods can be employed.
 
-The validity and utility of a simulation study rests on whether the models and assumptions employed are reasonable approximations to the processes involved in collecting real data. In particular, our simulation findings rest on the assumptions of the participation propensity model and recruitment models. By relying on previous work and real data to inform our modeling assumption, we hope tos capture realistic trends in the performance of different recruitment methods.\todo[color=blue!20]{I would not claim that we are representing reality here. Need a big "however" to conclude this paragraph...}
+The validity and utility of a simulation study rests on whether the models and assumptions employed are reasonable approximations to the processes involved in collecting real data. In particular, our simulation findings rest on the assumptions of the participation propensity model and recruitment models. By relying on previous work and real data to inform our modeling assumption, we hope to reasonably represent trends in the performance of different recruitment methods. That said, given the speculative nature of some aspects of the simulation our conclusions are tentative.\todo[color=blue!20]{I would not claim that we are representing reality here. Need a big "however" to conclude this paragraph...} \todo[color=orange]{Added}
 
 \hypertarget{data-generation}{%
 \subsection{Data Generation}\label{data-generation}}
@@ -425,7 +425,7 @@ Because these strata are a function of the characteristics of the full populatio
 
 We modeled the participation propensity score (Equation \eqref{eq:RGM}) using parameter estimates from extant school data. The set of covariates consisted of the same variables used in the cluster analysis. The corresponding coefficients were based on work by Fellers (2017) who compared 571 elementary schools that participated in IES funded studies to the full population of U.S. elementary schools. The authors reported absolute SMD between the schools that participated and the population. We standardized the covariates and used reported SMDs as coefficients in Equation \eqref{eq:RGM} to generated \(\pi_j\) values. The coefficient values are reported in Table \ref{tab:tab-RGM-Pars}.
 
-The results of Fellers (2017) do not provide any information about the overall average participation propensity across the full population--that is, the fraction of the full population of schools that would agree to participate in a study, if approached. This is a key parameter of the simulation that has a strong influence on the performance of all recruitment methods. We therefore varied the overall participation propensity over a wide range, by manipulating the intercept term in Equation \eqref{eq:RGM}. We considered nine different levels of participation rates, ranging from XX to XX.\todo[color=blue!20]{Fill in.}
+The results of Fellers (2017) do not provide any information about the overall average participation propensity across the full population--that is, the fraction of the full population of schools that would agree to participate in a study, if approached. This is a key parameter of the simulation that has a strong influence on the performance of all recruitment methods. We therefore varied the overall participation propensity over a wide range, by manipulating the intercept term in Equation \eqref{eq:RGM}. We considered nine different levels of participation rates, ranging from 10\% to 90\%.
 
 \hypertarget{simulation-procedures}{%
 \subsection{Simulation procedures}\label{simulation-procedures}}
@@ -440,19 +440,31 @@ The order in which schools were approached varied by recruitment method and acro
 \hypertarget{generalizability}{%
 \subsubsection{Generalizability}\label{generalizability}}
 
-There are several methods to quantify how generalizable a sample is to a target population. One common method is to compare the sample to the population on a range of covariates by examining SMDs as shown in Equation \eqref{eq:SMD}. This method is limited as it only provides us with a measure of how close the sample means are to the population means. To have true generalizability, sample variance must also be representative of the population variance.\todo[color=blue!20]{Couldn't we just compare variance ratios then? More positive justification for the B index?} Therefore, in addition to SMDs we also estimated the generalizability index (\(B\); Tipton, 2014).
+There are several methods to quantify how generalizable a sample is to a target population. One common method is to compare the sample to the population on a range of covariates by examining SMDs as shown in Equation \eqref{eq:SMD}. This method is limited as it only provides us with a measure of how close the sample means are to the population means.
+To have true generalizability, however, we must also account variance representation. \todo[color=blue!20]{Couldn't we just compare variance ratios then? More positive justification for the B index?} \todo[color=orange]{added}
 
+A more comprehensive method is to calculate a generalizability index (\(B\); Tipton, 2014) which provides a single score summary of overlap between two groups. This index offeres several advantages, First, it takes into account both the variance and distribution of the variables in each group by measuring the overlap of multiple density plots. Second, it quantives what is typically a visual comparison and provides an intuitive interpretation. Third, it simulatniously compares two groups across a range of covariates and can easily be scaled to include various interactions and transformations. This is done using propensity score analysis to estimating a summary statistic that represents differences between groups.
+
+The first step is to perform a propensity score analysis. Let \(\hat\psi_j\) represent the sample propensity score, or the probability that school \(j\) was included in a given sample. We estimate \(\hat\psi_j\) using a basic logistic regression:
+
+\begin{align}
+\label{eq:PSA}
+\hat\psi_j = \log\left(\frac{\pi_j}{1 - \pi_j}\right) = \beta_0 + \mathbf{x}_j \boldsymbol\beta + e_j
+\end{align}
+
+This is essentially the reverse of the participation generation model (equation \eqref{eq:RGM}) where instead of generating a propensity to participate for each school, we are now estimating the propensity of each school actually participating when implementing a given sampling method. Here, \(\hat\psi_j\) serves as a scalar summary of differences across all covaraites in \(\mathbf{x}_j\). \todo[color=blue!20]{Details about estimated propensity score.}\todo[color=orange]{added, please look over}
+
+We then calculate the generalizability index to compare the distribution of \(\hat\psi_j\) in the sample to that of the population.
 The generalizability index is bounded between 0 and 1, with 0 indicating no overlap between the sample and the population, and 1 indicating the sample is representative of the population.
-We calculated the index by first estimating a population propensity score.\todo[color=blue!20]{Details about estimated propensity score.}
 Given the estimated propensity scores \(\hat\psi_1,...,\hat\psi_N\), we calculated the \(B\) index as
 \begin{align}
 B = \int_{\hat\psi_{min}-3h_{max}}^{\hat\psi_{max}+3h_{max}}\sqrt{\hat{f}_s(z)\hat{f}_p(z)}dz
 \end{align}
-where \(\hat\psi_{min}\) and \(\hat\psi_{max}\) are \todo[color=blue!20]{define}, \(\hat{f}_s(z)\) is a Gaussian kernel density estimate of the distribution of propensity scores in the sample, calculated using bandwidth \(h_s\), and \(\hat{f}_p(z)\) is a Gaussian kernel density estimate of the distribution of propensity scores in the non-sampled population, calculated using bandwidth \(h_p\). We calculated the bandwidth \(h\) for the population or sample as follows:
+where \(\hat\psi_{min}\) and \(\hat\psi_{max}\) are the minimum and maximum values of \(\hat\psi\) respectively, \(\hat{f}_s(z)\) is a Gaussian kernel density estimate of the distribution of propensity scores in the sample, calculated using bandwidth \(h_s\), and \(\hat{f}_p(z)\) is a Gaussian kernel density estimate of the distribution of propensity scores in the non-sampled population, calculated using bandwidth \(h_p\). We calculated the bandwidth \(h\) for the population or sample as follows:
 \begin{align}
 h = \sigma_{\pi}\left(\frac{4}{3n}\right)^{1/5}
 \end{align}
-where \(\sigma_{\pi}\) is the standard deviation of the propensity scores. \todo[color=orange]{Do these equations look right?}\todo[color=blue!20]{Could you point me to the lines in the code?}
+where \(\sigma_{\pi}\) is the standard deviation of the propensity scores.
 
 \hypertarget{feasibility}{%
 \subsubsection{Feasibility}\label{feasibility}}
@@ -492,11 +504,7 @@ We began this analysis by plotting mean SMDs for each recruitment method on each
 
 
 
-\begin{figure}
-\centering
-\includegraphics{6---Paper_files/figure-latex/fig-SMD-groups-1.pdf}
-\caption{\label{fig:fig-SMD-groups}Patterns of relative performance based on standardized mean differences. The dotted horizontal line represents a cut off of 0.25, under which acceptable balance is achieved.}
-\end{figure}
+\includegraphics{6---Paper_files/figure-latex/unnamed-chunk-1-1.pdf}
 
 One potential explanation the patterns found in groups 2 and 3 is that the strata were poorly specified for these covariates. To examine this we calculated the the proportion of variance explained by the strata for each covariate and compared it to the log-odds coefficients associated with that covariate in the participation propensity model (Figure \ref{fig:fig-Var-Coef}). Several patterns emerged here as well. Group 1 consisted of covariates where a substantial fraction of the variance was between clusters. Groups 2 and 3 both consisted of covariates that were poorly clustered, with no more than 15\% of variance between clusters. The major difference between groups 2 and 3 appears to be the relationship between the covariates and the likelihood of participation.\todo[color=blue!20]{2-3 sentences of explanation of how these findings relate to overall patterns from previous figure.}
 

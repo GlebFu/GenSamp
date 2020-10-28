@@ -424,7 +424,7 @@ tabs$B <- results$B %>%
 
 tabs$B.label <- tabs$B %>%
   filter(RR == 10) %>%
-  mutate(RR = 0)
+  mutate(RR = 5)
 
 figs$B <- tabs$B %>%
   ggplot(aes(x = RR, y = M, color = Label, 
@@ -439,8 +439,8 @@ figs$B <- tabs$B %>%
                    ylim = c(.5, .95)) +
   labs(y = lab.vars$B ,
        x = lab.vars$rr) +
-  geom_hline(yintercept = .95, linetype = "dashed") +
-  geom_hline(yintercept = .8, linetype = "dotted") +
+  geom_hline(yintercept = .95, linetype = "dotted") +
+  geom_hline(yintercept = .8, linetype = "dashed") +
   scale_x_continuous(breaks = seq(0, 100, 10)) + 
   scale_y_continuous(limits = c(0.5, 1.0), expand = c(0,0)) +
   scale_color_brewer(type = "qual", palette = 6)
@@ -515,6 +515,79 @@ figs$smd.examples <-
   facet_wrap(~ Variables, ncol = 2)
 
 figs$smd.examples
+
+
+```
+
+
+```{r}
+
+smd.examples.sep <- tabs$smd.examples %>%
+  nest(data = -Variables) %>%
+  mutate(plots = map(data, plot_smd2),
+         plots = map(plots, function(x) x + coord_cartesian(ylim = c(0, 1.1))),
+         plots = set_names(plots, paste("smd.", str_replace(Variables, " ", ""), sep = "")),
+         data = set_names(data, paste("smd.", str_replace(Variables, " ", ""), sep = ""))) 
+
+tabs$smd.label <- tibble(Label = c("SBS", "SRS", "SCS", "URS", "UCS"),
+                       mASMD = (1:5) * .18, 
+                       Variables = "Label",
+                       xmin = 10, 
+                       xmax = 90) %>%
+  gather(key = lim, value = RR, xmin, xmax) 
+
+figs$smd.label <- tabs$smd.label %>%
+  ggplot(aes(x = RR, y = mASMD, color = Label, linetype = Label, group = Label, label = Label)) +
+  geom_line(size = 1) +
+  geom_label(data = filter(tabs$smd.label, RR == 10) %>% mutate(RR = 50)) +
+  labs(y = lab.vars$smd,
+       x = lab.vars$rr) + 
+  coord_cartesian(ylim = c(0, 1.1)) +
+  scale_x_continuous(breaks = seq(10, 90, 20)) +
+  theme(legend.position = "none")  +
+  scale_color_brewer(type = "qual", palette = 6) 
+    
+tabs[names(smd.examples.sep$data)] <- smd.examples.sep$data
+figs[names(smd.examples.sep$plots)] <- smd.examples.sep$plots
+
+figs$smd.Group1
+figs$smd.label
+```
+
+```{r}
+
+
+# smd.fig.list <- list(plot_grid(plotlist = smd.examples.sep$plots[1:2], 
+#                                labels = c("Group 1", "Group 2"), 
+#                                ncol = 2, 
+#                                nrow = 1, 
+#                                rel_heights = c(1, 1),
+#                                label_x = .5,
+#                                align = "h",
+#                                label_fontface = "plain" ,
+#                                label_size = 10), 
+#                      plot_grid(plotlist = list(smd.examples.sep$plots[[3]], smd.label.plot),
+#                                labels = c("Group 3", "Legend"), 
+#                                ncol = 2, 
+#                                nrow = 1, 
+#                                rel_heights = c(1, 1),
+#                                label_x = .5,
+#                                align = "h",
+#                                label_fontface = "plain" ,
+#                                label_size = 10)
+# 
+# )
+# 
+# plot_grid(plotlist = smd.fig.list,
+#                     ncol = 1, 
+#                     nrow = 2, 
+#                     rel_heights = c(1, 1),
+#                     label_x = .5,
+#                     align = "h",
+#                     label_fontface = "plain" ,
+#                     label_size = 10)
+
+
 
 ```
 
