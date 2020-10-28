@@ -381,7 +381,8 @@ Figure \@ref(fig:fig-k-plots)c plots the required sample size from each cluster 
 
 ## Variation explained by the strata
 
-The strata resulting from the cluster analysis range in size from XX to XX schools. The strata explain XX% of the variation across all covariates (Figure \@ref(fig:fig-k-plots)b), with a CH-index of XX (Figure \@ref(fig:fig-k-plots)a).\JEP{Complete this sub-section with details about variation explained in individual covariates. This should set up Figure 5 in the results.} 
+The strata resulting from the cluster analysis range in size from `r format(min(tabs$strata.data$n), big.mark = ",")` to  `r format(max(tabs$strata.data$n), big.mark = ",")` schools. The strata explain `r tabs$strata.data$bet.perc %>% unique()`% of the variation across all covariates (Figure \@ref(fig:fig-k-plots)b), with a CH-index of `r tabs$strata.data$ch %>% unique()` (Figure \@ref(fig:fig-k-plots)a). We also computed variance explained for individual covaraites. This varied quite a bit, with 5 variables ranging from .1% to 10.6% variance explaiend by the strata, and 8 variables ranging from 45.1% to 86.5% variance explained. This disparity indicates that the cluster analysis did not adequately maximize between strata heterogeneity for for 5 of the 13 variables used. \JEP{Complete this sub-section with details about variation explained in individual covariates. This should set up Figure 5 in the results.} \GF{Added}
+
 
 # Simulating sample recruitment
 
@@ -444,7 +445,7 @@ where $\sigma_{\pi}$ is the standard deviation of the propensity scores.
 
 ### Feasibility
 
-Recruiters expend a lot of resources contacting districts and schools, scheduling meetings and traveling between prospective schools. A project with limited resources may not be able to afford to go through a large list of potentially uninterested schools. To capture the feasibility of different recruitment methods, we tracked the total number of schools approached to achieve a full sample.\JEP{Add Equation numbers} We then calculated the average number of refusals needed to achieve a full sample for each recruitment method. This measure allows us to compare the feasibility or difficulty of recruiting a full sample by each method.
+Recruiters expend a lot of resources contacting districts and schools, scheduling meetings and traveling between prospective schools. A project with limited resources may not be able to afford to go through a large list of potentially uninterested schools. To capture the feasibility of different recruitment methods, we tracked the total number of schools approached to achieve a full sample (Equations \@ref(eq:Zj) and \@ref(eq:Zj-strat)). We then calculated the average number of refusals needed to achieve a full sample for each recruitment method. This measure allows us to compare the feasibility or difficulty of recruiting a full sample by each method.
 
 ### Sampling Inequity
 
@@ -458,10 +459,6 @@ In economic contexts, the Gini coefficient is used to describe the degree of inc
 
 ## Generalizability
 
-### B-Index
-
-Figure \@ref(fig:fig-avg-B) displays the average $B$-index for each method across participation rates.\JEP{Couldn't figure out how to get the Figure to the top of the page.} Acceptable values of $B$ for generalizability vary depending on the size of the sample, the size of the population, and the number of covariates [@tiptonHowGeneralizableYour2014]. Given our design, a value of $B = .95$ would indicate very good overlap with no need to adjust estimates. Generally $B >= .80$ still supports generalizability with adjustment and likely no need to redefine the population. At population participation rates below 40%, SBS consistently out-performed the other recruitment methods. Further, across population response rates, SBS never resulted in a $B$ value below .85. This indicates that SBS is successful at sampling schools that are unlikely to participate and therefore tend to be underrepresented by the other sampling methods---particularly when overall participation propensities are low. Stratified random sampling consistently outperformed simple random sampling across all participation rates, though only slightly.\JEP{For all of the figures in this section, I think it would better to combine the two dimensions of the legends so that color AND line have values of SBS, SRS, URS, SCS, UCS. Double encoding will help with black-and-white legibility. Might also need to add geom\_point with shape corresponding to recruitment method, and/or get rid of the legend and just directly label the lines (try geom\_label\_rapel from ggrepel pkg).}\GF{added}
-
 (ref:fig-avg-B-caption) Average $B$-index for varying participation rates, by sampling method. Horizontal dotted and dashed lines represented indices of .80 and .95, respectively, indicating acceptable or high levels of generalizability.
 
 ```{r fig-avg-B, fig.pos="tb", fig.cap = "(ref:fig-avg-B-caption)"}
@@ -474,12 +471,20 @@ figs$B %>%
 
 if(saveFigs) save.figures("Results - B Index")
 ```
+\JEP{Couldn't figure out how to get the Figure to the top of the page.} \GF{like this?}
+
+### B-Index
+
+Figure \@ref(fig:fig-avg-B) displays the average $B$-index for each method across participation rates. Acceptable values of $B$ for generalizability vary depending on the size of the sample, the size of the population, and the number of covariates [@tiptonHowGeneralizableYour2014]. Given our design, a value of $B = .95$ would indicate very good overlap with no need to adjust estimates. Generally $B >= .80$ still supports generalizability with adjustment and likely no need to redefine the population. At population participation rates below 40%, SBS consistently out-performed the other recruitment methods. Further, across population response rates, SBS never resulted in a $B$ value below .85. This indicates that SBS is successful at sampling schools that are unlikely to participate and therefore tend to be underrepresented by the other sampling methods---particularly when overall participation propensities are low. Stratified random sampling consistently outperformed simple random sampling across all participation rates, though only slightly.\JEP{For all of the figures in this section, I think it would better to combine the two dimensions of the legends so that color AND line have values of SBS, SRS, URS, SCS, UCS. Double encoding will help with black-and-white legibility. Might also need to add geom\_point with shape corresponding to recruitment method, and/or get rid of the legend and just directly label the lines (try geom\_label\_rapel from ggrepel pkg).}\GF{added}
+
 
 We also found several trends that were unexpected. At 50% and beyond, SBS performance slowly degraded, while other methods maintained a steady increase. We expected a constant positive relationship between the population participation rate and the performance of all methods. Furthermore, at low response rates, unstratified convenience sampling achieved better balance than stratified convenience sampling. This seems counter-intuitive, as survey literature suggests that stratified samples are more representative.\JEP{Cite} Because the B-index is an overall measure of generalizabilty across many covariates, it does not provide much indication of why these performance differences occur. To untangle why the methods performed as they did, we need to examine the balance obtained by each recruitment method on individual covariates.
 
 ### Standardized Mean Differences
 
-We began this analysis by plotting mean SMDs for each recruitment method on each individual covariate versus the population participation rate. We considered a method to perform well if it resulted in an average imbalance of no more than 0.25 standard deviations. The relative performance of sampling methods varied depending on the covariate. Several patterns did emerge, based on which we identified three groups of covariates. Figure \@ref(fig:fig-SMD-groups) displays an example of each pattern; results for specific covariates can be found in Online Appendix Figure XX.\JEP{Fill in.} The first group of covariates included nine variables where stratified methods outperformed unstratified methods at every population participation rate. The second group included two covariates where all sampling methods resulted in good balance. The third group included three covariates where where at least one unstratified method performed better than the corresponding stratified method. Across all groups, stratified balanced sampling almost always resulted in acceptable balance and generally yielded better balance than all other sampling methods.
+We began this analysis by plotting mean SMDs for each recruitment method on each individual covariate versus the population participation rate. We considered a method to perform well if it resulted in an average imbalance of no more than 0.25 standard deviations. The relative performance of sampling methods varied depending on the covariate. Several patterns did emerge, based on which we identified three groups of covariates. Figure \@ref(fig:fig-SMD-groups) displays an example of each pattern; results for specific covariates can be found in Online Appendix Figure XX.\JEP{Fill in.}
+
+The first group of covariates included nine variables where stratified methods outperformed unstratified methods at every population participation rate. The second group included two covariates where all sampling methods resulted in good balance. The third group included three covariates where where at least one unstratified method performed better than the corresponding stratified method. Across all groups, stratified balanced sampling almost always resulted in acceptable balance and generally yielded better balance than all other sampling methods.
 
 (ref:fig-SMD-groups-caption) Patterns of relative performance based on standardized mean differences. The dotted horizontal line represents a cut off of 0.25, under which acceptable balance is achieved.
 
@@ -512,9 +517,6 @@ legend_plot <- function(x) {
 }
 
 
-```
-
-```{r}
 
 smd.fig.list <- list(plot_grid(plotlist = list(tfun(figs$smd.Group1), tfun(figs$smd.Group2)), 
                                labels = c("Group 1", "Group 2"), 
@@ -561,7 +563,9 @@ test + #perhaps reduce this for a bit more space
 ```
 
 
-One potential explanation the patterns found in groups 2 and 3 is that the strata were poorly specified for these covariates. To examine this we calculated the the proportion of variance explained by the strata for each covariate and compared it to the log-odds coefficients associated with that covariate in the participation propensity model (Figure \@ref(fig:fig-Var-Coef)). Several patterns emerged here as well. Group 1 consisted of covariates where a substantial fraction of the variance was between clusters. Groups 2 and 3 both consisted of covariates that were poorly clustered, with no more than 15% of variance between clusters. The major difference between groups 2 and 3 appears to be the relationship between the covariates and the likelihood of participation.\JEP{2-3 sentences of explanation of how these findings relate to overall patterns from previous figure.} 
+One potential explanation the patterns found in groups 2 and 3 is that the strata were poorly specified for these covariates. To examine this we calculated the the proportion of variance explained by the strata for each covariate and compared it to the log-odds coefficients associated with that covariate in the participation propensity model (Figure \@ref(fig:fig-Var-Coef)). 
+
+Several patterns emerged here as well. Group 1 consisted of covariates where a substantial fraction of the variance was between clusters. Groups 2 and 3 both consisted of covariates that were poorly clustered, with no more than 15% of variance between clusters. The major difference between groups 2 and 3 appears to be the relationship between the covariates and the likelihood of participation.
 
 (ref:fig-Var-Coef-caption) Variance explained by clustering vs absolute log odds. Shaded areas illustrate patterns in generalizability measured by SMDs.
 
@@ -577,7 +581,7 @@ figs$v.coef %>%
 
 ### Recruitment Attempts
 
-Figure \@ref(fig:fig-responses)a depicts the total number of schools contacted to recruit a full sample of 60 schools versus the population participation rate, for each recruitment method. Figure \@ref(fig:fig-responses)b depicts the response rate, or percentage of schools that agreed to participate among those where recruitment was attempted, versus the population participation rate, for each recruitment method.\JEP{Vertical axis should be "Participation response rate."} For each of these metrics, there were substantial differences between methods at lower population participation rates.\JEP{Add a few sentences summarizing differences between methods. How does BS compare to CS, CS to RS, stratified versus not, etc.?} At higher participation rates, the differences were less pronounced, becoming negligible at population participation rates of 60% or more. 
+Figure \@ref(fig:fig-responses)a depicts the total number of schools contacted to recruit a full sample of 60 schools versus the population participation rate, for each recruitment method. Figure \@ref(fig:fig-responses)b depicts the response rate, or percentage of schools that agreed to participate among those where recruitment was attempted, versus the population participation rate, for each recruitment method. For each of these metrics, there were substantial differences between methods at lower population participation rates. At higher participation rates, the differences were less pronounced, becoming negligible at population participation rates of 60% or more. 
 
 It is important to note that, particularly in the lower population participation rates, the total schools contacted values are quite extreme. Due to the speculative nature of the simulation, a more meaningful interpretation would be to compare the relative performance of the recruitment methods. Overall, UCS required the smallest recruitment effort to obtain a full sample, followed by URS and SCS, SRS, and finally SBS.
 
