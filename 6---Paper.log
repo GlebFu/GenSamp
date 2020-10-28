@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.19 (MiKTeX 2.9.6840 64-bit) (preloaded format=pdflatex 2018.12.20)  28 OCT 2020 15:19
+This is pdfTeX, Version 3.14159265-2.6-1.40.19 (MiKTeX 2.9.6840 64-bit) (preloaded format=pdflatex 2018.12.20)  28 OCT 2020 16:21
 entering extended mode
 **./6---Paper.tex
 (6---Paper.tex
@@ -1338,57 +1338,67 @@ File: 6---Paper_files/figure-latex/fig-responses-1.pdf Graphic file (type pdf)
 Package pdftex.def Info: 6---Paper_files/figure-latex/fig-responses-1.pdf  used
  on input line 542.
 (pdftex.def)             Requested size: 458.9116pt x 344.1837pt.
-[30 <./6---Paper_files/figure-latex/fig-Var-Coef-1.pdf>] [31 <./6---Paper_files
-/figure-latex/fig-responses-1.pdf>]
+[30 <./6---Paper_files/figure-latex/fig-Var-Coef-1.pdf>]
+
+LaTeX Warning: Marginpar on page 31 moved.
+
+[31 <./6---Paper_files/figure-latex/fig-responses-1.pdf>]
 <6---Paper_files/figure-latex/fig-gini-1.pdf, id=488, 650.43pt x 361.35pt>
 File: 6---Paper_files/figure-latex/fig-gini-1.pdf Graphic file (type pdf)
 <use 6---Paper_files/figure-latex/fig-gini-1.pdf>
 Package pdftex.def Info: 6---Paper_files/figure-latex/fig-gini-1.pdf  used on i
-nput line 557.
+nput line 559.
 (pdftex.def)             Requested size: 458.93034pt x 254.9613pt.
 [32 <./6---Paper_files/figure-latex/fig-gini-1.pdf>]
 
-LaTeX Warning: Reference `fig:fig-SMD-group4' on page 33 undefined on input lin
-e 566.
+LaTeX Warning: Marginpar on page 33 moved.
 
-[33] [34] [35] [36] [37] [38] [39] [40] [41] [42]
+[33] [34]
+
+LaTeX Warning: Marginpar on page 35 moved.
+
+[35] [36] [37]
+
+LaTeX Warning: Marginpar on page 38 moved.
+
+[38] [39] [40] [41] [42]
 
 Package hyperref Warning: Difference (2) between bookmark levels is greater 
-(hyperref)                than one, level fixed on input line 711.
+(hyperref)                than one, level fixed on input line 713.
 
-<6---Paper_files/figure-latex/fig-rel-per-1.pdf, id=604, 650.43pt x 361.35pt>
+<6---Paper_files/figure-latex/fig-rel-per-1.pdf, id=602, 650.43pt x 361.35pt>
 File: 6---Paper_files/figure-latex/fig-rel-per-1.pdf Graphic file (type pdf)
 <use 6---Paper_files/figure-latex/fig-rel-per-1.pdf>
 Package pdftex.def Info: 6---Paper_files/figure-latex/fig-rel-per-1.pdf  used o
-n input line 717.
+n input line 719.
 (pdftex.def)             Requested size: 458.93034pt x 254.9613pt.
 [43 <./6---Paper_files/figure-latex/fig-rel-per-1.pdf>]
-<6---Paper_files/figure-latex/fig-gini-curve-1.pdf, id=622, 722.7pt x 433.62pt>
+<6---Paper_files/figure-latex/fig-gini-curve-1.pdf, id=620, 722.7pt x 433.62pt>
 
 File: 6---Paper_files/figure-latex/fig-gini-curve-1.pdf Graphic file (type pdf)
 
 <use 6---Paper_files/figure-latex/fig-gini-curve-1.pdf>
 Package pdftex.def Info: 6---Paper_files/figure-latex/fig-gini-curve-1.pdf  use
-d on input line 729.
+d on input line 731.
 (pdftex.def)             Requested size: 650.43501pt x 390.26102pt.
 AED endfloat: Processing end Figures and Tables [44] [45 <./6---Paper_files/fig
 ure-latex/fig-gini-curve-1.pdf>]
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 733.
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 733.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 735.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 735.
 (6---Paper.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 733.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 733.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 735.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 735.
 Package rerunfilecheck Info: File `6---Paper.out' has not changed.
-(rerunfilecheck)             Checksum: 6B6E3C5F84D26411399D77A7E48A118E;5944.
+(rerunfilecheck)             Checksum: 6A89CDB7CF61117EEE465846C1237878;5944.
 
 LaTeX Warning: There were undefined references.
 
  ) 
 Here is how much of TeX's memory you used:
- 27364 strings out of 492970
- 483237 string characters out of 3135857
- 625393 words of memory out of 3000000
- 30394 multiletter control sequences out of 15000+200000
+ 27354 strings out of 492970
+ 483013 string characters out of 3135857
+ 625240 words of memory out of 3000000
+ 30385 multiletter control sequences out of 15000+200000
  58302 words of font info for 106 fonts, out of 3000000 for 9000
  1141 hyphenation exceptions out of 8191
  62i,13n,81p,2250b,988s stack positions out of 5000i,500n,10000p,200000b,50000s
@@ -1406,9 +1416,9 @@ r12.pfb><C:/Program Files/MiKTeX 2.9/fonts/type1/public/lm/lmr6.pfb><C:/Program
  Files/MiKTeX 2.9/fonts/type1/public/lm/lmr8.pfb><C:/Program Files/MiKTeX 2.9/f
 onts/type1/public/lm/lmri12.pfb><C:/Program Files/MiKTeX 2.9/fonts/type1/public
 /lm/lmsy10.pfb><C:/Program Files/MiKTeX 2.9/fonts/type1/public/lm/lmsy8.pfb>
-Output written on 6---Paper.pdf (45 pages, 1955148 bytes).
+Output written on 6---Paper.pdf (45 pages, 1953731 bytes).
 PDF statistics:
- 733 PDF objects out of 1000 (max. 8388607)
- 215 named destinations out of 1000 (max. 500000)
+ 731 PDF objects out of 1000 (max. 8388607)
+ 214 named destinations out of 1000 (max. 500000)
  6618 words of extra memory for PDF output out of 10000 (max. 10000000)
 
