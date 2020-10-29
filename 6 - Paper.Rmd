@@ -22,7 +22,7 @@ affiliation:
 
 
 abstract: |
-  Educational research aimed at informing policy decisions should ideally be designed to support causal inferences at the population level. Large scale, multi-site randomized trials often rely on vague convenience sampling methodology when recruiting districts and schools, resulting in relatively homogeneous samples that may differ greatly from the intended population of interest. Retrospective methods that quantify and statistically adjust for those differences are promising but may have difficulty overcoming substantial selection bias. Designing sampling methods that focus on generalizability may be a more effective approach. However, there is a lack of methodological research examining the effectiveness of such strategies in education research contexts. We propose a framework for conducting such research based on formal models for study recruitment and participation. Using this framework, we then examine one promising method, stratified balanced sampling (SBS), in the context of recruiting a representative sample of schools for a large trial. Using simulations based on real sampling frames, we compare SBS to stratified and unstratified versions of convenience sampling and probability sampling. Under our modeling assumptions, we find that SBS and stratified random sampling result in highly generalizable samples. These methods are extremely costly to implement, however, especially when the population average willingness to participate is low. Stratified convenience sampling represents a potential compromise. Further research into recruitment and perticipation behavior is needed to design and test more effective sampling methods
+  Educational research aimed at informing policy decisions should ideally be designed to support causal inferences at the population level. Large scale, multi-site randomized trials often rely on vague convenience sampling methodology when recruiting districts and schools, resulting in relatively homogeneous samples that may differ greatly from the intended population of interest. Retrospective methods that quantify and statistically adjust for those differences are promising but may have difficulty overcoming substantial selection bias. Designing sampling methods that focus on generalizability may be a more effective approach. However, there is a lack of methodological research examining the effectiveness of such strategies in education research contexts. We propose a framework for conducting such research based on formal models for study recruitment and participation. Using this framework, we then examine one promising method, stratified balanced sampling (SBS), in the context of recruiting a representative sample of schools for a large trial. Using simulations based on real sampling frames, we compare SBS to stratified and unstratified versions of convenience sampling and probability sampling. Under our modeling assumptions, we find that SBS and stratified random sampling result in highly generalizable samples. Implementing these methods requires extensive recruitment efforts, however, especially when the population average willingness to participate is low. Stratified convenience sampling represents a potential compromise. Further research into recruitment and perticipation behavior is needed to design and test more effective sampling methods
 
 keywords          : "generalizability, sampling, MRT"
 # wordcount         : "X"
@@ -467,12 +467,12 @@ Figure \@ref(fig:fig-avg-B) displays the average $B$-index for each method acros
 ```{r fig-avg-B, fig.pos="tb", fig.cap = "(ref:fig-avg-B-caption)"}
 
 figs$B %>%
-  apa_style_plot +
+  apa_style_plot() +
   geom_hline(yintercept = .8, linetype = "dotted")
   
 
 
-if(saveFigs) save.figures("Results - B Index")
+if (saveFigs) save.figures("Results - B Index")
 ```
 
 We also found several trends that were unexpected. At 50% and beyond, SBS performance slowly degraded, while other methods maintained a steady increase. We expected a constant positive relationship between the population participation rate and the performance of all methods. Furthermore, at low response rates, unstratified convenience sampling achieved better balance than stratified convenience sampling. This seems counter-intuitive, as survey literature suggests that stratified samples are more representative.\JEP{Cite} Because the B-index is an overall measure of generalizabilty across many covariates, it does not provide much indication of why these performance differences occur. To untangle why the methods performed as they did, we need to examine the balance obtained by each recruitment method on individual covariates.
