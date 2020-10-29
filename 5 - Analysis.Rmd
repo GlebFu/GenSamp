@@ -153,6 +153,23 @@ lab.vars <- list(k = "Number of strata (k)",
 
 # Data Summary
 
+## Variation explained by the strata
+```{r}
+tabs$strata.data <- tabs$allocation %>%
+  filter(k == 5) %>%
+  bind_cols(df.list$k.stats %>% filter(K == 5)) %>%
+  mutate(bet.perc = round(bt.ss * 100, 2),
+         ch = round(ch, 2))
+
+tabs$v.coef %>%
+  rename(var = vnames) %>%
+  full_join(df.list$pop.stats) %>%
+  select(vratio) %>%
+  arrange(vratio)
+
+
+```
+
 ## Covaraite Statistics
 ```{r}
 tabs$pop.desc <- df.list$pop.data %>%
@@ -678,7 +695,7 @@ figs$v.coef <- tabs$v.coef  %>%
   # geom_encircle(alpha = .2, s_shape = 0, expand = .1, spread = .05, color = "black") +
   geom_text_repel(aes(label = Variables), point.padding = .2, color = "black") +
   labs(y = lab.vars$coef,
-       x = lab.vars$vratio) +
+       x = lab.vars$rr) +
   scale_x_continuous(breaks = seq(0, 1, .1)) +
   scale_y_continuous(breaks = seq(0, .6, .1),
   limits = c(0, .6)) + 

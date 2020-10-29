@@ -5,7 +5,10 @@
 
 rename_conditions <- function(orig.data) {
   orig.data %>%
-    separate(col = sample_method, into = c("Clustering", "Sampling"), remove = F)
+    separate(col = sample_method, 
+             into = c("Clustering", "Sampling"), 
+             remove = F) %>%
+    mutate(Label = paste(str_sub(Clustering, end = 1), Sampling, sep = ""))
 }
 
 boxErrors <- function(x) {
