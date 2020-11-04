@@ -400,7 +400,7 @@ Figure \ref{fig:fig-k-plots}c plots the required sample size from each cluster t
 \hypertarget{variation-explained-by-the-strata}{%
 \subsection{Variation explained by the strata}\label{variation-explained-by-the-strata}}
 
-The strata resulting from the cluster analysis range in size from Inf to -Inf schools. The strata explain \% of the variation across all covariates (Figure \ref{fig:fig-k-plots}b), with a CH-index of (Figure \ref{fig:fig-k-plots}a). We also computed variance explained for individual covaraites. This varied quite a bit, with 5 variables ranging from .1\% to 10.6\% variance explaiend by the strata, and 8 variables ranging from 45.1\% to 86.5\% variance explained. This disparity indicates that the cluster analysis did not adequately maximize between strata heterogeneity for for 5 of the 13 variables used. \todo[color=blue!20]{Complete this sub-section with details about variation explained in individual covariates. This should set up Figure 5 in the results.} \todo[color=orange]{Added}
+The strata resulting from the cluster analysis range in size from 1,222 to 2,863 schools. The strata explain 70.43\% of the variation across all covariates (Figure \ref{fig:fig-k-plots}b), with a CH-index of 5,827.31 (Figure \ref{fig:fig-k-plots}a). We also computed variance explained for individual covaraites. This varied quite a bit, with 5 variables ranging from .1\% to 10.6\% variance explaiend by the strata, and 8 variables ranging from 45.1\% to 86.5\% variance explained. This disparity indicates that the cluster analysis did not adequately maximize between strata heterogeneity for for 5 of the 13 variables used. \todo[color=blue!20]{Complete this sub-section with details about variation explained in individual covariates. This should set up Figure 5 in the results.} \todo[color=orange]{Added}
 
 \hypertarget{simulating-sample-recruitment}{%
 \section{Simulating sample recruitment}\label{simulating-sample-recruitment}}
@@ -496,12 +496,12 @@ In economic contexts, the Gini coefficient is used to describe the degree of inc
 
 Figure \ref{fig:fig-avg-B} displays the average \(B\)-index for each method across participation rates. Acceptable values of \(B\) for generalizability vary depending on the size of the sample, the size of the population, and the number of covariates (Tipton, 2014). Given our design, a value of \(B = .95\) would indicate very good overlap with no need to adjust estimates. Generally \(B >= .80\) still supports generalizability with adjustment and likely no need to redefine the population. At population participation rates below 40\%, SBS consistently out-performed the other recruitment methods. Further, across population response rates, SBS never resulted in a \(B\) value below .85. This indicates that SBS is successful at sampling schools that are unlikely to participate and therefore tend to be underrepresented by the other sampling methods---particularly when overall participation propensities are low. Stratified random sampling consistently outperformed simple random sampling across all participation rates, though only slightly.\todo[color=blue!20]{For all of the figures in this section, I think it would better to combine the two dimensions of the legends so that color AND line have values of SBS, SRS, URS, SCS, UCS. Double encoding will help with black-and-white legibility. Might also need to add geom\_point with shape corresponding to recruitment method, and/or get rid of the legend and just directly label the lines (try geom\_label\_rapel from ggrepel pkg).}\todo[color=orange]{added}
 
-We also found several trends that were unexpected. At 50\% and beyond, SBS performance slowly degraded, while other methods maintained a steady increase. We expected a constant positive relationship between the population participation rate and the performance of all methods. Furthermore, at low response rates, unstratified convenience sampling achieved better balance than stratified convenience sampling. This seems counter-intuitive, as survey literature suggests that stratified samples are more representative.\todo[color=blue!20]{Cite} Because the B-index is an overall measure of generalizabilty across many covariates, it does not provide much indication of why these performance differences occur. To untangle why the methods performed as they did, we need to examine the balance obtained by each recruitment method on individual covariates.
+We also found several trends that were unexpected. At 50\% and beyond, SBS performance slowly degraded, while other methods maintained a steady increase. We expected a constant positive relationship between the population participation rate and the performance of all methods. Furthermore, at low response rates, unstratified convenience sampling achieved better balance than stratified convenience sampling. This seems counter-intuitive, as survey literature suggests that stratified samples are more representative (Lohr, 2019). Because the B-index is an overall measure of generalizabilty across many covariates, it does not provide much indication of why these performance differences occur. To untangle why the methods performed as they did, we need to examine the balance obtained by each recruitment method on individual covariates.
 
 \hypertarget{standardized-mean-differences}{%
 \subsubsection{Standardized Mean Differences}\label{standardized-mean-differences}}
 
-We began this analysis by plotting mean SMDs for each recruitment method on each individual covariate versus the population participation rate. We considered a method to perform well if it resulted in an average imbalance of no more than 0.25 standard deviations. The relative performance of sampling methods varied depending on the covariate. Several patterns did emerge, based on which we identified three groups of covariates. Figure \ref{fig:fig-SMD-groups} displays an example of each pattern; results for specific covariates can be found in Online Appendix Figure XX.\todo[color=blue!20]{Fill in.}
+We began this analysis by plotting mean SMDs for each recruitment method on each individual covariate versus the population participation rate. We considered a method to perform well if it resulted in an average imbalance of no more than 0.25 standard deviations. The relative performance of sampling methods varied depending on the covariate. Several patterns did emerge, based on which we identified three groups of covariates. Figure \ref{fig:fig-SMD-groups} displays an example of each pattern; results for specific covariates can be found in Online Appendix Figures \ref{fig:fig-smd-group1}, \ref{fig:fig-smd-group2}, and \ref{fig:fig-smd-group3}.
 
 The first group of covariates included nine variables where stratified methods outperformed unstratified methods at every population participation rate. The second group included two covariates where all sampling methods resulted in good balance. The third group included three covariates where where at least one unstratified method performed better than the corresponding stratified method. Across all groups, stratified balanced sampling almost always resulted in acceptable balance and generally yielded better balance than all other sampling methods.
 
@@ -533,7 +533,7 @@ Several patterns emerged here as well. Group 1 consisted of covariates where a s
 
 Figure \ref{fig:fig-responses}a depicts the total number of schools contacted to recruit a full sample of 60 schools versus the population participation rate, for each recruitment method. Figure \ref{fig:fig-responses}b depicts the response rate, or percentage of schools that agreed to participate among those where recruitment was attempted, versus the population participation rate, for each recruitment method. For each of these metrics, there were substantial differences between methods at lower population participation rates. At higher participation rates, the differences were less pronounced, becoming negligible at population participation rates of 60\% or more.
 
-It is important to note that, particularly in the lower population participation rates, the total schools contacted values are quite extreme. Due to the speculative nature of the simulation, a more meaningful interpretation would be to compare the relative performance of the recruitment methods. Overall, UCS required the smallest recruitment effort to obtain a full sample, followed by URS and SCS, SRS, and finally SBS.
+It is important to note that, particularly in the lower population participation rates, the total schools contacted values are quite extreme. Due to the speculative nature of the simulation, a more meaningful interpretation would be to compare the relative performance of the recruitment methods. Overall, UCS required the smallest recruitment effort to obtain a full sample, followed by URS and SCS, SRS, and finally SBS. Additional plots for comparing relative feasibility can be foudn in Online Appendix Figure \ref{fig:fig-rel-per}.
 
 
 
@@ -546,7 +546,8 @@ It is important to note that, particularly in the lower population participation
 \hypertarget{sampling-inequity-1}{%
 \subsubsection{Sampling Inequity}\label{sampling-inequity-1}}
 
-We calculated the Gini coefficient for each sampling method to examine the equity implications of different recruitment methods. Figure \ref{fig:fig-gini} displays these for each sampling method across population participation rates. A coefficient of 1 indicates absolute sampling inequity. In the context of the simulation, a high Gini coefficient indicates that across replications, only a small subset of the population actually participated.\todo[color=blue!20]{Recruited or participated?} \todo[color=orange]{Participated}
+We calculated the Gini coefficient for each sampling method to examine the equity implications of different recruitment methods. Figure \ref{fig:fig-gini} displays these for each sampling method across population participation rates. A coefficient of 1 indicates absolute sampling inequity. In the context of the simulation, a high Gini coefficient indicates that across replications, only a small subset of the population actually participated. \todo[color=blue!20]{Recruited or participated?} \todo[color=orange]{Participated}
+Indovidual Gini curves and coeficiencts for each method accross response rates can be found in Online Appendix Figure \ref{fig:fig-gini-curve}.
 
 Several trends emerged in this analysis. Overall, SBS resulted in the most sampling enequality. This is consistant with the balanced sample approach, since order of recruitment is tied to school characteristics and therefore the population frame. SRS resulted in the greatest sampling equality, followed by URS, SCS, and UCS.
 As population participation increased, inequity increased when using SBS, but decreased considerably when using the other methods, and differences between these methods diminished. This finding suggests that stratifying the population results in a larger potential sampling pool when the overall population response rate is low.
@@ -707,10 +708,41 @@ Zeileis, A. (2014). \emph{Ineq: Measuring inequality, concentration, and poverty
 \hypertarget{online-appendix}{%
 \section{Online Appendix}\label{online-appendix}}
 
-\hypertarget{sampling-feasibility}{%
-\subsubsection{Sampling Feasibility}\label{sampling-feasibility}}
+\hypertarget{standardized-mean-differences-1}{%
+\subsection{Standardized Mean Differences}\label{standardized-mean-differences-1}}
 
-Figure \ref{fig:fig-rel-per} compares each sampling method to a reference method by plotting the factor of increased difficulty, calculated as the number of schools contacted by comparison method divided by the number of schools contacted by reference method. This gives us another perspective on the relative difficulty of each method. The straight horizontal line represents the reference method.\todo[color=blue!20]{Need to reference the figure in the main text, or remove this section if it's not needed.}
+Figures \ref{fig:fig-smd-group1}, \ref{fig:fig-smd-group2}, and \ref{fig:fig-smd-group3} display individual covaraite balance as measured by standardized mean differences. Each group of plots correspond to the three patters on performance described in the paper.
+
+
+
+\begin{figure}
+\centering
+\includegraphics{6---Paper_files/figure-latex/fig-smd-group1-1.pdf}
+\caption{\label{fig:fig-smd-group1}Group 1: Sampling methods performed as expected. All stratified methods outperformed non-stratified methods. Better balance was attained by balanced sampling followed by random sampling and convenience sampling.}
+\end{figure}
+
+
+
+\begin{figure}
+\centering
+\includegraphics{6---Paper_files/figure-latex/fig-smd-group2-1.pdf}
+\caption{\label{fig:fig-smd-group2}Group 2: Sampling methods equally well resultiing in good balance.}
+\end{figure}
+
+
+
+\begin{figure}
+\centering
+\includegraphics{6---Paper_files/figure-latex/fig-smd-group3-1.pdf}
+\caption{\label{fig:fig-smd-group3}Group 3: Stratification sometimes resulted in poorer balance.}
+\end{figure}
+
+\newpage
+
+\hypertarget{sampling-feasibility}{%
+\subsection{Sampling Feasibility}\label{sampling-feasibility}}
+
+Figure \ref{fig:fig-rel-per} compares each sampling method to a reference method by plotting the factor of increased difficulty, calculated as the number of schools contacted by comparison method divided by the number of schools contacted by reference method. This gives us another perspective on the relative difficulty of each method. The straight horizontal line represents the reference method.
 
 
 
@@ -720,10 +752,12 @@ Figure \ref{fig:fig-rel-per} compares each sampling method to a reference method
 \caption{\label{fig:fig-rel-per}Relative sampling difficulty of each method compared to other methods. The straight horizontal line indicates the reference method being compared to.}
 \end{figure}
 
-\hypertarget{sampling-inequality}{%
-\subsubsection{Sampling Inequality}\label{sampling-inequality}}
+\newpage
 
-Figure \ref{fig:fig-gini-curve} displays the Gini curve and coefficient for all sampling methods across participation rates. The index is calculated by computing the area between the diagonal line and the curve. Coefficients of 0 indicate uniform equality across all sampling units, i.e.~all schools have an equal opportunity to be sampled. Coefficients of 1 indicate complete inequality, i.e.~very few schools are constantly being sampled across iterations. Overall, stratification results in lower inequality. However, since balanced sampling prioritizes schools according to set characteristics, the same schools are likely to be sampled each time.\todo[color=blue!20]{Again, need to reference the figure in the main text or remove if not needed.}
+\hypertarget{sampling-inequality}{%
+\subsection{Sampling Inequality}\label{sampling-inequality}}
+
+Figure \ref{fig:fig-gini-curve} displays the Gini curve and coefficient for all sampling methods across participation rates. The index is calculated by computing the area between the diagonal line and the curve. Coefficients of 0 indicate uniform equality across all sampling units, i.e.~all schools have an equal opportunity to be sampled. Coefficients of 1 indicate complete inequality, i.e.~very few schools are constantly being sampled across iterations. Overall, stratification results in lower inequality. However, since balanced sampling prioritizes schools according to set characteristics, the same schools are likely to be sampled each time.
 
 
 

@@ -36,7 +36,7 @@ plot_smd <- function(data, yvar = "mASMD") {
     ggplot(aes(x = RR, y = get(yvar), color = Label, linetype = Label, group = Label)) +
     geom_line(size = 1) +
     geom_hline(yintercept = .25, linetype = "dotted") +
-    facet_wrap( ~ Variables, scales = "free", ncol = 3) +
+    facet_wrap( ~ Variables, ncol = 3) +
     labs(y = lab.vars$smd,
          x = lab.vars$rr) + 
     scale_x_continuous(breaks = seq(10, 90, 20)) +
@@ -60,5 +60,6 @@ apa_style_plot <- function(x) {
     (if (grey.plots) {scale_colour_grey(start = 0, end = .7)}) +
     guides(linetype = guide_legend(ncol = 1, title.position = "top"),
            color = guide_legend(ncol = 1, title.position = "top")) +
-    theme(legend.position = "right")
+    theme(legend.position = "right") +
+    scale_color_brewer(type = "qual", palette = 6)
 }
