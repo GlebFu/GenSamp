@@ -38,7 +38,7 @@
 \IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
 \hypersetup{
   pdftitle={Assessing sampling methods for generalization from RCTs: Modeling recruitment and participation},
-  pdfauthor={Gleb Furman1 \& James E. Pustejovsky2},
+  pdfauthor={Gleb Furman1, James E. Pustejovsky2, \& Elizabeth Tipton3},
   pdflang={en-EN},
   pdfkeywords={generalizability, sampling, MRT},
   hidelinks,
@@ -130,11 +130,11 @@
 \fi
 
 \title{Assessing sampling methods for generalization from RCTs: Modeling recruitment and participation}
-\author{Gleb Furman\textsuperscript{1} \& James E. Pustejovsky\textsuperscript{2}}
+\author{Gleb Furman\textsuperscript{1}, James E. Pustejovsky\textsuperscript{2}, \& Elizabeth Tipton\textsuperscript{3}}
 \date{}
 
 
-\affiliation{\vspace{0.5cm}\textsuperscript{1} University of Texas at Austin\\\textsuperscript{2} University of Wisconsin-Madison}
+\affiliation{\vspace{0.5cm}\textsuperscript{1} University of Texas at Austin\\\textsuperscript{2} University of Wisconsin-Madison\\\textsuperscript{3} Northwestern University}
 
 \abstract{
 Educational research aimed at informing policy decisions should ideally be designed to support causal inferences at the population level. Large scale, multi-site randomized trials often rely on vague convenience sampling methodology when recruiting districts and schools, resulting in relatively homogeneous samples that may differ systematically from the intended population of interest. Retrospective methods that quantify and statistically adjust for those differences are promising but may have difficulty overcoming substantial selection bias. Designing sampling methods that focus on generalizability may be a more effective approach. However, there is a lack of methodological research examining the effectiveness of such strategies in education research contexts. We propose a framework for conducting such research based on formal models for study recruitment and participation. Using this framework, we examine one promising method, stratified balanced sampling (SBS), in the context of recruiting a representative sample of schools for a large trial. Using simulations based on real sampling frames, we compare SBS to stratified and unstratified versions of convenience sampling and probability sampling. Under our modeling assumptions, we find that SBS and stratified random sampling result in highly generalizable samples. Implementing these methods requires extensive recruitment efforts, however, especially when the population average willingness to participate is low. Stratified convenience sampling represents a potential compromise. Further research into recruitment and participation behavior is needed to design and test sampling methods under realistic conditions.
@@ -565,7 +565,7 @@ It is important to note that, particularly in the lower population participation
 We calculated the Gini coefficient for each sampling method to examine the equity implications of different recruitment methods. Figure \ref{fig:fig-gini} displays these for each sampling method across population participation rates. A coefficient of 1 indicates absolute sampling inequity. In the context of the simulation, a high Gini coefficient indicates that across replications, only a small subset of the population actually participated. \todo[color=blue!20]{Recruited or participated?} \todo[color=orange]{Participated} \todo[color=blue!20]{Then the methods section needs to clarify that too.}
 Indovidual Gini curves and coeficiencts for each method accross response rates can be found in Online Appendix Figure \ref{fig:fig-gini-curve}.
 
-Several trends emerged in this analysis. Overall, SBS resulted in the most sampling enequality. This is consistant with the balanced sample approach, since order of recruitment is tied to school characteristics and therefore the population frame. SRS resulted in the greatest sampling equality, followed by URS, SCS, and UCS.
+Several trends emerged in this analysis. Overall, SBS was the most inequitable sampling process. This is consistent with the balanced sample approach because order of recruitment is tied to school characteristics and therefore the population frame. SRS was the most equitable sampling process, followed by URS, SCS, and UCS.
 As population participation increased, inequity increased when using SBS, but decreased considerably when using the other methods, and differences between these methods diminished. This finding suggests that stratifying the population results in a larger potential sampling pool when the overall population response rate is low.
 However, stratification alone is still limited by the recruitment method within strata, and any method that does not involve probability sampling inherently results in increased sampling inequality.
 
@@ -582,7 +582,7 @@ However, stratification alone is still limited by the recruitment method within 
 
 Under the assumptions of our simulation models, recruiting samples using SBS yielded highly generalizable samples. In particular, SBS resulted in a considerable improvement compared to UCS---the method that we suspect most closely approximates current practice. However, given the large number of schools contacted to obtain a full sample, it may be infeasible to fully implement SBS in the ideal form. Another consistent pattern was that convenience and probability sampling methods were often improved by first stratifying the population. In fact, in cases where the cluster analysis performed well for a given covariate, or where popoulation participation rates were high, convenience sampling within strata (SCS) performed as well as or better than simple random sampling (URS) on measures of both generalizability and feasibility.
 
-A further pattern in these simulation results relates the specification of the clustering method to the response model. Covariates that are highly related to determining participation must be prioritized in generating the strata. If such covariates are poorly allocated accross strata (heterogeneity between strata is not maximized) then the stratification process can be entirely undercut and will not result in good balance on the individual covaraite. It is therefore important to not only examine overall variance explained when performing the cluster analysis, but to use individual covaraite variability as a criterion as well. \todo[color=blue!20]{This paragraph is very in-the-weeds. What is the high level summary and what is the implication?} \todo[color=orange]{updated}
+A further pattern in these simulation results relates the specification of the clustering method to the response model. Covariates that are highly related to determining participation must be prioritized in generating the strata. If such covariates are poorly allocated across strata (i.e., there is little heterogeneity between strata) then the purpose of stratification is undercut and it will not result in good balance on the individual covariate. It is therefore important to not only examine overall variance explained when performing the cluster analysis, but to use individual covariate variability as a criterion as well. \todo[color=blue!20]{Wonder if this isn't more of a discussion point (because it's drawing implications, rather than just summarizing.)}
 
 \hypertarget{discussion}{%
 \section{Discussion}\label{discussion}}

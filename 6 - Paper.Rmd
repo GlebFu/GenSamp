@@ -10,12 +10,17 @@ author:
     email         : "gleb.furman@utexas.edu"
   - name          : "James E. Pustejovsky"
     affiliation   : "2"
+  - name          : "Elizabeth Tipton"
+    affiliation   : "3"
+    
 
 affiliation:
   - id            : "1"
     institution   : "University of Texas at Austin"
   - id            : "2"
     institution   : "University of Wisconsin-Madison"
+  - id            : "3"
+    institution   : "Northwestern University"
 
 #author_note: |
 #   Address correspondence to Gleb Furman, University of Texas at Austin, SZB 504, 1912 Speedway, Austin, Texas 78712. E-mail: gleb.furman@utexas.edu

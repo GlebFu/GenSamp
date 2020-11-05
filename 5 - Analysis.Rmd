@@ -5,18 +5,23 @@ shorttitle        : "RESULTS"
 author:
   - name          : "Gleb Furman"
     affiliation   : "1"
-    # corresponding : yes    # Define only one corresponding author
-    # address       : "Postal address"
-    # email         : "Gleb.Furman@gmail.com"
+    corresponding : yes    # Define only one corresponding author
+    address       : "University of Texas at Austin, SZB 504, 1912 Speedway, Austin, Texas 78712"
+    email         : "gleb.furman@utexas.edu"
   - name          : "James E. Pustejovsky"
-    affiliation   : "1"
+    affiliation   : "2"
+  - name          : "Elizabeth Tipton"
+    affiliation   : "3"
+    
 
 affiliation:
   - id            : "1"
     institution   : "University of Texas at Austin"
-#   - id            : "2"
-#     institution   : "Konstanz Business School"
-
+  - id            : "2"
+    institution   : "University of Wisconsin-Madison"
+  - id            : "3"
+    institution   : "Northwestern University"
+    
 # author_note: |
 #   Add complete departmental affiliations for each author here. Each new line herein must be indented, like this line.
 
