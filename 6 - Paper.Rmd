@@ -468,7 +468,6 @@ Figure \@ref(fig:fig-avg-B) displays the average $B$-index for each method acros
 
 figs$B %>%
   apa_style_plot() +
-  geom_hline(yintercept = .8, linetype = "dotted") + 
   theme(legend.position = "none")
   
 

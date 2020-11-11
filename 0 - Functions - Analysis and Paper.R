@@ -63,3 +63,4 @@ apa_style_plot <- function(x) {
     theme(legend.position = "right") +
     scale_color_brewer(type = "qual", palette = 6)
 }
+you

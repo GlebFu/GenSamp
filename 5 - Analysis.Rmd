@@ -95,6 +95,8 @@ source("0 - Functions - Analysis and Paper.R")
 
 ```{r declare-objects}
 
+grey.plots <- F
+
 df.list <- list()
 results <- list()
 vars <- list()
@@ -152,7 +154,7 @@ lab.vars <- list(k = "Number of strata (k)",
                  rr = "Population participation \n(generated %)",
                  B = "Average B-index",
                  coef = "Participation model coeficients \n(absolute log-odds)",
-                 contacts = expression("Schools contacted (" ~ 10^2 ~ ")"),
+                 contacts = expression("Schools contacted (" ~ 10^3 ~ ")"),
                  rr.o = "Population participation  \n(observed %)")
 ```
 
@@ -461,8 +463,7 @@ figs$B <- tabs$B %>%
   geom_hline(yintercept = .95, linetype = "dotted") +
   geom_hline(yintercept = .8, linetype = "dashed") +
   scale_x_continuous(breaks = seq(0, 100, 10)) + 
-  scale_y_continuous(limits = c(0.5, 1.0), expand = c(0,0)) +
-  scale_color_brewer(type = "qual", palette = 6)
+  scale_y_continuous(limits = c(0.5, 1.0), expand = c(0,0))
 
 
 figs$B
@@ -899,7 +900,7 @@ figs$samples.contacts <- tabs$samples %>%
   scale_x_continuous(breaks = seq(0, 100, 10)) +
   scale_y_continuous(breaks = seq(0, 4000, 500),
                      limits = c(0, 4000),
-                     labels = function(x) x / 100) +
+                     labels = function(x) x / 1000) +
   labs(x = lab.vars$rr,
        y = lab.vars$contacts) +
   geom_label(data = tabs$samples.contacts.labels,
@@ -1147,4 +1148,24 @@ save(df.list,
      tabs,
      vars,
      file = "Data/Paper/Paper Data 09-27-2020.rdata")
+```
+
+
+# APPAM PLOTS
+
+```{r}
+figs$B  +
+  geom_label(size = 10) %>%
+  apa_style_plot() +
+  theme(legend.position = "none") +
+  theme(text = element_text(size = 20))
+
+ggsave(filename = "Figs/APPAM 2020/B index.jpg", dpi = 1000, width = (6), height = (6))
+
+figs$samples.contacts %>%
+  apa_style_plot() +
+  theme(legend.position = "none") +
+  theme(text = element_text(size = 20))
+
+ggsave(filename = "Figs/APPAM 2020/Contacts.jpg", dpi = 1000, width = (6), height = (6))
 ```
