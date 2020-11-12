@@ -29,11 +29,12 @@ calcPS_RRs <- function(value_data, x.data, exclude = NULL) {
          int = value_data$pars[1])
 }
 
-calcPS <- function(Bs, MRR, vars, data, exclude, getint = F, int = NULL) {
+calcPS <- function(Bs, MRR, scale_factor, vars, data, exclude, getint = F, int = NULL) {
   vars <- vars[!(vars %in% exclude)]
   X <- as.matrix(data[,vars])
   
-  XB <- as.numeric(X %*% Bs)
+  Bs_scaled <- scale_factor * Bs
+  XB <- as.numeric(X %*% Bs_scaled)
   
   # int = uniroot(function(b0) mean(expit(b0 + XB)) - MRR, c(-20,20))
   # tryCatch({
@@ -48,7 +49,7 @@ calcPS <- function(Bs, MRR, vars, data, exclude, getint = F, int = NULL) {
   # })
   
   
-  dY <- as.numeric(X %*% Bs) + int
+  dY <- as.numeric(X %*% Bs_scaled) + int
   
   PS <- expit(dY)
   

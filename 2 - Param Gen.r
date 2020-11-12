@@ -48,12 +48,20 @@ df.pop.stats <- df.sim %>%
 # Generate Intercept
 # -----------------------
 
+scale_factor <- c(1/4, 1/2, 1/1)
+
 # response.rates <- 8:1/20
 response.rates <- 9:1/10
 # response.rates <- c(.1, .2, .3)
 response.rates.names <- paste("RR_", formatC(response.rates*100, width = 2, format = "d", flag = "0"), sep = "")
 
-PS.Int <- sapply(response.rates, calcPS, Bs = DGM.Bs, vars = covariates, data = df.sim.standardized %>% select(-DSID), exclude = DGM.exclude, getint = T)
+response_grid <- expand.grid(scale_factor = scale_factor, MRR = response.rates)
+
+PS.Int <- mapply(calcPS, MRR = response_grid$MRR, scale_factor = response_grid$scale_factor, 
+                 MoreArgs = list(Bs = DGM.Bs, vars = covariates, 
+                                 data = df.sim.standardized %>% select(-DSID), exclude = DGM.exclude, getint = T))
+
+response_grid$intercept <- unlist(PS.Int[2,])
 
 df.PS <- 
   bind_cols(PS.Int[1,]) %>%
