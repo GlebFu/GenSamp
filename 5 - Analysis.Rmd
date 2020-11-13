@@ -407,11 +407,46 @@ tabs$intercepts %>%
 df.list$PS %>% 
   ggplot(aes(x = PS)) + 
   geom_histogram() + 
-  facet_wrap(~RR, scales = "free") +
-  theme_apa()
+  facet_wrap(~RR, scales = "free_y") +
+  theme_apa() 
+
+df.list$PS %>% 
+  mutate(logit = log(PS / (1 - PS))) %>%
+  ggplot(aes(x = logit)) + 
+  geom_histogram() + 
+  facet_wrap(~RR, scales = "free_y") +
+  theme_apa() 
+```
 
 
+```{r}
+df.list$PS %>%
+  mutate(RR = parse_number(RR) %>% as.character()) %>%
+  ggplot(aes(x = PS, y = RR, fill = RR)) +
+  ggridges::geom_density_ridges(stat = "binline", 
+                                bins = 100, 
+                                alpha = .3, 
+                                scale = 4) +
+  theme_apa()  +
+  theme(legend.position = "none") +
+  scale_x_continuous(breaks = seq(0,1, .1))
 
+
+df.list$PS %>%
+  mutate(RR = parse_number(RR) %>% as.character(),
+         logit = log(PS / (1 - PS))) %>%
+  ggplot(aes(x = logit, y = RR, fill = RR)) +
+  ggridges::geom_density_ridges(stat = "binline", 
+                                bins = 100, 
+                                alpha = .3, 
+                                scale = 2) +
+  theme_apa() +
+  theme(legend.position = "none")+
+  scale_x_continuous(breaks = seq(-8,10, 2))
+```
+
+
+```{r}
 left_join(df.list$PS, df.list$strata.id) %>%
   ggplot(aes(x = PS, color = strata, group = strata)) +
   geom_density() +
@@ -443,21 +478,21 @@ tabs$B <- results$B %>%
          UL = M + SD,
          RR = parse_number(RR))
 
+
 tabs$B.label <- tabs$B %>%
+  ungroup() %>%
   filter(RR == 10) %>%
-  mutate(RR = 5)
+  mutate(RR = 5)  %>%
+  arrange(M) %>%
+  mutate(M = c(.53, .58, .73, .78, .9))
 
 figs$B <- tabs$B %>%
   ggplot(aes(x = RR, y = M, color = Label, 
              linetype = Label, group = Label)) +
   geom_line() +
   # geom_label(data = tabs$B.label, aes(label = Label)) +
-  geom_label_repel(data = tabs$B.label, 
-                   aes(label = Label), 
-                   direction = "y",
-                   point.padding = .1,
-                   force = .2,
-                   ylim = c(.5, .95)) +
+  geom_label(data = tabs$B.label,
+             aes(label = Label)) +
   labs(y = lab.vars$B ,
        x = lab.vars$rr) +
   geom_hline(yintercept = .95, linetype = "dotted") +
@@ -465,8 +500,6 @@ figs$B <- tabs$B %>%
   scale_x_continuous(breaks = seq(0, 100, 10)) + 
   scale_y_continuous(limits = c(0.5, 1.0), expand = c(0,0))
 
-
-figs$B
 
 
 ```
@@ -1153,19 +1186,145 @@ save(df.list,
 
 # APPAM PLOTS
 
+## B-index
 ```{r}
-figs$B  +
-  geom_label(size = 10) %>%
-  apa_style_plot() +
+appam <- list()
+ 
+appam$B <- tabs$B %>%
+  ggplot(aes(x = RR, y = M, color = Label, 
+             linetype = Label, group = Label)) +
+  geom_line() +
+  # geom_label(data = tabs$B.label, aes(label = Label)) +
+  geom_label(data = tabs$B.label,
+             aes(label = Label), size = 4) +
+  labs(y = lab.vars$B ,
+       x = lab.vars$rr) +
+  geom_hline(yintercept = .95, linetype = "dotted") +
+  geom_hline(yintercept = .8, linetype = "dashed") +
+  scale_x_continuous(breaks = seq(0, 100, 10)) + 
+  scale_y_continuous(limits = c(0.5, 1.0), expand = c(0,0)) +
+  theme_apa() +
+  scale_color_brewer(type = "qual", palette = 6) +
+  theme(legend.position = "none",
+        text = element_text(size = 15))
+
+ggsave(plot = appam$B , filename = "Figs/APPAM 2020/B index.jpg", dpi = 1000, width = (6), height = (6))
+
+```
+
+## Sample
+```{r}
+appam$samples <- tabs$samples %>%
+  filter(measure == "sch.contacted") %>%
+  ggplot(aes(x = RR, y = value, group = sample_method, color = Label, linetype = Label)) +
+  geom_line() +
   theme(legend.position = "none") +
-  theme(text = element_text(size = 20))
+  scale_x_continuous(breaks = seq(0, 100, 10)) +
+  scale_y_continuous(breaks = seq(0, 4000, 500),
+                     limits = c(0, 4000),
+                     labels = function(x) x / 1000) +
+  labs(x = lab.vars$rr,
+       y = lab.vars$contacts) +
+  geom_label(data = tabs$samples.contacts.labels,
+             aes(label = Label),
+             size = 4) +
+  theme_apa() +
+  scale_color_brewer(type = "qual", palette = 6) +
+  theme(legend.position = "none",
+        text = element_text(size = 15))
 
-ggsave(filename = "Figs/APPAM 2020/B index.jpg", dpi = 1000, width = (6), height = (6))
+ggsave(plot = appam$samples, filename = "Figs/APPAM 2020/Contacts.jpg", dpi = 1000, width = (6), height = (6))
+```
 
-figs$samples.contacts %>%
-  apa_style_plot() +
-  theme(legend.position = "none") +
-  theme(text = element_text(size = 20))
+## Combined
 
-ggsave(filename = "Figs/APPAM 2020/Contacts.jpg", dpi = 1000, width = (6), height = (6))
+```{r}
+plot_grid(plotlist = list(appam$B + labs(x = ""),
+                          appam$samples),
+          ncol = 1, 
+          nrow = 2, 
+          label_x = .5,
+          align = "v",
+          label_fontface = "plain") 
+
+
+ggsave( filename = "Figs/APPAM 2020/Combined.jpg", dpi = 1000, width = (8), height = (6))
+```
+
+## Individual
+
+```{r}
+
+tfun <- function(x) {
+  x +
+    theme_apa() + 
+    theme(legend.position = "none",
+          axis.title.x = element_blank(),
+          axis.title.y = element_blank()) +
+  scale_color_brewer(type = "qual", palette = 6) 
+} 
+
+legend_plot <- function(x) {
+   x +
+    theme_apa() + 
+    theme(legend.position = "none",
+          axis.ticks.x = element_blank(),
+          axis.ticks.y = element_blank(),
+          axis.line.x = element_blank(),
+          axis.line.y = element_blank()) +
+    labs(x = "", y = "") +
+  scale_x_continuous(labels = rep("", 5), breaks = 1:5) +
+  scale_y_continuous(labels = rep("", 5), breaks = 1:5) +
+  scale_color_brewer(type = "qual", palette = 6) 
+    
+}
+
+
+
+appam$smd.list <- list(plot_grid(plotlist = list(tfun(figs$smd.Group1), 
+                                               tfun(figs$smd.Group2)), 
+                               labels = c("Group 1", "Group 2"), 
+                               ncol = 2, 
+                               nrow = 1, 
+                               rel_heights = c(1, 1),
+                               label_x = .2,
+                               align = "h",
+                               label_fontface = "plain" ,
+                               label_size = 10), 
+                     plot_grid(plotlist = list(tfun(figs$smd.Group3), legend_plot(figs$smd.label)),
+                               labels = c("Group 3", ""), 
+                               ncol = 2, 
+                               nrow = 1, 
+                               rel_heights = c(1, 1),
+                               label_x = .2,
+                               align = "h",
+                               label_fontface = "plain" ,
+                               label_size = 10)
+
+)
+
+appam$smd <- plot_grid(plotlist = appam$smd.list,
+                    ncol = 1, 
+                    nrow = 2, 
+                    rel_heights = c(1, 1),
+                    label_x = .5,
+                    align = "v",
+                    label_fontface = "plain" ,
+                    label_size = 10,
+                  scale = .9) 
+
+appam$smd  + #perhaps reduce this for a bit more space
+  draw_label(lab.vars$rr,
+             x= 0.5,
+             y = 0,
+             vjust = -0.25,
+             angle = 0) +
+  draw_label(lab.vars$smd,
+             x = 0,
+             y = 0.5,
+             vjust = 1.5,
+             angle = 90)
+
+
+ggsave( filename = "Figs/APPAM 2020/SMD.jpg", dpi = 1000, width = (8), height = (6))
 ```
