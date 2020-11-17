@@ -145,6 +145,9 @@ Educational research aimed at informing policy decisions should ideally be desig
 \begin{document}
 \maketitle
 
+\hypertarget{sampling-for-generalization}{%
+\section{Sampling for generalization}\label{sampling-for-generalization}}
+
 The multi-site randomized trial (MRT) has become a common design for evaluating the effects of educational interventions. An MRT is a randomized control trial that takes place across multiple distinct sites, such as school districts, medical clinics, or geographic areas, with random assignment taking place either at the site level or unit level. In education research, an MRT might entail recruiting multiple schools in each of several districts. Once a sample of schools is recruited, students, classes, teachers, or whole schools are randomly assigned either to receive an intervention (treatment group) or to an alternative condition, such as continuing business-as-usual (control group).
 
 Well-executed MRTs with low attrition support a high level of internal validity, in that one can be confident that observed differences in outcomes between the treatment and control groups represent causal effects of treatment assignment. One might also expect that running a trial across multiple sites would support a high level of external validity, or generalizability, because it provides a basis for detecting and investigating cross-site variation in treatment effects (Raudenbush \& Bloom, 2015). Ostensibly, running an experiment across multiple sites allows researchers to generalize findings to a larger population than estimates from a single-site design (Raudenbush \& Liu, 2000). However, such claims rest on strong and rather ambiguous assumptions about the goal of generalization.
@@ -406,14 +409,22 @@ The strata ranged in size from 1,222 to 2,863 schools and explained 70.43\% of t
 \hypertarget{participation-propensity-score}{%
 \subsection{Participation Propensity Score}\label{participation-propensity-score}}
 
-We modeled the participation propensity score (Equation \eqref{eq:RGM}) using parameter estimates from extant school data. The set of covariates consisted of the same variables used in the cluster analysis. The corresponding coefficients were based on work by Fellers (2017) who compared 571 elementary schools that participated in IES funded studies to the full population of U.S. elementary schools. The authors reported absolute SMD between the schools that participated and the population. We standardized the covariates and used reported SMDs as coefficients in Equation \eqref{eq:RGM} to generated \(\pi_j\) values. The coefficient values are reported in Table \ref{tab:tab-RGM-Pars}.
+In order to simulate the full process of recruiting a sample for an MRT, we need to choose parameter values for the participation propensity score model (Equation \eqref{eq:RGM}).
+To do so, we drew on work by Fellers (2017), who compared 571 elementary schools that participated in IES-funded studies to the full population of U.S. elementary schools on the same variables used in our sampling frame.
+Note that this comparison is between schools that participated in trials (i.e., \(P_j = 1\)) and the full population of schools, and so differences may be the result of \emph{both} non-response bias and researcher recruitment bias.
+In contrast, we are ideally interested in \(\Pr(E_j = 1 | \mathbf{x}_j)\), the \emph{potential} participation probabilities across the full population.
+However, there is little data currently available to directly inform this participation model, and so we relied on the findings of Fellers (2017) to make tentative assumptions about the magnitude of the participation propensity model coefficients.
 
-The results of Fellers (2017) do not provide any information about the overall average participation propensity across the full population--that is, the fraction of the full population of schools that would agree to participate in a study, if approached. This is a key parameter of the simulation that has a strong influence on the performance of all recruitment methods. We therefore varied the overall participation propensity over a wide range, by manipulating the intercept term in Equation \eqref{eq:RGM}. We considered nine different levels for the average participation rate, ranging from 10\% to 90\%.
+Fellers (2017) reported absolute standardized mean differences between schools that participated in IES-funded randomized trials and the population. We standardized the covariates and used reported SMDs as coefficients in Equation \eqref{eq:RGM} to generated \(\pi_j\) values. The coefficients are reported in Table \ref{tab:tab-RGM-Pars}.
+These values lead to large variation in the response propensity scores. In order to examine the extent to which our results are driven by this assumption, we considered two further conditions, in which the propensity model coefficients were divided by a scaling factor of two or four.
+These conditions lead to successively weaker relationships between the covariates and the response propensity.
+
+The results of Fellers (2017) do not provide any information about the overall potential participation rate across the full population--that is, the fraction of the full population of schools that would agree to participate in a study, if the entire population were recruited. This is a key parameter of the simulation that has a strong influence on the performance of all recruitment methods. We therefore varied the overall participation propensity over a wide range, by manipulating the intercept term in Equation \eqref{eq:RGM}, given the other coefficients of the propensity score model and the scaling factor. We considered nine different levels for the average participation rate, ranging from 10\% to 90\%.
 
 \hypertarget{simulation-procedures}{%
 \subsection{Simulation procedures}\label{simulation-procedures}}
 
-We designed the simulation to examine the performance of 5 recruitment methods across 9 levels of population participation. The population of schools and their assigned strata were constant across all conditions and replications. The participation propensity score was constant across all sampling methods and replications within each level of population participation. Each replication involved first simulating potential participation indicators (\(E_j\)'s) according to Equation \eqref{eq:Ej}, which we then treated as constant across each sampling method. That is, if a given school was selected in each of three sampling methods, the school would provide the same response for all three methods, either agreeing or refusing to participate. Next, we generated five sets of rankings (one for each recruitment method) for all schools.
+We designed the simulation to examine the performance of 5 recruitment methods across 9 levels of population response rate and 3 levels of the scaling factor in the response propensity model. The population of schools and their assigned strata were constant across all conditions and replications. The participation propensity score was constant across all sampling methods and replications within each condition for the response propensity model. Each replication involved first simulating potential participation indicators (\(E_j\)'s) according to Equation \eqref{eq:Ej}, which we then treated as constant across each sampling method. That is, if a given school was selected in each of three sampling methods, the school would provide the same response for all three methods, either agreeing or refusing to participate. Next, we generated five sets of rankings (one for each recruitment method) for all schools.
 We checked each school in order of rank for recruitment until a sample of 60 schools was selected by each method. For each sample within an iteration, we tracked which schools agreed to participate, which schools refused to participate, and how many schools refused to participate.
 The order in which schools were approached varied by recruitment method and across replications. The one exception was the stratified balanced sampling method, where the order in which schools are approached was constant because it is a function of stratum assignment and school characteristics.
 
@@ -423,18 +434,22 @@ The order in which schools were approached varied by recruitment method and acro
 \hypertarget{generalizability}{%
 \subsubsection{Generalizability}\label{generalizability}}
 
-There are several methods to quantify how generalizable a sample is to a target population. One common method is to compare the sample to the population on a range of covariates by examining SMDs as shown in Equation \eqref{eq:SMD}. This method is limited as it only provides us with a measure of how close the sample means are to the population means.\\
+There are several methods to quantify how generalizable a sample is to a target population. One common method is to compare the sample to the population on a range of covariates by examining SMDs as shown in Equation \eqref{eq:SMD}. This method is limited as it only provides us with a measure of how close the sample means are to the population means.
 To have full generalizability, however, we should consider how the full distribution of the sample compares to that of the population.
 
 A more comprehensive measure of generalizability is the \(B\) index (\(B\); Tipton, 2014), which provides a single score summary of overlap between two groups. This index offers several advantages. First, it takes into account both the variance and distribution of the variables in each group by measuring the overlap of multiple density plots. Second, it quantifies what is typically a visual comparison and provides an intuitive interpretation. Third, it simultaneously compares two groups across a range of covariates and can easily be scaled to include various interactions and transformations.
 
 The \(B\) index is defined in terms of a distribution of propensity scores, which are used to summarize into a single dimension the differences between an obtained sample and the population distribution of the covariates.
-For a given recruitment method, let \(\psi_j\) represent the sample selection propensity score, or the logistic transform of the probability that school \(j\) was included in an obtained sample. We estimate \(\psi_j\) using a basic logistic regression:
+For a given recruitment method, let \(\psi_j\) represent the sample selection propensity score, or the logistic transform of the probability that school \(j\) was included in an obtained sample:
+\[
+\psi_j = \log\left(\frac{\Pr(P_j = 1 | \mathbf{x}_j)}{1 - \Pr(P_j = 1 | \mathbf{x}_j)}\right). 
+\]
+Note that this sample selection propensity score is distinct from the potential participation propensity model (Equation \eqref{eq:RGM}), in that \(\psi_j\) is based on a sample actually obtained under a given recruitment method, allowing for units to self-select or decline to participate. For each recruitment method and each obtained sample, we estimated \(\psi_j\) using a basic logistic regression:
 \begin{align}
 \label{eq:PSA}
 \psi_j = \gamma_0 + \mathbf{x}_j \boldsymbol\gamma
 \end{align}
-Note that this sample selection propensity score is distinct from the potential participation propensity model (Equation \eqref{eq:RGM}), in that \(\psi_j\) is based on a sample actually obtained under a given recruitment method, allowing for units to self-select or decline to participate. The estimated values of the sample selection propensity score, \(\hat\psi_j\), serve as scalar summaries of differences across all covariates in \(\mathbf{x}_j\).
+The estimated values of the sample selection propensity score, \(\hat\psi_j\), serve as scalar summaries of differences across all covariates in \(\mathbf{x}_j\).
 
 The generalizability index compares the distribution of \(\hat\psi_j\) in the sample to the corresponding distribution in the population.
 The index is bounded between 0 and 1, with 0 indicating no overlap between the sample and the population, and 1 indicating the sample is representative of the population.
@@ -446,7 +461,7 @@ where \(\hat\psi_{min}\) and \(\hat\psi_{max}\) are the minimum and maximum valu
 \begin{align}
 h = \sigma_{\pi}\left(\frac{4}{3n}\right)^{1/5}
 \end{align}
-where \(\sigma_{\pi}\) is the standard deviation of the propensity scores.
+where \(\sigma_{\pi}\) is the standard deviation of the propensity scores.\todo[color=blue!20]{If need be, we could probably move these two paragraphs to online appendix to save space.}
 
 \hypertarget{feasibility}{%
 \subsubsection{Feasibility}\label{feasibility}}
@@ -733,7 +748,7 @@ We first calculated the Calinski-Harabasz (CH) index using the \emph{cluster.sta
 \includegraphics[width=1\linewidth]{6---Paper_files/figure-latex/fig-k-plots-1} \caption{Plots used to determine the number of strata (\(K\)). (a) Calinski-Harabasz index; peaks indicate better fit. (b) Ratio of between cluster sum of squares to total cluster sum of squares; horizontal line indicates cutoff of .8, vertical line indicates minimum number of clusters needed to achieve cutoff. (c) Sampling requirements for each cluster given proportional allocation; horizontal dotted line indicates a minimum sample size requirement of 5 schools. }\label{fig:fig-k-plots}
 \end{figure}
 
-We also considered the proportion of variance that lay between clusters. Let \(Q\) be the maximum allowable number of strata. For each set of \(K = 1,..,Q\) strata, we computed the between and within cluster variability for each covariate. We then calculated the proportion of variability that is between strata by taking the sum of the between-cluster variance across all covariates, divided by the sum of the between-cluster and within-cluster variance across all covariates.
+We also considered the proportion of variance that lay between clusters. For each set of \(K = 1,..,10\) total strata, we computed the between and within cluster variability for each covariate. We then calculated the proportion of variability that is between strata by taking the sum of the between-cluster variance across all covariates, divided by the sum of the between-cluster and within-cluster variance across all covariates.
 
 Figure \ref{fig:fig-k-plots}b plots \(p_k\) against \(K\). The \(K\) for which the rate of change \(p_k\) slows is considered favorable. Tipton (2013b) also recommended selecting the number of clusters such that at least 80\% of the variability is between clusters; this threshold is indicated in the figure by a dashed line. In light of this criterion, it seems that at least 9 clusters should be generated. However, we also see that after a sharp initial increase, the slope of the graph begins to level out. This indicates that each additional cluster increases the sampling complexity while explaining less variability in covariates. In practice, the difficulty of sampling may not be worth the small increases in homogeneity within clusters obtained when using more than 4 or 5 clusters.
 
