@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.21 (TeX Live 2020/W32TeX) (preloaded format=pdflatex 2020.10.29)  17 NOV 2020 13:20
+This is pdfTeX, Version 3.14159265-2.6-1.40.21 (TeX Live 2020/W32TeX) (preloaded format=pdflatex 2020.10.29)  17 NOV 2020 14:22
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1162,14 +1162,14 @@ tex.map}
 
 ] [2] [3] [4] [5] [6] [7] [8]
 Package hyperref Info: bookmark level for unknown todo defaults to 0 on input l
-ine 222.
+ine 219.
 [9] [10]
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <10> on input line 248.
+(Font)              <10> on input line 245.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <7> on input line 248.
+(Font)              <7> on input line 245.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <5> on input line 248.
+(Font)              <5> on input line 245.
 [11]
 
 LaTeX Warning: Marginpar on page 12 moved.
@@ -1182,124 +1182,120 @@ LaTeX Warning: Marginpar on page 12 moved.
 LaTeX Warning: Marginpar on page 17 moved.
 
 [17]
-
-LaTeX Warning: `!h' float specifier changed to `!ht'.
-
-<6---Paper_files/figure-latex/fig-dist1-1.pdf, id=326, 650.43pt x 361.35pt>
+<6---Paper_files/figure-latex/fig-dist1-1.pdf, id=315, 650.43pt x 361.35pt>
 File: 6---Paper_files/figure-latex/fig-dist1-1.pdf Graphic file (type pdf)
 <use 6---Paper_files/figure-latex/fig-dist1-1.pdf>
 Package pdftex.def Info: 6---Paper_files/figure-latex/fig-dist1-1.pdf  used on 
-input line 395.
+input line 391.
 (pdftex.def)             Requested size: 458.93034pt x 254.9613pt.
-[18] [19] [20 <./6---Paper_files/figure-latex/fig-dist1-1.pdf>]
-<6---Paper_files/figure-latex/fig-k-plots-1.pdf, id=356, 650.43pt x 361.35pt>
-File: 6---Paper_files/figure-latex/fig-k-plots-1.pdf Graphic file (type pdf)
-<use 6---Paper_files/figure-latex/fig-k-plots-1.pdf>
-Package pdftex.def Info: 6---Paper_files/figure-latex/fig-k-plots-1.pdf  used o
-n input line 435.
-(pdftex.def)             Requested size: 458.93034pt x 254.9613pt.
-[21] [22 <./6---Paper_files/figure-latex/fig-k-plots-1.pdf>] [23] [24] [25] [26
-] [27] [28]
-<6---Paper_files/figure-latex/fig-avg-B-1.pdf, id=435, 650.43pt x 361.35pt>
+[18] [19 <./6---Paper_files/figure-latex/fig-dist1-1.pdf>] [20] [21] [22] [23]
+<6---Paper_files/figure-latex/fig-avg-B-1.pdf, id=371, 650.43pt x 361.35pt>
 File: 6---Paper_files/figure-latex/fig-avg-B-1.pdf Graphic file (type pdf)
 <use 6---Paper_files/figure-latex/fig-avg-B-1.pdf>
 Package pdftex.def Info: 6---Paper_files/figure-latex/fig-avg-B-1.pdf  used on 
-input line 541.
+input line 480.
 (pdftex.def)             Requested size: 458.93034pt x 254.9613pt.
-[29 <./6---Paper_files/figure-latex/fig-avg-B-1.pdf>]
-<6---Paper_files/figure-latex/fig-SMD-groups-1.pdf, id=449, 505.89pt x 361.35pt
+[24] [25 <./6---Paper_files/figure-latex/fig-avg-B-1.pdf>]
+<6---Paper_files/figure-latex/fig-SMD-groups-1.pdf, id=399, 505.89pt x 361.35pt
 >
 File: 6---Paper_files/figure-latex/fig-SMD-groups-1.pdf Graphic file (type pdf)
 
 <use 6---Paper_files/figure-latex/fig-SMD-groups-1.pdf>
 Package pdftex.def Info: 6---Paper_files/figure-latex/fig-SMD-groups-1.pdf  use
-d on input line 558.
+d on input line 497.
 (pdftex.def)             Requested size: 458.92482pt x 327.80345pt.
-<6---Paper_files/figure-latex/fig-Var-Coef-1.pdf, id=451, 650.43pt x 361.35pt>
+[26 <./6---Paper_files/figure-latex/fig-SMD-groups-1.pdf>]
+<6---Paper_files/figure-latex/fig-Var-Coef-1.pdf, id=411, 650.43pt x 361.35pt>
 File: 6---Paper_files/figure-latex/fig-Var-Coef-1.pdf Graphic file (type pdf)
 <use 6---Paper_files/figure-latex/fig-Var-Coef-1.pdf>
 Package pdftex.def Info: 6---Paper_files/figure-latex/fig-Var-Coef-1.pdf  used 
-on input line 569.
+on input line 508.
 (pdftex.def)             Requested size: 458.93034pt x 254.9613pt.
-[30] [31 <./6---Paper_files/figure-latex/fig-SMD-groups-1.pdf>]
-<6---Paper_files/figure-latex/fig-responses-1.pdf, id=480, 578.16pt x 433.62pt>
+[27 <./6---Paper_files/figure-latex/fig-Var-Coef-1.pdf>]
+<6---Paper_files/figure-latex/fig-responses-1.pdf, id=432, 578.16pt x 433.62pt>
 
 File: 6---Paper_files/figure-latex/fig-responses-1.pdf Graphic file (type pdf)
 <use 6---Paper_files/figure-latex/fig-responses-1.pdf>
 Package pdftex.def Info: 6---Paper_files/figure-latex/fig-responses-1.pdf  used
- on input line 587.
+ on input line 526.
 (pdftex.def)             Requested size: 458.9116pt x 344.1837pt.
+[28 <./6---Paper_files/figure-latex/fig-responses-1.pdf>]
 
-LaTeX Warning: Marginpar on page 32 moved.
+LaTeX Warning: Marginpar on page 29 moved.
 
 
-LaTeX Warning: Marginpar on page 32 moved.
+LaTeX Warning: Marginpar on page 29 moved.
 
-[32 <./6---Paper_files/figure-latex/fig-Var-Coef-1.pdf>] [33 <./6---Paper_files
-/figure-latex/fig-responses-1.pdf>]
-<6---Paper_files/figure-latex/fig-gini-1.pdf, id=512, 650.43pt x 361.35pt>
+<6---Paper_files/figure-latex/fig-gini-1.pdf, id=448, 650.43pt x 361.35pt>
 File: 6---Paper_files/figure-latex/fig-gini-1.pdf Graphic file (type pdf)
 <use 6---Paper_files/figure-latex/fig-gini-1.pdf>
 Package pdftex.def Info: 6---Paper_files/figure-latex/fig-gini-1.pdf  used on i
-nput line 605.
+nput line 544.
 (pdftex.def)             Requested size: 458.93034pt x 254.9613pt.
-[34 <./6---Paper_files/figure-latex/fig-gini-1.pdf>] [35] [36] [37] [38] [39]
+[29] [30 <./6---Paper_files/figure-latex/fig-gini-1.pdf>] [31] [32] [33] [34]
 
-LaTeX Warning: Marginpar on page 40 moved.
+LaTeX Warning: Marginpar on page 35 moved.
 
-[40] [41] [42] [43] [44]
-<6---Paper_files/figure-latex/fig-smd-group1-1.pdf, id=627, 650.43pt x 361.35pt
+[35] [36] [37] [38] [39] [40] [41] [42]
+<6---Paper_files/figure-latex/fig-k-plots-1.pdf, id=587, 578.16pt x 505.89pt>
+File: 6---Paper_files/figure-latex/fig-k-plots-1.pdf Graphic file (type pdf)
+<use 6---Paper_files/figure-latex/fig-k-plots-1.pdf>
+Package pdftex.def Info: 6---Paper_files/figure-latex/fig-k-plots-1.pdf  used o
+n input line 733.
+(pdftex.def)             Requested size: 458.9116pt x 401.54764pt.
+[43] [44 <./6---Paper_files/figure-latex/fig-k-plots-1.pdf>]
+<6---Paper_files/figure-latex/fig-smd-group1-1.pdf, id=614, 650.43pt x 361.35pt
 >
 File: 6---Paper_files/figure-latex/fig-smd-group1-1.pdf Graphic file (type pdf)
 
 <use 6---Paper_files/figure-latex/fig-smd-group1-1.pdf>
 Package pdftex.def Info: 6---Paper_files/figure-latex/fig-smd-group1-1.pdf  use
-d on input line 766.
+d on input line 756.
 (pdftex.def)             Requested size: 458.93034pt x 254.9613pt.
-<6---Paper_files/figure-latex/fig-smd-group2-1.pdf, id=628, 650.43pt x 361.35pt
+<6---Paper_files/figure-latex/fig-smd-group2-1.pdf, id=615, 650.43pt x 361.35pt
 >
 File: 6---Paper_files/figure-latex/fig-smd-group2-1.pdf Graphic file (type pdf)
 
 <use 6---Paper_files/figure-latex/fig-smd-group2-1.pdf>
 Package pdftex.def Info: 6---Paper_files/figure-latex/fig-smd-group2-1.pdf  use
-d on input line 774.
+d on input line 764.
 (pdftex.def)             Requested size: 458.93034pt x 254.9613pt.
-<6---Paper_files/figure-latex/fig-smd-group3-1.pdf, id=629, 650.43pt x 361.35pt
+<6---Paper_files/figure-latex/fig-smd-group3-1.pdf, id=616, 650.43pt x 361.35pt
 >
 File: 6---Paper_files/figure-latex/fig-smd-group3-1.pdf Graphic file (type pdf)
 
 <use 6---Paper_files/figure-latex/fig-smd-group3-1.pdf>
 Package pdftex.def Info: 6---Paper_files/figure-latex/fig-smd-group3-1.pdf  use
-d on input line 782.
+d on input line 772.
 (pdftex.def)             Requested size: 458.93034pt x 254.9613pt.
-[45 <./6---Paper_files/figure-latex/fig-smd-group1-1.pdf>] [46 <./6---Paper_fil
-es/figure-latex/fig-smd-group2-1.pdf> <./6---Paper_files/figure-latex/fig-smd-g
-roup3-1.pdf>]
-<6---Paper_files/figure-latex/fig-rel-per-1.pdf, id=656, 650.43pt x 361.35pt>
+[45] [46 <./6---Paper_files/figure-latex/fig-smd-group1-1.pdf> <./6---Paper_fil
+es/figure-latex/fig-smd-group2-1.pdf>]
+<6---Paper_files/figure-latex/fig-rel-per-1.pdf, id=637, 650.43pt x 361.35pt>
 File: 6---Paper_files/figure-latex/fig-rel-per-1.pdf Graphic file (type pdf)
 <use 6---Paper_files/figure-latex/fig-rel-per-1.pdf>
 Package pdftex.def Info: 6---Paper_files/figure-latex/fig-rel-per-1.pdf  used o
-n input line 797.
+n input line 787.
 (pdftex.def)             Requested size: 458.93034pt x 254.9613pt.
-[47 <./6---Paper_files/figure-latex/fig-rel-per-1.pdf>]
-<6---Paper_files/figure-latex/fig-gini-curve-1.pdf, id=669, 722.7pt x 433.62pt>
+[47 <./6---Paper_files/figure-latex/fig-smd-group3-1.pdf>]
+<6---Paper_files/figure-latex/fig-gini-curve-1.pdf, id=649, 722.7pt x 433.62pt>
 
 File: 6---Paper_files/figure-latex/fig-gini-curve-1.pdf Graphic file (type pdf)
 
 <use 6---Paper_files/figure-latex/fig-gini-curve-1.pdf>
 Package pdftex.def Info: 6---Paper_files/figure-latex/fig-gini-curve-1.pdf  use
-d on input line 811.
+d on input line 801.
 (pdftex.def)             Requested size: 650.43501pt x 390.26102pt.
-AED endfloat: Processing end Figures and Tables [48] [49 <./6---Paper_files/fig
-ure-latex/fig-gini-curve-1.pdf>] (./6---Paper.aux)
+AED endfloat: Processing end Figures and Tables [48 <./6---Paper_files/figure-l
+atex/fig-rel-per-1.pdf>] [49 <./6---Paper_files/figure-latex/fig-gini-curve-1.p
+df>] (./6---Paper.aux)
 Package rerunfilecheck Info: File `6---Paper.out' has not changed.
-(rerunfilecheck)             Checksum: 0E1B218DBD549F5DDF1B069A6A5B876F;6106.
+(rerunfilecheck)             Checksum: EBA1397F03819FD16D2D7375BA32A08D;5689.
  ) 
 Here is how much of TeX's memory you used:
- 25868 strings out of 481466
- 468101 string characters out of 5920169
- 774914 words of memory out of 5000000
- 41833 multiletter control sequences out of 15000+600000
+ 25865 strings out of 481466
+ 468128 string characters out of 5920169
+ 776767 words of memory out of 5000000
+ 41835 multiletter control sequences out of 15000+600000
  606299 words of font info for 96 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
  99i,13n,109p,2248b,959s stack positions out of 5000i,500n,10000p,200000b,80000s
@@ -1325,10 +1321,10 @@ mes/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/lm/lmr8.pfb><c:/Users
 Users/James/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy10.pfb
 ><c:/Users/James/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy8
 .pfb>
-Output written on 6---Paper.pdf (49 pages, 1986658 bytes).
+Output written on 6---Paper.pdf (49 pages, 1985849 bytes).
 PDF statistics:
- 789 PDF objects out of 1000 (max. 8388607)
- 676 compressed objects within 7 object streams
- 212 named destinations out of 1000 (max. 500000)
- 497 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 774 PDF objects out of 1000 (max. 8388607)
+ 661 compressed objects within 7 object streams
+ 207 named destinations out of 1000 (max. 500000)
+ 473 words of extra memory for PDF output out of 10000 (max. 10000000)
 

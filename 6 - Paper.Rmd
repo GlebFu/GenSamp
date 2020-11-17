@@ -39,6 +39,7 @@ figurelist        : no
 tablelist         : no
 footnotelist      : no
 lineno            : no
+numbersections    : false
 mask              : no
 
 header-includes   :
@@ -108,7 +109,7 @@ source("0 - Functions - Analysis and Paper.R")
 
 ```
 
-# Introduction
+# Sampling for generalization
 
 The multi-site randomized trial (MRT) has become a common design for evaluating the effects of educational interventions. An MRT is a randomized control trial that takes place across multiple distinct sites, such as school districts, medical clinics, or geographic areas, with random assignment taking place either at the site level or unit level. In education research, an MRT might entail recruiting multiple schools in each of several districts. Once a sample of schools is recruited, students, classes, teachers, or whole schools are randomly assigned either to receive an intervention (treatment group) or to an alternative condition, such as continuing business-as-usual (control group).
 
@@ -239,7 +240,10 @@ R(S) = \sum_{j=1}^N I\left(S_j \leq S^{max}\right),
 \end{equation}
 where $S^{max} = \max \{S_1 Z_1, S_2 Z_2, ..., S_N Z_N\}$.
 
-Several of the sampling methods that we shall consider involve use of stratification. For these methods, we will assume that the population is divided into a set of $K$ strata. Proportional allocation will be used to ensure the relative size of the strata in the sample reflects that of the population [@tiptonStratifiedSamplingUsing2013]. 
+Several of the sampling methods that we shall consider involve use of stratification. 
+Stratified sampling gives researchers more control over the characteristics of their sample. Consider the case of random sampling, which only produces a representative sample on average. To reduce the likelihood of an "unlucky" sample, a population can be split into strata based on characteristics specified by the researcher. Random sampling from within each of the strata will then ensure that each of those characteristics are represented in the final sample. Stratification is routinely used with probability or non-probability sampling methods in survey research. 
+
+To model stratified sampling methods, we will assume that the population is divided into a set of $K$ strata. Proportional allocation will be used to ensure the relative size of the strata in the sample reflects that of the population [@tiptonStratifiedSamplingUsing2013]. 
 Letting $N_k$ denote the total number of schools in stratum $k$, we set a target sample size of $n_k = [n \times N_k / N]$ for stratum $k = 1,...,K$, where $[x]$ is the integer nearest to $x$.
 Let $G_j \in \{1,...,K\}$ be the stratum assignment of unit $j$, for $j = 1,...,N$.
 For the stratified sampling methods, the process for determining participation is applied separately within each stratum, so that
@@ -253,7 +257,6 @@ and
 R_k(S) = \sum_{j=1}^N I\left(S_j \leq S^{max}_k, G_j = k\right),
 \end{equation}
 with $S^{max}_k = \max \{S_1 Z_1 I(G_1 = k), ..., S_N Z_N I(G_N = k)\}$ and $R(S) = \sum_{k=1}^K R_k(S)$.
-
 
 ## Random Sampling
 
@@ -295,21 +298,17 @@ where $w_p$ is a weight assigned to covariate $X_p$. Different weights could be 
 SBS is unique in that rankings are directly related to school characteristics and are not stochastic (i.e., they do not change across replications of the process). 
 Scores within strata are based on equation \@ref(eq:euclid), where schools closer to the "center" of the stratum are more representative and are therefore a higher priority. Though extremely unlikely, it is possible that several schools could be equidistant from the center of the stratum; in such cases, schools are ordered randomly. Because @tiptonStratifiedSamplingUsing2013 proposed balanced sampling in connection with stratification based on a cluster analysis, we only consider the stratified version, SBS.
 
-# Stratification
+# Simulating sample recruitment
 
-Stratified sampling gives researchers more control over the characteristics of their sample. Consider the case of random sampling, which only produces a representative sample on average. To reduce the likelihood of an "unlucky" sample, a population can be split into strata based on characteristics specified by the researcher. Random sampling from within each of the strata will then ensure that each of those characteristics are represented in the final sample.S tratification is routinely used with probability or non-probability sampling methods in survey research. 
+Using the formal models for unit participation and sample recruitment that we have described, it becomes possible to simulate the process of recruiting schools for an MRT.
+Monte Carlo simulations, such as the one we now describe, are a flexible method for assessing the performance of different sample recruitment methods under controlled conditions.
+Here, we use simulation to assess the generalizability of samples recruited through SBS relative to probability sampling or convenience sampling methods. We also examine the feasibility and equity with which the sampling methods can be employed. 
 
-An innovative aspect of SBS is use of cluster analysis to determine a stratification. We now illustrate how a population can be stratified using a cluster analysis, and consider stratified versions of several other sampling methods within the framework described in the previous section.
-Our illustration follows the approach originally proposed by @tiptonStratifiedSamplingUsing2013, who provided a more complete discussion of its use in the context of SBS.
-The results of this exercise also serve as the basis for the simulation study described in the next section.
+The validity of simulation study findings rests on whether the models and assumptions employed are reasonable approximations to the processes involved in collecting real data. In particular, our simulation findings hinge on the assumptions of the participation propensity model and recruitment models. By relying on previous work and real data to inform our modeling assumption, we hope to reasonably represent trends in the performance of different recruitment methods. That said, given the speculative nature of some aspects of the simulation, our conclusions will necessarily be tentative.
 
-We demonstrate stratification within the context of selecting schools for a large-scale MRT, where the goal is to select a sample that is representative of a population with respect to a set of covariates related to treatment heterogeneity and site participation. When used for survey sampling or blocking in experimental studies, strata may be defined based on one or two covariates that lend themselves to categorization [@lohrSamplingDesignAnalysis2019]. In contrast, our purpose here is to reduce bias in the estimate by achieving balance on potential moderators---a task that requires a larger number of covariates of varying complexity. Traditional stratification at this scale would result in too many strata and an overly complicated recruitment process. Cluster analysis provides a way to define a tractable, smaller number of strata. 
+## Sampling frame
 
-We begin by explaining the data which will serve as the sampling frame and the covariates used in the cluster analysis process. We then implement k-medoids clustering to divide the population into heterogeneous strata comprised of homogeneous sites, generally following recommendations put forth by @tiptonStratifiedSamplingUsing2013. K-medoids clustering assigns sites to strata such that similarity within each stratum is maximized, where similarity is defined by a distance metric. We choose the number of strata to be generated by considering empirical criteria as well as subjective appraisals of what is feasible to implement. After arriving at a final clustering of schools, we illustrate how the strata explain variation in the underlying clusters. 
-
-## Sample Frame
-
-For purposes of illustration, we will consider a population of schools from a diverse set of six states: California, Oregon, Pennsylvania, South Carolina, Texas, and Wyoming. These six states were selected because they provided ready access to school- and district-level achievement data, which can be used to expand the current research.\JEP{Weird justification}\GF{Leaving for now} Also for illustrative purposes, we selected as covariates school characteristics that previous research has found to be associated with participation in RCTs. The goal is for our final sample to include schools not normally found in large-scale evaluations of interventions [@stuartCharacteristicsSchoolDistricts2017; @fellersDevelopingApproachDetermine2017; @tiptonSiteSelectionExperiments2016]. These studies found that districts and schools with higher proportions of students who are English language learners (ELL), economically disadvantaged (ED), non-White, and living in urban settings are more likely to participate, as are larger districts and schools. 
+We study the performance of different recruitment methods for a study aimed at generalizing to the population of schools across a diverse set of six states: California, Oregon, Pennsylvania, South Carolina, Texas, and Wyoming. These six states were selected because they provided ready access to school- and district-level achievement data, which can be used to expand the current research.\JEP{Weird justification}\GF{Leaving for now} For illustrative purposes, we selected as covariates school characteristics that previous research has found to be associated with participation in RCTs. The goal is for the sample to include schools not normally found in large-scale evaluations of interventions [cf. @stuartCharacteristicsSchoolDistricts2017; @fellersDevelopingApproachDetermine2017; @tiptonSiteSelectionExperiments2016]. These studies found that districts and schools with higher proportions of students who are English language learners (ELL), economically disadvantaged (ED), non-White, and living in urban settings are more likely to participate, as are larger districts and schools.\JEP{Trim or condense this sentence?}
 
 We developed a sampling frame for this population using data from the Common Core of Data (CCD; https://nces.ed.gov/ccd/index.asp). The CCD is a comprehensive database housing annually collected census data of all public schools and districts. Table \@ref(tab:tab-RGM-Pars) displays population descriptives based on the selected covariates. Prior to stratification, we calculated log-transformations of school size (number of students), district size (number of schools) and the student-to-teacher ratio in order to allow proportional comparisons at the extremes of the distributions [@hennigHowFindAppropriate2013]. Figure \@ref(fig:fig-dist1) displays the distribution of the continuous variables used in the cluster analysis. In all, the population frame consisted of 6 states, 2,016 districts and 9,792 schools.
 
@@ -346,93 +345,17 @@ if(saveFigs) save.figures("Intro - Covariate Distribution")
 #             School = n())
 ```
 
+## Stratification
 
-## Stratification with Cluster Analysis
+For recruitment methods involving stratification, we use strata generated through a cluster analysis of the school and student characteristics listed in Table \@ref(tab:tab-RGM-Pars). 
+Our cluster analysis generally followed the approach and recommendations described by @tiptonStratifiedSamplingUsing2013. Specifically, we implemented k-medoids clustering to divide the population into heterogeneous strata comprised of homogeneous sites. We used Gower's general similarity measure, which is appropriate for covariates that include both continuous and categorical variables [@gowerGeneralCoefficientSimilarity1971; @tiptonStratifiedSamplingUsing2013].
+All analyses were performed in R [@rcite] using the _cluster_ package [@machlerClusterClusterAnalysis2012].
+Section XX of the online appendix includes further details about the cluster analysis and stratification process.
 
-Cluster analysis serves as a dimension reduction tool to condense the population into smaller set of homogeneous strata. Cluster analysis requires selecting a distance metric, specifying the number of strata, and generating the strata. We describe each of these considerations in turn. All analyses were performed in R [@rcite] using the _cluster_ package [@machlerClusterClusterAnalysis2012].
+Based on empirical criteria as well as subjective appraisals of what is feasible to implement, we chose a cluster solution with five strata.
+The strata ranged in size from `r format(min(tabs$strata.data$n), big.mark = ",")` to  `r format(max(tabs$strata.data$n), big.mark = ",")` schools and explained `r tabs$strata.data$bet.perc %>% unique()`% of the variation across all covariates. The proportion of variance explained by the strata differed by covariate, with five covariates having between 0 and 11% variance explained by the strata and eight covariates having from 45% to 87% variance explained. This discrepancy suggests that stratification will not be equally useful for balancing all covariates.\JEP{Further take-aways? Foreshadow simulation findings?}
 
-### Distance metric
-
-In a cluster analysis, the distance metric is how dis-similarity between pairs of units on a set of covariates is quantified. As such, the appropriate metric varies depending on the type of data in the matrix. 
-In educational research contexts, data are likely to contain both continuous and categorical variables, and such was the case here. For mixed data such as this, it is appropriate to use Gower's general similarity measure [@gowerGeneralCoefficientSimilarity1971; @tiptonStratifiedSamplingUsing2013]. This measure relies on different calculations of distance depending on the type of covariates. Let $x_{pi}$ and $x_{pj}$ be the observed value of covariate $p \in \{1, ..., P\}$ for units $i$ and $j$ respectively, where $i \ne j$. Let $d_{pij}$ be the distance between observed values of covariate $p$ for sites $i,j$. For categorical or dummy coded variables, $d_{pij} = 1$ if $x_{pi} = x_{pj}$ and $d_{pij} = 0$ otherwise. For continuous covariates, we use the following formula:
-\begin{align}
-\label{eq:gowerdist-p}
-d_{pij} = 1 - \frac{|X_{pi} - X_{pj}|}{R_p}
-\end{align}
-where $|\cdot|$ indicates absolute value and $R_p$ is the range of observations for covariate $p$. This equation restricts the range of $d_{pij}$ to $[0,1]$. We calculated the general similarity between each site pair by taking the weighted average of the distances between all covariates. Let $d^{g}_{ij}$ be the general similarity between site $i$ and site $j$.
-\begin{align}
-\label{eq:gowerdist}
-d^{g}_{ij} = \frac{\sum^P_{p = 1} w_{pij} d_{pij}}{\sum^P_{p = 1} w_{pij}}
-\end{align}
-where $w_{pij} = 0$ if $x_p$ is missing for either site and $w_{pij} = 1$ otherwise.
-We computed a dissimilarity matrix for all $N \times N$ pairs of units based on the the full set of school-level covariates in Table \@ref(tab:tab-RGM-Pars). 
-
-### Number of Strata
-
-Selecting an appropriate number of clusters is one of the most difficult problems in cluster analysis [@steinleyKmeansClusteringHalfcentury2006]. @tiptonStratifiedSamplingUsing2013 argued that both empirical and practical criteria should be used in selecting $K$. @hennigHowFindAppropriate2013 also argued that the method of selecting $K$ should depend on the context of the clustering, framing the issue as one of obtaining an appropriate subject-matter-dependent definition rather than a purely statistical question. 
-
-Proportional allocation dictates that each stratum should contribute a number of units to the full sample that is proportional to the size of the strata. Having unequally sized strata means that recruiters will need to focus more on larger strata. Generating a larger set of strata would result in greater homogeneity within each stratum, but it may also be more difficult to manage for recruiters. For instance, if refusal and non-response rates are fairly high, having fewer sites spread across more strata may make it difficult to adequately recruit from all strata. Resource constraints (e.g. time, funding, recruiters) may also be a factor in the number of strata selected.
-
-With these considerations in mind, we examined three criteria for choosing the number of strata: (1) a generalized form of the Calinski-Harabasz index [@calinskiDendriteMethodCluster1974] proposed by @hennigHowFindAppropriate2013, (2) the proportion of between-cluster variance as recommended by @tiptonStratifiedSamplingUsing2013, and (3) the practicality of sampling from fewer clusters. Our strategy was to perform the cluster analysis several times for a specified number of clusters, then compare all performance criteria for each set of strata generated (Figure \@ref(fig:fig-k-plots)).
-
-We first calculated the Calinski-Harabasz (CH) index using the _cluster.stats_ function from the _fpc_ [@R-fpc] package. Figure \@ref(fig:fig-k-plots)a displays the CH index for each $k$ clusters generated. In this case, generating 2 clusters maximizes the CH-index. Another potential solution is at 4 clusters where there is also a local maxima. 
-
-(ref:fig-k-plots-caption) Plots used to determine the number of strata ($K$). (a) Calinski-Harabasz index; peaks indicate better fit. (b) Ratio of between cluster sum of squares to total cluster sum of squares; horizontal line indicates cutoff of .8, vertical line indicates minimum number of clusters needed to achieve cutoff. (c) Sampling requirements for each cluster given proportional allocation; horizontal dotted line indicates a minimum sample size requirement of 5 schools.
-
-```{r fig-k-plots, out.width = "1\\linewidth", fig.pos = "tbp", fig.cap = "(ref:fig-k-plots-caption) "}
-
-figs$joint.cluster.stats <- 
-  plot_grid(plotlist = list(figs$ch %>% apa_style_plot,
-                            figs$vratio %>% apa_style_plot), 
-          labels=c("(a)", "(b)"), 
-          ncol = 2, 
-          nrow = 1, 
-          rel_heights = c(1, 1),
-          label_x = .5,
-          align = "h",
-          label_fontface = "plain" ,
-          label_size = 10) %>%
-  plot_grid(figs$allocation  %>% apa_style_plot, 
-            ncol = 1,
-            nrow = 2, 
-            labels = c("", "(c)"),
-            label_x = .5,
-            # align = "v",
-            # axis = "r",
-            label_fontface = "plain" ,
-            label_size = 10)
-
-figs$joint.cluster.stats 
-
-```
-
-We also considered the proportion of variance that lay between clusters. Let $Q$ be the maximum allowable number of strata. For each set of $K = 1,..,Q$ strata, we computed the between and within cluster variability for each covariate. We then calculated the proportion of variability that is between strata by taking the sum of the between-cluster variance across all covariates, divided by the sum of the between-cluster and within-cluster variance across all covariates.
-
-Figure \@ref(fig:fig-k-plots)b plots $p_k$ against $K$. The $K$ for which the rate of change $p_k$ slows is considered favorable. @tiptonStratifiedSamplingUsing2013 also recommended selecting the number of clusters such that at least 80% of the variability is between clusters; this threshold is indicated in the figure by a dashed line. In light of this criterion, it seems that at least 9 clusters should be generated. However, we also see that after a sharp initial increase, the slope of the graph begins to level out. This indicates that each additional cluster increases the sampling complexity while explaining less variability in covariates. In practice, the difficulty of sampling may not be worth the small increases in homogeneity within clusters obtained when using more than 4 or 5 clusters.
-
-Figure \@ref(fig:fig-k-plots)c plots the required sample size from each cluster to fulfill the proportional allocation requirement. The dashed line indicates the ideal allocation if all clusters were of equal size. We see that the variability in cluster sizes decreases as more clusters are generated. A sensible cutoff may be determined by looking at the size of the smallest cluster. When $K > 5$, the smallest clusters would require less than 5 sites being sampled, which may be very difficult in practice. Considering both the statistical criteria and the pragmatic constraints, we generated 5 clusters for purposes of stratification.
-
-## Variation explained by the strata
-
-The strata resulting from the cluster analysis range in size from `r format(min(tabs$strata.data$n), big.mark = ",")` to  `r format(max(tabs$strata.data$n), big.mark = ",")` schools. The strata explain `r tabs$strata.data$bet.perc %>% unique()`% of the variation across all covariates (Figure \@ref(fig:fig-k-plots)b), with a CH-index of `r tabs$strata.data$ch %>% unique()` (Figure \@ref(fig:fig-k-plots)a). We also computed variance explained for individual covariates. The proportion of variance explained by the strata differed greatly by covariate, with 5 covariates having between 0 and 11% variance explained by the strata and 8 variables having from 45% to 87% variance explained. This disparity indicates that the cluster analysis did not create homogeneous strata for for 5 of the 13 variables used.\JEP{Take-away? Foreshadow simulation findings?}
-
-
-# Simulating sample recruitment
-
-Using the formal models for unit participation and sample recruitment that we have described, it becomes possible to simulate the process of recruiting schools for an MRT.
-Monte Carlo simulations, such as the one we now describe, are a flexible method for assessing the performance of different sample recruitment methods under controlled conditions.
-Here, we use simulation to assess the generalizability of samples recruited through SBS relative to probability sampling or convenience sampling methods. We also examine the feasibility and equity with which the sampling methods can be employed. 
-
-The validity of simulation study findings rests on whether the models and assumptions employed are reasonable approximations to the processes involved in collecting real data. In particular, our simulation findings hinge on the assumptions of the participation propensity model and recruitment models. By relying on previous work and real data to inform our modeling assumption, we hope to reasonably represent trends in the performance of different recruitment methods. That said, given the speculative nature of some aspects of the simulation, our conclusions will necessarily be tentative.
-
-## Data Generation
-
-### Population and Strata
-
-We study the performance of different recruitment methods for a study aimed at generalizing to the population of schools in six states, as described in the previous section. For recruitment methods involving stratification, we use the five strata generated through the cluster analysis of the school and student characteristics listed in Table \@ref(tab:tab-RGM-Pars). 
-Because these strata are a function of the characteristics of the full population, they are fixed and constant across replications and across the different conditions manipulated in the simulation.
-
-### Participation Propensity Score
+## Participation Propensity Score
 
 We modeled the participation propensity score (Equation \@ref(eq:RGM)) using parameter estimates from extant school data. The set of covariates consisted of the same variables used in the cluster analysis. The corresponding coefficients were based on work by @fellersDevelopingApproachDetermine2017 who compared 571 elementary schools that participated in IES funded studies to the full population of U.S. elementary schools. The authors reported absolute SMD between the schools that participated and the population. We standardized the covariates and used reported SMDs as coefficients in Equation \@ref(eq:RGM) to generated $\pi_j$ values. The coefficient values are reported in Table \@ref(tab:tab-RGM-Pars). 
 
@@ -714,6 +637,76 @@ r_refs(file = "references.bib")
 \newpage 
 
 # Online Appendix
+
+## Stratification with Cluster Analysis
+
+This section provides further details about how we used cluster analysis to determine the population strata used in the simulation study. 
+Cluster analysis serves as a dimension reduction tool to condense a high-dimensional distribution of population characteristics into a small set of homogeneous strata. Cluster analysis requires selecting a distance metric, specifying the number of strata, and generating the strata. We describe each of these considerations in turn. All analyses were performed in R [@rcite] using the _cluster_ package [@machlerClusterClusterAnalysis2012].
+
+### Distance metric
+
+In a cluster analysis, the distance metric is how dis-similarity between pairs of units on a set of covariates is quantified. As such, the appropriate metric varies depending on the type of data in the matrix. 
+In educational research contexts, data are likely to contain both continuous and categorical variables, and such was the case here. For mixed data such as this, it is appropriate to use Gower's general similarity measure [@gowerGeneralCoefficientSimilarity1971; @tiptonStratifiedSamplingUsing2013]. This measure relies on different calculations of distance depending on the type of covariates. Let $x_{pi}$ and $x_{pj}$ be the observed value of covariate $p \in \{1, ..., P\}$ for units $i$ and $j$ respectively, where $i \ne j$. Let $d_{pij}$ be the distance between observed values of covariate $p$ for sites $i,j$. For categorical or dummy coded variables, $d_{pij} = 1$ if $x_{pi} = x_{pj}$ and $d_{pij} = 0$ otherwise. For continuous covariates, we use the following formula:
+\begin{align}
+\label{eq:gowerdist-p}
+d_{pij} = 1 - \frac{|X_{pi} - X_{pj}|}{R_p}
+\end{align}
+where $|\cdot|$ indicates absolute value and $R_p$ is the range of observations for covariate $p$. This equation restricts the range of $d_{pij}$ to $[0,1]$. We calculated the general similarity between each site pair by taking the weighted average of the distances between all covariates. Let $d^{g}_{ij}$ be the general similarity between site $i$ and site $j$.
+\begin{align}
+\label{eq:gowerdist}
+d^{g}_{ij} = \frac{\sum^P_{p = 1} w_{pij} d_{pij}}{\sum^P_{p = 1} w_{pij}}
+\end{align}
+where $w_{pij} = 0$ if $x_p$ is missing for either site and $w_{pij} = 1$ otherwise.
+We computed a dissimilarity matrix for all $N \times N$ pairs of units based on the the full set of school-level covariates in Table \@ref(tab:tab-RGM-Pars). 
+
+### Number of Strata
+
+Selecting an appropriate number of clusters is one of the most difficult problems in cluster analysis [@steinleyKmeansClusteringHalfcentury2006]. @tiptonStratifiedSamplingUsing2013 argued that both empirical and practical criteria should be used in selecting $K$. @hennigHowFindAppropriate2013 also argued that the method of selecting $K$ should depend on the context of the clustering, framing the issue as one of obtaining an appropriate subject-matter-dependent definition rather than a purely statistical question. 
+
+Proportional allocation dictates that each stratum should contribute a number of units to the full sample that is proportional to the size of the strata. Having unequally sized strata means that recruiters will need to focus more on larger strata. Generating a larger set of strata would result in greater homogeneity within each stratum, but it may also be more difficult to manage for recruiters. For instance, if refusal and non-response rates are fairly high, having fewer sites spread across more strata may make it difficult to adequately recruit from all strata. Resource constraints (e.g. time, funding, recruiters) may also be a factor in the number of strata selected.
+
+With these considerations in mind, we examined three criteria for choosing the number of strata: (1) a generalized form of the Calinski-Harabasz index [@calinskiDendriteMethodCluster1974] proposed by @hennigHowFindAppropriate2013, (2) the proportion of between-cluster variance as recommended by @tiptonStratifiedSamplingUsing2013, and (3) the practicality of sampling from fewer clusters. Our strategy was to perform the cluster analysis several times for a specified number of clusters, then compare all performance criteria for each set of strata generated (Figure \@ref(fig:fig-k-plots)).
+
+We first calculated the Calinski-Harabasz (CH) index using the _cluster.stats_ function from the _fpc_ [@R-fpc] package. Figure \@ref(fig:fig-k-plots)a displays the CH index for each $k$ clusters generated. In this case, generating 2 clusters maximizes the CH-index. Another potential solution is at 4 clusters where there is also a local maxima. 
+
+(ref:fig-k-plots-caption) Plots used to determine the number of strata ($K$). (a) Calinski-Harabasz index; peaks indicate better fit. (b) Ratio of between cluster sum of squares to total cluster sum of squares; horizontal line indicates cutoff of .8, vertical line indicates minimum number of clusters needed to achieve cutoff. (c) Sampling requirements for each cluster given proportional allocation; horizontal dotted line indicates a minimum sample size requirement of 5 schools.
+
+```{r fig-k-plots, fig.height = 7, fig.width = 8, out.width = "1\\linewidth", fig.pos = "tbp", fig.cap = "(ref:fig-k-plots-caption) "}
+
+figs$joint.cluster.stats <- 
+  plot_grid(plotlist = list(figs$ch %>% apa_style_plot,
+                            figs$vratio %>% apa_style_plot), 
+          labels=c("(a)", "(b)"), 
+          ncol = 2, 
+          nrow = 1, 
+          rel_heights = c(1, 1),
+          label_x = .5,
+          align = "h",
+          label_fontface = "plain" ,
+          label_size = 10) %>%
+  plot_grid(figs$allocation  %>% apa_style_plot, 
+            ncol = 1,
+            nrow = 2, 
+            labels = c("", "(c)"),
+            label_x = .5,
+            # align = "v",
+            # axis = "r",
+            label_fontface = "plain" ,
+            label_size = 10)
+
+figs$joint.cluster.stats 
+
+```
+
+We also considered the proportion of variance that lay between clusters. For each set of $K = 1,..,10$ total strata, we computed the between and within cluster variability for each covariate. We then calculated the proportion of variability that is between strata by taking the sum of the between-cluster variance across all covariates, divided by the sum of the between-cluster and within-cluster variance across all covariates.
+
+Figure \@ref(fig:fig-k-plots)b plots $p_k$ against $K$. The $K$ for which the rate of change $p_k$ slows is considered favorable. @tiptonStratifiedSamplingUsing2013 also recommended selecting the number of clusters such that at least 80% of the variability is between clusters; this threshold is indicated in the figure by a dashed line. In light of this criterion, it seems that at least 9 clusters should be generated. However, we also see that after a sharp initial increase, the slope of the graph begins to level out. This indicates that each additional cluster increases the sampling complexity while explaining less variability in covariates. In practice, the difficulty of sampling may not be worth the small increases in homogeneity within clusters obtained when using more than 4 or 5 clusters.
+
+Figure \@ref(fig:fig-k-plots)c plots the required sample size from each cluster to fulfill the proportional allocation requirement. The dashed line indicates the ideal allocation if all clusters were of equal size. We see that the variability in cluster sizes decreases as more clusters are generated. A sensible cutoff may be determined by looking at the size of the smallest cluster. When $K > 5$, the smallest clusters would require less than 5 sites being sampled, which may be very difficult in practice. Considering both the statistical criteria and the pragmatic constraints, we generated 5 clusters for purposes of stratification.
+
+## Variation explained by the strata
+
+The strata resulting from the cluster analysis range in size from `r format(min(tabs$strata.data$n), big.mark = ",")` to  `r format(max(tabs$strata.data$n), big.mark = ",")` schools. The strata explain `r tabs$strata.data$bet.perc %>% unique()`% of the variation across all covariates (Figure \@ref(fig:fig-k-plots)b), with a CH-index of `r tabs$strata.data$ch %>% unique()` (Figure \@ref(fig:fig-k-plots)a). We also computed variance explained for individual covariates. The proportion of variance explained by the strata differed greatly by covariate, with 5 covariates having between 0 and 11% variance explained by the strata and 8 variables having from 45% to 87% variance explained. 
 
 ## Standardized Mean Differences
 
