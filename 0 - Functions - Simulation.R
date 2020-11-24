@@ -11,10 +11,11 @@ Sample_Binomial <- function(ps) rbinom(length(ps), 1, prob = ps)
 
 
 
-Generate_Responses <- function(PS.data, cluster.data, K.condition, RR.condition) {
+Generate_Responses <- function(PS.data, cluster.data, K.condition, RR.condition, SB.condition) {
   df.responses <- PS.data %>%
     ungroup() %>%
-    filter(RR == RR.condition) %>%
+    filter(RR == RR.condition,
+           scale_factor == SB.condition) %>%
     mutate(Ej = Sample_Binomial(PS))
   
   df.responses <- cluster.data %>%
@@ -62,7 +63,7 @@ Calc_Bindex <- function(PS, sampled) {
 
 
 # Creates dataset with samples for each method and response rate
-Create_Samples <- function(data, df.cov) {
+Create_Samples <- function(data) {
   
   # Random Sampling
   U.RS <- data %>%
@@ -73,7 +74,7 @@ Create_Samples <- function(data, df.cov) {
   
   # Convenience Sampling
   U.CS <- data %>%
-    sample_frac(size = 1, weight = PS) %>%
+    sample_frac(size = 1, weight = UCS_Rank) %>%
     mutate(contacted = cumsum(Ej) <= 60,
            accepted = contacted  & Ej == 1,
            sample_method = "Unstratified_CS")
@@ -81,7 +82,7 @@ Create_Samples <- function(data, df.cov) {
   # Stratified Balanced Sampling
   S.BS <- data %>%
     group_by(strata) %>%
-    arrange(cluster_rank ) %>%
+    arrange(SBS_Rank ) %>%
     mutate(contacted = cumsum(Ej) <= pa,
            accepted = contacted  & Ej == 1,
            sample_method = "Stratified_BS")
@@ -97,7 +98,7 @@ Create_Samples <- function(data, df.cov) {
   # Stratified Convenience
   S.CS <- data %>%
     group_by(strata)  %>%
-    sample_frac(size = 1, weight = PS) %>%
+    sample_frac(size = 1, weight = SCS_Rank) %>%
     mutate(contacted = cumsum(Ej) <= pa,
            accepted = contacted  & Ej == 1,
            sample_method = "Stratified_CS")
@@ -137,12 +138,13 @@ Calc_Sample_Statistics <- function(sample.data, list.covariates) {
               samp.sd = sd(val))
 }
 
-Run_Iteration <- function(sim.data, PS.data, cluster.data, K.condition, RR.condition, B.index.formula, list.covariates) {
+Run_Iteration <- function(sim.data, PS.data, cluster.data, K.condition, RR.condition, SB.condition, B.index.formula, list.covariates) {
   
   df.responses <- Generate_Responses(PS.data = PS.data, 
                                      cluster.data = cluster.data,
                                      K.condition = K.condition,
-                                     RR.condition = RR.condition)
+                                     RR.condition = RR.condition,
+                                     SB.condition = SB.condition)
   
   df.sampled <- Create_Samples(df.responses)
   
@@ -172,24 +174,27 @@ Run_Iteration <- function(sim.data, PS.data, cluster.data, K.condition, RR.condi
                  df.samp.counts = df.samp.counts, 
                  df.B.indicies = df.B.indicies, 
                  df.samp.stats = df.samp.stats) %>%
-    lapply(function(x) mutate(x, K = K.condition, RR = RR.condition))
+    lapply(function(x) mutate(x, K = K.condition, RR = RR.condition, SB = SB.condition))
   return(results)
 }
 
-Sim_Driver <- function(sim.data, PS.data, cluster.data, B.index.formula, list.covariates, K.list, RR.list) {
+Sim_Driver <- function(sim.data, PS.data, cluster.data, B.index.formula, list.covariates, K.list, RR.list, SB.list) {
   results <- list()
   
   for(cond.K in K.list) {
     for(cond.RR in RR.list) {
-      results <- Run_Iteration(sim.data = sim.data,
-                               PS.data = PS.data,
-                               cluster.data = cluster.data,
-                               K.condition = cond.K,
-                               RR.condition = cond.RR,
-                               B.index.formula = B.index.formula,
-                               list.covariates = list.covariates) %>%
-        as.matrix %>%
-        cbind(results)
+      for(cond.SB in SB.list) {
+        results <- Run_Iteration(sim.data = sim.data,
+                                 PS.data = PS.data,
+                                 cluster.data = cluster.data,
+                                 K.condition = cond.K,
+                                 RR.condition = cond.RR,
+                                 SB.condition = cond.SB,
+                                 B.index.formula = B.index.formula,
+                                 list.covariates = list.covariates) %>%
+          as.matrix %>%
+          cbind(results)
+      }
     }
   }
   

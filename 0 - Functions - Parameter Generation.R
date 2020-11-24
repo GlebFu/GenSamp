@@ -33,7 +33,7 @@ calcPS <- function(Bs, MRR, scale_factor, vars, data, exclude, getint = F, int =
   vars <- vars[!(vars %in% exclude)]
   X <- as.matrix(data[,vars])
   
-  Bs_scaled <- scale_factor * Bs
+  Bs_scaled <- scale_factor * Bs[vars]
   XB <- as.numeric(X %*% Bs_scaled)
   
   # int = uniroot(function(b0) mean(expit(b0 + XB)) - MRR, c(-20,20))

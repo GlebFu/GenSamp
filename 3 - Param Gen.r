@@ -19,15 +19,15 @@ covariates
 # DGM.Bs <- c(-.03, 0, -.02, .46, .04, -.01, .01, .01, 0, -.1, 0, .02)
 
 # SMDs
-DGM.Bs <- c(.019, .374, .081, .433, .007, -.403, -.538, .291, .395, -.019, -.101, .520, .412)
+DGM.Bs <- tibble(Bs = c(.019, .374, .081, .433, .007, -.403, -.538, .291, .395, -.019, -.101, .520, .412),
+                 var = c("T1", "n", "pTotfrl", "Urban", "Suburban",  "ToRu", "ethWhite", "ethBlack", "ethHisp", "pFem", "ST.ratio", "dSCH", "pELL")) %>%
+  mutate(Bs = set_names(Bs, var))
+
+
 
 # Set focus to Town/Rural
 # DGM.exclude <- "ToRu"
 DGM.exclude <- ""
-
-names(DGM.Bs) <- c("T1", "n", "pTotfrl", "Urban", "Suburban",  "ToRu", "ethWhite", "ethBlack", "ethHisp", "pFem", "ST.ratio", "dSCH", "pELL")
-
-DGM.Bs
 
 #-----------------------
 # Standardize
@@ -49,41 +49,53 @@ df.pop.stats <- df.sim %>%
 # -----------------------
 
 scale_factor <- c(1/4, 1/2, 1/1)
+# scale_factor <- c(1/2, 1/1)
 
-# response.rates <- 8:1/20
 response.rates <- 9:1/10
 # response.rates <- c(.1, .2, .3)
-response.rates.names <- paste("RR_", formatC(response.rates*100, width = 2, format = "d", flag = "0"), sep = "")
 
-response_grid <- expand.grid(scale_factor = scale_factor, MRR = response.rates)
+response_grid <- expand.grid(scale_factor = scale_factor, MRR = response.rates) %>%
+  tibble() %>%
+  mutate(RR = paste("RR_", formatC(MRR*100, width = 2, format = "d", flag = "0"), sep = ""),
+         Bs = list(DGM.Bs$Bs),
+         vars = list(covariates),
+         DSID = list(df.sim.standardized$DSID)) %>%
+  mutate(PS.Int = pmap(.l = list(Bs = Bs,
+                                 MRR = MRR,
+                                 scale_factor = scale_factor,
+                                 vars = vars),
+                       .f = calcPS,
+                       data = df.sim.standardized,
+                       exclude = DGM.exclude,
+                       getint = T),
+         Int = map_dbl(PS.Int, function(x) x$Intercept),
+         PS = map(PS.Int, function(x) x$PS))
 
-PS.Int <- mapply(calcPS, MRR = response_grid$MRR, scale_factor = response_grid$scale_factor, 
-                 MoreArgs = list(Bs = DGM.Bs, vars = covariates, 
-                                 data = df.sim.standardized %>% select(-DSID), exclude = DGM.exclude, getint = T))
 
-response_grid$intercept <- unlist(PS.Int[2,])
 
-df.PS <- 
-  bind_cols(PS.Int[1,]) %>%
-  setNames(response.rates.names) %>%
-  mutate(DSID = df.sim.standardized$DSID)
-
+df.PS <- response_grid %>%
+  select(scale_factor, RR, DSID, PS) %>%
+  unnest(cols = c(DSID, PS))
+  
 df.PS %>% 
+  group_by(scale_factor, RR ) %>%
   summarise_if(is.numeric, mean)
 
 intercepts <- 
-  PS.Int[2,] %>%
-  unlist %>%
-  setNames(response.rates.names)
+  response_grid %>%
+  select(scale_factor, RR, Int)
 
+# df.PS %>%
+#   mutate(PS.log = log(PS / (1-PS))) %>%
+#   ggplot(aes(x = PS)) +
+#   geom_histogram() +
+#   facet_grid(scale_factor~RR)
 
 df.PS %>%
-  gather(key = RR, value = PS, -DSID) %>%
-  ggplot(aes(x = PS)) +
+  mutate(PS.log = log(PS / (1-PS))) %>%
+  ggplot(aes(x = PS.log)) +
   geom_histogram() +
-  facet_wrap(~RR)
-
-df.PS <- gather(df.PS, key = RR, value = PS, - DSID)
+  facet_grid(scale_factor~RR )
 
 
 df.smd.ipsw <- df.PS %>%
@@ -91,16 +103,25 @@ df.smd.ipsw <- df.PS %>%
   gather(key = var, value = val, T1:pELL) %>%
   mutate(w1 = 1 / PS,
          w0 = 1 / (1 - PS)) %>%
-  group_by(RR, var) %>%
+  group_by(scale_factor, RR, var) %>%
   summarise(m = weighted.mean(val, PS)) %>%
   left_join(df.pop.stats) %>%
   mutate(smd = (m - pop.mean) / pop.sd)
 
 df.smd.ipsw %>%
   select(RR, var, smd) %>%
-  spread(var, smd)
+  left_join(DGM.Bs) %>%
+  mutate(dif = Bs - smd,
+         scale_d = abs(dif / Bs)) %>%
+  ggplot(aes(x = RR,
+             y = scale_d,
+             color = scale_factor,
+             group = scale_factor)) +
+  geom_point() +
+  geom_line() +
+  facet_wrap(~var)
 
-DGM.Bs
+
 
 #-----------------------
 # Generate Within Cluster Ranks and Proportional Allocations
@@ -136,9 +157,25 @@ df.clusters <- df.sim %>%
   summarise(value = sqrt(sum(value))) %>%
   group_by(K, strata) %>%
   arrange(K, strata, value) %>%
-  mutate(cluster_rank = 1:n(),
-         cluster_percentile = cluster_rank/n() * 100) %>%
+  mutate(SBS_Rank = 1:n()) %>%
   select(-value)
+
+
+df.clusters <- prop_allocations %>%
+  select(K, strata, pa) %>%
+  right_join(df.clusters) 
+
+df.clusters <- df.PS %>%
+  group_by(scale_factor, RR) %>%
+  arrange(PS) %>%
+  mutate(UCS_Rank = 1:n()) %>%
+  ungroup() %>%
+  select(DSID, UCS_Rank) %>%
+  unique() %>%
+  right_join(df.clusters) %>%
+  group_by(K, strata) %>%
+  arrange(UCS_Rank) %>%
+  mutate(SCS_Rank = 1:n())
 
 
 # df.clusters %>%
@@ -177,15 +214,10 @@ df.clusters <- df.sim %>%
 
 
 
-df.clusters <- prop_allocations %>%
-  select(K, strata, pa) %>%
-  right_join(df.clusters)
 
 
 #-----------------------
 # Export Data
 #-----------------------
-
-DGM.Bs
 
 save(df.sim, df.PS, df.clusters, covariates, df.pop.stats, DGM.Bs, intercepts, df.smd.ipsw, prop_allocations, file = "Data/Simulation Data/Sim Data.Rdata")
