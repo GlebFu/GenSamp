@@ -3,13 +3,6 @@
 # SUPPORT FUNCTIONS
 ######################
 
-rename_conditions <- function(orig.data) {
-  orig.data %>%
-    separate(col = sample_method, 
-             into = c("Clustering", "Sampling"), 
-             remove = F) %>%
-    mutate(Label = paste(str_sub(Clustering, end = 1), Sampling, sep = ""))
-}
 
 boxErrors <- function(x) {
   v <- c(min(x), mean(x) - sd(x), mean(x), mean(x) + sd(x), max(x))
@@ -33,7 +26,7 @@ row_groups <- function(x, blank = F) {
 
 plot_smd <- function(data, yvar = "mASMD") {
   data %>% 
-    ggplot(aes(x = RR, y = get(yvar), color = Label, linetype = Label, group = Label)) +
+    ggplot(aes(x = RR, y = get(yvar), color = Sampler, linetype = Sampler, group = Sampler)) +
     geom_line(size = 1) +
     geom_hline(yintercept = .25, linetype = "dotted") +
     facet_wrap( ~ Variables, ncol = 3) +
@@ -45,7 +38,7 @@ plot_smd <- function(data, yvar = "mASMD") {
 
 plot_smd2 <- function(data, yvar = "mASMD") {
   data %>% 
-    ggplot(aes(x = RR, y = get(yvar), color = Label, linetype = Label, group = Label)) +
+    ggplot(aes(x = RR, y = get(yvar), color = Sampler, linetype = Sampler, group = Sampler)) +
     geom_line(size = 1) +
     geom_hline(yintercept = .25, linetype = "dotted") +
     labs(y = lab.vars$smd,

@@ -418,12 +418,12 @@ figs$B <- tabs$B %>%
   # geom_label(data = tabs$B.label, aes(label = Sampler)) +
   # geom_label(data = tabs$B.label,
              # aes(label = Sampler)) +
-  labs(y = lab.vars$B ,
+  labs(y = lab.vars$B,
        x = lab.vars$rr) +
   geom_hline(yintercept = .95, linetype = "dotted") +
   geom_hline(yintercept = .8, linetype = "dashed") +
   scale_x_continuous(breaks = seq(0, 100, 10)) + 
-  scale_y_continuous(limits = c(0.6c5, 1.0), expand = c(0,0)) +
+  scale_y_continuous(limits = c(0.65, 1.0), expand = c(0,0)) +
   facet_grid(rows = vars(SB), scales = "free_y")
 
 
@@ -472,6 +472,88 @@ df.list$smd.results <- results$smd.stats %>%
   left_join(df.list$coefs) %>%
   ungroup()
 
+
+df.list$smd.results  %>%
+  ggplot(aes(x = RR, y = mASMD, group = interaction(Variables, SB, Sampler), color = Sampler)) +
+  geom_line(alpha = .5) +
+  theme(legend.position = "none")
+  
+
+
+smd.test <- df.list$smd.result %>%
+  nest(data = everything()) %>%
+  mutate(resid = map(data, function(x) lm(mASMD ~ RR + I(RR^2), data = x) %>% residuals())) %>%
+  unnest(cols = c(data, resid))
+
+smd.test %>%
+  ggplot(aes(x = SB, y = resid, group = interaction(RR, Sampler), color = Sampler)) +
+  geom_line(alpha = .5) +
+  theme(legend.position = "none") +
+  facet_wrap(~ Variables)
+
+smd.test <- df.list$smd.result %>%
+  nest(data = -Sampler) %>%
+  mutate(resid = map(data, function(x) lm(mASMD ~ RR + I(RR^2), data = x) %>% residuals())) %>%
+  unnest(cols = c(data, resid))
+
+smd.test %>%
+  ggplot(aes(x = SB, y = resid, group = interaction(RR, Sampler), color = Sampler)) +
+  geom_line(alpha = .5) +
+  theme(legend.position = "none") +
+  facet_wrap(~ Variables)
+
+smd.test %>%
+  group_by(Sampler, SB, vnames, Variables) %>%
+  summarise(resid = mean(resid)) %>%
+  ggplot(aes(x = SB, y = resid, group = interaction(Sampler), color = Sampler)) +
+  geom_line(alpha = .5) +
+  theme(legend.position = "none") +
+  facet_wrap(~ Variables)
+
+```
+
+```{r}
+smd.test %>%
+  filter(vnames == "n") %>%
+  ggplot(aes(x = SB, y = resid, group = interaction(RR, Sampler), color = Sampler)) +
+  geom_line(alpha = .5) +
+  theme(legend.position = "none")
+
+smd.test %>%
+  filter(vnames == "n") %>%
+  ggplot(aes(x = SB, y = resid, group = interaction(RR, Sampler), color = Sampler)) +
+  geom_line(alpha = .5) +
+  theme(legend.position = "none")
+
+test$plots[5]
+
+```
+
+
+```{r}
+plot_smd <- function(data, yvar = "mASMD") {
+  data %>% 
+    ggplot(aes(x = RR, y = get(yvar), color = Sampler, linetype = Sampler, group = Sampler)) +
+    geom_line(size = 1) +
+    geom_hline(yintercept = .25, linetype = "dotted") +
+    facet_wrap( ~ SB, ncol = 3) +
+    labs(y = lab.vars$smd,
+         x = lab.vars$rr) + 
+    scale_x_continuous(breaks = seq(10, 90, 20)) +
+    theme(legend.position = "bottom")
+}
+
+test <- df.list$smd.results %>%
+  nest(cols = -Variables) %>%
+  mutate(plots = map(cols, plot_smd),
+         plots = set_names(plots, paste("smd.", Variables, sep = "")),
+         data = set_names(cols, paste("smd.", Variables, sep = "")))
+test$plots
+
+```
+
+```{r}
+
 SMDFigs <- df.list$smd.results  %>%
   left_join(vars$plot.groups) %>%
   group_by(group, desc) %>%
@@ -483,10 +565,6 @@ SMDFigs <- df.list$smd.results  %>%
   select(data, plots)
 
 
-
-```
-
-```{r}
 tabs[names(SMDFigs$data)] <- SMDFigs$data
 figs[names(SMDFigs$plots)] <- SMDFigs$plots
 
