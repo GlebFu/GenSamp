@@ -396,12 +396,11 @@ df.list$PS %>%
 
 
 tabs$B <- results$B %>% 
-  group_by(sample_method, RR, SB, Label) %>%
+  group_by(Sampler, RR, SB) %>%
   summarise(M = mean(Bs, na.rm = T),
             SD = sd(Bs, na.rm = T)) %>%
   mutate(LL = M - SD,
-         UL = M + SD,
-         RR = parse_number(RR))
+         UL = M + SD)
 
 
 tabs$B.label <- tabs$B %>%
@@ -413,18 +412,18 @@ tabs$B.label <- tabs$B %>%
   mutate(M = c(.53, .58, .73, .78, .9))
 
 figs$B <- tabs$B %>%
-  ggplot(aes(x = RR, y = M, color = Label, 
-             linetype = Label, group = Label)) +
+  ggplot(aes(x = RR, y = M, color = Sampler, 
+             linetype = Sampler, group = Sampler)) +
   geom_line() +
-  # geom_label(data = tabs$B.label, aes(label = Label)) +
+  # geom_label(data = tabs$B.label, aes(label = Sampler)) +
   # geom_label(data = tabs$B.label,
-             # aes(label = Label)) +
+             # aes(label = Sampler)) +
   labs(y = lab.vars$B ,
        x = lab.vars$rr) +
   geom_hline(yintercept = .95, linetype = "dotted") +
   geom_hline(yintercept = .8, linetype = "dashed") +
   scale_x_continuous(breaks = seq(0, 100, 10)) + 
-  scale_y_continuous(limits = c(0.5, 1.0), expand = c(0,0)) +
+  scale_y_continuous(limits = c(0.6c5, 1.0), expand = c(0,0)) +
   facet_grid(rows = vars(SB), scales = "free_y")
 
 
@@ -432,18 +431,18 @@ figs$B
 
 tabs$B %>%
   filter(SB == 1) %>%
-  ggplot(aes(x = RR, y = M, color = Label, 
-             linetype = Label, group = Label)) +
+  ggplot(aes(x = RR, y = M, color = Sampler, 
+             linetype = Sampler, group = Sampler)) +
   geom_line() +
-  # geom_label(data = tabs$B.label, aes(label = Label)) +
+  # geom_label(data = tabs$B.label, aes(label = Sampler)) +
   # geom_label(data = tabs$B.label,
-             # aes(label = Label)) +
+             # aes(label = Sampler)) +
   labs(y = lab.vars$B ,
        x = lab.vars$rr) +
   geom_hline(yintercept = .95, linetype = "dotted") +
   geom_hline(yintercept = .8, linetype = "dashed") +
   scale_x_continuous(breaks = seq(0, 100, 10)) + 
-  scale_y_continuous(limits = c(0.5, 1.0), expand = c(0,0)) 
+  scale_y_continuous(limits = c(0.65, 1.0), expand = c(0,0)) 
 ```
 
 
@@ -468,21 +467,13 @@ vars$plot.groups <- bind_rows(
   )
 
 
-df.list$smd.results <- results$s.stats %>%
-  left_join(df.list$pop.stats) %>%
-  mutate(smd = (samp.mean - pop.mean) / pop.sd,
-         RR = parse_number(RR)) %>%
-  group_by(sample_method, RR, var, Label) %>%
-  summarise(mSMD = mean(smd),
-            mSMD.sd = sd(smd),
-            mASMD = mean(abs(smd)),
-            mASMD.sd = sd(abs(smd))) %>%
+df.list$smd.results <- results$smd.stats %>%
   rename(vnames = var) %>%
   left_join(df.list$coefs) %>%
   ungroup()
 
 SMDFigs <- df.list$smd.results  %>%
-  left_join(vars$plot.groups ) %>%
+  left_join(vars$plot.groups) %>%
   group_by(group, desc) %>%
   nest %>%
   mutate(plots = map(data, plot_smd),
@@ -491,6 +482,11 @@ SMDFigs <- df.list$smd.results  %>%
   ungroup() %>%
   select(data, plots)
 
+
+
+```
+
+```{r}
 tabs[names(SMDFigs$data)] <- SMDFigs$data
 figs[names(SMDFigs$plots)] <- SMDFigs$plots
 
@@ -525,16 +521,16 @@ smd.examples.sep <- tabs$smd.examples %>%
          plots = set_names(plots, paste("smd.", str_replace(Variables, " ", ""), sep = "")),
          data = set_names(data, paste("smd.", str_replace(Variables, " ", ""), sep = ""))) 
 
-tabs$smd.label <- tibble(Label = c("SBS", "SRS", "SCS", "UCS", "URS"),
+tabs$smd.label <- tibble(Sampler = c("SBS", "SRS", "SCS", "UCS", "URS"),
                        mASMD = (1:5) * .18, 
-                       Variables = "Label",
+                       Variables = "Sampler",
                        xmin = 10, 
                        xmax = 90) %>%
   gather(key = lim, value = RR, xmin, xmax) %>%
-  arrange(desc(Label))
+  arrange(desc(Sampler))
 
 figs$smd.label <- tabs$smd.label %>%
-  ggplot(aes(x = RR, y = mASMD, color = Label, linetype = Label, group = Label, label = Label)) +
+  ggplot(aes(x = RR, y = mASMD, color = Sampler, linetype = Sampler, group = Sampler, label = Sampler)) +
   geom_line(size = 1) +
   geom_label(data = filter(tabs$smd.label, RR == 10) %>% mutate(RR = 50)) +
   labs(y = lab.vars$smd,
@@ -627,7 +623,7 @@ figs$smd.neutral
 #   left_join(df.list$pop.stats) %>%
 #   mutate(smd = (samp.mean - pop.mean) / pop.sd,
 #          RR = parse_number(RR)) %>%
-#   group_by(sample_method, RR, var, Sampling, Clustering, K) %>%
+#   group_by(Sampler, RR, var, Sampling, Clustering, K) %>%
 #   summarise(mSMD = mean(abs(smd)),
 #             mSMD.sd = sd(abs(smd))) %>%
 #   rename(vnames = var) %>%
@@ -708,7 +704,7 @@ df.test <- df.list$smd.results %>%
 
 ```{r}
 df.test %>%
-  ggplot(aes(x = abs_log_odds, y = mASMD, color = Label)) +
+  ggplot(aes(x = abs_log_odds, y = mASMD, color = Sampler)) +
   geom_point() +
   geom_hline(yintercept = .25, linetype = "dotted") +
   geom_hline(yintercept = 0) +
@@ -716,7 +712,7 @@ df.test %>%
   facet_grid(~RR)
 
 df.test %>%
-  ggplot(aes(x = log_odds, y = mSMD, color = Label)) +
+  ggplot(aes(x = log_odds, y = mSMD, color = Sampler)) +
   geom_point() +
   geom_hline(yintercept = .25, linetype = "dotted") +
   geom_hline(yintercept = 0) +
@@ -727,7 +723,7 @@ df.test %>%
 
 ```{r}
 df.test %>%
-  ggplot(aes(x = Label, y = mASMD, color = Label)) +
+  ggplot(aes(x = Sampler, y = mASMD, color = Sampler)) +
   geom_boxplot(alpha = .5,
                position = "dodge2") +
   facet_grid(~ RR) +
@@ -759,7 +755,7 @@ texreg::screenreg(df.plot$fit)
 df.plot %>%
   select(model, plot.data) %>%
   unnest(plot.data) %>%
-  ggplot(aes(x = RR, y = res, color = Label, linetype = Label)) +
+  ggplot(aes(x = RR, y = res, color = Sampler, linetype = Sampler)) +
   # geom_point(alpha = .5) +
   geom_smooth() +
   facet_wrap(~model)
@@ -767,7 +763,7 @@ df.plot %>%
 df.plot %>%
   select(model, plot.data) %>%
   unnest(plot.data) %>%
-  ggplot(aes(x = RR, y = res, color = Label, linetype = Label)) +
+  ggplot(aes(x = RR, y = res, color = Sampler, linetype = Sampler)) +
   geom_point() +
   geom_line() + 
   geom_hline(yintercept = 0) + 
@@ -782,7 +778,7 @@ df.plot %>%
 df.plot %>%
   select(model, plot.data) %>%
   unnest(plot.data) %>%
-  ggplot(aes(x = vratio, y = res, color = Label)) +
+  ggplot(aes(x = vratio, y = res, color = Sampler)) +
   geom_point() +
   geom_hline(yintercept = 0) +
   facet_grid(model ~ RR)
@@ -800,26 +796,26 @@ df.test.2 <- results$s.stats %>%
 
 df.test.2.sum <- df.test.2 %>%
   ungroup() %>%
-  group_by(sample_method, RR, var, Label) %>%
+  group_by(Sampler, RR, var) %>%
   summarise(mSMD = mean(smd),
             mSMD.sd = sd(smd),
             mASMD = mean(a_smd),
             mASMD.sd = sd(a_smd))
 
 df.test.2.sum %>%
-  ggplot(aes(x = mSMD, y = mSMD, color = Label)) +
+  ggplot(aes(x = mSMD, y = mSMD, color = Sampler)) +
   geom_point() +
   geom_vline(xintercept = 0)+
   facet_wrap(~RR)
 
 df.test.2 %>%
   filter(var == "ethWhite") %>%
-  ggplot(aes(x = RR, y = a_smd, color = Label)) +
+  ggplot(aes(x = RR, y = a_smd, color = Sampler)) +
   geom_smooth(method = "lm", formula = y ~ poly(x, 3))
 
 df.test.2 %>%
   filter(var == "ethWhite") %>%
-  ggplot(aes(x = RR, y = smd, color = Label)) +
+  ggplot(aes(x = RR, y = smd, color = Sampler)) +
   geom_smooth(method = "lm", formula = y ~ poly(x, 3))
 ```
 
@@ -836,7 +832,7 @@ tabs$samples <- results$r.stats
 
 ```{r, fig.cap = "Recruitment Counts"}
 # figs$samples <- tabs$samples  %>%
-#   ggplot(aes(x = RR, y = value, group = sample_method, color = Sampling, linetype = Clustering)) +
+#   ggplot(aes(x = RR, y = value, group = Sampler, color = Sampling, linetype = Clustering)) +
 #   geom_point() +
 #   geom_line() +
 #   facet_wrap( ~ measure, scales = "free_y") +
@@ -869,7 +865,7 @@ tabs$samples.contacts.labels <-  tabs$samples %>%
 
 figs$samples.contacts <- tabs$samples %>%
   filter(measure == "sch.contacted") %>%
-  ggplot(aes(x = RR, y = value, group = sample_method, color = Label, linetype = Label)) +
+  ggplot(aes(x = RR, y = value, group = Sampler, color = Sampler, linetype = Sampler)) +
   geom_point() +
   geom_line() +
   theme(legend.position = "none") +
@@ -880,7 +876,7 @@ figs$samples.contacts <- tabs$samples %>%
   labs(x = lab.vars$rr,
        y = lab.vars$contacts) +
   geom_label(data = tabs$samples.contacts.labels,
-             aes(label = Label))
+             aes(label = Sampler))
 
 figs$samples.contacts
 
@@ -894,7 +890,7 @@ figs$samples.contacts
 tabs$samples.response.rates.labels <-  tabs$samples %>%
   filter(measure == "sch.response.rate") %>%
   filter(RR %in% c(40, 50)) %>%
-  group_by(Label) %>%
+  group_by(Sampler) %>%
   summarise(value = (min(value) + (max(value) - min(value)) / 2) * 100) %>%
   mutate(RR = 45) %>%
   arrange(value) %>%
@@ -905,7 +901,7 @@ tabs$samples.response.rates.labels <-  tabs$samples %>%
 figs$samples.response.rates <- tabs$samples %>%
   filter(measure == "sch.response.rate") %>%
   mutate(value = value * 100) %>%
-  ggplot(aes(x = RR, y = value, group = Label, color = Label, linetype = Label)) +
+  ggplot(aes(x = RR, y = value, group = Sampler, color = Sampler, linetype = Sampler)) +
   geom_point() +
   geom_line() +
   expand_limits(y = 0) +
@@ -915,7 +911,7 @@ figs$samples.response.rates <- tabs$samples %>%
   scale_x_continuous(breaks = seq(0, 100, 10)) +
   scale_y_continuous(breaks = seq(0, 100, 10)) +
   geom_label(data = tabs$samples.response.rates.labels,
-             aes(label = Label))
+             aes(label = Sampler))
 
 figs$samples.response.rates
 ```
@@ -952,15 +948,15 @@ figs$joint.feasibility
 tabs$relative.counts <- tabs$samples  %>%
   ungroup() %>%
   filter(measure %in% c("sch.contacted")) %>%
-  select(-sample_method) %>%
-  spread(key = Label, value = value) %>%
+  select(-Sampler) %>%
+  spread(key = Sampler, value = value) %>%
   right_join(tabs$samples  %>% filter(measure == "sch.contacted")) %>%
   gather(key = Comp.Method, value = Comp.Value,
          SBS:URS) %>%
   mutate(Comp.Times = value / Comp.Value) 
 
 figs$relative.counts <- tabs$relative.counts %>%
-  ggplot(aes(x = RR, y = Comp.Times, group = Label, color = Label, linetype = Label)) +
+  ggplot(aes(x = RR, y = Comp.Times, group = Sampler, color = Sampler, linetype = Sampler)) +
   geom_line() +
   facet_wrap(~ Comp.Method, scales = "free") 
 
@@ -971,18 +967,18 @@ figs$relative.counts
 ### Gini Plot
 ```{r}
 # tabs$gini.count <- results$r.counts %>%
-#   group_by(sample_method, Label, DSID, RR) %>%
+#   group_by(Sampler, DSID, RR) %>%
 #   count(name = "count") %>%
-#   group_by(sample_method, Label, RR) %>%
+#   group_by(Sampler, RR) %>%
 #   nest() %>%
 #   mutate(data = map(data, full_join, df.list$pop.data %>% select(DSID))) %>%
 #   unnest %>%
-#   group_by(sample_method, Label, RR) %>%
+#   group_by(Sampler, RR) %>%
 #   mutate(count = ifelse(is.na(count), 0, count),
 #          prop.selected = count/sum(count),
 #          n = n(),
 #          prop.pop = 1/n()) %>%
-#   group_by(sample_method, Label, RR) %>%
+#   group_by(Sampler, RR) %>%
 #   arrange(prop.selected) %>%
 #   mutate(c.prop.sel = cumsum(prop.selected),
 #          c.prop.pop = cumsum(prop.pop))
@@ -1014,7 +1010,7 @@ tabs$gini.coef.labels <-  tabs$gini.coef %>%
 
 figs$gini <- tabs$gini.coef %>%
   mutate(RR = parse_number(RR)) %>%
-  ggplot(aes(x = RR, y = gini, group = Label, color = Label, linetype = Label)) +
+  ggplot(aes(x = RR, y = gini, group = Sampler, color = Sampler, linetype = Sampler)) +
   geom_point() +
   geom_line() +
   scale_x_continuous(breaks = seq(10, 90, 10)) +
@@ -1023,7 +1019,7 @@ figs$gini <- tabs$gini.coef %>%
   labs(x = lab.vars$rr,
       y = lab.vars$gini) +
   geom_label(data = tabs$gini.coef.labels,
-             aes(label = Label))
+             aes(label = Sampler))
 
 figs$gini
 
@@ -1034,8 +1030,8 @@ figs$gini
 
 figs$gini.coef <- tabs$gini.count %>%
   # filter(RR == "RR_90") %>%
-  # filter(sample_method == "Unstratified_RS") %>%
-  ggplot(aes(x = c.prop.pop, y = c.prop.sel, group = Label, color = Label, linetype = Label)) +
+  # filter(Sampler == "Unstratified_RS") %>%
+  ggplot(aes(x = c.prop.pop, y = c.prop.sel, group = Sampler, color = Sampler, linetype = Sampler)) +
   geom_line() +
   geom_abline(slope = 1, intercept = 0, linetype = "dotted") +
   geom_label(aes(label = gini, x = x.pos, y = y.pos), 
@@ -1142,12 +1138,12 @@ appam$B.label <- tabs$B %>%
   mutate(M = c(.53, .60, .7, .77, .9))
 
 appam$B <- tabs$B %>%
-  ggplot(aes(x = RR, y = M, color = Label, 
-             linetype = Label, group = Label)) +
+  ggplot(aes(x = RR, y = M, color = Sampler, 
+             linetype = Sampler, group = Sampler)) +
   geom_line(size = 1.5) +
-  # geom_label(data = tabs$B.label, aes(label = Label)) +
+  # geom_label(data = tabs$B.label, aes(label = Sampler)) +
   geom_label(data = appam$B.label,
-             aes(label = Label), size = 4) +
+             aes(label = Sampler), size = 4) +
   labs(y = lab.vars$B ,
        x = lab.vars$rr) +
   geom_hline(yintercept = .95, linetype = "dotted") +
@@ -1167,7 +1163,7 @@ ggsave(plot = appam$B , filename = "Figs/APPAM 2020/B index.jpg", dpi = 1000, wi
 ```{r}
 appam$samples <- tabs$samples %>%
   filter(measure == "sch.contacted") %>%
-  ggplot(aes(x = RR, y = value, group = sample_method, color = Label, linetype = Label)) +
+  ggplot(aes(x = RR, y = value, group = Sampler, color = Sampler, linetype = Sampler)) +
   geom_line() +
   theme(legend.position = "none") +
   scale_x_continuous(breaks = seq(0, 100, 10)) +
@@ -1177,7 +1173,7 @@ appam$samples <- tabs$samples %>%
   labs(x = lab.vars$rr,
        y = lab.vars$contacts) +
   geom_label(data = tabs$samples.contacts.labels,
-             aes(label = Label),
+             aes(label = Sampler),
              size = 4) +
   theme_apa() +
   scale_color_brewer(type = "qual", palette = 6) +
@@ -1204,7 +1200,7 @@ appam$nonresp.lab <-  tabs$samples %>%
 appam$nonresp <- tabs$samples %>%
   filter(measure == "sch.response.rate") %>%
   mutate(value = (1-value) * 100) %>%
-  ggplot(aes(x = RR, y = value, group = Label, color = Label, linetype = Label)) +
+  ggplot(aes(x = RR, y = value, group = Sampler, color = Sampler, linetype = Sampler)) +
   geom_line(size = 1.5) +
   geom_abline(slope = -1, intercept = 100, linetype = "dotted", alpha = .5) +
   expand_limits(y = 0) +
@@ -1214,7 +1210,7 @@ appam$nonresp <- tabs$samples %>%
   scale_x_continuous(breaks = seq(0, 100, 10), limits = c(5, 90)) +
   scale_y_continuous(breaks = seq(10, 100, 15), limits = c(5, 100)) +
   geom_label(data = appam$nonresp.lab,
-             aes(label = Label)) +
+             aes(label = Sampler)) +
   theme_apa() +
   scale_color_brewer(type = "qual", palette = 6) +
   theme(legend.position = "none",
