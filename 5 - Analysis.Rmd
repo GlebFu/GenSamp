@@ -75,12 +75,7 @@ library(cowplot)
 
 rm(list = ls())
 
-
-load("Data/Simulation Data/Sim Data.Rdata")
-load("Data/Cluster Analysis/Clusters k2-10.rdata")
-
-load(read_file("Data/Results/LastResults.txt"))
-# load("Data/Results/1002 Reps - K5 - pam.rdata")
+load(file = "Data/Paper/Summarised Sim Results.RData")
 
 source("0 - Functions - Analysis and Paper.R")
 
@@ -89,58 +84,10 @@ source("0 - Functions - Analysis and Paper.R")
 
 ## Organize Objects
 
-```{r declare-objects}
+```{r}
 
 grey.plots <- F
 
-df.list <- list()
-results <- list()
-vars <- list()
-
-tabs <- list()
-figs <- list()
-
-df.list$k.stats <- cluster.stats
-
-results$B <- df.B.indicies %>% rename_conditions()
-results$r.stats <- df.recruitment.stats %>% rename_conditions()
-results$r.counts <- df.samp.counts %>% rename_conditions()
-results$s.stats <- df.samp.stats %>% rename_conditions()
-results$k <- df.clusters
-
-df.list$strata.id <- df.clusters %>% 
-  transmute(DSID = DSID, 
-            k = K_05, 
-            strata = factor(paste("Strata", k)))
-
-df.list$pop.data <- left_join(df.sim, df.list$strata.id)
-
-df.list$pop.stats <- df.pop.stats
-
-df.list$PS <- df.PS %>% 
-  mutate(logit = log(PS / (1 - PS)))
-
-df.list$cluster.vars <- read_csv("Data/Paper/Clustering Variables.csv")
-
-df.list$coefs <- DGM.Bs %>%
-  transmute(vnames = var, log_odds = Bs) %>%
-  full_join(read_csv("Data/Paper/Clustering Variables.csv"))
-
-# df.list$coefs <- data.frame(vnames = names(DGM.Bs), 
-#                             log_odds = DGM.Bs, 
-#                             row.names = NULL) %>%
-#   full_join(read_csv("Data/Paper/Clustering Variables.csv"))
-
-rm(list = c("cluster.stats", 
-            "df.B.indicies", 
-            "df.recruitment.stats", 
-            "df.samp.counts", 
-            "df.samp.stats", 
-            "df.clusters", 
-            "df.pop.stats", 
-            "df.PS"))
-
-vars$cluster <- list(mixed = cluster_vars, dummy = covariates)
 
 lab.vars <- list(k = "Number of strata (k)", 
                  vratio = expression(paste("Variance Ratio (",
@@ -329,14 +276,13 @@ figs$cluster.SMD <- tabs$cluster.SMD %>%
   mutate(sig = ifelse(abs(SMD) > .25, "Sig", "Not Sig"),
          neg = SMD > 0,
          k = parse_number(as.character(strata))) %>%
-  ggplot(aes(x = SMD, y = Variables, color = strata, alpha = sig, label = k)) +
-  geom_text() +
-  geom_text(aes(x = 0, y = Variables, label = Variables), color = "black", alpha = 1) +
+  ggplot(aes(x = SMD, y = Variables, color = strata, alpha = sig, shape = strata)) +
+  geom_point() +
   geom_vline(xintercept = c(-.25, .25), linetype = "dotted") +
   scale_alpha_discrete(guide = "none")  +
   scale_x_continuous(limits = c(-2,2)) +
-  theme(axis.text.y = element_blank(),
-        axis.ticks.y = element_blank()) +
+  # theme(axis.text.y = element_blank(),
+  #       axis.ticks.y = element_blank()) +
   labs(x = lab.vars$smd ,
        y = lab.vars$vars)
 
@@ -344,21 +290,7 @@ figs$cluster.SMD
 ```
 
 
-```{r}
 
-df.list$pop.data %>% 
-  select(strata, covariates) %>%
-  # select(strata, n, dSCH, ST.ratio) %>%
-  mutate(n = log(n),
-         dSCH = log(dSCH),
-         ST.ratio = log(ST.ratio)) %>%
-  gather(key = var, value = val, -strata) %>%
-  ggplot(aes(x = strata, y = val)) + 
-  geom_boxplot() + 
-  facet_wrap(~ var, scales = "free_y") + 
-  theme(legend.position = "none")
-
-```
 
 
 ## Variation explained by the strata
@@ -497,6 +429,21 @@ figs$B <- tabs$B %>%
 
 
 figs$B 
+
+tabs$B %>%
+  filter(SB == 1) %>%
+  ggplot(aes(x = RR, y = M, color = Label, 
+             linetype = Label, group = Label)) +
+  geom_line() +
+  # geom_label(data = tabs$B.label, aes(label = Label)) +
+  # geom_label(data = tabs$B.label,
+             # aes(label = Label)) +
+  labs(y = lab.vars$B ,
+       x = lab.vars$rr) +
+  geom_hline(yintercept = .95, linetype = "dotted") +
+  geom_hline(yintercept = .8, linetype = "dashed") +
+  scale_x_continuous(breaks = seq(0, 100, 10)) + 
+  scale_y_continuous(limits = c(0.5, 1.0), expand = c(0,0)) 
 ```
 
 
@@ -718,8 +665,12 @@ tabs$v.coef <- df.list$pop.data %>%
          vratio = B.SS / T.SS) %>%
   left_join(df.list$coefs) %>%
   left_join(vars$plot.groups) %>%
-  mutate(abs_log_odds = abs(log_odds),
-         odds = exp(log_odds),
+  mutate(SB_11 = log_odds,
+         SB_12 = log_odds * .5,
+         SB_14 = log_odds * .25) %>%
+  gather(key = factor, value = coef, SB_11:SB_14) %>%
+  mutate(abs_log_odds = abs(coef),
+         odds = exp(coef),
          prob = odds / (1 + odds))%>%
   arrange(group)
 
@@ -728,9 +679,9 @@ figs$v.coef <- tabs$v.coef  %>%
   geom_mark_rect(expand = 0.04, color = "black") +
   geom_point(size = 2) +
   # geom_encircle(alpha = .2, s_shape = 0, expand = .1, spread = .05, color = "black") +
-  geom_text_repel(aes(label = Variables), point.padding = .2, color = "black") +
+  # geom_text_repel(aes(label = Variables), point.padding = .2, color = "black") +
   labs(y = lab.vars$coef,
-       x = lab.vars$rr) +
+       x = lab.vars$vratio) +
   scale_x_continuous(breaks = seq(0, 1, .1)) +
   scale_y_continuous(breaks = seq(0, .6, .1),
   limits = c(0, .6)) + 
@@ -877,10 +828,7 @@ df.test.2 %>%
 ### Sampling Difficulty
 
 ```{r}
-tabs$samples <- results$r.stats %>%
-  group_by(sample_method, RR, measure, Label, K) %>%
-  summarise(value = mean(value)) %>%
-  mutate(RR = parse_number(RR))
+tabs$samples <- results$r.stats 
 
 
 ```
@@ -1022,29 +970,29 @@ figs$relative.counts
 
 ### Gini Plot
 ```{r}
-tabs$gini.count <- results$r.counts %>%
-  group_by(sample_method, Label, DSID, RR) %>%
-  count(name = "count") %>%
-  group_by(sample_method, Label, RR) %>%
-  nest() %>%
-  mutate(data = map(data, full_join, df.list$pop.data %>% select(DSID))) %>%
-  unnest %>%
-  group_by(sample_method, Label, RR) %>%
-  mutate(count = ifelse(is.na(count), 0, count),
-         prop.selected = count/sum(count),
-         n = n(),
-         prop.pop = 1/n()) %>%
-  group_by(sample_method, Label, RR) %>%
-  arrange(prop.selected) %>%
-  mutate(c.prop.sel = cumsum(prop.selected),
-         c.prop.pop = cumsum(prop.pop))
-
-tabs$gini.coef <- tabs$gini.count %>%
-  summarise(gini = ineq::Gini(prop.selected) %>% round(2)) %>%
-  group_by(RR) %>%
-  arrange(gini) %>%
-  mutate(y.pos = 1 - (1:n()/n()) / 1.5,
-         x.pos = 1 - y.pos)
+# tabs$gini.count <- results$r.counts %>%
+#   group_by(sample_method, Label, DSID, RR) %>%
+#   count(name = "count") %>%
+#   group_by(sample_method, Label, RR) %>%
+#   nest() %>%
+#   mutate(data = map(data, full_join, df.list$pop.data %>% select(DSID))) %>%
+#   unnest %>%
+#   group_by(sample_method, Label, RR) %>%
+#   mutate(count = ifelse(is.na(count), 0, count),
+#          prop.selected = count/sum(count),
+#          n = n(),
+#          prop.pop = 1/n()) %>%
+#   group_by(sample_method, Label, RR) %>%
+#   arrange(prop.selected) %>%
+#   mutate(c.prop.sel = cumsum(prop.selected),
+#          c.prop.pop = cumsum(prop.pop))
+# 
+# tabs$gini.coef <- tabs$gini.count %>%
+#   summarise(gini = ineq::Gini(prop.selected) %>% round(2)) %>%
+#   group_by(RR) %>%
+#   arrange(gini) %>%
+#   mutate(y.pos = 1 - (1:n()/n()) / 1.5,
+#          x.pos = 1 - y.pos)
 
 
 lab.vars$gini <- "Gini Coeficient"
