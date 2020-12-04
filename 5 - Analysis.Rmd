@@ -481,36 +481,37 @@ df.list$smd.results  %>%
 
 
 smd.test <- df.list$smd.result %>%
-  nest(data = everything()) %>%
-  mutate(resid = map(data, function(x) lm(mASMD ~ RR + I(RR^2), data = x) %>% residuals())) %>%
-  unnest(cols = c(data, resid))
+  mutate(strat = str_sub(Sampler, end = 1),
+         type = str_sub(Sampler, start = -2)) %>%
+  group_by(type, Variables, RR, SB) %>%
+  arrange(strat) %>%
+  summarise(smd_dif = diff(mASMD))
 
 smd.test %>%
-  ggplot(aes(x = SB, y = resid, group = interaction(RR, Sampler), color = Sampler)) +
-  geom_line(alpha = .5) +
-  theme(legend.position = "none") +
-  facet_wrap(~ Variables)
-
-smd.test <- df.list$smd.result %>%
-  nest(data = -Sampler) %>%
-  mutate(resid = map(data, function(x) lm(mASMD ~ RR + I(RR^2), data = x) %>% residuals())) %>%
-  unnest(cols = c(data, resid))
+  filter(type == "CS") %>%
+  ggplot(aes(x = RR, y = smd_dif, color = as.factor(SB))) +
+  geom_line() +
+  facet_wrap(~Variables)
 
 smd.test %>%
-  ggplot(aes(x = SB, y = resid, group = interaction(RR, Sampler), color = Sampler)) +
-  geom_line(alpha = .5) +
-  theme(legend.position = "none") +
-  facet_wrap(~ Variables)
+  filter(type == "RS") %>%
+  ggplot(aes(x = RR, y = smd_dif, color = as.factor(SB))) +
+  geom_line() +
+  facet_wrap(~Variables)
 
-smd.test %>%
-  group_by(Sampler, SB, vnames, Variables) %>%
-  summarise(resid = mean(resid)) %>%
-  ggplot(aes(x = SB, y = resid, group = interaction(Sampler), color = Sampler)) +
-  geom_line(alpha = .5) +
-  theme(legend.position = "none") +
-  facet_wrap(~ Variables)
+# %>%
+#   nest(data = everything()) %>%
+#   mutate(resid = map(data, function(x) lm(mASMD ~ 0 + RR + I(RR^2), data = x) %>% residuals())) %>%
+#   unnest(cols = c(data, resid))
+# 
+# smd.test %>%
+#   ggplot(aes(x = SB, y = resid, group = interaction(RR, Sampler), color = Sampler)) +
+#   geom_line(alpha = .5) +
+#   theme(legend.position = "none") +
+#   facet_wrap(~ Variables)
 
 ```
+
 
 ```{r}
 smd.test %>%
@@ -526,6 +527,8 @@ smd.test %>%
   theme(legend.position = "none")
 
 test$plots[5]
+
+test$plots[3]
 
 ```
 

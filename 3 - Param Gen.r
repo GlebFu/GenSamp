@@ -167,16 +167,18 @@ df.clusters <- prop_allocations %>%
 
 df.clusters <- df.PS %>%
   group_by(scale_factor, RR) %>%
-  arrange(PS) %>%
+  arrange(desc(PS)) %>%
   mutate(UCS_Rank = 1:n()) %>%
   ungroup() %>%
   select(DSID, UCS_Rank) %>%
   unique() %>%
   right_join(df.clusters) %>%
   group_by(K, strata) %>%
-  arrange(UCS_Rank) %>%
+  arrange(desc(UCS_Rank)) %>%
   mutate(SCS_Rank = 1:n())
 
+?min_rank
+?cume_dist
 
 # df.clusters %>%
 #   filter(K == "K_06") %>%
