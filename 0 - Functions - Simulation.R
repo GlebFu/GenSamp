@@ -65,27 +65,12 @@ Calc_Bindex <- function(PS, sampled) {
 # Creates dataset with samples for each method and response rate
 Create_Samples <- function(data) {
   
-  # Random Sampling
+  # Unstratified Random Sampling
   U.RS <- data %>%
     sample_frac(size = 1) %>%
     mutate(contacted = cumsum(Ej) <= 60,
            accepted = contacted  & Ej == 1,
            sample_method = "Unstratified_RS")
-  
-  # Convenience Sampling
-  U.CS <- data %>%
-    sample_frac(size = 1, weight = UCS_Rank) %>%
-    mutate(contacted = cumsum(Ej) <= 60,
-           accepted = contacted  & Ej == 1,
-           sample_method = "Unstratified_CS")
-
-  # Stratified Balanced Sampling
-  S.BS <- data %>%
-    group_by(strata) %>%
-    arrange(SBS_Rank ) %>%
-    mutate(contacted = cumsum(Ej) <= pa,
-           accepted = contacted  & Ej == 1,
-           sample_method = "Stratified_BS")
   
   # Stratified Random
   S.RS <- data %>%
@@ -94,14 +79,29 @@ Create_Samples <- function(data) {
     mutate(contacted = cumsum(Ej) <= pa,
            accepted = contacted  & Ej == 1,
            sample_method = "Stratified_RS")
+
+  # Unstratified Convenience Sampling
+  U.CS <- data %>%
+    sample_frac(size = 1, weight = UCS_Rank) %>%
+    mutate(contacted = cumsum(Ej) <= 60,
+           accepted = contacted  & Ej == 1,
+           sample_method = "Unstratified_CS")
   
   # Stratified Convenience
   S.CS <- data %>%
     group_by(strata)  %>%
     sample_frac(size = 1, weight = SCS_Rank) %>%
     mutate(contacted = cumsum(Ej) <= pa,
-           accepted = contacted  & Ej == 1,
+           accepted = contacted & Ej == 1,
            sample_method = "Stratified_CS")
+
+  # Stratified Balanced Sampling
+  S.BS <- data %>%
+    group_by(strata) %>%
+    arrange(SBS_Rank) %>%
+    mutate(contacted = cumsum(Ej) <= pa,
+           accepted = contacted  & Ej == 1,
+           sample_method = "Stratified_BS")
   
   return(bind_rows(U.RS, U.CS, S.BS, S.RS, S.CS))
 }
@@ -178,6 +178,9 @@ Run_Iteration <- function(sim.data, PS.data, cluster.data, K.condition, RR.condi
   return(results)
 }
 
+
+
+
 Sim_Driver <- function(sim.data, PS.data, cluster.data, B.index.formula, list.covariates, K.list, RR.list, SB.list) {
   results <- list()
   
@@ -205,3 +208,67 @@ Sim_Driver <- function(sim.data, PS.data, cluster.data, B.index.formula, list.co
   
 }
 
+
+Run_Iteration_JP <- function(x, sim.data, PS.data, cluster.data, K.condition, RR.condition, SB.condition, B.index.formula, list.covariates) {
+  
+  df.responses <- Generate_Responses(PS.data = PS.data, 
+                                     cluster.data = cluster.data,
+                                     K.condition = K.condition,
+                                     RR.condition = RR.condition,
+                                     SB.condition = SB.condition)
+  
+  df.sampled <- Create_Samples(df.responses)
+  
+  df.recruitment.stats <- Calc_Recruitment_Stats(df.sampled) 
+  
+  df.samp.counts <- df.sampled %>%
+    filter(accepted) %>%
+    select(sample_method, DSID, strata, PS, RR) 
+  
+  df.sampled <- sim.data %>% 
+    full_join(df.sampled)
+  
+  df.samp.stats <- Calc_Sample_Statistics(df.sampled, list.covariates)
+  
+  df.B.indicies <- df.sampled %>%
+    mutate(accepted = ifelse(accepted, 1, 0)) %>%
+    group_by(sample_method) %>%
+    nest() %>%
+    mutate(PS_sample = map(data, glm, formula = B.index.formula, family = quasibinomial()),
+           PS_sample = map(PS_sample, fitted)) %>%
+    unnest(cols = c(data, PS_sample)) %>%
+    select(sample_method, PS_sample, accepted) %>%
+    group_by(sample_method) %>%
+    summarise(Bs = Calc_Bindex(PS_sample, accepted))
+  
+  tibble(
+    df.recruitment.stats = list(df.recruitment.stats), 
+    df.samp.counts = list(df.samp.counts), 
+    df.B.indicies = list(df.B.indicies), 
+    df.samp.stats = list(df.samp.stats)
+  )
+}
+
+
+Sim_Driver_JP <- function(iterations, 
+                          K.condition, RR.condition, SB.condition, 
+                          sim.data, PS.data, cluster.data, 
+                          B.index.formula, list.covariates) {
+  
+  
+  results <- map_dfr(
+    1:iterations, 
+    Run_Iteration_JP,
+    sim.data = sim.data,
+    PS.data = PS.data,
+    cluster.data = cluster.data,
+    K.condition = K.condition,
+    RR.condition = RR.condition,
+    SB.condition = SB.condition,
+    B.index.formula = B.index.formula,
+    list.covariates = list.covariates
+  )
+  
+  # calculate summary stats across iterations here
+
+}

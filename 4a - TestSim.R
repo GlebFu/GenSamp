@@ -6,6 +6,12 @@ source("0 - Functions - Simulation.R")
 
 load("Data/Simulation Data/Sim Data.Rdata")
 
+# ggplot(df.clusters, aes(UCS_Rank, SCS_Rank, color = factor(strata))) + 
+#   geom_point() + 
+#   facet_wrap(~ K) + 
+#   theme_minimal()
+
+
 #---------------------------------
 # SETUP
 #---------------------------------
@@ -38,12 +44,38 @@ df.responses <- Generate_Responses(PS.data = PS.data,
                                    RR.condition = RR.condition,
                                    SB.condition = SB.condition)
 
+df.responses %>% 
+  group_by(strata) %>%
+  summarise(
+    N = n(),
+    PS = sum(PS),
+    Ej = sum(Ej)
+  ) %>%
+  mutate(
+    RR = Ej / N
+  )
+
 #---------------------------------
 # Select Samples
 #---------------------------------
 
 df.sampled <- Create_Samples(df.responses)
 
+sampled_by_stratum <- 
+df.sampled %>%
+  group_by(K, RR, scale_factor, sample_method, strata) %>%
+  summarise(
+    N = n(),
+    Contacted = sum(contacted),
+    Potential = sum(Ej),
+    Accepted = sum(accepted),
+    .groups = "drop_last"
+  )
+
+sampled_by_stratum
+
+sampled_by_stratum %>%
+  summarise(across(c(N, Contacted, Potential, Accepted), sum))
 
 df.sampled %>%
   group_by(K, RR, scale_factor, sample_method, Ej, accepted) %>%

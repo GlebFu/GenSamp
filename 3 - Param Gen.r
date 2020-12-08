@@ -54,26 +54,35 @@ scale_factor <- c(1/4, 1/2, 1/1)
 response.rates <- 9:1/10
 # response.rates <- c(.1, .2, .3)
 
-response_grid <- expand.grid(scale_factor = scale_factor, MRR = response.rates) %>%
+response_grid <- 
+  expand.grid(
+    scale_factor = scale_factor, 
+    MRR = response.rates
+  ) %>%
   tibble() %>%
-  mutate(RR = paste("RR_", formatC(MRR*100, width = 2, format = "d", flag = "0"), sep = ""),
-         Bs = list(DGM.Bs$Bs),
-         vars = list(covariates),
-         DSID = list(df.sim.standardized$DSID)) %>%
-  mutate(PS.Int = pmap(.l = list(Bs = Bs,
+  mutate(
+    RR = paste("RR_", formatC(MRR*100, width = 2, format = "d", flag = "0"), sep = ""),
+    Bs = list(DGM.Bs$Bs),
+    vars = list(covariates),
+    DSID = list(df.sim.standardized$DSID)
+  ) %>%
+  mutate(
+    PS.Int = pmap(.l = list(Bs = Bs,
                                  MRR = MRR,
                                  scale_factor = scale_factor,
                                  vars = vars),
-                       .f = calcPS,
-                       data = df.sim.standardized,
-                       exclude = DGM.exclude,
-                       getint = T),
-         Int = map_dbl(PS.Int, function(x) x$Intercept),
-         PS = map(PS.Int, function(x) x$PS))
+                  .f = calcPS,
+                  data = df.sim.standardized,
+                  exclude = DGM.exclude,
+                  getint = T),
+    Int = map_dbl(PS.Int, function(x) x$Intercept),
+    PS = map(PS.Int, function(x) x$PS)
+  )
 
 
 
-df.PS <- response_grid %>%
+df.PS <- 
+  response_grid %>%
   select(scale_factor, RR, DSID, PS) %>%
   unnest(cols = c(DSID, PS))
   
@@ -98,11 +107,14 @@ df.PS %>%
   facet_grid(scale_factor~RR )
 
 
-df.smd.ipsw <- df.PS %>%
+df.smd.ipsw <- 
+  df.PS %>%
   left_join(df.sim %>% select(DSID, covariates)) %>%
   gather(key = var, value = val, T1:pELL) %>%
-  mutate(w1 = 1 / PS,
-         w0 = 1 / (1 - PS)) %>%
+  mutate(
+    w1 = 1 / PS,
+    w0 = 1 / (1 - PS)
+  ) %>%
   group_by(scale_factor, RR, var) %>%
   summarise(m = weighted.mean(val, PS)) %>%
   left_join(df.pop.stats) %>%
@@ -143,7 +155,8 @@ prop_allocations %>%
   summarise(t = sum(pa))
 
 
-df.clusters <- df.sim %>%
+df.clusters <- 
+  df.sim %>%
   select(DSID, all_of(covariates)) %>%
   gather(key = variables, value = value, -DSID) %>%
   left_join(df.clusters) %>%
@@ -165,9 +178,10 @@ df.clusters <- prop_allocations %>%
   select(K, strata, pa) %>%
   right_join(df.clusters) 
 
-df.clusters <- df.PS %>%
+df.clusters <- 
+  df.PS %>%
   group_by(scale_factor, RR) %>%
-  arrange(desc(PS)) %>%
+  arrange(scale_factor, RR, desc(PS)) %>%
   mutate(UCS_Rank = 1:n()) %>%
   ungroup() %>%
   select(DSID, UCS_Rank) %>%
@@ -177,8 +191,13 @@ df.clusters <- df.PS %>%
   arrange(desc(UCS_Rank)) %>%
   mutate(SCS_Rank = 1:n())
 
-?min_rank
-?cume_dist
+ggplot(df.clusters, aes(UCS_Rank, SCS_Rank, color = factor(strata))) + 
+  geom_point() + 
+  facet_wrap(~ K) + 
+  theme_minimal()
+
+# ?min_rank
+# ?cume_dist
 
 # df.clusters %>%
 #   filter(K == "K_06") %>%
