@@ -61,6 +61,8 @@ df.responses %>%
 
 df.sampled <- Create_Samples(df.responses)
 
+df.sampled$sample_method %>% unique()
+
 sampled_by_stratum <- 
 df.sampled %>%
   group_by(K, RR, scale_factor, sample_method, strata) %>%

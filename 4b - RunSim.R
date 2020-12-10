@@ -11,7 +11,7 @@ source("0 - Functions - Simulation.R")
 
 load("Data/Simulation Data/Sim Data.Rdata")
 
-minreps <- 1000
+minreps <- 100
 whichK <- c("K_05")
 whichRR <- NULL
 whichSB <- NULL
@@ -91,7 +91,7 @@ date <- paste(lubridate::year(Sys.time()), lubridate::month(Sys.time()), lubrida
 
 resultsFile <- paste("Data/Results/", date, " - ", sum(reps), " Reps - K", whichK, ".rdata", sep = "")
 
-with(results, save(list = c(names(results), "runtime", "seed"), file = resultsFile))
+with(results, save(list = c(names(results), "runtime", "seed", "reps"), file = resultsFile))
 
 write_file(x = resultsFile, "Data/Results/LastResults.txt")
 

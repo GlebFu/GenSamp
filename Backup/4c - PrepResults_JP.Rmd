@@ -1,0 +1,246 @@
+---
+title: "Untitled"
+output: pdf_document
+---
+
+# Setup
+
+## Packages and Data
+
+```{r}
+library(papaja)
+library(tidyverse)
+library(kableExtra)
+library(ggalt)
+library(ggrepel)
+library(ggforce)
+library(concaveman)
+library(cowplot)
+
+rm(list = ls())
+
+
+load("Data/Simulation Data/Sim Data.Rdata")
+load("Data/Cluster Analysis/Clusters k2-10.rdata")
+
+# load(read_file("Data/Results/LastResults.txt"))
+# load("Data/Results/1002 Reps - K5 - pam.rdata")
+load("Data/Results/GenSamp - 20201210 - 12.rdata")
+
+results_jp <- results
+
+
+load("Data/Results/20201210 - 12 Reps - K5.rdata")
+```
+
+
+```{r}
+ls() %>%
+  tibble(Vars = .) %>%
+  mutate(MB = map(Vars, function(x) object.size(eval(parse(text = x))) %>% format(units = "MB", digits = 3))) %>%
+  unnest(MB) %>%
+  arrange(desc(parse_number(MB)))
+
+```
+
+```{r}
+
+df.list <- list()
+results <- list()
+results2 <-list()
+vars <- list()
+
+tabs <- list()
+figs <- list()
+
+df.list$strata.id <- df.clusters %>% 
+  transmute(DSID = DSID, 
+            k = K_05, 
+            strata = factor(paste("Strata", k)))
+
+df.list$pop.data <- left_join(df.sim, df.list$strata.id)
+
+df.list$pop.stats <- df.pop.stats
+
+df.list$PS <- df.PS %>% 
+  mutate(logit = log(PS / (1 - PS)))
+
+df.list$cluster.vars <- read_csv("Data/Paper/Clustering Variables.csv")
+
+df.list$coefs <- DGM.Bs %>%
+  transmute(vnames = var, log_odds = Bs) %>%
+  full_join(read_csv("Data/Paper/Clustering Variables.csv"))
+```
+
+```{r}
+rename_results <- function(result.data) {
+  result.data %>%
+    mutate(Sampler = paste(str_sub(sample_method, end = 1),  str_sub(sample_method, start = -2), sep = ""),
+         K = parse_number(K),
+         RR = parse_number(RR)) %>%
+    select(-sample_method)
+}
+
+rename_results_jp <- function(result.data) {
+  result.data %>%
+  mutate(Sampler = paste(str_sub(sample_method, end = 1),  str_sub(sample_method, start = -2), sep = ""),
+         K = parse_number(K.condition),
+         RR = parse_number(RR.condition),
+         SB = SB.condition) %>%
+  select(-K.condition, -RR.condition, -sample_method, -SB.condition)
+}
+
+
+df.list$k.stats <- cluster.stats
+
+results$B <- df.B.indicies %>% rename_results()
+
+results2$B <- results_jp %>% 
+  select(RR.condition:SB.condition, df.B.indicies) %>%
+  unnest(df.B.indicies) %>% 
+  rename_results_jp()
+
+
+
+results$r.stats <- df.recruitment.stats %>% rename_results() %>%
+  group_by(K, Sampler, RR, SB, measure) %>%
+  summarise(value = mean(value))
+
+
+results2$r.stats <- results_jp %>% 
+  select(RR.condition:SB.condition, df.recruitment.stats) %>%
+  unnest(df.recruitment.stats) %>% 
+  rename_results_jp()  %>%
+  group_by(K, Sampler, RR, SB, measure) %>%
+  summarise(value = mean(value))
+
+
+```
+
+
+```{r}
+results$gini.coef <- df.samp.counts %>%
+  rename_results() %>%
+  group_by(Sampler, DSID, RR, SB) %>%
+  count(name = "count") %>%
+  group_by(Sampler, RR, SB) %>%
+  nest() %>%
+  mutate(data = map(data, full_join, df.list$pop.data %>% select(DSID))) %>%
+  unnest(cols = c(data)) %>%
+  group_by(Sampler, RR, SB) %>%
+  mutate(count = ifelse(is.na(count), 0, count),
+         prop.selected = count/sum(count),
+         n = n(),
+         prop.pop = 1/n()) %>%
+  group_by(Sampler, RR, SB) %>%
+  arrange(prop.selected) %>%
+  mutate(c.prop.sel = cumsum(prop.selected),
+         c.prop.pop = cumsum(prop.pop)) %>%
+  summarise(gini = ineq::Gini(prop.selected) %>% round(2)) %>%
+  group_by(RR) %>%
+  arrange(gini) %>%
+  mutate(y.pos = 1 - (1:n()/n()) / 1.5,
+         x.pos = 1 - y.pos)
+
+results2$gini.coef <- results_jp %>% 
+  # filter(RR.condition == "RR_90",
+         # SB.condition == 1) %>%
+  select(RR.condition:SB.condition, df.samp.counts) %>%
+  unnest(df.samp.counts) %>%
+  rename_results_jp() %>%
+  group_by(Sampler, DSID, RR, SB) %>%
+  count(name = "count") %>%
+  group_by(Sampler, RR, SB) %>%
+  nest() %>%
+  mutate(data = map(data, full_join, df.list$pop.data %>% select(DSID))) %>%
+  unnest(cols = c(data)) %>%
+  group_by(Sampler, RR, SB) %>%
+  mutate(count = ifelse(is.na(count), 0, count),
+         prop.selected = count/sum(count),
+         n = n(),
+         prop.pop = 1/n()) %>%
+  group_by(Sampler, RR, SB) %>%
+  arrange(prop.selected) %>%
+  mutate(c.prop.sel = cumsum(prop.selected),
+         c.prop.pop = cumsum(prop.pop)) %>%
+  summarise(gini = ineq::Gini(prop.selected) %>% round(2)) %>%
+  group_by(RR) %>%
+  arrange(gini) %>%
+  mutate(y.pos = 1 - (1:n()/n()) / 1.5,
+         x.pos = 1 - y.pos)
+
+
+```
+
+```{r}
+
+results$smd.stats <- df.samp.stats %>% 
+  ungroup() %>% 
+  rename_results() %>% 
+  select(-K) %>%
+  left_join(df.list$pop.stats) %>%
+  mutate(smd = (samp.mean - pop.mean) / pop.sd) %>%
+  group_by(Sampler, RR, SB, var) %>%
+  summarise(mSMD = mean(smd),
+            mASMD = mean(abs(smd)),
+            sim.mean = mean(samp.mean),
+            sim.sd = mean(samp.sd))
+
+results2$smd.stats <- results_jp %>% 
+  # filter(RR.condition == "RR_90",
+         # SB.condition == 1) %>%
+  select(RR.condition:SB.condition, df.samp.stats) %>%
+  unnest(df.samp.stats) %>%
+  ungroup() %>%
+  rename_results_jp() %>%
+  select(-K) %>%
+  left_join(df.list$pop.stats) %>%
+  mutate(smd = (samp.mean - pop.mean) / pop.sd) %>%
+  group_by(Sampler, RR, SB, var) %>%
+  summarise(mSMD = mean(smd),
+            mASMD = mean(abs(smd)),
+            sim.mean = mean(samp.mean),
+            sim.sd = mean(samp.sd))
+```
+
+
+```{r}
+
+results$k <- df.clusters
+results2$k <- df.clusters
+
+
+# df.list$coefs <- data.frame(vnames = names(DGM.Bs), 
+#                             log_odds = DGM.Bs, 
+#                             row.names = NULL) %>%
+#   full_join(read_csv("Data/Paper/Clustering Variables.csv"))
+
+rm(list = c("cluster.stats", 
+            "df.B.indicies", 
+            "df.recruitment.stats", 
+            "df.samp.counts", 
+            "df.samp.stats", 
+            "df.clusters", 
+            "df.pop.stats", 
+            "df.PS",
+            "results_jp",
+            "rename_results_jp",
+            "rename_results"))
+
+vars$cluster <- list(mixed = cluster_vars, dummy = covariates)
+
+
+```
+
+```{r}
+ls() %>%
+  tibble(Vars = .) %>%
+  mutate(MB = map(Vars, function(x) object.size(eval(parse(text = x))) %>% format(units = "MB", digits = 3))) %>%
+  unnest(MB) %>%
+  arrange(desc(parse_number(MB)))
+
+
+save.image(file = "Data/Paper/Summarised Sim Results.RData")
+
+
+```

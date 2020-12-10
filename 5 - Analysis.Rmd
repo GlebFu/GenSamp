@@ -409,7 +409,7 @@ tabs$B.label <- tabs$B %>%
          SB == 1) %>%
   mutate(RR = 5)  %>%
   arrange(M) %>%
-  mutate(M = c(.53, .58, .73, .78, .9))
+  mutate(M = c(.53, .58, .73, .78, .9, .9))
 
 figs$B <- tabs$B %>%
   ggplot(aes(x = RR, y = M, color = Sampler, 
@@ -514,46 +514,19 @@ smd.test %>%
 
 
 ```{r}
-smd.test %>%
-  filter(vnames == "n") %>%
-  ggplot(aes(x = SB, y = resid, group = interaction(RR, Sampler), color = Sampler)) +
-  geom_line(alpha = .5) +
-  theme(legend.position = "none")
-
-smd.test %>%
-  filter(vnames == "n") %>%
-  ggplot(aes(x = SB, y = resid, group = interaction(RR, Sampler), color = Sampler)) +
-  geom_line(alpha = .5) +
-  theme(legend.position = "none")
-
-test$plots[5]
-
-test$plots[3]
+# test <- df.list$smd.results %>%
+#   select(Sampler, RR, SB, vnames, mASMD, Variables) %>%
+#   nest(data = -c(vnames, Variables)) %>%
+#   mutate(resid = map(data, function(x) lm(mASMD ~ RR + I(RR^2), data = x) %>% residuals())) %>%
+#   unnest(cols = c(data, resid))
+# 
+# test %>%
+#   ggplot(aes(x = RR, y = resid, color = Sampler, group = interaction(Variables, Sampler))) +
+#   geom_line() +
+#   facet_grid(SB ~ Variables)
 
 ```
 
-
-```{r}
-plot_smd <- function(data, yvar = "mASMD") {
-  data %>% 
-    ggplot(aes(x = RR, y = get(yvar), color = Sampler, linetype = Sampler, group = Sampler)) +
-    geom_line(size = 1) +
-    geom_hline(yintercept = .25, linetype = "dotted") +
-    facet_wrap( ~ SB, ncol = 3) +
-    labs(y = lab.vars$smd,
-         x = lab.vars$rr) + 
-    scale_x_continuous(breaks = seq(10, 90, 20)) +
-    theme(legend.position = "bottom")
-}
-
-test <- df.list$smd.results %>%
-  nest(cols = -Variables) %>%
-  mutate(plots = map(cols, plot_smd),
-         plots = set_names(plots, paste("smd.", Variables, sep = "")),
-         data = set_names(cols, paste("smd.", Variables, sep = "")))
-test$plots
-
-```
 
 ```{r}
 
@@ -768,138 +741,6 @@ figs$v.coef
 ```
 
 
-
-### Test
-
-
-
-
-```{r}
-
-df.test <- df.list$smd.results %>%
-  left_join(tabs$v.coef %>% 
-              select(vnames, vratio, log_odds, abs_log_odds:prob))
-
-```
-
-
-```{r}
-df.test %>%
-  ggplot(aes(x = abs_log_odds, y = mASMD, color = Sampler)) +
-  geom_point() +
-  geom_hline(yintercept = .25, linetype = "dotted") +
-  geom_hline(yintercept = 0) +
-  geom_smooth(method = "lm", se = F) +
-  facet_grid(~RR)
-
-df.test %>%
-  ggplot(aes(x = log_odds, y = mSMD, color = Sampler)) +
-  geom_point() +
-  geom_hline(yintercept = .25, linetype = "dotted") +
-  geom_hline(yintercept = 0) +
-  geom_smooth(method = "lm", se = F) +
-  facet_grid(~RR)
-
-```
-
-```{r}
-df.test %>%
-  ggplot(aes(x = Sampler, y = mASMD, color = Sampler)) +
-  geom_boxplot(alpha = .5,
-               position = "dodge2") +
-  facet_grid(~ RR) +
-  geom_hline(yintercept = 0) +
-  geom_hline(yintercept = .25, linetype = "dotted")
-
-```
-
-
-```{r}
-
-df.plot <- df.test %>%
-  nest(data = everything())  %>%
-  mutate(m1 = map(data, lm, formula = mSMD ~ RR),
-         m2 = map(data, lm, formula = mSMD ~ log_odds + vratio + RR),
-         m3 = map(data, lm, formula = mSMD ~ log_odds * vratio * RR)) %>%
-  gather(model, fit, -data) %>%
-  mutate(res = map(fit, function(x) x$residuals),
-         plot.data = map2(data, 
-                          res, 
-                          function(x, y) x %>% mutate(res = y)))
-
-
-
-anova(df.plot$fit[[1]], df.plot$fit[[2]], df.plot$fit[[3]])
-
-texreg::screenreg(df.plot$fit)
-
-df.plot %>%
-  select(model, plot.data) %>%
-  unnest(plot.data) %>%
-  ggplot(aes(x = RR, y = res, color = Sampler, linetype = Sampler)) +
-  # geom_point(alpha = .5) +
-  geom_smooth() +
-  facet_wrap(~model)
-
-df.plot %>%
-  select(model, plot.data) %>%
-  unnest(plot.data) %>%
-  ggplot(aes(x = RR, y = res, color = Sampler, linetype = Sampler)) +
-  geom_point() +
-  geom_line() + 
-  geom_hline(yintercept = 0) + 
-  geom_hline(yintercept = .25, linetype = "dotted") +
-  facet_grid(vnames ~ model, scale = "free_y")
-  
-```
-
-
-```{r}
-
-df.plot %>%
-  select(model, plot.data) %>%
-  unnest(plot.data) %>%
-  ggplot(aes(x = vratio, y = res, color = Sampler)) +
-  geom_point() +
-  geom_hline(yintercept = 0) +
-  facet_grid(model ~ RR)
-
-```
-### Test 2
-
-```{r}
-df.test.2 <- results$s.stats %>%
-  ungroup() %>%
-  left_join(df.list$pop.stats) %>%
-  mutate(smd = (samp.mean - pop.mean) / pop.sd,
-         a_smd = abs(smd),
-         RR = parse_number(RR))
-
-df.test.2.sum <- df.test.2 %>%
-  ungroup() %>%
-  group_by(Sampler, RR, var) %>%
-  summarise(mSMD = mean(smd),
-            mSMD.sd = sd(smd),
-            mASMD = mean(a_smd),
-            mASMD.sd = sd(a_smd))
-
-df.test.2.sum %>%
-  ggplot(aes(x = mSMD, y = mSMD, color = Sampler)) +
-  geom_point() +
-  geom_vline(xintercept = 0)+
-  facet_wrap(~RR)
-
-df.test.2 %>%
-  filter(var == "ethWhite") %>%
-  ggplot(aes(x = RR, y = a_smd, color = Sampler)) +
-  geom_smooth(method = "lm", formula = y ~ poly(x, 3))
-
-df.test.2 %>%
-  filter(var == "ethWhite") %>%
-  ggplot(aes(x = RR, y = smd, color = Sampler)) +
-  geom_smooth(method = "lm", formula = y ~ poly(x, 3))
-```
-
 ## Feasibility
 
 ### Sampling Difficulty
@@ -938,21 +779,23 @@ tabs$samples.contacts.labels <-  tabs$samples %>%
 
 tabs$samples.contacts.labels <-  tabs$samples %>%
   filter(measure == "sch.contacted") %>%
-  filter(RR == 10) %>%
+  filter(RR == 10,
+         SB == 1) %>%
   arrange(value) %>%
   ungroup() %>%
   mutate(RR = 5,
          value = c(200, 1000, 2200, 2900, 3700))
 
 figs$samples.contacts <- tabs$samples %>%
-  filter(measure == "sch.contacted") %>%
+  filter(measure == "sch.contacted",
+         SB == 1) %>%
   ggplot(aes(x = RR, y = value, group = Sampler, color = Sampler, linetype = Sampler)) +
   geom_point() +
   geom_line() +
   theme(legend.position = "none") +
   scale_x_continuous(breaks = seq(0, 100, 10)) +
-  scale_y_continuous(breaks = seq(0, 4000, 500),
-                     limits = c(0, 4000),
+  scale_y_continuous(breaks = seq(0, 4500, 500),
+                     limits = c(0, 4500),
                      labels = function(x) x / 1000) +
   labs(x = lab.vars$rr,
        y = lab.vars$contacts) +
@@ -1080,7 +923,7 @@ lab.vars$gini <- "Gini Coeficient"
 ```{r}
 
 
-tabs$gini.coef.labels <-  tabs$gini.coef %>%
+tabs$gini.coef.labels <-  results$gini.coef %>%
   mutate(RR = parse_number(RR)) %>%
   filter(RR %in% c(10)) %>%
   mutate(RR = 5) %>%

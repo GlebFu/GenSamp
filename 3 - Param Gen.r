@@ -100,11 +100,11 @@ intercepts <-
 #   geom_histogram() +
 #   facet_grid(scale_factor~RR)
 
-df.PS %>%
-  mutate(PS.log = log(PS / (1-PS))) %>%
-  ggplot(aes(x = PS.log)) +
-  geom_histogram() +
-  facet_grid(scale_factor~RR )
+# df.PS %>%
+#   mutate(PS.log = log(PS / (1-PS))) %>%
+#   ggplot(aes(x = PS.log)) +
+#   geom_histogram() +
+#   facet_grid(scale_factor~RR )
 
 
 df.smd.ipsw <- 
@@ -120,18 +120,18 @@ df.smd.ipsw <-
   left_join(df.pop.stats) %>%
   mutate(smd = (m - pop.mean) / pop.sd)
 
-df.smd.ipsw %>%
-  select(RR, var, smd) %>%
-  left_join(DGM.Bs) %>%
-  mutate(dif = Bs - smd,
-         scale_d = abs(dif / Bs)) %>%
-  ggplot(aes(x = RR,
-             y = scale_d,
-             color = scale_factor,
-             group = scale_factor)) +
-  geom_point() +
-  geom_line() +
-  facet_wrap(~var)
+# df.smd.ipsw %>%
+#   select(RR, var, smd) %>%
+#   left_join(DGM.Bs) %>%
+#   mutate(dif = Bs - smd,
+#          scale_d = abs(dif / Bs)) %>%
+#   ggplot(aes(x = RR,
+#              y = scale_d,
+#              color = scale_factor,
+#              group = scale_factor)) +
+#   geom_point() +
+#   geom_line() +
+#   facet_wrap(~var)
 
 
 
@@ -178,22 +178,22 @@ df.clusters <- prop_allocations %>%
   select(K, strata, pa) %>%
   right_join(df.clusters) 
 
-df.clusters <- 
+df.clusters <-
   df.PS %>%
   group_by(scale_factor, RR) %>%
-  arrange(scale_factor, RR, desc(PS)) %>%
-  mutate(UCS_Rank = 1:n()) %>%
+  arrange(scale_factor, RR) %>%
+  mutate(UCS_Rank = min_rank(PS)) %>%
   ungroup() %>%
   select(DSID, UCS_Rank) %>%
   unique() %>%
   right_join(df.clusters) %>%
   group_by(K, strata) %>%
-  arrange(desc(UCS_Rank)) %>%
-  mutate(SCS_Rank = 1:n())
+  mutate(SCS_Rank = min_rank(UCS_Rank))
 
-ggplot(df.clusters, aes(UCS_Rank, SCS_Rank, color = factor(strata))) + 
-  geom_point() + 
-  facet_wrap(~ K) + 
+df.clusters %>%
+  filter(K == "K_05") %>%
+  ggplot(aes(UCS_Rank, SCS_Rank, color = factor(strata))) +
+  geom_point() +
   theme_minimal()
 
 # ?min_rank

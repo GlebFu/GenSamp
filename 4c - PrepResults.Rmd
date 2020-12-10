@@ -25,6 +25,8 @@ load("Data/Cluster Analysis/Clusters k2-10.rdata")
 
 load(read_file("Data/Results/LastResults.txt"))
 # load("Data/Results/1002 Reps - K5 - pam.rdata")
+
+
 ```
 
 
@@ -79,9 +81,13 @@ df.list$k.stats <- cluster.stats
 
 results$B <- df.B.indicies %>% rename_results()
 
+
 results$r.stats <- df.recruitment.stats %>% rename_results() %>%
   group_by(K, Sampler, RR, SB, measure) %>%
   summarise(value = mean(value))
+
+
+
 
 ```
 
@@ -110,6 +116,8 @@ results$gini.coef <- df.samp.counts %>%
   mutate(y.pos = 1 - (1:n()/n()) / 1.5,
          x.pos = 1 - y.pos)
 
+
+
 ```
 
 ```{r}
@@ -133,8 +141,6 @@ results$smd.stats <- df.samp.stats %>%
 
 results$k <- df.clusters
 
-
-
 # df.list$coefs <- data.frame(vnames = names(DGM.Bs), 
 #                             log_odds = DGM.Bs, 
 #                             row.names = NULL) %>%
@@ -147,7 +153,8 @@ rm(list = c("cluster.stats",
             "df.samp.stats", 
             "df.clusters", 
             "df.pop.stats", 
-            "df.PS"))
+            "df.PS",
+            "rename_results"))
 
 vars$cluster <- list(mixed = cluster_vars, dummy = covariates)
 
@@ -163,5 +170,6 @@ ls() %>%
 
 
 save.image(file = "Data/Paper/Summarised Sim Results.RData")
+
 
 ```
