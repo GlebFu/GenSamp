@@ -11,7 +11,7 @@ source("0 - Functions - Simulation.R")
 
 load("Data/Simulation Data/Sim Data.Rdata")
 
-minreps <- 100
+minreps <- 1000
 whichK <- c("K_05")
 whichRR <- NULL
 whichSB <- NULL

@@ -55,7 +55,7 @@ df.list$strata.id <- df.clusters %>%
 
 df.list$pop.data <- left_join(df.sim, df.list$strata.id)
 
-df.list$pop.stats <- df.pop.stats
+
 
 df.list$PS <- df.PS %>% 
   mutate(logit = log(PS / (1 - PS)))
@@ -65,6 +65,19 @@ df.list$cluster.vars <- read_csv("Data/Paper/Clustering Variables.csv")
 df.list$coefs <- DGM.Bs %>%
   transmute(vnames = var, log_odds = Bs) %>%
   full_join(read_csv("Data/Paper/Clustering Variables.csv"))
+
+df.list$pop.stats <- df.list$pop.data %>%
+  select(DSID, all_of(covariates), strata) %>%
+  gather(key = vnames, value = value, covariates) %>%
+  group_by(vnames) %>%
+  mutate(T.SS = var(value) * (n() - 1)) %>%
+  group_by(vnames, T.SS, strata) %>%
+  summarise(W.SS = var(value) * (n() - 1)) %>%
+  summarise(W.SS = sum(W.SS)) %>%
+  mutate(B.SS = T.SS - W.SS,
+         vratio = B.SS / T.SS) %>%
+  left_join(df.list$coefs) %>%
+  left_join(df.pop.stats %>% rename(vnames = var))
 ```
 
 ```{r}
@@ -123,12 +136,13 @@ results$gini.coef <- df.samp.counts %>%
 ```{r}
 
 results$smd.stats <- df.samp.stats %>% 
+  rename(vnames = var) %>%
   ungroup() %>% 
   rename_results() %>% 
   select(-K) %>%
   left_join(df.list$pop.stats) %>%
   mutate(smd = (samp.mean - pop.mean) / pop.sd) %>%
-  group_by(Sampler, RR, SB, var) %>%
+  group_by(Sampler, RR, SB, vnames) %>%
   summarise(mSMD = mean(smd),
             mASMD = mean(abs(smd)),
             sim.mean = mean(samp.mean),

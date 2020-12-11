@@ -258,11 +258,11 @@ figs$joint.cluster.stats
 tabs$cluster.SMD <- df.list$pop.data %>% 
   # droplevels() %>% 
   select(strata, all_of(covariates)) %>%
-  gather(key = var, value = val, -strata) %>%
-  group_by(strata, var) %>%
+  gather(key = vnames, value = val, -strata) %>%
+  group_by(strata, vnames) %>%
   summarise(strat.mean = mean(val)) %>%
   left_join(df.list$pop.stats) %>%
-  transmute(vnames = var,
+  transmute(vnames = vnames,
             SMD = round((pop.mean - strat.mean) / pop.sd, 2)) %>%
   left_join(df.list$coefs)
 
@@ -453,62 +453,93 @@ tabs$B %>%
 
 
 
-vars$plot.groups <- bind_rows(
-  tibble(group = "Group 1", 
-         desc = "good", 
-         vnames = c("ethHisp", "pELL", "Urban", "ethWhite", 
-                    "ToRu", "pTotfrl", "T1",  "Suburban")),
-  tibble(group = "Group 3", 
-         desc = "bad", 
-         vnames = c("ethBlack", "n", "dSCH")),
-  tibble(group = "Group 2", 
-         desc = "neutral", 
-         vnames = c("pFem", "ST.ratio"))
-  )
-
 
 df.list$smd.results <- results$smd.stats %>%
-  rename(vnames = var) %>%
-  left_join(df.list$coefs) %>%
+  left_join(df.list$pop.stats) %>%
   ungroup()
 
 
-df.list$smd.results  %>%
-  ggplot(aes(x = RR, y = mASMD, group = interaction(Variables, SB, Sampler), color = Sampler)) +
-  geom_line(alpha = .5) +
-  theme(legend.position = "none")
-  
-
 
 smd.test <- df.list$smd.result %>%
-  mutate(strat = str_sub(Sampler, end = 1),
-         type = str_sub(Sampler, start = -2)) %>%
-  group_by(type, Variables, RR, SB) %>%
-  arrange(strat) %>%
-  summarise(smd_dif = diff(mASMD))
+  select(Sampler, RR, SB, vnames, Variables, log_odds, mASMD, vratio) %>%
+  mutate(Neutrality  = mASMD <= .25,
+         log_odds = SB * log_odds) %>%
+  group_by(SB, vnames, Variables, log_odds, vratio) %>%
+  mutate(Neutrality  = mean(Neutrality )) %>%
+  spread(Sampler, mASMD) %>%
+  mutate(SBS_vs_Strata = SBS <= min(c(SCS, SRS, SC2)),
+         SBS_vs_All = SBS <= min(c(SCS, SRS, SC2, URS, UCS)),
+         SCS_vs_All = SCS <= min(c(SBS, SRS, SC2, URS, UCS)),
+         Strata_in_CS = SCS <= UCS,
+         Strata_in_CS2 = SC2 <= UCS,
+         Strata_in_RS = SRS <= UCS)
 
 smd.test %>%
-  filter(type == "CS") %>%
-  ggplot(aes(x = RR, y = smd_dif, color = as.factor(SB))) +
-  geom_line() +
-  facet_wrap(~Variables)
+  group_by(Variables) %>%
+  mutate(Mean_Neutrality = mean(Neutrality )) %>%
+  filter(Mean_Neutrality == 1)
 
 smd.test %>%
-  filter(type == "RS") %>%
-  ggplot(aes(x = RR, y = smd_dif, color = as.factor(SB))) +
-  geom_line() +
-  facet_wrap(~Variables)
+  select(RR, SB, vnames, Variables, log_odds, vratio, Neutrality, SBS_vs_Strata:Strata_in_RS) %>%
+  gather(comparison, value, SBS_vs_Strata:Strata_in_RS) %>%
+  mutate(alpha = Neutrality,
+         shape = Neutrality == 1) %>%
+  ggplot(aes(x = vratio, y = abs(log_odds), color = value, alpha = alpha, shape = shape)) +
+  geom_point(size = 4 ) +
+  facet_wrap(~comparison) +
+  theme_bw() +
+  scale_shape_manual(values=c(20, 1))
 
-# %>%
-#   nest(data = everything()) %>%
-#   mutate(resid = map(data, function(x) lm(mASMD ~ 0 + RR + I(RR^2), data = x) %>% residuals())) %>%
-#   unnest(cols = c(data, resid))
+
+```
+
+
+```{r}
+
+
+# smd.test <- df.list$smd.result %>%
+#   select(RR, SB, Variables, vnames, Sampler, mASMD) %>%
+#   spread(Sampler, mASMD) %>%
+#   mutate(CS_Dif_1 = UCS - SCS,
+#          CS_Dif_2 = UCS - SC2,
+#          RS_Dif = URS - SRS,
+#          BS_Dif_R = SRS - SBS,
+#          BS_Dif_C1 = SCS - SBS,
+#          BS_Dif_C2 = SC2 - SBS,
+#          SB = factor(SB))
+#   
 # 
 # smd.test %>%
-#   ggplot(aes(x = SB, y = resid, group = interaction(RR, Sampler), color = Sampler)) +
-#   geom_line(alpha = .5) +
-#   theme(legend.position = "none") +
-#   facet_wrap(~ Variables)
+#   ggplot(aes(x = RR, y = CS_Dif_1, color = SB)) +
+#   geom_line() +
+#   geom_hline(yintercept = 0) +
+#   facet_wrap(~Variables, scale = "free") +
+#   theme_minimal()
+# 
+# smd.test %>%
+#   ggplot(aes(x = RR, y = CS_Dif_2, color = SB)) +
+#   geom_line() +
+#   geom_hline(yintercept = 0) +
+#   facet_wrap(~Variables, scale = "free") +
+#   theme_minimal()
+
+```
+
+```{r}
+smd.test %>%
+  filter(vnames == "n") %>%
+  ggplot(aes(x = RR, y = CS_Dif_1, color = SB)) +
+  geom_line() +
+  theme_minimal()
+
+
+df.list$smd.results %>%
+  filter(SB == 1,
+         vnames == "n") %>%
+  ggplot(aes(x = RR, y = mASMD, color = Sampler)) +
+  geom_line() +
+  theme_minimal()
+
 
 ```
 
