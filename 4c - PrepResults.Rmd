@@ -23,8 +23,8 @@ rm(list = ls())
 load("Data/Simulation Data/Sim Data.Rdata")
 load("Data/Cluster Analysis/Clusters k2-10.rdata")
 
-load(read_file("Data/Results/LastResults.txt"))
-# load("Data/Results/1002 Reps - K5 - pam.rdata")
+# load(read_file("Data/Results/LastResults.txt"))
+load("Data/Results/20201210 - 1002 Reps - K5.rdata")
 
 
 ```

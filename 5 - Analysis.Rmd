@@ -402,6 +402,19 @@ tabs$B <- results$B %>%
   mutate(LL = M - SD,
          UL = M + SD)
 
+tabs$B %>%
+  filter(Sampler %in% c("SCS", "SC2", "UCS")) %>%
+  ggplot(aes(x = RR, y = M, color = factor(SB))) +
+  geom_line() +
+  facet_wrap(~ Sampler) +
+  geom_hline(yintercept = .95, linetype = "dotted") +
+  geom_hline(yintercept = .8, linetype = "dashed") +
+  theme_minimal()
+
+```
+
+
+```{r}
 
 tabs$B.label <- tabs$B %>%
   ungroup() %>%
@@ -458,15 +471,31 @@ df.list$smd.results <- results$smd.stats %>%
   left_join(df.list$pop.stats) %>%
   ungroup()
 
+df.list$smd.results %>%
+  filter(SB == 1,
+         !(vnames %in% c("pFem", "ST.ratio"))) %>%
+  # mutate(mSMD = abs(mSMD),
+  #        log_odds = abs(log_odds)) %>%
+  ggplot(aes(x = RR, y = mSMD, color = Sampler)) +
+  geom_line(size = 1) +
+  facet_wrap(~Variables, scale = "free") +
+  geom_hline(yintercept = 0) +
+  geom_hline(aes(yintercept = log_odds), linetype = "dashed") +
+  geom_hline(yintercept = c(.25, -.25), linetype = "dotted") +
+  theme_bw()
+```
+
+
+```{r}
 
 
 smd.test <- df.list$smd.result %>%
-  select(Sampler, RR, SB, vnames, Variables, log_odds, mASMD, vratio) %>%
-  mutate(Neutrality  = mASMD <= .25,
+  select(Sampler, RR, SB, vnames, Variables, log_odds, mSMD, vratio) %>%
+  mutate(Neutrality  = (-.25 <= mSMD) & (mSMD <= .25),
          log_odds = SB * log_odds) %>%
   group_by(SB, vnames, Variables, log_odds, vratio) %>%
   mutate(Neutrality  = mean(Neutrality )) %>%
-  spread(Sampler, mASMD) %>%
+  spread(Sampler, mSMD) %>%
   mutate(SBS_vs_Strata = SBS <= min(c(SCS, SRS, SC2)),
          SBS_vs_All = SBS <= min(c(SCS, SRS, SC2, URS, UCS)),
          SCS_vs_All = SCS <= min(c(SBS, SRS, SC2, URS, UCS)),
@@ -484,7 +513,23 @@ smd.test %>%
   gather(comparison, value, SBS_vs_Strata:Strata_in_RS) %>%
   mutate(alpha = Neutrality,
          shape = Neutrality == 1) %>%
-  ggplot(aes(x = vratio, y = abs(log_odds), color = value, alpha = alpha, shape = shape)) +
+  ggplot(aes(x = vratio, y = log_odds, color = value, alpha = alpha, shape = shape)) +
+  geom_point(size = 4 ) +
+  facet_wrap(~comparison) +
+  theme_bw() +
+  scale_shape_manual(values=c(20, 1))
+
+
+```
+
+```{r}
+
+smd.test %>%
+  select(RR, SB, vnames, Variables, log_odds, vratio, Neutrality, SBS_vs_Strata:Strata_in_RS) %>%
+  gather(comparison, value, SBS_vs_Strata:Strata_in_RS) %>%
+  mutate(alpha = Neutrality,
+         shape = Neutrality == 1) %>%
+  ggplot(aes(x = RR, y = log_odds, color = value, alpha = alpha, shape = shape)) +
   geom_point(size = 4 ) +
   facet_wrap(~comparison) +
   theme_bw() +

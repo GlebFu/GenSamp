@@ -87,21 +87,44 @@ Create_Samples <- function(data) {
            accepted = contacted  & Ej == 1,
            sample_method = "Unstratified_CS")
   
-  # Stratified Convenience 2
-  S.C2 <- data %>%
+  # Stratified Convenience Unstratified Ranks
+  S.CS_UR <- data %>%
     group_by(strata)  %>%
     sample_frac(size = 1, weight = UCS_Rank) %>%
     mutate(contacted = cumsum(Ej) <= pa,
            accepted = contacted & Ej == 1,
-           sample_method = "Stratified_C2")
+           sample_method = "Stratified_CS_UR")
   
-  # Stratified Convenience
-  S.CS <- data %>%
+  # Stratified Convenience Stratified Ranks
+  S.CS_SR <- data %>%
     group_by(strata)  %>%
     sample_frac(size = 1, weight = SCS_Rank) %>%
     mutate(contacted = cumsum(Ej) <= pa,
            accepted = contacted & Ej == 1,
-           sample_method = "Stratified_CS")
+           sample_method = "Stratified_CS_SR")
+
+  # Unstratified Convenience Sampling Squared Ranks
+  U.CS2 <- data %>%
+    sample_frac(size = 1, weight = UCS_Rank^2) %>%
+    mutate(contacted = cumsum(Ej) <= 60,
+           accepted = contacted  & Ej == 1,
+           sample_method = "Unstratified_CS2")
+  
+  # Stratified Convenience Squared Unstratified Ranks
+  S.CS_UR2 <- data %>%
+    group_by(strata)  %>%
+    sample_frac(size = 1, weight = UCS_Rank^2) %>%
+    mutate(contacted = cumsum(Ej) <= pa,
+           accepted = contacted & Ej == 1,
+           sample_method = "Stratified_CS_UR2")
+  
+  # Stratified Convenience Squared Stratified Ranks
+  S.CS_SR2 <- data %>%
+    group_by(strata)  %>%
+    sample_frac(size = 1, weight = SCS_Rank^2) %>%
+    mutate(contacted = cumsum(Ej) <= pa,
+           accepted = contacted & Ej == 1,
+           sample_method = "Stratified_CS_SR2")
 
   # Stratified Balanced Sampling
   S.BS <- data %>%
@@ -110,12 +133,13 @@ Create_Samples <- function(data) {
     mutate(contacted = cumsum(Ej) <= pa,
            accepted = contacted  & Ej == 1,
            sample_method = "Stratified_BS")
+ 
   
-  return(bind_rows(U.RS, U.CS, S.BS, S.RS, S.CS, S.C2))
+  return(bind_rows(U.RS, S.BS, S.RS, U.CS, S.CS_UR, S.CS_SR, U.CS2, S.CS_UR2, S.CS_SR2))
 }
 
 # Calculates response rates and other recruiting statistics
-Calc_Recruitment_Stats <- function(data, include_strata = F) {
+Calc_Recruitment_Stats <- function(data, include_strata = T) {
   if(!include_strata){
     data <- data %>%
       group_by(sample_method)
@@ -130,7 +154,7 @@ Calc_Recruitment_Stats <- function(data, include_strata = F) {
               sch.accepted = sum(accepted),
               sch.rejected = sch.contacted - sch.accepted,
               sch.response.rate = sch.accepted/sch.contacted) %>%
-    gather(key = measure, value = value, -sample_method) %>%
+    gather(key = measure, value = value, sch.contacted, sch.accepted, sch.rejected, sch.response.rate) %>%
     return()
 
 }

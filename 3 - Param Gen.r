@@ -182,13 +182,15 @@ df.clusters <-
   df.PS %>%
   group_by(scale_factor, RR) %>%
   arrange(scale_factor, RR) %>%
-  mutate(UCS_Rank = min_rank(PS)) %>%
+  mutate(UCS_Rank = min_rank(PS),
+         UCS_Rank = UCS_Rank / max(UCS_Rank)) %>%
   ungroup() %>%
   select(DSID, UCS_Rank) %>%
   unique() %>%
   right_join(df.clusters) %>%
   group_by(K, strata) %>%
-  mutate(SCS_Rank = min_rank(UCS_Rank))
+  mutate(SCS_Rank = min_rank(UCS_Rank),
+         SCS_Rank = SCS_Rank / max(SCS_Rank))
 
 df.clusters %>%
   filter(K == "K_05") %>%

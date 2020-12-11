@@ -89,7 +89,7 @@ df.sampled %>%
 # Calculate Recruitment Statistics
 #---------------------------------
 
-df.recruitment.stats <- Calc_Recruitment_Stats(df.sampled) 
+df.recruitment.stats <- Calc_Recruitment_Stats(df.sampled, include_strata = T) 
 
 #---------------------------------
 # Track Sampled Schools
@@ -142,4 +142,29 @@ results <- Run_Iteration(sim.data, PS.data, cluster.data, K.condition, RR.condit
 # Run All Conditions
 #`--------------------------------
 
-results <- Sim_Driver(sim.data, PS.data, cluster.data, B.index.formula, list.covariates, K.list, RR.list, SB.list)
+# results <- Sim_Driver(sim.data, PS.data, cluster.data, B.index.formula, list.covariates, K.list, RR.list, SB.list)
+
+results <- Sim_Driver(sim.data, PS.data, cluster.data, B.index.formula, list.covariates, K.list = "K_05", RR.list, SB.list = 1)
+
+
+
+prop_allocations %>%
+  filter(K == "K_05") %>%
+  select(strata, n) %>%
+  right_join(results$df.recruitment.stats) %>%
+  mutate(proportion = value / n) %>%
+  filter(measure == "sch.contacted") %>%
+  ggplot(aes(x = RR, y = proportion, color = sample_method, group = sample_method)) +
+  geom_line() +
+  theme_minimal() +
+  facet_wrap(~strata)
+
+
+
+df.clusters %>%
+  filter(K == "K_05") %>%
+  left_join(df.PS) %>%
+  filter(RR %in% c("RR_10", "RR_20", "RR_30", "RR_40")) %>%
+  ggplot(aes(x = PS, fill = factor(strata))) +
+  geom_histogram() +
+  facet_wrap(~RR)
