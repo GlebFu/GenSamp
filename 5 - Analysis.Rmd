@@ -396,17 +396,17 @@ df.list$PS %>%
 
 
 tabs$B <- results$B %>% 
-  group_by(Sampler, RR, SB) %>%
+  group_by(Sampler, Cluster, Sample, Rank_Type, RR, SB) %>%
   summarise(M = mean(Bs, na.rm = T),
             SD = sd(Bs, na.rm = T)) %>%
   mutate(LL = M - SD,
          UL = M + SD)
 
 tabs$B %>%
-  filter(Sampler %in% c("SCS", "SC2", "UCS")) %>%
-  ggplot(aes(x = RR, y = M, color = factor(SB))) +
+  filter(Sample == "CS") %>%
+  ggplot(aes(x = RR, y = M, color = Sampler)) +
   geom_line() +
-  facet_wrap(~ Sampler) +
+  facet_wrap(~ SB) +
   geom_hline(yintercept = .95, linetype = "dotted") +
   geom_hline(yintercept = .8, linetype = "dashed") +
   theme_minimal()

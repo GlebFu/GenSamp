@@ -45,6 +45,7 @@ df.responses <- Generate_Responses(PS.data = PS.data,
                                    SB.condition = SB.condition)
 
 df.responses %>% 
+  bind_rows(mutate(., strata = 0)) %>%
   group_by(strata) %>%
   summarise(
     N = n(),
@@ -71,8 +72,7 @@ df.sampled %>%
     Contacted = sum(contacted),
     Potential = sum(Ej),
     Accepted = sum(accepted),
-    .groups = "drop_last"
-  )
+    .groups = "drop_last" )
 
 sampled_by_stratum
 
@@ -103,33 +103,35 @@ df.samp.counts <- df.sampled %>%
 # Calculate Sample Statistics
 #---------------------------------
 
-df.sampled <- sim.data %>% 
-  full_join(df.sampled)
+df.samp.stats <- df.sampled %>%
+  filter(accepted) %>%
+  left_join(sim.data) %>%
+  Calc_Sample_Statistics(list.covariates)
 
-df.samp.stats <- Calc_Sample_Statistics(df.sampled, list.covariates)
 
-full_join(df.samp.stats, df.pop.stats) %>%
-  mutate(smd = (samp.mean - pop.mean) / pop.sd) %>%
-  arrange(var) %>%
-  as.data.frame
+# full_join(df.samp.stats, df.pop.stats) %>%
+#   mutate(smd = (samp.mean - pop.mean) / pop.sd) %>%
+#   select(sample_method, strata, var, smd) %>%
+#   ggplot(aes(x = strata, y = smd, color = sample_method)) +
+#   geom_point() +
+#   facet_wrap(~var)
 
 #---------------------------------
 # Calculate B-Index
 #---------------------------------
 
 df.B.indicies <- df.sampled %>%
+  full_join(sim.data) %>%
   mutate(accepted = ifelse(accepted, 1, 0)) %>%
-  group_by(sample_method) %>%
-  nest() %>%
-  mutate(PS_sample = map(data, glm, formula = B.index.formula, family = quasibinomial()),
-         PS_sample = map(PS_sample, fitted)) %>%
+  nest(data = -sample_method) %>%
+  mutate(PS_sample = map(data, function(x) glm(data = x, formula = B.index.formula, family = quasibinomial()) %>% fitted())) %>%
   unnest(cols = c(data, PS_sample)) %>%
   select(sample_method, PS_sample, accepted) %>%
   group_by(sample_method) %>%
   summarise(Bs = Calc_Bindex(PS_sample, accepted))
 
 #---------------------------------
-# Run Full Iteration
+# Run Full Iteration for One Condition
 #---------------------------------
 
 K.condition <- "K_05"
@@ -138,8 +140,81 @@ SB.condition <- 1
 
 results <- Run_Iteration(sim.data, PS.data, cluster.data, K.condition, RR.condition, SB.condition, B.index.formula, list.covariates)
 
+#undebug(Run_Iteration)
+
 #---------------------------------
-# Run All Conditions
+# Run All Conditions Once
+#`--------------------------------
+
+Run_Iteration <- function(sim.data, PS.data, cluster.data, K.condition, RR.condition, SB.condition, B.index.formula, list.covariates) {
+  
+  df.responses <- Generate_Responses(PS.data = PS.data, 
+                                     cluster.data = cluster.data,
+                                     K.condition = K.condition,
+                                     RR.condition = RR.condition,
+                                     SB.condition = SB.condition)
+  
+  df.sampled <- Create_Samples(df.responses)
+  
+  df.recruitment.stats <- Calc_Recruitment_Stats(df.sampled) 
+  
+  df.samp.counts <- df.sampled %>%
+    filter(accepted) %>%
+    select(sample_method, DSID, strata, PS, RR) 
+  
+  df.samp.stats <- df.sampled %>%
+    filter(accepted) %>%
+    left_join(sim.data) %>%
+    Calc_Sample_Statistics(list.covariates)
+  
+  
+  
+  # df.samp.stats <- df.samp.counts %>%
+  #   left_join(df.sampled) %>%
+  #   Calc_Sample_Statistics(list.covariates)
+  
+  df.B.indicies <- df.sampled %>%
+    full_join(sim.data) %>%
+    mutate(accepted = ifelse(accepted, 1, 0)) %>%
+    nest(data = -sample_method) %>%
+    mutate(PS_sample = map(data, function(x) glm(data = x, formula = B.index.formula, family = quasibinomial()) %>% fitted())) %>%
+    unnest(cols = c(data, PS_sample)) %>%
+    select(sample_method, PS_sample, accepted) %>%
+    group_by(sample_method) %>%
+    summarise(Bs = Calc_Bindex(PS_sample, accepted))
+  
+  results <- list(df.recruitment.stats = df.recruitment.stats, 
+                  df.samp.counts = df.samp.counts, 
+                  df.B.indicies = df.B.indicies, 
+                  df.samp.stats = df.samp.stats) %>%
+    lapply(function(x) mutate(x, K = K.condition, RR = RR.condition, SB = SB.condition))
+  
+  return(results)
+}
+
+
+PS.data %>%
+  nest(PS.data = c(DSID, PS)) %>%
+  filter(scale_factor == 1,
+         RR == "RR_50") %>%
+  mutate(results = pmap(.l = list(RR.condition = RR,
+                                  SB.condition = scale_factor),
+                        .f = Run_Iteration,
+                        sim.data = sim.data,
+                        PS.data = PS.data,
+                        cluster.data = cluster.data,
+                        K.condition = "K_05",
+                        B.index.formula = B.index.formula,
+                        list.covariates = list.covariates))
+
+
+#undebug(Run_Iteration)
+
+
+
+
+#---------------------------------
+# Test Full Sim
 #`--------------------------------
 
 # results <- Sim_Driver(sim.data, PS.data, cluster.data, B.index.formula, list.covariates, K.list, RR.list, SB.list)

@@ -23,8 +23,9 @@ rm(list = ls())
 load("Data/Simulation Data/Sim Data.Rdata")
 load("Data/Cluster Analysis/Clusters k2-10.rdata")
 
+
 # load(read_file("Data/Results/LastResults.txt"))
-load("Data/Results/20201210 - 1002 Reps - K5.rdata")
+load("Data/Results/20201211 - 12 Reps - K5.rdata")
 
 
 ```
@@ -83,10 +84,10 @@ df.list$pop.stats <- df.list$pop.data %>%
 ```{r}
 rename_results <- function(result.data) {
   result.data %>%
-    mutate(Sampler = paste(str_sub(sample_method, end = 1),  str_sub(sample_method, start = -2), sep = ""),
-         K = parse_number(K),
-         RR = parse_number(RR)) %>%
-    select(-sample_method)
+  separate(sample_method, into = c("Cluster", "Sample", "Rank_Type"), remove = F) %>%
+  rename(Sampler = sample_method) %>%
+  mutate(K = parse_number(K),
+         RR = parse_number(RR))
 }
 
 
@@ -94,10 +95,11 @@ df.list$k.stats <- cluster.stats
 
 results$B <- df.B.indicies %>% rename_results()
 
-
-results$r.stats <- df.recruitment.stats %>% rename_results() %>%
-  group_by(K, Sampler, RR, SB, measure) %>%
-  summarise(value = mean(value))
+results$r.stats <- df.recruitment.stats %>% 
+  rename_results() %>%
+  group_by(K, Sampler, Cluster, Sample, Rank_Type, RR, SB, strata) %>%
+  summarise(contacted = mean(sch.contacted),
+            accepted = mean(sch.contacted))
 
 
 
@@ -106,28 +108,28 @@ results$r.stats <- df.recruitment.stats %>% rename_results() %>%
 
 
 ```{r}
-results$gini.coef <- df.samp.counts %>%
-  rename_results() %>%
-  group_by(Sampler, DSID, RR, SB) %>%
-  count(name = "count") %>%
-  group_by(Sampler, RR, SB) %>%
-  nest() %>%
-  mutate(data = map(data, full_join, df.list$pop.data %>% select(DSID))) %>%
-  unnest(cols = c(data)) %>%
-  group_by(Sampler, RR, SB) %>%
-  mutate(count = ifelse(is.na(count), 0, count),
-         prop.selected = count/sum(count),
-         n = n(),
-         prop.pop = 1/n()) %>%
-  group_by(Sampler, RR, SB) %>%
-  arrange(prop.selected) %>%
-  mutate(c.prop.sel = cumsum(prop.selected),
-         c.prop.pop = cumsum(prop.pop)) %>%
-  summarise(gini = ineq::Gini(prop.selected) %>% round(2)) %>%
-  group_by(RR) %>%
-  arrange(gini) %>%
-  mutate(y.pos = 1 - (1:n()/n()) / 1.5,
-         x.pos = 1 - y.pos)
+# results$gini.coef <- df.samp.counts %>%
+#   rename_results() %>%
+#   group_by(Sampler, Cluster, Sample, Rank_Type, DSID, RR, SB) %>%
+#   count(name = "count") %>%
+#   group_by(Sampler, Cluster, Sample, Rank_Type, RR, SB) %>%
+#   nest() %>%
+#   mutate(data = map(data, full_join, df.list$pop.data %>% select(DSID))) %>%
+#   unnest(cols = c(data)) %>%
+#   group_by(Sampler, Cluster, Sample, Rank_Type, RR, SB) %>%
+#   mutate(count = ifelse(is.na(count), 0, count),
+#          prop.selected = count/sum(count),
+#          n = n(),
+#          prop.pop = 1/n()) %>%
+#   group_by(Sampler, Cluster, Sample, Rank_Type, RR, SB) %>%
+#   arrange(prop.selected) %>%
+#   mutate(c.prop.sel = cumsum(prop.selected),
+#          c.prop.pop = cumsum(prop.pop)) %>%
+#   summarise(gini = ineq::Gini(prop.selected) %>% round(2)) %>%
+#   group_by(RR) %>%
+#   arrange(gini) %>%
+#   mutate(y.pos = 1 - (1:n()/n()) / 1.5,
+#          x.pos = 1 - y.pos)
 
 
 
@@ -139,14 +141,12 @@ results$smd.stats <- df.samp.stats %>%
   rename(vnames = var) %>%
   ungroup() %>% 
   rename_results() %>% 
-  select(-K) %>%
+  select(-K) %>% 
+  group_by(Sampler, Cluster, Sample, Rank_Type, RR, SB, vnames, strata) %>%
+  summarise(sim.mean = mean(samp.mean)) %>%
   left_join(df.list$pop.stats) %>%
-  mutate(smd = (samp.mean - pop.mean) / pop.sd) %>%
-  group_by(Sampler, RR, SB, vnames) %>%
-  summarise(mSMD = mean(smd),
-            mASMD = mean(abs(smd)),
-            sim.mean = mean(samp.mean),
-            sim.sd = mean(samp.sd))
+  mutate(mSMD = (sim.mean - pop.mean) / pop.sd)
+
 
 ```
 

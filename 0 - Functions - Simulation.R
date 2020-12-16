@@ -65,77 +65,79 @@ Calc_Bindex <- function(PS, sampled) {
 # Creates dataset with samples for each method and response rate
 Create_Samples <- function(data) {
   
-  # Unstratified Random Sampling
-  U.RS <- data %>%
-    sample_frac(size = 1) %>%
-    mutate(contacted = cumsum(Ej) <= 60,
-           accepted = contacted  & Ej == 1,
-           sample_method = "Unstratified_RS")
   
-  # Stratified Random
-  S.RS <- data %>%
-    group_by(strata) %>%
-    sample_frac(size = 1) %>%
-    mutate(contacted = cumsum(Ej) <= pa,
-           accepted = contacted  & Ej == 1,
-           sample_method = "Stratified_RS")
-
-  # Unstratified Convenience Sampling
-  U.CS <- data %>%
-    sample_frac(size = 1, weight = UCS_Rank) %>%
-    mutate(contacted = cumsum(Ej) <= 60,
-           accepted = contacted  & Ej == 1,
-           sample_method = "Unstratified_CS")
   
-  # Stratified Convenience Unstratified Ranks
-  S.CS_UR <- data %>%
-    group_by(strata)  %>%
-    sample_frac(size = 1, weight = UCS_Rank) %>%
-    mutate(contacted = cumsum(Ej) <= pa,
-           accepted = contacted & Ej == 1,
-           sample_method = "Stratified_CS_UR")
+  bind_rows(
+    # Unstratified Random Sampling
+    data %>%
+      sample_frac(size = 1) %>%
+      mutate(contacted = cumsum(Ej) <= 60,
+             accepted = contacted & Ej == 1,
+             sample_method = "U_RS_RR"),
+    
+    # Stratified Random
+   data %>%
+      group_by(strata) %>%
+      sample_frac(size = 1) %>%
+      mutate(contacted = cumsum(Ej) <= pa,
+             accepted = contacted & Ej == 1,
+             sample_method = "S_RS_RR"),
+    
+    # Unstratified Convenience Sampling
+    data %>%
+      sample_frac(size = 1, weight = UCS_Rank) %>%
+      mutate(contacted = cumsum(Ej) <= 60,
+             accepted = contacted & Ej == 1,
+             sample_method = "U_CS_UR"),
+    
+    # Stratified Convenience Unstratified Ranks
+    data %>%
+      group_by(strata)  %>%
+      sample_frac(size = 1, weight = UCS_Rank) %>%
+      mutate(contacted = cumsum(Ej) <= pa,
+             accepted = contacted & Ej == 1,
+             sample_method = "S_CS_UR"),
+    
+    # Stratified Convenience Stratified Ranks
+    data %>%
+      group_by(strata)  %>%
+      sample_frac(size = 1, weight = SCS_Rank) %>%
+      mutate(contacted = cumsum(Ej) <= pa,
+             accepted = contacted & Ej == 1,
+             sample_method = "S_CS_SR"),
+    
+    # Unstratified Convenience Sampling Squared Ranks
+    data %>%
+      sample_frac(size = 1, weight = UCS_Rank^2) %>%
+      mutate(contacted = cumsum(Ej) <= 60,
+             accepted = contacted  & Ej == 1,
+             sample_method = "U_CS_UR2"),
+    
+    # Stratified Convenience Squared Unstratified Ranks
+    data %>%
+      group_by(strata)  %>%
+      sample_frac(size = 1, weight = UCS_Rank^2) %>%
+      mutate(contacted = cumsum(Ej) <= pa,
+             accepted = contacted & Ej == 1,
+             sample_method = "S_CS_UR2"),
+    
+    # Stratified Convenience Squared Stratified Ranks
+    data %>%
+      group_by(strata)  %>%
+      sample_frac(size = 1, weight = SCS_Rank^2) %>%
+      mutate(contacted = cumsum(Ej) <= pa,
+             accepted = contacted & Ej == 1,
+             sample_method = "S_CS_SR2"),
+    
+    # Stratified Balanced Sampling
+    data %>%
+      group_by(strata) %>%
+      arrange(SBS_Rank) %>%
+      mutate(contacted = cumsum(Ej) <= pa,
+             accepted = contacted  & Ej == 1,
+             sample_method = "S_BS_BR"),
+  )
   
-  # Stratified Convenience Stratified Ranks
-  S.CS_SR <- data %>%
-    group_by(strata)  %>%
-    sample_frac(size = 1, weight = SCS_Rank) %>%
-    mutate(contacted = cumsum(Ej) <= pa,
-           accepted = contacted & Ej == 1,
-           sample_method = "Stratified_CS_SR")
-
-  # Unstratified Convenience Sampling Squared Ranks
-  U.CS2 <- data %>%
-    sample_frac(size = 1, weight = UCS_Rank^2) %>%
-    mutate(contacted = cumsum(Ej) <= 60,
-           accepted = contacted  & Ej == 1,
-           sample_method = "Unstratified_CS2")
-  
-  # Stratified Convenience Squared Unstratified Ranks
-  S.CS_UR2 <- data %>%
-    group_by(strata)  %>%
-    sample_frac(size = 1, weight = UCS_Rank^2) %>%
-    mutate(contacted = cumsum(Ej) <= pa,
-           accepted = contacted & Ej == 1,
-           sample_method = "Stratified_CS_UR2")
-  
-  # Stratified Convenience Squared Stratified Ranks
-  S.CS_SR2 <- data %>%
-    group_by(strata)  %>%
-    sample_frac(size = 1, weight = SCS_Rank^2) %>%
-    mutate(contacted = cumsum(Ej) <= pa,
-           accepted = contacted & Ej == 1,
-           sample_method = "Stratified_CS_SR2")
-
-  # Stratified Balanced Sampling
-  S.BS <- data %>%
-    group_by(strata) %>%
-    arrange(SBS_Rank) %>%
-    mutate(contacted = cumsum(Ej) <= pa,
-           accepted = contacted  & Ej == 1,
-           sample_method = "Stratified_BS")
- 
-  
-  return(bind_rows(U.RS, S.BS, S.RS, U.CS, S.CS_UR, S.CS_SR, U.CS2, S.CS_UR2, S.CS_SR2))
 }
 
 # Calculates response rates and other recruiting statistics
@@ -151,10 +153,7 @@ Calc_Recruitment_Stats <- function(data, include_strata = T) {
   
   data %>%
     summarise(sch.contacted = sum(contacted),
-              sch.accepted = sum(accepted),
-              sch.rejected = sch.contacted - sch.accepted,
-              sch.response.rate = sch.accepted/sch.contacted) %>%
-    gather(key = measure, value = value, sch.contacted, sch.accepted, sch.rejected, sch.response.rate) %>%
+              sch.accepted = sum(accepted)) %>%
     return()
 
 }
@@ -162,10 +161,10 @@ Calc_Recruitment_Stats <- function(data, include_strata = T) {
 
 Calc_Sample_Statistics <- function(sample.data, list.covariates) {
   sample.data %>%
-    filter(accepted) %>%
-    select(sample_method, all_of(list.covariates)) %>%
-    gather(key = var, value = val, -sample_method) %>%
-    group_by(sample_method, var) %>%
+    bind_rows(mutate(., strata = 0)) %>%
+    select(strata, sample_method, all_of(list.covariates)) %>%
+    gather(key = var, value = val, -sample_method, -strata) %>%
+    group_by(sample_method, strata, var) %>%
     summarise(samp.mean = mean(val),
               samp.sd = sd(val))
 }
@@ -186,21 +185,22 @@ Run_Iteration <- function(sim.data, PS.data, cluster.data, K.condition, RR.condi
     filter(accepted) %>%
     select(sample_method, DSID, strata, PS, RR) 
   
-  df.sampled <- sim.data %>%
-    full_join(df.sampled)
-
-  df.samp.stats <- Calc_Sample_Statistics(df.sampled, list.covariates)
+  df.samp.stats <- df.sampled %>%
+    filter(accepted) %>%
+    left_join(sim.data) %>%
+    Calc_Sample_Statistics(list.covariates)
+  
+  
   
   # df.samp.stats <- df.samp.counts %>%
   #   left_join(df.sampled) %>%
   #   Calc_Sample_Statistics(list.covariates)
   
   df.B.indicies <- df.sampled %>%
+    full_join(sim.data) %>%
     mutate(accepted = ifelse(accepted, 1, 0)) %>%
-    group_by(sample_method) %>%
-    nest() %>%
-    mutate(PS_sample = map(data, glm, formula = B.index.formula, family = quasibinomial()),
-           PS_sample = map(PS_sample, fitted)) %>%
+    nest(data = -sample_method) %>%
+    mutate(PS_sample = map(data, function(x) glm(data = x, formula = B.index.formula, family = quasibinomial()) %>% fitted())) %>%
     unnest(cols = c(data, PS_sample)) %>%
     select(sample_method, PS_sample, accepted) %>%
     group_by(sample_method) %>%
@@ -211,6 +211,7 @@ Run_Iteration <- function(sim.data, PS.data, cluster.data, K.condition, RR.condi
                  df.B.indicies = df.B.indicies, 
                  df.samp.stats = df.samp.stats) %>%
     lapply(function(x) mutate(x, K = K.condition, RR = RR.condition, SB = SB.condition))
+  
   return(results)
 }
 
