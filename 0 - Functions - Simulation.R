@@ -75,22 +75,22 @@ Create_Samples <- function(data) {
       sample_frac(size = 1) %>%
       mutate(contacted = cumsum(Ej) <= 60,
              accepted = contacted & Ej == 1,
-             sample_method = "U_RS_RR"),
+             sample_method = "U_RS_UR_X1"),
     
-    # Stratified Random
+    # Stratified Random Sampling
    data %>%
       group_by(strata) %>%
       sample_frac(size = 1) %>%
       mutate(contacted = cumsum(Ej) <= pa,
              accepted = contacted & Ej == 1,
-             sample_method = "S_RS_RR"),
+             sample_method = "S_RS_SR_X1"),
     
     # Unstratified Convenience Sampling
     data %>%
       sample_frac(size = 1, weight = UCS_Rank) %>%
       mutate(contacted = cumsum(Ej) <= 60,
              accepted = contacted & Ej == 1,
-             sample_method = "U_CS_UR"),
+             sample_method = "U_CS_UR_X1"),
     
     # Stratified Convenience Unstratified Ranks
     data %>%
@@ -98,7 +98,7 @@ Create_Samples <- function(data) {
       sample_frac(size = 1, weight = UCS_Rank) %>%
       mutate(contacted = cumsum(Ej) <= pa,
              accepted = contacted & Ej == 1,
-             sample_method = "S_CS_UR"),
+             sample_method = "S_CS_UR_X1"),
     
     # Stratified Convenience Stratified Ranks
     data %>%
@@ -106,14 +106,14 @@ Create_Samples <- function(data) {
       sample_frac(size = 1, weight = SCS_Rank) %>%
       mutate(contacted = cumsum(Ej) <= pa,
              accepted = contacted & Ej == 1,
-             sample_method = "S_CS_SR"),
+             sample_method = "S_CS_SR_X1"),
     
     # Unstratified Convenience Sampling Squared Ranks
     data %>%
       sample_frac(size = 1, weight = UCS_Rank^2) %>%
       mutate(contacted = cumsum(Ej) <= 60,
              accepted = contacted  & Ej == 1,
-             sample_method = "U_CS_UR2"),
+             sample_method = "U_CS_UR_X2"),
     
     # Stratified Convenience Squared Unstratified Ranks
     data %>%
@@ -121,7 +121,7 @@ Create_Samples <- function(data) {
       sample_frac(size = 1, weight = UCS_Rank^2) %>%
       mutate(contacted = cumsum(Ej) <= pa,
              accepted = contacted & Ej == 1,
-             sample_method = "S_CS_UR2"),
+             sample_method = "S_CS_UR_X2"),
     
     # Stratified Convenience Squared Stratified Ranks
     data %>%
@@ -129,7 +129,7 @@ Create_Samples <- function(data) {
       sample_frac(size = 1, weight = SCS_Rank^2) %>%
       mutate(contacted = cumsum(Ej) <= pa,
              accepted = contacted & Ej == 1,
-             sample_method = "S_CS_SR2"),
+             sample_method = "S_CS_SR_X2"),
     
     # Stratified Balanced Sampling
     data %>%
@@ -137,7 +137,7 @@ Create_Samples <- function(data) {
       arrange(SBS_Rank) %>%
       mutate(contacted = cumsum(Ej) <= pa,
              accepted = contacted  & Ej == 1,
-             sample_method = "S_BS_BR"),
+             sample_method = "S_BS_SR_X1"),
   )
   
 }
@@ -210,7 +210,8 @@ Summarise_Condition_Results <- function(results) {
     results$df.B.indicies %>%
     bind_rows()
   
-  smd.stats <- results$df.samp.stats %>%
+  smd.stats <- 
+    results$df.samp.stats %>%
     bind_rows() %>%
     group_by(sample_method, strata, var) %>%
     summarise(sim.mean = mean(samp.mean),

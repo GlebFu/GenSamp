@@ -45,7 +45,7 @@ df.K.ranks <- df.clusters %>%
 
 ```{r}
 params <- list(
-  iterations = 1000,
+  iterations = 2,
   RR.condition = unique(df.PS$RR),
   K.condition = c("K_05"),
   SB.condition = unique(df.PS$scale_factor)
@@ -68,7 +68,8 @@ param_df <- df.PS %>%
 ## Run Simulation
 
 ```{r}
-plan(multisession)
+# plan(multisession(workers = availableCores() - 1))
+plan(multisession(workers = 2))
 
 sim.time.results <- 
   system.time(
@@ -85,6 +86,7 @@ sim.time.results <-
       select(SB.condition, RR.condition, K.condition, results)
     )
 
+plan(sequential)
 
 
 
@@ -92,7 +94,7 @@ sim.time.results <-
 
 ```{r}
 sim.time.results[[3]] / 60 / 60
-(sim.time.results[[3]] / unique(param_df$iterations) * 1000) / 60 / 60
+(sim.time.results[[3]] / unique(param_df$iterations) * 100) / 60 / 60
 
 
 ```
@@ -116,13 +118,13 @@ descript <-
 
 resultsFile <- paste("Data/Results/", date, " - ", descript, ".rdata", sep = "")
 
-sim.results %>%
-  save(file = resultsFile)
+save(sim.results, file = resultsFile)
+
+backup.results <- sim.results
 
 write_file(x = resultsFile, "Data/Results/LastResults.txt")
 
 load(resultsFile)
-
 
 ```
 

@@ -23,7 +23,6 @@ rm(list = ls())
 load("Data/Cluster Analysis/Clusters k2-10.rdata")
 load("Data/Simulation Data/Sim Data.Rdata")
 
-
 load(read_file("Data/Results/LastResults.txt"))
 
 # save(sim.results, file = read_file("Data/Results/LastResults.txt"))
@@ -99,10 +98,19 @@ df.list$cluster.pa <- df.clusters %>%
 ```{r}
 rename_results <- function(result.data) {
   result.data %>%
-    mutate(sample_method = str_replace(sample_method, "2", "_2")) %>%
     separate(sample_method, into = c("Cluster", "Sample", "Rank_Type", "Rank_Factor"), remove = F, fill = "right") %>%
     rename(Sampler = sample_method) %>%
-  pack(Sample_Catagories = c(Cluster, Sample, Rank_Type, Rank_Factor))
+    mutate(Cluster = factor(Cluster, 
+                            level = c("S", "U"), 
+                            label = c("Stratified", "Unstratified")),
+           Sample = factor(Sample,
+                           level = c("BS", "CS", "RS"), 
+                           label = c("Balanced", "Convenience", "Random")),
+           Rank_Type = factor(Rank_Type,
+                              level = c("SR", "UR"), 
+                              label = c("Stratified Ranks", "Unstratified Ranks")),
+           Rank_Factor = factor(Rank_Factor)) %>%
+    pack(Sample_Catagories = c(Cluster, Sample, Rank_Type, Rank_Factor))
 }
 
 results$B <- 
@@ -115,9 +123,8 @@ results$B <-
 results$r.stats <- sim.results %>% 
   select(SB:K, r.stats) %>%
   unnest(r.stats) %>%
-  rename_results %>%
-  rename(contacted = sch.contacted,
-         accepted = sch.accepted)
+  rename_results 
+
 
 results$smd.stats <- sim.results %>% 
   select(SB:K, smd.stats) %>%
@@ -126,7 +133,6 @@ results$smd.stats <- sim.results %>%
   rename_results() %>%
   left_join(df.list$pop.stats) %>%
   mutate(mSMD = (sim.mean - pop.mean) / pop.sd)
-
 
 
 
@@ -151,6 +157,8 @@ calc_gini_curve <- function(count.data, pop.list) {
     as.data.frame
 }
 
+
+
 results$gini <- sim.results %>% 
   select(SB:K, samp.counts) %>%
   unnest(samp.counts) %>%
@@ -158,6 +166,8 @@ results$gini <- sim.results %>%
   rename_results() %>%
   mutate(count.data = map(count.data, calc_gini_curve, select(df.sim, DSID)),
          Gini_Coef = map_dbl(count.data, function(x) ineq::Gini(x$prop.selected)))
+
+# results$gini %>% unpack(Sample_Catagories)
 ```
 
 
