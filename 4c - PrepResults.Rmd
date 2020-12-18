@@ -88,6 +88,15 @@ df.list$pop.stats <- df.list$pop.data %>%
   left_join(df.list$coefs) %>%
   left_join(df.pop.stats %>% rename(vnames = var))
 
+df.list$pop.cluster.stats <- df.list$pop.data %>%
+  select(DSID, all_of(covariates), strata) %>%
+  bind_rows(mutate(., strata = "Strata 0")) %>%
+  gather(key = vnames, value = value, covariates) %>%
+  group_by(vnames, strata) %>%
+  summarise(pop.mean = mean(value),
+            pop.sd = sd(value)) %>%
+  mutate(strata = parse_number(strata))
+
 df.list$k.stats <- cluster.stats
 
 df.list$cluster.pa <- df.clusters %>%
@@ -132,6 +141,8 @@ results$smd.stats <- sim.results %>%
   rename(vnames = var) %>% 
   rename_results() %>%
   left_join(df.list$pop.stats) %>%
+  select(-pop.mean, -pop.sd) %>%
+  left_join(df.list$pop.cluster.stats) %>%
   mutate(mSMD = (sim.mean - pop.mean) / pop.sd)
 
 

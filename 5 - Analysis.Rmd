@@ -421,7 +421,8 @@ tabs$B <-
          Quantile = map(Bs, get_quant)) %>%
   select(-Bs) %>%
   unpack(Sample_Catagories) %>%
-  unnest(Quantile) 
+  unnest(Quantile) %>%
+  filter(Cluster == str_replace(Rank_Type, " Ranks", ""))
 
 
   
@@ -437,7 +438,14 @@ tabs$B %>%
   geom_hline(yintercept = c(.8, .95), linetype = "dotted", alpha = .5) +
   theme_minimal()
   
-
+tabs$B %>%
+  filter(Cluster == str_replace(Rank_Type, " Ranks", ""),
+         Rank_Factor == "X1") %>%
+  ggplot(aes(x = RR, y = M, color = Sample, linetype = Cluster)) +
+  geom_line() +
+  geom_hline(yintercept = c(.8, .95), linetype = "dotted", alpha = .5) +
+  theme_minimal() +
+  facet_wrap(~SB)
 ```
 
 
@@ -465,15 +473,17 @@ tabs$B %>%
 tabs$B %>%
   filter(SB == 1,
          Sample == "Convenience") %>%
-  ggplot(aes(x = RR, y = q_50, group = Sampler, color = Sampler)) +
+  ggplot(aes(x = RR, y = M, group = Sampler, color = Rank_Factor)) +
   geom_line() +
   geom_line(aes(y = q_25), linetype = "dotted") +
   geom_line(aes(y = q_75), linetype = "dotted") +
   # geom_errorbar(aes(ymin = q_25, ymax = q_75), width = 3) +
   geom_hline(yintercept = c(.8, .95), linetype = "dotted", alpha = .5) +
-  facet_grid(Rank_Factor ~ Rank_Type + Cluster) +
+  facet_grid(~ Rank_Type + Cluster) +
   theme_minimal() +
   theme(legend.position = "none")
+
+# geom_ibbon
 ```
 
 
@@ -498,7 +508,50 @@ df.list$smd.results %>%
   geom_hline(aes(yintercept = log_odds), linetype = "dashed") +
   geom_hline(yintercept = c(.25, -.25), linetype = "dotted") +
   theme_minimal() +
-  theme(legend.position = "none")
+  theme(legend.position = "bottom")
+```
+
+```{r}
+
+
+df.list$smd.results %>%
+  filter(Cluster == str_replace(Rank_Type, " Ranks", ""),
+         Cluster == "Stratified",
+         Rank_Factor == "X1",
+         # strata != 0,
+         vnames %in% c("ethBlack")) %>%
+  mutate(strata = paste("Strata", strata)) %>%
+  ggplot(aes(x = RR, y = mSMD, color = strata)) +
+  geom_line() +
+  facet_grid(SB ~ Sample + Cluster, scales = "free_y") +
+  geom_hline(yintercept = 0) +
+  geom_hline(yintercept = c(.25, -.25), linetype = "dotted") +
+  theme_minimal() +
+  theme(legend.position = "bottom",
+        legend.title = element_blank())
+
+
+```
+```{r}
+
+
+df.list$smd.results %>%
+  filter(Sampler == "S_CS_SR_X1",
+         strata != 0) %>%
+  mutate(strata = paste("Strata", strata)) %>%
+  ggplot(aes(x = RR, y = abs(mSMD), color = strata)) +
+  geom_line() +
+  facet_grid(SB ~ Variables, scales = "free_y") +
+  geom_hline(yintercept = 0) +
+  geom_hline(yintercept = c(.25), linetype = "dotted") +
+  theme_minimal() +
+  theme(legend.position = "none",
+        legend.title = element_blank())
+# 
+# df.list$smd.results %>%
+#   filter(Sampler == "S_CS_SR_X1",
+#          strata != 0) %>%
+#   filter(is.na(mSMD))
 ```
 
 ```{r}
@@ -506,9 +559,9 @@ df.list$smd.results %>%
 
 df.list$smd.results %>%
   filter(SB == 1,
-         Cluster == str_replace(Rank_Type, " Ranks", ""),
+         Sample == "Stratified",
          Rank_Factor == "X1",
-         strata != 0,
+         # strata != 0,
          vnames %in% c("ethBlack", "n")) %>%
   mutate(strata = paste("Strata", strata)) %>%
   ggplot(aes(x = RR, y = mSMD, color = strata)) +
