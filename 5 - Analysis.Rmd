@@ -401,6 +401,16 @@ get_quant <- function(x) {
     spread(Percent, Q)
 }
 
+Set_Compare <- function(data, variable = "Sampler", value = "S_BS_SR_X1", observations = c("M", "q_25", "q_50", "q_75")){
+  data %>%
+  filter(.[[variable]] == value) %>%
+  nest(Comparison = c(variable, observations)) %>%
+  select(SB:K,
+         Comparison) %>%
+  mutate(Comparison = map(Comparison, rename_with, function(x) paste(x, "_C", sep = ""))) %>%
+  unnest(Comparison)
+}
+
 tabs$B <- 
   results$B %>%
   chop(Bs) %>%
@@ -410,92 +420,60 @@ tabs$B <-
          UL = M + SD,
          Quantile = map(Bs, get_quant)) %>%
   select(-Bs) %>%
-  unpack(Sample_Catagories) 
+  unpack(Sample_Catagories) %>%
+  unnest(Quantile) 
+
+
   
 ```
 
 ```{r}
 tabs$B %>%
-  mutate(Rank_Type = str_replace(Rank_Type, " Ranks", "")) %>%
   filter(SB == 1,
-         C)
-
-```
-
-```{r}
-tabs$B %>%
-  filter(SB == 1) %>%
-  ggplot(aes(x = RR, y = M, color = Rank_Factor, linetype = Cluster)) +
+         Cluster == str_replace(Rank_Type, " Ranks", ""),
+         Rank_Factor == "X1") %>%
+  ggplot(aes(x = RR, y = M, color = Sample, linetype = Cluster)) +
   geom_line() +
-  facet_wrap(~ SB) +
   geom_hline(yintercept = c(.8, .95), linetype = "dotted", alpha = .5) +
-  facet_wrap(~ Sample + Rank_Type) +
   theme_minimal()
+  
+
 ```
 
 
 ```{r}
 tabs$B %>%
-  filter(SB == 1) %>%
-  unnest(Quantile) %>%
-  ggplot(aes(x = RR, y = q_50, color = interaction(Sample, Rank_Type))) +
+  left_join(Set_Compare(.)) %>%
+  filter(SB == 1,
+         Sampler != Sampler_C) %>%
+  ggplot(aes(x = RR, y = q_50, group = Sampler, color = Sampler)) +
   geom_line() +
   geom_line(aes(y = q_25), linetype = "dotted") +
   geom_line(aes(y = q_75), linetype = "dotted") +
-  facet_wrap(~ Sampler) +
-  geom_hline(yintercept = .95, linetype = "dotted") +
-  geom_hline(yintercept = .8, linetype = "dashed") +
+  geom_line(aes(y = q_50_C), color = "black", alpha = .2) +
+  # geom_errorbar(aes(ymin = q_25, ymax = q_75), width = 3) +
+  # geom_errorbar(aes(ymin = q_25_C, ymax = q_75_C), color = "black", width = .2, alpha = .2) +
+  geom_hline(yintercept = c(.8, .95), linetype = "dotted", alpha = .5) +
+  facet_wrap(Cluster ~ Sampler, nrow = 2) +
   theme_minimal() +
   theme(legend.position = "none")
-
-
-
-
+  
 
 ```
 
-
 ```{r}
-
-# tabs$B.label <- tabs$B %>%
-#   filter(RR == 10,
-#          SB == 1) %>%
-#   mutate(RR = 5)  %>%
-#   arrange(M) %>%
-#   mutate(M = c(.53, .58, .73, .78, .9, .9))
-# 
-# figs$B <- tabs$B %>%
-#   ggplot(aes(x = RR, y = M, color = Sampler, 
-#              linetype = Sampler, group = Sampler)) +
-#   geom_line() +
-#   # geom_label(data = tabs$B.label, aes(label = Sampler)) +
-#   # geom_label(data = tabs$B.label,
-#              # aes(label = Sampler)) +
-#   labs(y = lab.vars$B,
-#        x = lab.vars$rr) +
-#   geom_hline(yintercept = .95, linetype = "dotted") +
-#   geom_hline(yintercept = .8, linetype = "dashed") +
-#   scale_x_continuous(breaks = seq(0, 100, 10)) + 
-#   scale_y_continuous(limits = c(0.65, 1.0), expand = c(0,0)) +
-#   facet_grid(rows = vars(SB), scales = "free_y")
-# 
-# 
-# figs$B 
-# 
-# tabs$B %>%
-#   filter(SB == 1) %>%
-#   ggplot(aes(x = RR, y = M, color = Sampler, 
-#              linetype = Sampler, group = Sampler)) +
-#   geom_line() +
-#   # geom_label(data = tabs$B.label, aes(label = Sampler)) +
-#   # geom_label(data = tabs$B.label,
-#              # aes(label = Sampler)) +
-#   labs(y = lab.vars$B ,
-#        x = lab.vars$rr) +
-#   geom_hline(yintercept = .95, linetype = "dotted") +
-#   geom_hline(yintercept = .8, linetype = "dashed") +
-#   scale_x_continuous(breaks = seq(0, 100, 10)) + 
-#   scale_y_continuous(limits = c(0.65, 1.0), expand = c(0,0)) 
+tabs$B %>%
+  filter(SB == 1,
+         Sample == "Convenience") %>%
+  ggplot(aes(x = RR, y = q_50, group = Sampler, color = Sampler)) +
+  geom_line() +
+  geom_line(aes(y = q_25), linetype = "dotted") +
+  geom_line(aes(y = q_75), linetype = "dotted") +
+  # geom_errorbar(aes(ymin = q_25, ymax = q_75), width = 3) +
+  geom_hline(yintercept = c(.8, .95), linetype = "dotted", alpha = .5) +
+  facet_grid(Rank_Factor ~ Rank_Type + Cluster) +
+  theme_minimal() +
+  theme(legend.position = "none")
 ```
 
 
@@ -503,25 +481,68 @@ tabs$B %>%
 ### Standardized mean differences
 
 ```{r, fig.cap = "Average SMDs", fig.height = 7}
-
-
-
-
-df.list$smd.results <- results$smd.stats
+df.list$smd.results <- results$smd.stats %>%
+  select(SB:vnames, Variables, log_odds, Sample_Catagories, mSMD) %>%
+  unpack(Sample_Catagories)
 
 df.list$smd.results %>%
   filter(SB == 1,
+         Cluster == str_replace(Rank_Type, " Ranks", ""),
+         Rank_Factor == "X1",
          strata == 0,
          !(vnames %in% c("pFem", "ST.ratio"))) %>%
-  # mutate(mSMD = abs(mSMD),
-  #        log_odds = abs(log_odds)) %>%
-  ggplot(aes(x = RR, y = mSMD, color = Sampler)) +
+  ggplot(aes(x = RR, y = mSMD, color = Sample, linetype = Cluster)) +
   geom_line(size = 1) +
-  facet_wrap(~Variables) +
+  facet_wrap(~Variables, scales = "free") +
   geom_hline(yintercept = 0) +
   geom_hline(aes(yintercept = log_odds), linetype = "dashed") +
   geom_hline(yintercept = c(.25, -.25), linetype = "dotted") +
-  theme_bw()
+  theme_minimal() +
+  theme(legend.position = "none")
+```
+
+```{r}
+
+
+df.list$smd.results %>%
+  filter(SB == 1,
+         Cluster == str_replace(Rank_Type, " Ranks", ""),
+         Rank_Factor == "X1",
+         strata != 0,
+         vnames %in% c("ethBlack", "n")) %>%
+  mutate(strata = paste("Strata", strata)) %>%
+  ggplot(aes(x = RR, y = mSMD, color = strata)) +
+  geom_line() +
+  facet_grid(Variables ~ Sample + Cluster, scales = "free_y") +
+  geom_hline(yintercept = 0) +
+  geom_hline(yintercept = c(.25, -.25), linetype = "dotted") +
+  theme_minimal() +
+  theme(legend.position = "bottom",
+        legend.title = element_blank())
+
+
+```
+
+```{r}
+
+
+df.list$smd.results %>%
+  filter(SB == 1,
+         Cluster == str_replace(Rank_Type, " Ranks", ""),
+         Rank_Factor == "X1",
+         strata != 0,
+         vnames %in% c("Suburban", "Urban", "ToRu")) %>%
+  mutate(strata = paste("Strata", strata)) %>%
+  ggplot(aes(x = RR, y = mSMD, color = strata)) +
+  geom_line() +
+  facet_grid(Variables ~ Sample + Cluster, scales = "free_y") +
+  geom_hline(yintercept = 0) +
+  geom_hline(yintercept = c(.25, -.25), linetype = "dotted") +
+  theme_minimal() +
+  theme(legend.position = "bottom",
+        legend.title = element_blank())
+
+
 ```
 
 
@@ -541,8 +562,8 @@ smd.test <- df.list$smd.result %>%
          Strata_in_CS = SCS <= UCS,
          Strata_in_CS2 = SC2 <= UCS,
          Strata_in_RS = SRS <= UCS)
-
 smd.test %>%
+
   group_by(Variables) %>%
   mutate(Mean_Neutrality = mean(Neutrality )) %>%
   filter(Mean_Neutrality == 1)

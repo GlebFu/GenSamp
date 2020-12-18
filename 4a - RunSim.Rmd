@@ -45,7 +45,7 @@ df.K.ranks <- df.clusters %>%
 
 ```{r}
 params <- list(
-  iterations = 2,
+  iterations = 10,
   RR.condition = unique(df.PS$RR),
   K.condition = c("K_05"),
   SB.condition = unique(df.PS$scale_factor)
@@ -68,8 +68,8 @@ param_df <- df.PS %>%
 ## Run Simulation
 
 ```{r}
-# plan(multisession(workers = availableCores() - 1))
-plan(multisession(workers = 2))
+plan(multisession(workers = availableCores() - 1))
+# plan(multisession(workers = 2))
 
 sim.time.results <- 
   system.time(
