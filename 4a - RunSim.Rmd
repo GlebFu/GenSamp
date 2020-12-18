@@ -1,0 +1,128 @@
+---
+title: "Untitled"
+output: pdf_document
+---
+
+# Setup
+
+## Packages and Data
+
+```{r}
+library(tidyverse)
+library(future)
+library(furrr)
+
+rm(list = ls())
+
+source("0 - Functions - Simulation.R")
+
+load("Data/Simulation Data/Sim Data.Rdata")
+
+```
+
+
+## Specify data inputs
+
+```{r}
+
+sim.data <- df.sim %>% 
+  select(DSID, all_of(covariates))
+
+B.index.covariates <- c(covariates[!(covariates %in% c("Urban", "Suburban", "ToRu"))], "urbanicity")
+
+B.index.formula <- as.formula(paste("accepted ~", paste(B.index.covariates, collapse = " + ")))
+
+B.index.data <- df.sim %>%
+  select(DSID, all_of(B.index.covariates))
+
+df.K.ranks <- df.clusters %>%
+              nest(cluster.ranks = -c(K)) %>%
+              rename(K.condition = K)
+```
+
+
+## Specify simulation design parameters
+
+```{r}
+params <- list(
+  iterations = 1000,
+  RR.condition = unique(df.PS$RR),
+  K.condition = c("K_05"),
+  SB.condition = unique(df.PS$scale_factor)
+)
+
+
+param_df <- df.PS %>%
+  nest(PS.data = -c(scale_factor, RR)) %>%
+  rename(SB.condition = scale_factor,
+         RR.condition = RR) %>%
+  right_join(cross_df(params)) %>%
+  left_join(df.K.ranks) %>%
+  mutate(B.index.formula = list(B.index.formula),
+         B.index.data = list(B.index.data),
+         sim.data = map(cluster.ranks, function(x) select(x, strata, DSID) %>% left_join(sim.data)))
+
+
+```
+
+## Run Simulation
+
+```{r}
+plan(multisession)
+
+sim.time.results <- 
+  system.time(
+    sim.results <- 
+      param_df %>%
+      mutate(results = future_pmap(.l = list(iterations, 
+                                             PS.data, 
+                                             cluster.ranks, 
+                                             sim.data, 
+                                             B.index.data, 
+                                             B.index.formula),
+                                   .f = Sim_Driver,
+                                   .options = furrr_options(seed = NULL))) %>%
+      select(SB.condition, RR.condition, K.condition, results)
+    )
+
+
+
+
+```
+
+```{r}
+sim.time.results[[3]] / 60 / 60
+(sim.time.results[[3]] / unique(param_df$iterations) * 1000) / 60 / 60
+
+
+```
+
+## Save Results
+
+```{r}
+
+
+
+date <- paste(lubridate::year(Sys.time()), 
+              lubridate::month(Sys.time()), 
+              lubridate::day(Sys.time()), sep = "")
+
+descript <- 
+  paste(length(params$RR.condition), "RR ",
+      length(params$K.condition), "K ",
+      length(params$SB.condition), "SB ",
+      "x", params$iterations,
+      sep = "")
+
+resultsFile <- paste("Data/Results/", date, " - ", descript, ".rdata", sep = "")
+
+sim.results %>%
+  save(file = resultsFile)
+
+write_file(x = resultsFile, "Data/Results/LastResults.txt")
+
+load(resultsFile)
+
+
+```
+

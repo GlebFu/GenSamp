@@ -11,19 +11,10 @@ Sample_Binomial <- function(ps) rbinom(length(ps), 1, prob = ps)
 
 
 
-Generate_Responses <- function(PS.data, cluster.data, K.condition, RR.condition, SB.condition) {
-  df.responses <- PS.data %>%
-    ungroup() %>%
-    filter(RR == RR.condition,
-           scale_factor == SB.condition) %>%
-    mutate(Ej = Sample_Binomial(PS))
-  
-  df.responses <- cluster.data %>%
-    ungroup() %>%
-    filter(K == K.condition) %>%
-    left_join(df.responses)
-  
-  return(df.responses)
+Generate_Responses <- function(PS.data, cluster.ranks) {
+  PS.data %>%
+    mutate(Ej = Sample_Binomial(PS)) %>%
+    full_join(cluster.ranks)
 }
 
 Calc_H <- function(x){
@@ -60,12 +51,23 @@ Calc_Bindex <- function(PS, sampled) {
 
 }
 
+Bindex_Summary <- function(sampled, B.index.data, B.index.formula) {
+  sampled %>%
+    select(DSID, accepted, sample_method) %>%
+    left_join(B.index.data) %>%
+    mutate(accepted = as.numeric(accepted)) %>%
+    nest(data = -sample_method) %>%
+    mutate(PS_sample = map(data, function(x) glm(data = x, formula = B.index.formula, family = quasibinomial()) %>% fitted()),
+           accepted = map(data, select, "accepted")) %>%
+    select(-data) %>%
+    unnest(cols = c(accepted, PS_sample)) %>%
+    group_by(sample_method) %>%
+    summarise(Bs = Calc_Bindex(PS_sample, accepted))
+}
 
 
 # Creates dataset with samples for each method and response rate
 Create_Samples <- function(data) {
-  
-  
   
   bind_rows(
     # Unstratified Random Sampling
@@ -142,40 +144,30 @@ Create_Samples <- function(data) {
 
 # Calculates response rates and other recruiting statistics
 Calc_Recruitment_Stats <- function(data, include_strata = T) {
-  if(!include_strata){
-    data <- data %>%
-      group_by(sample_method)
-  } else {
-    data <- data %>%
-      group_by(sample_method, strata)
-
-  }
-  
   data %>%
-    summarise(sch.contacted = sum(contacted),
-              sch.accepted = sum(accepted)) %>%
-    return()
+    bind_rows(mutate(., strata = 0)) %>%
+    group_by(sample_method, strata) %>%
+    summarise(contacted = sum(contacted),
+              accepted = sum(accepted))
 
 }
 
 
-Calc_Sample_Statistics <- function(sample.data, list.covariates) {
-  sample.data %>%
+Calc_Sample_Statistics <- function(sample.counts) {
+  sample.counts %>%
     bind_rows(mutate(., strata = 0)) %>%
-    select(strata, sample_method, all_of(list.covariates)) %>%
-    gather(key = var, value = val, -sample_method, -strata) %>%
+    gather(key = var, value = val, -sample_method, -strata, -DSID) %>%
     group_by(sample_method, strata, var) %>%
     summarise(samp.mean = mean(val),
               samp.sd = sd(val))
 }
 
-Run_Iteration <- function(sim.data, PS.data, cluster.data, K.condition, RR.condition, SB.condition, B.index.formula, list.covariates) {
+
+
+Run_Iteration <- function(x, PS.data, cluster.ranks, sim.data, B.index.data, B.index.formula) {
   
-  df.responses <- Generate_Responses(PS.data = PS.data, 
-                                     cluster.data = cluster.data,
-                                     K.condition = K.condition,
-                                     RR.condition = RR.condition,
-                                     SB.condition = SB.condition)
+  df.responses <- Generate_Responses(PS.data, cluster.ranks)
+  
   
   df.sampled <- Create_Samples(df.responses)
   
@@ -183,132 +175,78 @@ Run_Iteration <- function(sim.data, PS.data, cluster.data, K.condition, RR.condi
   
   df.samp.counts <- df.sampled %>%
     filter(accepted) %>%
-    select(sample_method, DSID, strata, PS, RR) 
+    select(sample_method, DSID) 
   
-  df.samp.stats <- df.sampled %>%
-    filter(accepted) %>%
+  df.samp.stats <- df.samp.counts %>%
     left_join(sim.data) %>%
-    Calc_Sample_Statistics(list.covariates)
+    Calc_Sample_Statistics
   
+  df.B.indicies <- Bindex_Summary(df.sampled, B.index.data, B.index.formula)
   
+  tibble(
+    df.recruitment.stats = list(df.recruitment.stats),
+    df.samp.counts = list(df.samp.counts),
+    df.B.indicies = list(df.B.indicies),
+    df.samp.stats = list(df.samp.stats)
+  )
   
-  # df.samp.stats <- df.samp.counts %>%
-  #   left_join(df.sampled) %>%
-  #   Calc_Sample_Statistics(list.covariates)
+}
+
+Summarise_Condition_Results <- function(results) {
+  r.stats <- 
+    results$df.recruitment.stats %>%
+    bind_rows() %>%
+    group_by(sample_method, strata) %>%
+    summarise_all(mean)
   
-  df.B.indicies <- df.sampled %>%
-    full_join(sim.data) %>%
-    mutate(accepted = ifelse(accepted, 1, 0)) %>%
-    nest(data = -sample_method) %>%
-    mutate(PS_sample = map(data, function(x) glm(data = x, formula = B.index.formula, family = quasibinomial()) %>% fitted())) %>%
-    unnest(cols = c(data, PS_sample)) %>%
-    select(sample_method, PS_sample, accepted) %>%
-    group_by(sample_method) %>%
-    summarise(Bs = Calc_Bindex(PS_sample, accepted))
+  samp.counts <-
+    results$df.samp.counts %>%
+    bind_rows() %>%
+    group_by(sample_method, DSID) %>%
+    count() %>%
+    as.data.frame()
   
-  results <- list(df.recruitment.stats = df.recruitment.stats, 
-                 df.samp.counts = df.samp.counts, 
-                 df.B.indicies = df.B.indicies, 
-                 df.samp.stats = df.samp.stats) %>%
-    lapply(function(x) mutate(x, K = K.condition, RR = RR.condition, SB = SB.condition))
+  B <- 
+    results$df.B.indicies %>%
+    bind_rows()
   
-  return(results)
+  smd.stats <- results$df.samp.stats %>%
+    bind_rows() %>%
+    group_by(sample_method, strata, var) %>%
+    summarise(sim.mean = mean(samp.mean),
+              sim.sd = sd(samp.mean))
+  
+  tibble(r.stats = list(r.stats),
+         samp.counts = list(samp.counts), 
+         B = list(B),
+         smd.stats = list(smd.stats))
 }
 
 
-
-
-Sim_Driver <- function(sim.data, PS.data, cluster.data, B.index.formula, list.covariates, K.list, RR.list, SB.list) {
-  results <- list()
+Sim_Driver  <- function(iterations, PS.data, cluster.ranks, sim.data, B.index.data, B.index.formula) {
   
-  for(cond.K in K.list) {
-    for(cond.RR in RR.list) {
-      for(cond.SB in SB.list) {
-        results <- Run_Iteration(sim.data = sim.data,
-                                 PS.data = PS.data,
-                                 cluster.data = cluster.data,
-                                 K.condition = cond.K,
-                                 RR.condition = cond.RR,
-                                 SB.condition = cond.SB,
-                                 B.index.formula = B.index.formula,
-                                 list.covariates = list.covariates) %>%
-          as.matrix %>%
-          cbind(results)
-      }
-    }
-  }
+  sim.stats <- list()
   
-  # results <- apply(results, 2, bind_cols)
+  sim.stats$condition.runtime <-
+    system.time(
+      results <- 
+        map_dfr(
+          .x = 1:iterations,
+          .f = Run_Iteration,
+          PS.data = PS.data, 
+          cluster.ranks = cluster.ranks, 
+          sim.data = sim.data,
+          B.index.data = B.index.data, 
+          B.index.formula = B.index.formula
+        )
+    )
+  
+  sim.stats$summary.runtime <-
+    system.time(
+      results <- Summarise_Condition_Results(results)
+    )
+  
   results %>%
-    apply(1, bind_rows) %>%
-    return()
+    mutate(sim.stats = list(sim.stats))
   
 }
-
-# Run_Iteration_JP <- function(x, sim.data, PS.data, cluster.data, K.condition, RR.condition, SB.condition, B.index.formula, list.covariates) {
-#   
-#   df.responses <- Generate_Responses(PS.data = PS.data, 
-#                                      cluster.data = cluster.data,
-#                                      K.condition = K.condition,
-#                                      RR.condition = RR.condition,
-#                                      SB.condition = SB.condition)
-#   
-#   df.sampled <- Create_Samples(df.responses)
-#   
-#   df.recruitment.stats <- Calc_Recruitment_Stats(df.sampled) 
-#   
-#   df.samp.counts <- df.sampled %>%
-#     filter(accepted) %>%
-#     select(sample_method, DSID, strata, PS, RR) 
-#   
-#   df.sampled <- sim.data %>%
-#     full_join(df.sampled)
-# 
-#   df.samp.stats <- Calc_Sample_Statistics(df.sampled, list.covariates)
-#   
-#   # df.samp.stats <- df.samp.counts %>%
-#   #   left_join(df.sampled) %>%
-#   #   Calc_Sample_Statistics(list.covariates)
-#   
-#   df.B.indicies <- df.sampled %>%
-#     mutate(accepted = ifelse(accepted, 1, 0)) %>%
-#     group_by(sample_method) %>%
-#     nest() %>%
-#     mutate(PS_sample = map(data, glm, formula = B.index.formula, family = quasibinomial()),
-#            PS_sample = map(PS_sample, fitted)) %>%
-#     unnest(cols = c(data, PS_sample)) %>%
-#     select(sample_method, PS_sample, accepted) %>%
-#     group_by(sample_method) %>%
-#     summarise(Bs = Calc_Bindex(PS_sample, accepted))
-#   
-#   tibble(
-#     df.recruitment.stats = list(df.recruitment.stats), 
-#     df.samp.counts = list(df.samp.counts), 
-#     df.B.indicies = list(df.B.indicies), 
-#     df.samp.stats = list(df.samp.stats)
-#   )
-# }
-
-
-# Sim_Driver_JP <- function(iterations, 
-#                           K.condition, RR.condition, SB.condition, 
-#                           sim.data, PS.data, cluster.data, 
-#                           B.index.formula, list.covariates) {
-#   
-#   
-#   results <- map_dfr(
-#     1:iterations, 
-#     Run_Iteration_JP,
-#     sim.data = sim.data,
-#     PS.data = PS.data,
-#     cluster.data = cluster.data,
-#     K.condition = K.condition,
-#     RR.condition = RR.condition,
-#     SB.condition = SB.condition,
-#     B.index.formula = B.index.formula,
-#     list.covariates = list.covariates
-#   )
-#   
-#   # calculate summary stats across iterations here
-# 
-# }
