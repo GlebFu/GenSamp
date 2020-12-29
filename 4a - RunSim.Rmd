@@ -94,7 +94,7 @@ plan(sequential)
 
 ```{r}
 sim.time.results[[3]] / 60 / 60
-(sim.time.results[[3]] / unique(param_df$iterations) * 100) / 60 / 60
+(sim.time.results[[3]] / unique(param_df$iterations) * 50) / 60 / 60
 
 
 ```
@@ -120,11 +120,8 @@ resultsFile <- paste("Data/Results/", date, " - ", descript, ".rdata", sep = "")
 
 save(sim.results, file = resultsFile)
 
-backup.results <- sim.results
-
 write_file(x = resultsFile, "Data/Results/LastResults.txt")
 
-load(resultsFile)
 
 ```
 

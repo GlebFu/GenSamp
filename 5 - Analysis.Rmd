@@ -429,14 +429,23 @@ tabs$B <-
 
 ```{r}
 tabs$B %>%
-  filter(SB == 1,
-         Cluster == str_replace(Rank_Type, " Ranks", ""),
-         Rank_Factor == "X1") %>%
+  filter(Cluster == str_replace(Rank_Type, " Ranks", ""),
+         Rank_Factor %in% c("X1", "X9")) %>%
+  ggplot(aes(x = RR, y = M, color = Sample, linetype = Cluster)) +
+  geom_line() +
+  geom_hline(yintercept = c(.8, .95), linetype = "dotted", alpha = .5) +
+  theme_minimal() +
+  facet_wrap(~SB)
+  
+
+tabs$B %>%
+  filter(Cluster == str_replace(Rank_Type, " Ranks", ""),
+         !(Sampler %in% c("U_CS_UR_X9", "S_CS_SR_X9")),
+         SB == 1) %>%
   ggplot(aes(x = RR, y = M, color = Sample, linetype = Cluster)) +
   geom_line() +
   geom_hline(yintercept = c(.8, .95), linetype = "dotted", alpha = .5) +
   theme_minimal()
-  
 
 ```
 
@@ -446,35 +455,18 @@ tabs$B %>%
   left_join(Set_Compare(.)) %>%
   filter(SB == 1,
          Sampler != Sampler_C) %>%
-  ggplot(aes(x = RR, y = q_50, group = Sampler, color = Sampler)) +
+  ggplot(aes(x = RR, y = M, group = Sampler, color = Cluster, fill = Cluster)) +
   geom_line() +
-  geom_line(aes(y = q_25), linetype = "dotted") +
-  geom_line(aes(y = q_75), linetype = "dotted") +
-  geom_line(aes(y = q_50_C), color = "black", alpha = .2) +
-  # geom_errorbar(aes(ymin = q_25, ymax = q_75), width = 3) +
-  # geom_errorbar(aes(ymin = q_25_C, ymax = q_75_C), color = "black", width = .2, alpha = .2) +
+  geom_ribbon(aes(ymin = q_25, ymax = q_75), alpha = .1, linetype = "dotted") +
+  geom_line(aes(y = M_C), color = "black", alpha = .2) +
   geom_hline(yintercept = c(.8, .95), linetype = "dotted", alpha = .5) +
-  facet_wrap(Cluster ~ Sampler, nrow = 2) +
+  facet_wrap(~ Sample + Rank_Factor, nrow = 1) +
   theme_minimal() +
-  theme(legend.position = "none")
+  theme(legend.position = "bottom")
   
 
 ```
 
-```{r}
-tabs$B %>%
-  filter(SB == 1,
-         Sample == "Convenience") %>%
-  ggplot(aes(x = RR, y = q_50, group = Sampler, color = Sampler)) +
-  geom_line() +
-  geom_line(aes(y = q_25), linetype = "dotted") +
-  geom_line(aes(y = q_75), linetype = "dotted") +
-  # geom_errorbar(aes(ymin = q_25, ymax = q_75), width = 3) +
-  geom_hline(yintercept = c(.8, .95), linetype = "dotted", alpha = .5) +
-  facet_grid(Rank_Factor ~ Rank_Type + Cluster) +
-  theme_minimal() +
-  theme(legend.position = "none")
-```
 
 
 

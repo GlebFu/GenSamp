@@ -25,8 +25,7 @@ load("Data/Simulation Data/Sim Data.Rdata")
 
 load(read_file("Data/Results/LastResults.txt"))
 
-# save(sim.results, file = read_file("Data/Results/LastResults.txt"))
-# load("Data/Results/20201217 - 9RR 1K 3SB x100.rdata")
+
 
 sim.results <- sim.results %>%
   transmute(SB = SB.condition,
@@ -34,10 +33,12 @@ sim.results <- sim.results %>%
             K = parse_number(K.condition),
             results = results) %>%
   unnest(results)
+
 ```
 
 
 ```{r}
+
 ls() %>%
   tibble(Vars = .) %>%
   mutate(MB = map(Vars, function(x) object.size(eval(parse(text = x))) %>% format(units = "MB", digits = 3))) %>%
@@ -113,12 +114,20 @@ rename_results <- function(result.data) {
     pack(Sample_Catagories = c(Cluster, Sample, Rank_Type, Rank_Factor))
 }
 
+
+
 results$B <- 
   sim.results %>% 
   select(SB:K, B) %>%
   unnest(B) %>%
   rename_results
 
+
+# results$B  %>%
+#   # filter(SB == 1, RR == 10, Sampler == "U_CS_UR_X2") %>%
+#   arrange(Bs)
+
+# results$B %>% filter(is.na(Bs))
 
 results$r.stats <- sim.results %>% 
   select(SB:K, r.stats) %>%

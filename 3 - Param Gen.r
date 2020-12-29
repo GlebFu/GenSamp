@@ -48,10 +48,10 @@ df.pop.stats <- df.sim %>%
 # Generate Intercept
 # -----------------------
 
-scale_factor <- c(1/4, 1/2, 1/1)
+scale_factor <- c(1/100, 1/4, 1/2, 1/1)
 # scale_factor <- c(1/2, 1/1)
 
-response.rates <- 9:1/10
+response.rates <- c(.99, 9:1/10)
 # response.rates <- c(.1, .2, .3)
 
 response_grid <- 
@@ -162,8 +162,9 @@ df.clusters <-
   left_join(df.clusters) %>%
   gather(key = K, value = strata, -DSID, -variables, -value) %>%
   group_by(K, strata, variables) %>%
-  mutate(w = 1/var(value)) %>%
-  filter(w != Inf) %>%
+  # mutate(w = 1/var(value)) %>%
+  mutate(w = 1) %>%
+  # filter(w != Inf) %>%
   mutate(value = w * (value - mean(value))^2) %>%
   # mutate(value = (value - mean(value))^2) %>%
   group_by(K, DSID, strata) %>%

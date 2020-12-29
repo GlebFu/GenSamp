@@ -426,4 +426,306 @@ multitest.results %>%
   unnest(results)
 ```
 
+# Analysis Test
+
+
+## Specify Conditions
+```{r}
+
+test <- param_df %>% filter(SB.condition == 1,
+                            RR.condition %in% c("RR_10"))
+
+PS.data <- test$PS.data[[1]]
+cluster.ranks <- test$cluster.ranks[[1]]
+sim.data <- test$sim.data[[1]]
+
+```
+
+## Generate Sample
+
+```{r}
+
+df.responses <- Generate_Responses(PS.data, cluster.ranks)
+
+df.sampled <- Create_Samples(df.responses)
+
+df.sampled %>%
+  filter(sample_method == ("U_CS_UR_X2")) %>% 
+  # filter(contacted) %>%
+  ggplot(aes(x = UCS_Rank, y = PS, color = accepted)) +
+  geom_point(alpha = .3, position = position_jitter()) +
+  facet_grid(~contacted)
+
+```
+
+## Summarise Results
+```{r}
+
+df.recruitment.stats <- Calc_Recruitment_Stats(df.sampled) 
+
+df.samp.counts <- df.sampled %>%
+  filter(accepted) %>%
+  select(sample_method, DSID) 
+
+df.samp.stats <- df.samp.counts %>%
+  left_join(sim.data) %>%
+  Calc_Sample_Statistics
+
+df.B.indicies <- Bindex_Summary(df.sampled, B.index.data, B.index.formula)
+
+df.B.indicies
+
+```
+
+
+## Examine B-Index
+```{r}
+fit.predict <- function(x) tibble(PS = fitted(x), PS.logit = predict(x))
+
+
+test.results <- df.sampled %>%
+  select(sample_method, DSID, contacted, accepted) %>%
+  nest(data = -sample_method) %>%
+  mutate(data = map(data, left_join, B.index.data),
+         PS_sample = map(data, function(x) glm(data = x, formula = B.index.formula, family = quasibinomial()) %>% fit.predict()),
+         accepted = map(data, select, "accepted")) %>%
+  select(-data) %>%
+  unnest(cols = c(accepted, PS_sample)) %>%
+  group_by(sample_method) %>%
+  mutate(Bs = Calc_Bindex(PS, accepted) %>% round(2)) %>%
+  nest(data = c(PS, PS.logit, accepted))
+```
+
+```{r}
+test.results %>%
+  unnest(data) %>%
+  ggplot(aes(x = PS.logit)) +
+  geom_density(alpha = .5, aes(fill = accepted)) +
+  geom_text(data = test.results, aes(x = -9, y = 1, label = Bs)) +
+  facet_wrap(~sample_method) +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+```
+
+## Examine Alt B-Index
+```{r}
+B.index.covariates2 <- c(covariates[!(covariates %in% c("ToRu"))])
+B.index.formula2 <- as.formula(paste("accepted ~", paste(B.index.covariates2, collapse = " + ")))
+
+
+test.data <- df.sampled %>% 
+  filter(sample_method == "S_BS_SR_X1") %>%
+  select(sample_method, DSID, contacted, accepted) %>%
+  left_join(df.sim)
+
+test.data2 <- test.data %>%
+  filter(accepted == T) %>%
+  mutate(accepted = F) %>%
+  bind_rows(test.data)
+
+glm(data = test.data, formula = B.index.formula, family = quasibinomial) %>% 
+  fit.predict %>% 
+  bind_cols(test.data) %>%
+  summarise(B = Calc_Bindex(PS.logit, accepted))
+
+glm(data = test.data2, formula = B.index.formula, family = quasibinomial) %>% 
+  fit.predict  %>% 
+  bind_cols(test.data2) %>%
+  summarise(B = Calc_Bindex(PS.logit, accepted))
+
+
+
+```
+
+```{r}
+
+test.results <- df.sampled %>%
+  select(sample_method, DSID, contacted, accepted) %>%
+  nest(data = -sample_method) %>%
+  mutate(data = map(data, left_join, df.sim),
+         PS_frm1 = map(data, function(x) glm(data = x, formula = B.index.formula, family = quasibinomial()) %>% fit.predict()),
+         PS_frm2 = map(data, function(x) glm(data = x, formula = B.index.formula2, family = quasibinomial()) %>% fit.predict()),
+         accepted = map(data, select, c("accepted", "DSID"))) %>%
+  select(-data) %>%
+  gather(key = PS_frm, value = PS_sample, PS_frm1, PS_frm2) %>%
+  unnest(cols = c(accepted, PS_sample)) %>%
+  group_by(sample_method, PS_frm) %>%
+  mutate(Bs = Calc_Bindex(PS, accepted) %>% round(2)) %>%
+  nest(data = c(PS, PS.logit, accepted, DSID))
+
+test.results %>%
+  filter(sample_method == "S_BS_SR_X1") %>%
+  unnest(data) %>%
+  select(-PS) %>%
+  spread(PS_frm, PS.logit)
+
+test.results %>%
+  unnest(data) %>%
+  ggplot(aes(x = PS.logit)) +
+  geom_density(alpha = .5, aes(fill = accepted)) +
+  geom_text(data = test.results, aes(x = -9, y = 1, label = Bs)) +
+  facet_wrap(~sample_method) +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+```
+
+
+# Best Case 
+
+## UCS
+
+```{r}
+
+test <- param_df %>% filter(SB.condition == 1,
+                            RR.condition %in% c("RR_50"))
+
+PS.data <- test$PS.data[[1]]
+cluster.ranks <- test$cluster.ranks[[1]]
+sim.data <- test$sim.data[[1]]
+
+df.responses <- Generate_Responses(PS.data, cluster.ranks)
+
+df.sampled <- 
+  df.responses %>%
+  mutate(UCS_Rank = pmax(.001, UCS_Rank - .75)) %>%
+  sample_frac(size = 1, weight = UCS_Rank ^ 10) %>%
+  mutate(contacted = cumsum(Ej) <= 60,
+         accepted = contacted  & Ej == 1,
+         sample_method = "U_CS_UR_X2")
+
+
+df.sampled %>%
+  filter(contacted) %>%
+  ggplot(aes(x = UCS_Rank, y = PS, color = accepted)) +
+  geom_point(alpha = .3, position = position_jitter()) +
+  facet_grid(~accepted)
+
+
+
+df.sampled %>%
+  filter(sample_method == "U_CS_UR_X2") %>%
+  select(DSID, accepted, sample_method) %>%
+  nest(data = -sample_method) %>%
+  mutate(data = map(data, left_join, df.sim),
+         PS_sample = map(data, function(x) glm(data = x, 
+                                               formula = B.index.formula, 
+                                               family = quasibinomial()) %>% 
+                           fit.predict()),
+         accepted = map(data, select, c("accepted", "DSID"))) %>%
+  select(-data) %>%
+  unnest(cols = c(accepted, PS_sample)) %>%
+  mutate(Bs = Calc_Bindex(PS, accepted) %>% round(2)) %>%
+  nest(data = c(PS, PS.logit, accepted, DSID))
+
+```
+
+```{r}
+cluster.ranks %>%
+  left_join(df.PS %>% filter(scale_factor == 1, RR == "RR_50")) %>%
+  arrange(desc(PS)) %>%
+  ungroup() %>%
+  mutate(accepted = (1:n() %in% c(1:60)),
+         sample_method = "UCS")  %>%  
+  ungroup() %>%
+  select(DSID, accepted, sample_method) %>%
+  nest(data = -sample_method) %>%
+  mutate(data = map(data, left_join, df.sim),
+         PS_sample = map(data, function(x) glm(data = x, 
+                                               formula = B.index.formula, 
+                                               family = quasibinomial()) %>% 
+                           fit.predict()),
+         accepted = map(data, select, c("accepted", "DSID"))) %>%
+  select(-data) %>%
+  unnest(cols = c(accepted, PS_sample)) %>%
+  mutate(Bs = Calc_Bindex(PS, accepted) %>% round(2)) %>%
+  nest(data = c(PS, PS.logit, accepted, DSID))
+
+
+```
+
+```{r}
+cluster.ranks %>%
+  group_by(strata) %>%
+  arrange(desc(SCS_Rank)) %>%
+  mutate(accepted = (1:n() <= pa),
+         sample_method = "SCS")  %>% 
+  ungroup() %>%
+  select(DSID, accepted, sample_method) %>%
+  nest(data = -sample_method) %>%
+  mutate(data = map(data, left_join, df.sim),
+         PS_sample = map(data, function(x) glm(data = x, 
+                                               formula = B.index.formula, 
+                                               family = quasibinomial()) %>% 
+                           fit.predict()),
+         accepted = map(data, select, c("accepted", "DSID"))) %>%
+  select(-data) %>%
+  unnest(cols = c(accepted, PS_sample)) %>%
+  mutate(Bs = Calc_Bindex(PS, accepted) %>% round(2)) %>%
+  nest(data = c(PS, PS.logit, accepted, DSID))
+
+```
+
+## Best Case SBS
+
+```{r}
+cluster.ranks %>%
+  ungroup() %>%
+  mutate(accepted = (SBS_Rank <= pa),
+         sample_method = "SBS")  %>%
+  select(DSID, accepted, sample_method) %>%
+  nest(data = -sample_method) %>%
+  mutate(data = map(data, left_join, df.sim),
+         PS_sample = map(data, function(x) glm(data = x, 
+                                               formula = B.index.formula, 
+                                               family = quasibinomial()) %>% 
+                           fit.predict()),
+         accepted = map(data, select, c("accepted", "DSID"))) %>%
+  select(-data) %>%
+  unnest(cols = c(accepted, PS_sample)) %>%
+  mutate(Bs = Calc_Bindex(PS, accepted) %>% round(2)) %>%
+  nest(data = c(PS, PS.logit, accepted, DSID))
+
+```
+
+```{r}
+test.ranks <- df.sim %>%
+  select(DSID, all_of(covariates)) %>%
+  gather(key = variables, value = value, -DSID) %>%
+  left_join(df.clusters %>% filter(K == "K_05") %>% select(DSID, strata)) %>%
+  group_by(K, strata, variables) %>%
+  mutate(w = 1) %>%
+  mutate(value = w * (value - mean(value))^2) %>%
+  # mutate(value = (value - mean(value))^2) %>%
+  group_by(K, DSID, strata) %>%
+  summarise(value = sqrt(sum(value))) %>%
+  group_by(K, strata) %>%
+  arrange(K, strata, value) %>%
+  mutate(SBS_Rank = 1:n()) %>%
+  select(-value)
+
+
+test.ranks <- prop_allocations %>%
+  select(K, strata, pa) %>%
+  right_join(test.ranks) 
+
+test.ranks %>%
+  ungroup() %>%
+  mutate(accepted = (SBS_Rank <= pa),
+         sample_method = "SBS")  %>%
+  select(DSID, accepted, sample_method) %>%
+  nest(data = -sample_method) %>%
+  mutate(data = map(data, left_join, df.sim),
+         PS_sample = map(data, function(x) glm(data = x, 
+                                               formula = B.index.formula, 
+                                               family = quasibinomial()) %>% 
+                           fit.predict()),
+         accepted = map(data, select, c("accepted", "DSID"))) %>%
+  select(-data) %>%
+  unnest(cols = c(accepted, PS_sample)) %>%
+  mutate(Bs = Calc_Bindex(PS, accepted) %>% round(2)) %>%
+  nest(data = c(PS, PS.logit, accepted, DSID))
+
+```
 
