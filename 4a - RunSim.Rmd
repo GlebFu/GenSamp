@@ -45,7 +45,7 @@ df.K.ranks <- df.clusters %>%
 
 ```{r}
 params <- list(
-  iterations = 10,
+  iterations = 1000,
   RR.condition = unique(df.PS$RR),
   K.condition = c("K_05"),
   SB.condition = unique(df.PS$scale_factor)

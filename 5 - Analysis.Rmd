@@ -294,7 +294,8 @@ figs$cluster.SMD
 tabs$strata.data <- 
   tabs$allocation %>%
   filter(k == 5) %>%
-  bind_cols(df.list$k.stats %>% filter(K == 5)) %>%
+  left_join(df.list$k.stats %>% filter(K == 5) %>%
+              rename(k = K)) %>%
   mutate(bet.perc = round(bt.ss * 100, 2),
          ch = round(ch, 2))
 
@@ -335,21 +336,6 @@ tabs$intercepts %>%
        x = lab.vars$rr)
 ```
 
-
-```{r, fig.cap = "Distributions of Participation Propensity Scores"}
-
-df.list$PS %>%
-  mutate(RR = parse_number(RR) %>% as_factor()) %>%
-  ggplot(aes(x = PS, y = RR, fill = RR)) +
-  ggridges::geom_density_ridges(stat = "binline", 
-                                bins = 100, 
-                                alpha = .3, 
-                                scale = 4) +
-  theme_apa()  +
-  theme(legend.position = "none") +
-  scale_x_continuous(breaks = seq(0,1, .1)) +
-  facet_wrap(~scale_factor)
-```
 
 
 
@@ -429,18 +415,23 @@ tabs$B <-
 
 ```{r}
 tabs$B %>%
-  filter(Cluster == str_replace(Rank_Type, " Ranks", ""),
-         Rank_Factor %in% c("X1", "X9")) %>%
+  filter(!(Rank_Factor %in% c("X9"))) %>%
   ggplot(aes(x = RR, y = M, color = Sample, linetype = Cluster)) +
   geom_line() +
   geom_hline(yintercept = c(.8, .95), linetype = "dotted", alpha = .5) +
   theme_minimal() +
   facet_wrap(~SB)
   
+tabs$B %>%
+  filter(!(Rank_Factor %in% c("X2"))) %>%
+  ggplot(aes(x = RR, y = M, color = Sample, linetype = Cluster)) +
+  geom_line() +
+  geom_hline(yintercept = c(.8, .95), linetype = "dotted", alpha = .5) +
+  theme_minimal() +
+  facet_wrap(~SB)
 
 tabs$B %>%
-  filter(Cluster == str_replace(Rank_Type, " Ranks", ""),
-         !(Sampler %in% c("U_CS_UR_X9", "S_CS_SR_X9")),
+  filter(!(Rank_Factor %in% c("X9")),
          SB == 1) %>%
   ggplot(aes(x = RR, y = M, color = Sample, linetype = Cluster)) +
   geom_line() +
@@ -454,11 +445,13 @@ tabs$B %>%
 tabs$B %>%
   left_join(Set_Compare(.)) %>%
   filter(SB == 1,
-         Sampler != Sampler_C) %>%
+         Sampler != Sampler_C,
+         !(Rank_Factor %in% c("X9"))) %>%
   ggplot(aes(x = RR, y = M, group = Sampler, color = Cluster, fill = Cluster)) +
   geom_line() +
   geom_ribbon(aes(ymin = q_25, ymax = q_75), alpha = .1, linetype = "dotted") +
   geom_line(aes(y = M_C), color = "black", alpha = .2) +
+  geom_ribbon(aes(ymin = q_25_C, ymax = q_75_C), alpha = .1, linetype = "dotted", color = "black") +
   geom_hline(yintercept = c(.8, .95), linetype = "dotted", alpha = .5) +
   facet_wrap(~ Sample + Rank_Factor, nrow = 1) +
   theme_minimal() +
@@ -472,6 +465,7 @@ tabs$B %>%
 
 ### Standardized mean differences
 
+
 ```{r, fig.cap = "Average SMDs", fig.height = 7}
 df.list$smd.results <- results$smd.stats %>%
   select(SB:vnames, Variables, log_odds, Sample_Catagories, mSMD) %>%
@@ -479,8 +473,7 @@ df.list$smd.results <- results$smd.stats %>%
 
 df.list$smd.results %>%
   filter(SB == 1,
-         Cluster == str_replace(Rank_Type, " Ranks", ""),
-         Rank_Factor == "X1",
+         !(Rank_Factor %in% c("X9")),
          strata == 0,
          !(vnames %in% c("pFem", "ST.ratio"))) %>%
   ggplot(aes(x = RR, y = mSMD, color = Sample, linetype = Cluster)) +
@@ -491,6 +484,21 @@ df.list$smd.results %>%
   geom_hline(yintercept = c(.25, -.25), linetype = "dotted") +
   theme_minimal() +
   theme(legend.position = "none")
+
+df.list$smd.results %>%
+  filter(SB == 1,
+         !(Rank_Factor %in% c("X9")),
+         strata == 0,
+         !(vnames %in% c("pFem", "ST.ratio"))) %>%
+  mutate(mSMD = abs(mSMD)) %>%
+  ggplot(aes(x = RR, y = mSMD, color = Sample, linetype = Cluster)) +
+  geom_line(size = 1) +
+  facet_wrap(~Variables, scales = "free") +
+  geom_hline(yintercept = 0) +
+  geom_hline(aes(yintercept = log_odds), linetype = "dashed") +
+  geom_hline(yintercept = c(.25), linetype = "dotted") +
+  theme_minimal() +
+  theme(legend.position = "none")
 ```
 
 ```{r}
@@ -498,8 +506,7 @@ df.list$smd.results %>%
 
 df.list$smd.results %>%
   filter(SB == 1,
-         Cluster == str_replace(Rank_Type, " Ranks", ""),
-         Rank_Factor == "X1",
+         !(Rank_Factor %in% c("X2")),
          strata != 0,
          vnames %in% c("ethBlack", "n")) %>%
   mutate(strata = paste("Strata", strata)) %>%
@@ -520,8 +527,7 @@ df.list$smd.results %>%
 
 df.list$smd.results %>%
   filter(SB == 1,
-         Cluster == str_replace(Rank_Type, " Ranks", ""),
-         Rank_Factor == "X1",
+         !(Rank_Factor %in% c("X2")),
          strata != 0,
          vnames %in% c("Suburban", "Urban", "ToRu")) %>%
   mutate(strata = paste("Strata", strata)) %>%
@@ -541,155 +547,91 @@ df.list$smd.results %>%
 ```{r}
 
 
-smd.test <- df.list$smd.result %>%
-  select(Sampler, RR, SB, vnames, Variables, log_odds, mSMD, vratio) %>%
-  mutate(Neutrality  = (-.25 <= mSMD) & (mSMD <= .25),
-         log_odds = SB * log_odds) %>%
-  group_by(SB, vnames, Variables, log_odds, vratio) %>%
-  mutate(Neutrality  = mean(Neutrality )) %>%
-  spread(Sampler, mSMD) %>%
-  mutate(SBS_vs_Strata = SBS <= min(c(SCS, SRS, SC2)),
-         SBS_vs_All = SBS <= min(c(SCS, SRS, SC2, URS, UCS)),
-         SCS_vs_All = SCS <= min(c(SBS, SRS, SC2, URS, UCS)),
-         Strata_in_CS = SCS <= UCS,
-         Strata_in_CS2 = SC2 <= UCS,
-         Strata_in_RS = SRS <= UCS)
-smd.test %>%
-
-  group_by(Variables) %>%
-  mutate(Mean_Neutrality = mean(Neutrality )) %>%
-  filter(Mean_Neutrality == 1)
-
-smd.test %>%
-  select(RR, SB, vnames, Variables, log_odds, vratio, Neutrality, SBS_vs_Strata:Strata_in_RS) %>%
-  gather(comparison, value, SBS_vs_Strata:Strata_in_RS) %>%
-  mutate(alpha = Neutrality,
-         shape = Neutrality == 1) %>%
-  ggplot(aes(x = vratio, y = log_odds, color = value, alpha = alpha, shape = shape)) +
-  geom_point(size = 4 ) +
-  facet_wrap(~comparison) +
-  theme_bw() +
-  scale_shape_manual(values=c(20, 1))
-
-
-```
-
-```{r}
-
-smd.test %>%
-  select(RR, SB, vnames, Variables, log_odds, vratio, Neutrality, SBS_vs_Strata:Strata_in_RS) %>%
-  gather(comparison, value, SBS_vs_Strata:Strata_in_RS) %>%
-  mutate(alpha = Neutrality,
-         shape = Neutrality == 1) %>%
-  ggplot(aes(x = RR, y = log_odds, color = value, alpha = alpha, shape = shape)) +
-  geom_point(size = 4 ) +
-  facet_wrap(~comparison) +
-  theme_bw() +
-  scale_shape_manual(values=c(20, 1))
-
-
-```
-
-
-```{r}
-
-
 # smd.test <- df.list$smd.result %>%
-#   select(RR, SB, Variables, vnames, Sampler, mASMD) %>%
-#   spread(Sampler, mASMD) %>%
-#   mutate(CS_Dif_1 = UCS - SCS,
-#          CS_Dif_2 = UCS - SC2,
-#          RS_Dif = URS - SRS,
-#          BS_Dif_R = SRS - SBS,
-#          BS_Dif_C1 = SCS - SBS,
-#          BS_Dif_C2 = SC2 - SBS,
-#          SB = factor(SB))
-#   
+#   select(Sampler, RR, SB, vnames, Variables, log_odds, mSMD) %>%
+#   mutate(Neutrality  = (-.25 <= mSMD) & (mSMD <= .25),
+#          log_odds = SB * log_odds) %>%
+#   group_by(SB, vnames, Variables, log_odds) %>%
+#   mutate(Neutrality  = mean(Neutrality )) %>%
+#   spread(Sampler, mSMD) %>%
+#   mutate(SBS_vs_Strata = SBS <= min(c(SCS, SRS, SC2)),
+#          SBS_vs_All = SBS <= min(c(SCS, SRS, SC2, URS, UCS)),
+#          SCS_vs_All = SCS <= min(c(SBS, SRS, SC2, URS, UCS)),
+#          Strata_in_CS = SCS <= UCS,
+#          Strata_in_CS2 = SC2 <= UCS,
+#          Strata_in_RS = SRS <= UCS)
 # 
 # smd.test %>%
-#   ggplot(aes(x = RR, y = CS_Dif_1, color = SB)) +
-#   geom_line() +
-#   geom_hline(yintercept = 0) +
-#   facet_wrap(~Variables, scale = "free") +
-#   theme_minimal()
+# 
+#   group_by(Variables) %>%
+#   mutate(Mean_Neutrality = mean(Neutrality )) %>%
+#   filter(Mean_Neutrality == 1)
 # 
 # smd.test %>%
-#   ggplot(aes(x = RR, y = CS_Dif_2, color = SB)) +
-#   geom_line() +
-#   geom_hline(yintercept = 0) +
-#   facet_wrap(~Variables, scale = "free") +
-#   theme_minimal()
-
-```
-
-```{r}
-smd.test %>%
-  filter(vnames == "n") %>%
-  ggplot(aes(x = RR, y = CS_Dif_1, color = SB)) +
-  geom_line() +
-  theme_minimal()
-
-
-df.list$smd.results %>%
-  filter(SB == 1,
-         vnames == "n") %>%
-  ggplot(aes(x = RR, y = mASMD, color = Sampler)) +
-  geom_line() +
-  theme_minimal()
-
-
-```
-
-
-```{r}
-# test <- df.list$smd.results %>%
-#   select(Sampler, RR, SB, vnames, mASMD, Variables) %>%
-#   nest(data = -c(vnames, Variables)) %>%
-#   mutate(resid = map(data, function(x) lm(mASMD ~ RR + I(RR^2), data = x) %>% residuals())) %>%
-#   unnest(cols = c(data, resid))
+#   select(RR, SB, vnames, Variables, log_odds, vratio, Neutrality, SBS_vs_Strata:Strata_in_RS) %>%
+#   gather(comparison, value, SBS_vs_Strata:Strata_in_RS) %>%
+#   mutate(alpha = Neutrality,
+#          shape = Neutrality == 1) %>%
+#   ggplot(aes(x = vratio, y = log_odds, color = value, alpha = alpha, shape = shape)) +
+#   geom_point(size = 4 ) +
+#   facet_wrap(~comparison) +
+#   theme_bw() +
+#   scale_shape_manual(values=c(20, 1))
 # 
-# test %>%
-#   ggplot(aes(x = RR, y = resid, color = Sampler, group = interaction(Variables, Sampler))) +
-#   geom_line() +
-#   facet_grid(SB ~ Variables)
+# 
+# smd.test %>%
+#   select(RR, SB, vnames, Variables, log_odds, vratio, Neutrality, SBS_vs_Strata:Strata_in_RS) %>%
+#   gather(comparison, value, SBS_vs_Strata:Strata_in_RS) %>%
+#   mutate(alpha = Neutrality,
+#          shape = Neutrality == 1) %>%
+#   ggplot(aes(x = RR, y = log_odds, color = value, alpha = alpha, shape = shape)) +
+#   geom_point(size = 4 ) +
+#   facet_wrap(~comparison) +
+#   theme_bw() +
+#   scale_shape_manual(values=c(20, 1))
+
 
 ```
 
-
 ```{r}
 
-SMDFigs <- df.list$smd.results  %>%
-  left_join(vars$plot.groups) %>%
-  group_by(group, desc) %>%
-  nest %>%
-  mutate(plots = map(data, plot_smd),
-         plots = set_names(plots, paste("smd.", desc, sep = "")),
-         data = set_names(data, paste("smd.", desc, sep = ""))) %>%
-  ungroup() %>%
-  select(data, plots)
-
-
-tabs[names(SMDFigs$data)] <- SMDFigs$data
-figs[names(SMDFigs$plots)] <- SMDFigs$plots
-
-
-tabs$smd.examples <- 
-  df.list$smd.results %>% 
-  filter(vnames %in% c("pELL", "pFem", "n")) %>% 
-  mutate(Variables = factor(vnames, 
+# SMDFigs <- df.list$smd.results  %>%
+#   left_join(vars$plot.groups) %>%
+#   group_by(group, desc) %>%
+#   nest %>%
+#   mutate(plots = map(data, plot_smd),
+#          plots = set_names(plots, paste("smd.", desc, sep = "")),
+#          data = set_names(data, paste("smd.", desc, sep = ""))) %>%
+#   ungroup() %>%
+#   select(data, plots)
+# 
+# 
+# tabs[names(SMDFigs$data)] <- SMDFigs$data
+# figs[names(SMDFigs$plots)] <- SMDFigs$plots
+# 
+# 
+tabs$smd.examples <-
+  df.list$smd.results %>%
+  filter(vnames %in% c("pELL", "pFem", "n"),
+         SB == 1,
+         !(Rank_Factor %in% c("X9")),
+         strata == 0) %>% 
+  arrange(Variables) %>%
+  mutate(Variables = factor(vnames,
                             labels = c("Group 3", "Group 1", "Group 2")),
          Variables = ordered(Variables, levels =  c("Group 1", "Group 2", "Group 3"))) %>%
-  arrange(Variables) 
+  arrange(Variables) %>%
+  mutate(mSMD = abs(mSMD))
 
-figs$smd.examples <- 
+figs$smd.examples <-
   tabs$smd.examples %>%
-  plot_smd() + 
+  plot_smd() +
   facet_wrap(~ Variables, ncol = 2)
 
 figs$smd.examples
-figs$smd.bad
-figs$smd.good
-figs$smd.neutral
+# figs$smd.bad
+# figs$smd.good
+# figs$smd.neutral
 
 ```
 
@@ -725,6 +667,8 @@ tabs[names(smd.examples.sep$data)] <- smd.examples.sep$data
 figs[names(smd.examples.sep$plots)] <- smd.examples.sep$plots
 
 figs$smd.Group1
+figs$smd.Group2
+figs$smd.Group3
 figs$smd.label
 
  tabs$smd.examples  %>%
@@ -771,14 +715,14 @@ figs$smd.label
 
 ```{r}
 
-figs$smd.good
+# figs$smd.good
 
 ```
 
 
 
 ```{r}
-figs$smd.neutral
+# figs$smd.neutral
 
 ```
 ### Examples for presentations
@@ -853,7 +797,7 @@ tabs$v.coef <- df.list$pop.data %>%
   arrange(group)
 
 figs$v.coef <- tabs$v.coef  %>%
-  ggplot(aes(x = vratio, y = abs_log_odds, color = group, fill = group)) + 
+  ggplot(aes(x = vratio, y = abs_log_odds, color = group, fill = group)) +
   geom_mark_rect(expand = 0.04, color = "black") +
   geom_point(size = 2) +
   # geom_encircle(alpha = .2, s_shape = 0, expand = .1, spread = .05, color = "black") +
@@ -862,7 +806,7 @@ figs$v.coef <- tabs$v.coef  %>%
        x = lab.vars$vratio) +
   scale_x_continuous(breaks = seq(0, 1, .1)) +
   scale_y_continuous(breaks = seq(0, .6, .1),
-  limits = c(0, .6)) + 
+  limits = c(0, .6)) +
   theme(legend.position =)
 
 figs$v.coef

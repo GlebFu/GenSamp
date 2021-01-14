@@ -24,7 +24,7 @@ row_groups <- function(x, blank = F) {
 # PLOT FUNCTIONS
 ###################
 
-plot_smd <- function(data, yvar = "mASMD") {
+plot_smd <- function(data, yvar = "mSMD") {
   data %>% 
     ggplot(aes(x = RR, y = get(yvar), color = Sampler, linetype = Sampler, group = Sampler)) +
     geom_line(size = 1) +
@@ -36,7 +36,7 @@ plot_smd <- function(data, yvar = "mASMD") {
     theme(legend.position = "bottom")
 }
 
-plot_smd2 <- function(data, yvar = "mASMD") {
+plot_smd2 <- function(data, yvar = "mSMD") {
   data %>% 
     ggplot(aes(x = RR, y = get(yvar), color = Sampler, linetype = Sampler, group = Sampler)) +
     geom_line(size = 1) +
