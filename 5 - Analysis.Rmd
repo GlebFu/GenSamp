@@ -251,15 +251,14 @@ figs$joint.cluster.stats
 
 tabs$cluster.SMD <- 
   df.list$pop.data %>% 
-  # droplevels() %>% 
   select(strata, all_of(covariates)) %>%
   gather(key = vnames, value = val, -strata) %>%
   group_by(strata, vnames) %>%
-  summarise(strat.mean = mean(val)) %>%
-  left_join(df.list$pop.stats) %>%
+  summarise(strat.mean = mean(val), .groups = "drop_last") %>%
+  left_join(df.list$pop.stats, by = "vnames") %>%
   transmute(vnames = vnames,
             SMD = round((pop.mean - strat.mean) / pop.sd, 2)) %>%
-  left_join(df.list$coefs)
+  left_join(df.list$coefs, by = "vnames")
 
 ```
 
@@ -295,7 +294,7 @@ tabs$strata.data <-
   tabs$allocation %>%
   filter(k == 5) %>%
   left_join(df.list$k.stats %>% filter(K == 5) %>%
-              rename(k = K)) %>%
+              rename(k = K), by = "k") %>%
   mutate(bet.perc = round(bt.ss * 100, 2),
          ch = round(ch, 2))
 
@@ -308,7 +307,7 @@ tabs$strata.data <-
 
 ```{r}
 
-
+ 
 df.list$coefs %>% 
   select(-vnames) %>%
   kable() %>%
@@ -354,29 +353,13 @@ df.list$PS %>%
   facet_wrap(~scale_factor)
 ```
 
-
-```{r}
-# left_join(df.list$PS, df.list$strata.id) %>%
-#   ggplot(aes(x = PS, color = strata, group = strata)) +
-#   geom_density() +
-#   facet_wrap(~RR, scales = "free_y")
-# 
-# left_join(df.list$PS, df.list$strata.id) %>%
-#   ggplot(aes(x = strata, y = PS, color = strata)) +
-#   geom_boxplot() +
-#   facet_wrap(~RR, scales = "free_y") + 
-#   theme(legend.position = "none")
-
-```
-
-
 # Results
 
 ## Generalizability
 
 ### B Index
 
-```{r, fig.cap = "Averge B-Index"}
+```{r}
 
 get_quant <- function(x) {
   tibble(
@@ -387,7 +370,7 @@ get_quant <- function(x) {
     spread(Percent, Q)
 }
 
-Set_Compare <- function(data, variable = "Sampler", value = "S_BS_SR_X1", observations = c("M", "q_25", "q_50", "q_75")){
+set_compare <- function(data, variable = "Sampler", value = "S_BS_SR_X1", observations = c("M", "q_25", "q_50", "q_75")){
   data %>%
   filter(.[[variable]] == value) %>%
   nest(Comparison = c(variable, observations)) %>%
@@ -413,37 +396,24 @@ tabs$B <-
   
 ```
 
-```{r}
-tabs$B %>%
+```{r, fig.cap = "Averge B-Index"}
+figs$B <- tabs$B %>%
   filter(!(Rank_Factor %in% c("X9"))) %>%
   ggplot(aes(x = RR, y = M, color = Sample, linetype = Cluster)) +
   geom_line() +
   geom_hline(yintercept = c(.8, .95), linetype = "dotted", alpha = .5) +
   theme_minimal() +
-  facet_wrap(~SB)
-  
-tabs$B %>%
-  filter(!(Rank_Factor %in% c("X2"))) %>%
-  ggplot(aes(x = RR, y = M, color = Sample, linetype = Cluster)) +
-  geom_line() +
-  geom_hline(yintercept = c(.8, .95), linetype = "dotted", alpha = .5) +
-  theme_minimal() +
-  facet_wrap(~SB)
+  facet_wrap(~SB) +
+  labs(y = lab.vars$B,
+       x = lab.vars$rr)
 
-tabs$B %>%
-  filter(!(Rank_Factor %in% c("X9")),
-         SB == 1) %>%
-  ggplot(aes(x = RR, y = M, color = Sample, linetype = Cluster)) +
-  geom_line() +
-  geom_hline(yintercept = c(.8, .95), linetype = "dotted", alpha = .5) +
-  theme_minimal()
-
+figs$B
 ```
 
 
 ```{r}
 tabs$B %>%
-  left_join(Set_Compare(.)) %>%
+  left_join(set_compare(.)) %>%
   filter(SB == 1,
          Sampler != Sampler_C,
          !(Rank_Factor %in% c("X9"))) %>%
@@ -455,7 +425,9 @@ tabs$B %>%
   geom_hline(yintercept = c(.8, .95), linetype = "dotted", alpha = .5) +
   facet_wrap(~ Sample + Rank_Factor, nrow = 1) +
   theme_minimal() +
-  theme(legend.position = "bottom")
+  theme(legend.position = "bottom") +
+  labs(y = lab.vars$B,
+       x = lab.vars$rr)
   
 
 ```
@@ -468,72 +440,73 @@ tabs$B %>%
 
 ```{r, fig.cap = "Average SMDs", fig.height = 7}
 df.list$smd.results <- results$smd.stats %>%
-  select(SB:vnames, Variables, log_odds, Sample_Catagories, mSMD) %>%
-  unpack(Sample_Catagories)
+  select(SB:vnames, Variables, log_odds, Sample_Catagories, mSMD, abs.mSMD) %>%
+  unpack(Sample_Catagories) %>%
+  filter(!(Rank_Factor %in% c("X9")),
+         strata == 0) %>%
+  select(-K, -strata, -log_odds)
 
-df.list$smd.results %>%
-  filter(SB == 1,
-         !(Rank_Factor %in% c("X9")),
-         strata == 0,
-         !(vnames %in% c("pFem", "ST.ratio"))) %>%
-  ggplot(aes(x = RR, y = mSMD, color = Sample, linetype = Cluster)) +
-  geom_line(size = 1) +
-  facet_wrap(~Variables, scales = "free") +
-  geom_hline(yintercept = 0) +
-  geom_hline(aes(yintercept = log_odds), linetype = "dashed") +
-  geom_hline(yintercept = c(.25, -.25), linetype = "dotted") +
-  theme_minimal() +
-  theme(legend.position = "none")
+tabs$smd.by.scale <- df.list$smd.results %>%
+  nest(smd.plot.data = c(SB, RR, Sampler, Method_Label:abs.mSMD)) %>%
+  mutate(plots = pmap(.l = list(data = smd.plot.data, g.title = Variables), .f = plot_smd2, yvar = "abs.mSMD", l.pos = "bottom"),
+         plots = setNames(plots, vnames))
 
-df.list$smd.results %>%
-  filter(SB == 1,
-         !(Rank_Factor %in% c("X9")),
-         strata == 0,
-         !(vnames %in% c("pFem", "ST.ratio"))) %>%
-  mutate(mSMD = abs(mSMD)) %>%
-  ggplot(aes(x = RR, y = mSMD, color = Sample, linetype = Cluster)) +
-  geom_line(size = 1) +
-  facet_wrap(~Variables, scales = "free") +
-  geom_hline(yintercept = 0) +
-  geom_hline(aes(yintercept = log_odds), linetype = "dashed") +
-  geom_hline(yintercept = c(.25), linetype = "dotted") +
-  theme_minimal() +
-  theme(legend.position = "none")
+figs$smd.by.scale <- tabs$smd.by.scale$plots %>% as.list
+
 ```
 
 ```{r}
 
+figs$smd.by.scale$Suburban
+figs$smd.by.scale$T1
+figs$smd.by.scale$Urban
 
-df.list$smd.results %>%
+```
+
+```{r}
+
+figs$smd.by.scale$pTotfrl
+figs$smd.by.scale$ethHisp
+figs$smd.by.scale$ethWhite
+figs$smd.by.scale$pELL
+figs$smd.by.scale$dSCH
+```
+
+
+```{r}
+
+figs$smd.by.scale$n
+figs$smd.by.scale$ethBlack
+figs$smd.by.scale$ToRu
+
+```
+
+```{r}
+figs$smd.by.scale$pFem
+figs$smd.by.scale$ST.ratio
+```
+
+
+
+
+```{r}
+
+df.list$smd.by.strata.results <- 
+  results$smd.stats %>%
+  select(SB:vnames, Variables, log_odds, Sample_Catagories, mSMD, abs.mSMD) %>%
+  unpack(Sample_Catagories) %>%
+  filter(!(Rank_Factor %in% c("X9")),
+         Cluster == "Stratified",
+         strata != 0) %>%
+  select(-K, -log_odds)
+
+df.list$smd.by.strata.results %>%
   filter(SB == 1,
-         !(Rank_Factor %in% c("X2")),
-         strata != 0,
          vnames %in% c("ethBlack", "n")) %>%
   mutate(strata = paste("Strata", strata)) %>%
   ggplot(aes(x = RR, y = mSMD, color = strata)) +
   geom_line() +
-  facet_grid(Variables ~ Sample + Cluster, scales = "free_y") +
-  geom_hline(yintercept = 0) +
-  geom_hline(yintercept = c(.25, -.25), linetype = "dotted") +
-  theme_minimal() +
-  theme(legend.position = "bottom",
-        legend.title = element_blank())
-
-
-```
-
-```{r}
-
-
-df.list$smd.results %>%
-  filter(SB == 1,
-         !(Rank_Factor %in% c("X2")),
-         strata != 0,
-         vnames %in% c("Suburban", "Urban", "ToRu")) %>%
-  mutate(strata = paste("Strata", strata)) %>%
-  ggplot(aes(x = RR, y = mSMD, color = strata)) +
-  geom_line() +
-  facet_grid(Variables ~ Sample + Cluster, scales = "free_y") +
+  facet_grid(Variables ~ Cluster + Sample , scales = "free_y") +
   geom_hline(yintercept = 0) +
   geom_hline(yintercept = c(.25, -.25), linetype = "dotted") +
   theme_minimal() +
@@ -775,41 +748,41 @@ figs$smd.label
 
 ```{r}
 
-tabs$v.coef <- df.list$pop.data %>%
-  select(DSID, all_of(covariates), strata) %>%
-  gather(key = vnames, value = value, covariates) %>%
-  group_by(vnames) %>%
-  mutate(T.SS = var(value) * (n() - 1)) %>%
-  group_by(vnames, T.SS, strata) %>%
-  summarise(W.SS = var(value) * (n() - 1)) %>%
-  summarise(W.SS = sum(W.SS)) %>%
-  mutate(B.SS = T.SS - W.SS,
-         vratio = B.SS / T.SS) %>%
-  left_join(df.list$coefs) %>%
-  left_join(vars$plot.groups) %>%
-  mutate(SB_11 = log_odds,
-         SB_12 = log_odds * .5,
-         SB_14 = log_odds * .25) %>%
-  gather(key = factor, value = coef, SB_11:SB_14) %>%
-  mutate(abs_log_odds = abs(coef),
-         odds = exp(coef),
-         prob = odds / (1 + odds))%>%
-  arrange(group)
-
-figs$v.coef <- tabs$v.coef  %>%
-  ggplot(aes(x = vratio, y = abs_log_odds, color = group, fill = group)) +
-  geom_mark_rect(expand = 0.04, color = "black") +
-  geom_point(size = 2) +
-  # geom_encircle(alpha = .2, s_shape = 0, expand = .1, spread = .05, color = "black") +
-  # geom_text_repel(aes(label = Variables), point.padding = .2, color = "black") +
-  labs(y = lab.vars$coef,
-       x = lab.vars$vratio) +
-  scale_x_continuous(breaks = seq(0, 1, .1)) +
-  scale_y_continuous(breaks = seq(0, .6, .1),
-  limits = c(0, .6)) +
-  theme(legend.position =)
-
-figs$v.coef
+# tabs$v.coef <- df.list$pop.data %>%
+#   select(DSID, all_of(covariates), strata) %>%
+#   gather(key = vnames, value = value, covariates) %>%
+#   group_by(vnames) %>%
+#   mutate(T.SS = var(value) * (n() - 1)) %>%
+#   group_by(vnames, T.SS, strata) %>%
+#   summarise(W.SS = var(value) * (n() - 1)) %>%
+#   summarise(W.SS = sum(W.SS)) %>%
+#   mutate(B.SS = T.SS - W.SS,
+#          vratio = B.SS / T.SS) %>%
+#   left_join(df.list$coefs) %>%
+#   left_join(vars$plot.groups) %>%
+#   mutate(SB_11 = log_odds,
+#          SB_12 = log_odds * .5,
+#          SB_14 = log_odds * .25) %>%
+#   gather(key = factor, value = coef, SB_11:SB_14) %>%
+#   mutate(abs_log_odds = abs(coef),
+#          odds = exp(coef),
+#          prob = odds / (1 + odds))%>%
+#   arrange(group)
+# 
+# figs$v.coef <- tabs$v.coef  %>%
+#   ggplot(aes(x = vratio, y = abs_log_odds, color = group, fill = group)) +
+#   geom_mark_rect(expand = 0.04, color = "black") +
+#   geom_point(size = 2) +
+#   # geom_encircle(alpha = .2, s_shape = 0, expand = .1, spread = .05, color = "black") +
+#   # geom_text_repel(aes(label = Variables), point.padding = .2, color = "black") +
+#   labs(y = lab.vars$coef,
+#        x = lab.vars$vratio) +
+#   scale_x_continuous(breaks = seq(0, 1, .1)) +
+#   scale_y_continuous(breaks = seq(0, .6, .1),
+#   limits = c(0, .6)) +
+#   theme(legend.position =)
+# 
+# figs$v.coef
 ```
 
 
@@ -818,7 +791,12 @@ figs$v.coef
 ### Sampling Difficulty
 
 ```{r}
-tabs$samples <- results$r.stats 
+tabs$samples <- 
+  results$r.stats %>% 
+  unpack(Sample_Catagories) %>%
+  filter(strata == 0,
+         !(Rank_Factor %in% c("X9"))) %>%
+  mutate(response_rate = accepted/contacted)
 
 
 ```
@@ -834,13 +812,13 @@ tabs$samples <- results$r.stats
 #   theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
 # 
 # figs$samples
-
-tabs$samples.contacts.labels <-  tabs$samples %>%
-  filter(measure == "sch.contacted") %>%
-  filter(RR == 10) %>%
-  arrange(value) %>%
-  ungroup() %>%
-  mutate(RR = 5)
+# 
+# tabs$samples.contacts.labels <- 
+#   tabs$samples %>%
+#   filter(RR == 10) %>%
+#   arrange(contacted) %>%
+#   ungroup() %>%
+#   mutate(RR = 5)
 ```
 
 
@@ -849,19 +827,19 @@ tabs$samples.contacts.labels <-  tabs$samples %>%
 
 ```{r, fig.cap = "Schools Contacted"}
 
-tabs$samples.contacts.labels <-  tabs$samples %>%
-  filter(measure == "sch.contacted") %>%
+tabs$samples.contacts.labels <-  
+  tabs$samples %>%
   filter(RR == 10,
          SB == 1) %>%
-  arrange(value) %>%
+  arrange(contacted) %>%
   ungroup() %>%
   mutate(RR = 5,
-         value = c(200, 1000, 2200, 2900, 3700))
+         contacted = c(200, 1000, 2200, 2900, 3700))
 
-figs$samples.contacts <- tabs$samples %>%
-  filter(measure == "sch.contacted",
-         SB == 1) %>%
-  ggplot(aes(x = RR, y = value, group = Sampler, color = Sampler, linetype = Sampler)) +
+figs$samples.contacts <- 
+  tabs$samples %>%
+  filter(SB == 1) %>%
+  ggplot(aes(x = RR, y = contacted, group = Sampler, color = Sampler, linetype = Sampler)) +
   geom_point() +
   geom_line() +
   theme(legend.position = "none") +
@@ -883,20 +861,21 @@ figs$samples.contacts
 
 
 
-tabs$samples.response.rates.labels <-  tabs$samples %>%
-  filter(measure == "sch.response.rate") %>%
+tabs$samples.response.rates.labels <-  
+  tabs$samples %>%
   filter(RR %in% c(40, 50)) %>%
   group_by(Sampler) %>%
-  summarise(value = (min(value) + (max(value) - min(value)) / 2) * 100) %>%
+  summarise(response_rate = (min(response_rate) + (max(response_rate) - min(response_rate)) / 2) * 100) %>%
   mutate(RR = 45) %>%
-  arrange(value) %>%
+  arrange(response_rate) %>%
   mutate(value = c(5, 20, 35, 50, 65))
   
 
 
-figs$samples.response.rates <- tabs$samples %>%
-  filter(measure == "sch.response.rate") %>%
-  mutate(value = value * 100) %>%
+figs$samples.response.rates <- 
+  tabs$samples %>%
+  filter(SB == 1) %>%
+  mutate(value = response_rate * 100) %>%
   ggplot(aes(x = RR, y = value, group = Sampler, color = Sampler, linetype = Sampler)) +
   geom_point() +
   geom_line() +
@@ -941,18 +920,20 @@ figs$joint.feasibility
 ### Relative Performance
 
 ```{r}
-tabs$relative.counts <- tabs$samples  %>%
+tabs$relative.counts <- 
+  tabs$samples  %>%
   ungroup() %>%
-  filter(measure %in% c("sch.contacted")) %>%
-  select(-Sampler) %>%
-  spread(key = Sampler, value = value) %>%
-  right_join(tabs$samples  %>% filter(measure == "sch.contacted")) %>%
+  select(SB:strata, Sampler, response_rate) %>%
+  spread(key = Sampler, value = response_rate) %>%
+  right_join(tabs$samples) %>%
   gather(key = Comp.Method, value = Comp.Value,
-         SBS:URS) %>%
-  mutate(Comp.Times = value / Comp.Value) 
+         contains("_RS"), contains("_BS"), contains("_CS")) %>%
+  mutate(Comp.Rate = response_rate / Comp.Value) 
 
-figs$relative.counts <- tabs$relative.counts %>%
-  ggplot(aes(x = RR, y = Comp.Times, group = Sampler, color = Sampler, linetype = Sampler)) +
+figs$relative.counts <- 
+  tabs$relative.counts %>%
+  filter(SB == 1) %>%
+  ggplot(aes(x = RR, y = Comp.Rate, group = Sampler, color = Sampler, linetype = Sampler)) +
   geom_line() +
   facet_wrap(~ Comp.Method, scales = "free") 
 
@@ -994,19 +975,31 @@ lab.vars$gini <- "Gini Coeficient"
 
 ```{r}
 
+tabs$gini.coef <-
+  results$gini %>%
+  select(-count.data) %>%
+  unpack(Sample_Catagories) %>%
+  filter(!(Rank_Factor %in% c("X9")),
+         SB == 1) %>%
+  group_by(RR) %>%
+  arrange(Gini_Coef) %>%
+  mutate(y.pos = 1 - (1:n()/n()) / 1.5,
+         x.pos = 1 - y.pos)
 
-tabs$gini.coef.labels <-  results$gini.coef %>%
-  mutate(RR = parse_number(RR)) %>%
-  filter(RR %in% c(10)) %>%
+tabs$gini.coef.labels <-
+  tabs$gini.coef %>%
+  filter(RR == 10) %>%
   mutate(RR = 5) %>%
-  arrange(gini) %>%
-  mutate(gini = c(.5, .65, .75, .95, .85))
+  arrange(Gini_Coef) %>%
+  mutate(Gini_Coef = c(.5, .65, .75, .95, .85))
+```
 
+
+```{r}
 
 
 figs$gini <- tabs$gini.coef %>%
-  mutate(RR = parse_number(RR)) %>%
-  ggplot(aes(x = RR, y = gini, group = Sampler, color = Sampler, linetype = Sampler)) +
+  ggplot(aes(x = RR, y = Gini_Coef, group = Sampler, color = Sampler, linetype = Sampler)) +
   geom_point() +
   geom_line() +
   scale_x_continuous(breaks = seq(10, 90, 10)) +
@@ -1024,13 +1017,20 @@ figs$gini
 
 ```{r}
 
-figs$gini.coef <- tabs$gini.count %>%
-  # filter(RR == "RR_90") %>%
-  # filter(Sampler == "Unstratified_RS") %>%
+tabs$gini.count <-
+  results$gini %>%
+  select(SB:Sample_Catagories) %>%
+  unpack(Sample_Catagories) %>%
+  unnest(count.data)
+
+figs$gini.coef <- 
+  tabs$gini.count %>%
+  filter(SB == 1,
+         !(Rank_Factor %in% c("X9"))) %>%
   ggplot(aes(x = c.prop.pop, y = c.prop.sel, group = Sampler, color = Sampler, linetype = Sampler)) +
   geom_line() +
   geom_abline(slope = 1, intercept = 0, linetype = "dotted") +
-  geom_label(aes(label = gini, x = x.pos, y = y.pos), 
+  geom_label(aes(label = round(Gini_Coef, 2), x = x.pos, y = y.pos), 
              data = tabs$gini.coef, size = 3) +
   facet_wrap(~RR) +  
   # (if (grey.plots) {scale_colour_grey(start = 0, end = .7)}) +
@@ -1115,7 +1115,7 @@ save(df.list,
      results,
      tabs,
      vars,
-     file = "Data/Paper/Paper Data 09-27-2020.rdata")
+     file = "Data/Paper/Paper Data 01-14-2021.rdata")
 ```
 
 

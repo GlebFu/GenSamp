@@ -65,7 +65,7 @@ df.list$strata.id <-
 
 
 df.list$pop.data <- 
-  left_join(df.sim, df.list$strata.id)
+  left_join(df.sim, df.list$strata.id, by = "DSID")
 
 
 
@@ -74,7 +74,9 @@ df.list$PS <- df.PS %>%
 
 df.list$coefs <- DGM.Bs %>%
   transmute(vnames = var, log_odds = Bs) %>%
-  full_join(read_csv("Data/Paper/Clustering Variables.csv"))
+  full_join(read_csv("Data/Paper/Clustering Variables.csv",
+                      col_types = cols()),
+            by = "vnames")
 
 df.list$pop.stats <- df.list$pop.data %>%
   select(DSID, all_of(covariates), strata) %>%
@@ -82,12 +84,16 @@ df.list$pop.stats <- df.list$pop.data %>%
   group_by(vnames) %>%
   mutate(T.SS = var(value) * (n() - 1)) %>%
   group_by(vnames, T.SS, strata) %>%
-  summarise(W.SS = var(value) * (n() - 1)) %>%
-  summarise(W.SS = sum(W.SS)) %>%
+  summarise(W.SS = var(value) * (n() - 1), 
+            .groups = "drop_last") %>%
+  summarise(W.SS = sum(W.SS), 
+            .groups = "drop_last") %>%
   mutate(B.SS = T.SS - W.SS,
          vratio = B.SS / T.SS) %>%
-  left_join(df.list$coefs) %>%
-  left_join(df.pop.stats %>% rename(vnames = var))
+  left_join(df.list$coefs, 
+            by = "vnames") %>%
+  left_join(df.pop.stats %>% rename(vnames = var), 
+            by = "vnames")
 
 df.list$k.stats <- cluster.stats
 
@@ -101,7 +107,8 @@ rename_results <- function(result.data) {
   result.data %>%
     separate(sample_method, into = c("Cluster", "Sample", "Rank_Type", "Rank_Factor"), remove = F, fill = "right") %>%
     rename(Sampler = sample_method) %>%
-    mutate(Cluster = factor(Cluster, 
+    mutate(Method_Label = paste(Cluster, Sample, sep = ""),
+           Cluster = factor(Cluster, 
                             level = c("S", "U"), 
                             label = c("Stratified", "Unstratified")),
            Sample = factor(Sample,
@@ -111,7 +118,7 @@ rename_results <- function(result.data) {
                               level = c("SR", "UR"), 
                               label = c("Stratified Ranks", "Unstratified Ranks")),
            Rank_Factor = factor(Rank_Factor)) %>%
-    pack(Sample_Catagories = c(Cluster, Sample, Rank_Type, Rank_Factor))
+    pack(Sample_Catagories = c(Method_Label, Cluster, Sample, Rank_Type, Rank_Factor))
 }
 
 
@@ -140,8 +147,9 @@ results$smd.stats <- sim.results %>%
   unnest(smd.stats) %>% 
   rename(vnames = var) %>% 
   rename_results() %>%
-  left_join(df.list$pop.stats) %>%
-  mutate(mSMD = (sim.mean - pop.mean) / pop.sd)
+  left_join(df.list$pop.stats, by = "vnames") %>%
+  mutate(mSMD = (sim.mean - pop.mean) / pop.sd,
+         abs.mSMD = abs(mSMD))
 
 
 
@@ -154,7 +162,7 @@ results$smd.stats <- sim.results %>%
 
 calc_gini_curve <- function(count.data, pop.list) {
   count.data %>%
-    full_join(pop.list) %>%
+    full_join(pop.list, by = "DSID") %>%
     mutate(count = ifelse(is.na(n), 0, n),
            prop.selected = count / sum(count),
            n = n(),
