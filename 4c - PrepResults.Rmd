@@ -57,20 +57,39 @@ tabs <- list()
 figs <- list()
 
 
+vars$conditions <- c("SB", "RR", "Variables", "vnames") 
+vars$methods <- c("Sampler", "Sample_Catagories", "Cluster", "Sample", "Method_Label") 
+```
 
+```{r}
 df.list$strata.id <- 
   df.clusters %>%
+  ungroup() %>%
   filter(K == "K_05") %>%
-  mutate(strata = factor(paste("Strata", strata)))
+  mutate(strata = factor(paste("Strata", strata))) %>%
+  select(DSID, strata, SBS_Rank, UCS_Rank, SCS_Rank)
 
+```
+
+```{r}
 
 df.list$pop.data <- 
   left_join(df.sim, df.list$strata.id, by = "DSID")
 
 
+```
+
+```{r}
+
 
 df.list$PS <- df.PS %>% 
   mutate(logit = log(PS / (1 - PS)))
+
+
+```
+
+```{r}
+
 
 df.list$coefs <- DGM.Bs %>%
   transmute(vnames = var, log_odds = Bs) %>%

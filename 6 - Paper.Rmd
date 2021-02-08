@@ -102,7 +102,7 @@ library(kableExtra)
 ```{r data-prep}
 
 
-load("Data/Paper/Paper Data 09-27-2020.rdata")
+load("Data/Paper/Paper Data 02-08-2021.rdata")
 
 source("0 - Functions - Analysis and Paper.R")
 
@@ -314,11 +314,9 @@ We developed a sampling frame for this population using data from the Common Cor
 
 ```{r tab-RGM-Pars}
 tabs$pop.desc %>%
-  mutate(M = round(M, 2),
-         SD = round(SD, 2)) %>%
   select(-Category) %>%
   kable(booktabs = T,
-        caption = "Descriptive statistics for population of $N = 9,792$ schools and log odds of participation associated with each covariate (Fellers, 2017)",
+        caption = "Descriptive statistics for population of 9,792 schools and log odds of participation associated with each covariate (Fellers, 2017)",
         col.names = c("Variables", "M", "N", "Log-odds of participation")) %>%
   kable_styling(latex_options = c("hold_position"),
                 full_width = F) %>%

@@ -115,7 +115,10 @@ tabs$pop.desc <-
   df.list$pop.stats %>%
   ungroup() %>%
   arrange(Category, Sub) %>%
-  select(Category, Variables, pop.mean, pop.sd, log_odds)
+  select(Category, Variables, pop.mean, pop.sd, log_odds) %>%
+  mutate(M = round(pop.mean, 2),
+         SD = round(pop.sd, 2),
+         .keep = "unused")
 
 ```
 
@@ -129,7 +132,8 @@ tabs$dist <-
          ST.ratio = log(ST.ratio),
          dSCH = log(dSCH)) %>%
   gather(key = vnames, value = val) %>%
-  left_join(df.list$coefs)
+  left_join(df.list$coefs,
+            by = "vnames")
 
 figs$dist <- 
   tabs$dist %>%
@@ -370,7 +374,9 @@ get_quant <- function(x) {
     spread(Percent, Q)
 }
 
-set_compare <- function(data, variable = "Sampler", value = "S_BS_SR_X1", observations = c("M", "q_25", "q_50", "q_75")){
+set_compare <- function(data, variable = "Sampler", 
+                        value = "S_BS_SR_X1", 
+                        observations = c("M", "q_25", "q_50", "q_75")){
   data %>%
   filter(.[[variable]] == value) %>%
   nest(Comparison = c(variable, observations)) %>%
@@ -413,7 +419,7 @@ figs$B
 
 ```{r}
 tabs$B %>%
-  left_join(set_compare(.)) %>%
+  left_join(set_compare(.), by = c("SB", "RR", "K")) %>%
   filter(SB == 1,
          Sampler != Sampler_C,
          !(Rank_Factor %in% c("X9"))) %>%
@@ -437,10 +443,12 @@ tabs$B %>%
 
 ### Standardized mean differences
 
-
 ```{r, fig.cap = "Average SMDs", fig.height = 7}
-df.list$smd.results <- results$smd.stats %>%
-  select(SB:vnames, Variables, log_odds, Sample_Catagories, mSMD, abs.mSMD) %>%
+
+df.list$smd.results <- 
+  results$smd.stats %>%
+  select(any_of(vars$methods), any_of(vars$conditions),
+         log_odds, mSMD, abs.mSMD) %>%
   unpack(Sample_Catagories) %>%
   filter(!(Rank_Factor %in% c("X9")),
          strata == 0) %>%
@@ -448,7 +456,7 @@ df.list$smd.results <- results$smd.stats %>%
 
 tabs$smd.by.scale <- df.list$smd.results %>%
   nest(smd.plot.data = c(SB, RR, Sampler, Method_Label:abs.mSMD)) %>%
-  mutate(plots = pmap(.l = list(data = smd.plot.data, g.title = Variables), .f = plot_smd2, yvar = "abs.mSMD", l.pos = "bottom"),
+  mutate(plots = pmap(.l = list(data = smd.plot.data, g.title = Variables), .f = plot_smd, y.var = "abs.mSMD", l.pos = "bottom"),
          plots = setNames(plots, vnames))
 
 figs$smd.by.scale <- tabs$smd.by.scale$plots %>% as.list
@@ -457,13 +465,55 @@ figs$smd.by.scale <- tabs$smd.by.scale$plots %>% as.list
 
 ```{r}
 
+df.list$smd.results
+
+test <- tabs$intercepts %>%
+  select(-Int) %>%
+  right_join(df.list$smd.results,
+             by = "RR") %>%
+  left_join(df.list$coefs,
+            by = c("vnames", "Variables")) %>%
+  mutate(y.val = SB * log_odds + Intercept)
+
+test %>%
+  filter(vnames == "Suburban") %>%
+  ggplot(aes(x = y.val, y = abs.mSMD, color = as.factor(SB))) +
+  geom_point() +
+  geom_line() +
+  facet_wrap(~Method_Label)
+
+test %>%
+  group_by(Method_Label, vnames) %>%
+  arrange(mSMD) %>%
+  mutate(rank = 1:n()) %>%
+  filter(vnames == "Suburban") %>%
+  ggplot(aes(x = rank, y = mSMD, color = RR)) +
+  geom_point() +
+  geom_line() +
+  facet_wrap(~ Method_Label)
+
+test %>%
+  filter(vnames == "Suburban") %>%
+  mutate(alpha.value = abs.mSMD > .2) %>%
+  ggplot(aes(x = RR, y = abs.mSMD, color = Method_Label, group = interaction(Method_Label, SB))) +
+  geom_line(aes(alpha = alpha.value)) +
+  scale_alpha_discrete(guide = "none", range = c(.25, 1)) +
+  geom_hline(yintercept = .2, linetype = "dotted") +
+  facet_grid(~SB)
+```
+
+
+```{r}
+
 figs$smd.by.scale$Suburban
 figs$smd.by.scale$T1
 figs$smd.by.scale$Urban
 
+
 ```
 
 ```{r}
+
 
 figs$smd.by.scale$pTotfrl
 figs$smd.by.scale$ethHisp
@@ -479,13 +529,58 @@ figs$smd.by.scale$n
 figs$smd.by.scale$ethBlack
 figs$smd.by.scale$ToRu
 
+
+
 ```
+
+
+
 
 ```{r}
-figs$smd.by.scale$pFem
-figs$smd.by.scale$ST.ratio
+
+vars$smd.groups <- 
+  tibble(group1 = list(c("Suburban", "T1", "Urban")),
+         group2 = list(c("pTotfrl", "ethHisp", "ethWhite", "pELL", "dSCH")),
+         group3 = list(c("n", "ethBlack", "ToRu")),
+         group4 = list(c("pFem", "St.ratio"))) %>%
+  pivot_longer(cols = everything(), names_to = "Group", values_to = "vnames") %>%
+  unnest(vnames)
+
+
+
+vars$smd.examples <-c("Suburban", "dSCH", "n", "ST.ratio")
 ```
 
+
+
+
+
+```{r}
+tabs$smd.examples <- df.list$smd.results %>%
+  left_join(vars$smd.groups, by = "vnames") %>%
+  filter(vnames %in% vars$smd.examples) 
+
+smd.examples.sep <-
+  tabs$smd.examples %>%
+  nest(data = -c(Variables, Group)) %>%
+  mutate(plots = map(data, plot_smd, l.pos = "none", y.var = "abs.mSMD"))
+
+smd.examples.sep$plots[[1]]
+
+tabs$smd.examples %>%
+  ggplot(aes(x = RR, y = abs.mSMD, color = Method_Label)) +
+  geom_line(size = 1) +
+  geom_hline(yintercept = c(.25), linetype = "dotted") +
+  geom_hline(yintercept = 0, linetype = "solid") +
+  labs(y = lab.vars$smd,
+       x = lab.vars$rr) + 
+  scale_x_continuous(breaks = seq(10, 90, 20),
+                     limits = c(10, 100)) +
+  theme(legend.position = "bottom") +
+  facet_grid(Variables~SB, scales = "free_y") 
+
+
+```
 
 
 
@@ -512,190 +607,6 @@ df.list$smd.by.strata.results %>%
   theme_minimal() +
   theme(legend.position = "bottom",
         legend.title = element_blank())
-
-
-```
-
-
-```{r}
-
-
-# smd.test <- df.list$smd.result %>%
-#   select(Sampler, RR, SB, vnames, Variables, log_odds, mSMD) %>%
-#   mutate(Neutrality  = (-.25 <= mSMD) & (mSMD <= .25),
-#          log_odds = SB * log_odds) %>%
-#   group_by(SB, vnames, Variables, log_odds) %>%
-#   mutate(Neutrality  = mean(Neutrality )) %>%
-#   spread(Sampler, mSMD) %>%
-#   mutate(SBS_vs_Strata = SBS <= min(c(SCS, SRS, SC2)),
-#          SBS_vs_All = SBS <= min(c(SCS, SRS, SC2, URS, UCS)),
-#          SCS_vs_All = SCS <= min(c(SBS, SRS, SC2, URS, UCS)),
-#          Strata_in_CS = SCS <= UCS,
-#          Strata_in_CS2 = SC2 <= UCS,
-#          Strata_in_RS = SRS <= UCS)
-# 
-# smd.test %>%
-# 
-#   group_by(Variables) %>%
-#   mutate(Mean_Neutrality = mean(Neutrality )) %>%
-#   filter(Mean_Neutrality == 1)
-# 
-# smd.test %>%
-#   select(RR, SB, vnames, Variables, log_odds, vratio, Neutrality, SBS_vs_Strata:Strata_in_RS) %>%
-#   gather(comparison, value, SBS_vs_Strata:Strata_in_RS) %>%
-#   mutate(alpha = Neutrality,
-#          shape = Neutrality == 1) %>%
-#   ggplot(aes(x = vratio, y = log_odds, color = value, alpha = alpha, shape = shape)) +
-#   geom_point(size = 4 ) +
-#   facet_wrap(~comparison) +
-#   theme_bw() +
-#   scale_shape_manual(values=c(20, 1))
-# 
-# 
-# smd.test %>%
-#   select(RR, SB, vnames, Variables, log_odds, vratio, Neutrality, SBS_vs_Strata:Strata_in_RS) %>%
-#   gather(comparison, value, SBS_vs_Strata:Strata_in_RS) %>%
-#   mutate(alpha = Neutrality,
-#          shape = Neutrality == 1) %>%
-#   ggplot(aes(x = RR, y = log_odds, color = value, alpha = alpha, shape = shape)) +
-#   geom_point(size = 4 ) +
-#   facet_wrap(~comparison) +
-#   theme_bw() +
-#   scale_shape_manual(values=c(20, 1))
-
-
-```
-
-```{r}
-
-# SMDFigs <- df.list$smd.results  %>%
-#   left_join(vars$plot.groups) %>%
-#   group_by(group, desc) %>%
-#   nest %>%
-#   mutate(plots = map(data, plot_smd),
-#          plots = set_names(plots, paste("smd.", desc, sep = "")),
-#          data = set_names(data, paste("smd.", desc, sep = ""))) %>%
-#   ungroup() %>%
-#   select(data, plots)
-# 
-# 
-# tabs[names(SMDFigs$data)] <- SMDFigs$data
-# figs[names(SMDFigs$plots)] <- SMDFigs$plots
-# 
-# 
-tabs$smd.examples <-
-  df.list$smd.results %>%
-  filter(vnames %in% c("pELL", "pFem", "n"),
-         SB == 1,
-         !(Rank_Factor %in% c("X9")),
-         strata == 0) %>% 
-  arrange(Variables) %>%
-  mutate(Variables = factor(vnames,
-                            labels = c("Group 3", "Group 1", "Group 2")),
-         Variables = ordered(Variables, levels =  c("Group 1", "Group 2", "Group 3"))) %>%
-  arrange(Variables) %>%
-  mutate(mSMD = abs(mSMD))
-
-figs$smd.examples <-
-  tabs$smd.examples %>%
-  plot_smd() +
-  facet_wrap(~ Variables, ncol = 2)
-
-figs$smd.examples
-# figs$smd.bad
-# figs$smd.good
-# figs$smd.neutral
-
-```
-
-
-```{r}
-
-smd.examples.sep <- tabs$smd.examples %>%
-  nest(data = -Variables) %>%
-  mutate(plots = map(data, plot_smd2),
-         plots = map(plots, function(x) x + coord_cartesian(ylim = c(0, 1.1))),
-         plots = set_names(plots, paste("smd.", str_replace(Variables, " ", ""), sep = "")),
-         data = set_names(data, paste("smd.", str_replace(Variables, " ", ""), sep = ""))) 
-
-tabs$smd.label <- tibble(Sampler = c("SBS", "SRS", "SCS", "UCS", "URS"),
-                       mASMD = (1:5) * .18, 
-                       Variables = "Sampler",
-                       xmin = 10, 
-                       xmax = 90) %>%
-  gather(key = lim, value = RR, xmin, xmax) %>%
-  arrange(desc(Sampler))
-
-figs$smd.label <- tabs$smd.label %>%
-  ggplot(aes(x = RR, y = mASMD, color = Sampler, linetype = Sampler, group = Sampler, label = Sampler)) +
-  geom_line(size = 1) +
-  geom_label(data = filter(tabs$smd.label, RR == 10) %>% mutate(RR = 50)) +
-  labs(y = lab.vars$smd,
-       x = lab.vars$rr) + 
-  coord_cartesian(ylim = c(0, 1.1)) +
-  scale_x_continuous(breaks = seq(10, 90, 20)) +
-  theme(legend.position = "none")  
-    
-tabs[names(smd.examples.sep$data)] <- smd.examples.sep$data
-figs[names(smd.examples.sep$plots)] <- smd.examples.sep$plots
-
-figs$smd.Group1
-figs$smd.Group2
-figs$smd.Group3
-figs$smd.label
-
- tabs$smd.examples  %>%
-   filter(Variables == "Group 1") %>% plot_smd2()
-```
-
-```{r}
-
-
-# smd.fig.list <- list(plot_grid(plotlist = smd.examples.sep$plots[1:2], 
-#                                labels = c("Group 1", "Group 2"), 
-#                                ncol = 2, 
-#                                nrow = 1, 
-#                                rel_heights = c(1, 1),
-#                                label_x = .5,
-#                                align = "h",
-#                                label_fontface = "plain" ,
-#                                label_size = 10), 
-#                      plot_grid(plotlist = list(smd.examples.sep$plots[[3]], smd.label.plot),
-#                                labels = c("Group 3", "Legend"), 
-#                                ncol = 2, 
-#                                nrow = 1, 
-#                                rel_heights = c(1, 1),
-#                                label_x = .5,
-#                                align = "h",
-#                                label_fontface = "plain" ,
-#                                label_size = 10)
-# 
-# )
-# 
-# plot_grid(plotlist = smd.fig.list,
-#                     ncol = 1, 
-#                     nrow = 2, 
-#                     rel_heights = c(1, 1),
-#                     label_x = .5,
-#                     align = "h",
-#                     label_fontface = "plain" ,
-#                     label_size = 10)
-
-
-
-```
-
-
-```{r}
-
-# figs$smd.good
-
-```
-
-
-
-```{r}
-# figs$smd.neutral
 
 ```
 ### Examples for presentations
@@ -731,7 +642,7 @@ figs$smd.label
 #   left_join(vars$plot.smd.examples ) %>%
 #   group_by(group, desc) %>%
 #   nest %>%
-#   mutate(plots = map(data, plot_smd2),
+#   mutate(plots = map(data, plot_smd),
 #          plots = set_names(plots, paste("smd.", desc, sep = "")),
 #          data = set_names(data, paste("smd.", desc, sep = ""))) %>%
 #   ungroup() %>%
@@ -850,7 +761,7 @@ figs$samples.contacts <-
   labs(x = lab.vars$rr,
        y = lab.vars$contacts) +
   geom_label(data = tabs$samples.contacts.labels,
-             aes(label = Sampler))
+             aes(label = Method_Label))
 
 figs$samples.contacts
 
@@ -864,11 +775,12 @@ figs$samples.contacts
 tabs$samples.response.rates.labels <-  
   tabs$samples %>%
   filter(RR %in% c(40, 50)) %>%
-  group_by(Sampler) %>%
-  summarise(response_rate = (min(response_rate) + (max(response_rate) - min(response_rate)) / 2) * 100) %>%
+  group_by(Sampler, Method_Label) %>%
+  summarise(response_rate = (min(response_rate) + (max(response_rate) - min(response_rate)) / 2) * 100,
+            .groups = "drop") %>%
   mutate(RR = 45) %>%
   arrange(response_rate) %>%
-  mutate(value = c(5, 20, 35, 50, 65))
+  mutate(value = c(10, 25, 37, 50, 70))
   
 
 
@@ -886,9 +798,11 @@ figs$samples.response.rates <-
   scale_x_continuous(breaks = seq(0, 100, 10)) +
   scale_y_continuous(breaks = seq(0, 100, 10)) +
   geom_label(data = tabs$samples.response.rates.labels,
-             aes(label = Sampler))
+             aes(label = Method_Label))
 
 figs$samples.response.rates
+
+
 ```
 
 
@@ -910,10 +824,10 @@ figs$joint.feasibility <- plot_grid(plotlist = list(figs$samples.contacts + them
                                     label_x = .5,
                                     align = "v",
                                     label_fontface = "plain",
-                                    label_size = 10) %>%
-  plot_grid(legend, rel_widths = c(3, .4))
+                                    label_size = 10)
+  # plot_grid(legend, rel_widths = c(3, .4))
 
-figs$joint.feasibility
+figs$joint.feasibility 
 
 ```
 
@@ -923,17 +837,17 @@ figs$joint.feasibility
 tabs$relative.counts <- 
   tabs$samples  %>%
   ungroup() %>%
-  select(SB:strata, Sampler, response_rate) %>%
-  spread(key = Sampler, value = response_rate) %>%
-  right_join(tabs$samples) %>%
+  select(SB:strata, Method_Label, response_rate, -Sampler) %>%
+  spread(key = Method_Label, value = response_rate) %>%
+  right_join(tabs$samples, by = c("SB", "RR", "K", "strata")) %>%
   gather(key = Comp.Method, value = Comp.Value,
-         contains("_RS"), contains("_BS"), contains("_CS")) %>%
+         SBS, SRS, SCS, URS, UCS) %>%
   mutate(Comp.Rate = response_rate / Comp.Value) 
 
 figs$relative.counts <- 
   tabs$relative.counts %>%
   filter(SB == 1) %>%
-  ggplot(aes(x = RR, y = Comp.Rate, group = Sampler, color = Sampler, linetype = Sampler)) +
+  ggplot(aes(x = RR, y = Comp.Rate, group = Sampler, color = Method_Label, linetype = Method_Label)) +
   geom_line() +
   facet_wrap(~ Comp.Method, scales = "free") 
 
@@ -942,38 +856,9 @@ figs$relative.counts
 ```
 
 ### Gini Plot
+
 ```{r}
-# tabs$gini.count <- results$r.counts %>%
-#   group_by(Sampler, DSID, RR) %>%
-#   count(name = "count") %>%
-#   group_by(Sampler, RR) %>%
-#   nest() %>%
-#   mutate(data = map(data, full_join, df.list$pop.data %>% select(DSID))) %>%
-#   unnest %>%
-#   group_by(Sampler, RR) %>%
-#   mutate(count = ifelse(is.na(count), 0, count),
-#          prop.selected = count/sum(count),
-#          n = n(),
-#          prop.pop = 1/n()) %>%
-#   group_by(Sampler, RR) %>%
-#   arrange(prop.selected) %>%
-#   mutate(c.prop.sel = cumsum(prop.selected),
-#          c.prop.pop = cumsum(prop.pop))
-# 
-# tabs$gini.coef <- tabs$gini.count %>%
-#   summarise(gini = ineq::Gini(prop.selected) %>% round(2)) %>%
-#   group_by(RR) %>%
-#   arrange(gini) %>%
-#   mutate(y.pos = 1 - (1:n()/n()) / 1.5,
-#          x.pos = 1 - y.pos)
-
-
 lab.vars$gini <- "Gini Coeficient"
-
-
-```
-
-```{r}
 
 tabs$gini.coef <-
   results$gini %>%
@@ -991,7 +876,7 @@ tabs$gini.coef.labels <-
   filter(RR == 10) %>%
   mutate(RR = 5) %>%
   arrange(Gini_Coef) %>%
-  mutate(Gini_Coef = c(.5, .65, .75, .95, .85))
+  mutate(Gini_Coef = c(.5, .65, .75, .85, .95))
 ```
 
 
@@ -999,7 +884,7 @@ tabs$gini.coef.labels <-
 
 
 figs$gini <- tabs$gini.coef %>%
-  ggplot(aes(x = RR, y = Gini_Coef, group = Sampler, color = Sampler, linetype = Sampler)) +
+  ggplot(aes(x = RR, y = Gini_Coef, group = Sampler, color = Method_Label, linetype = Method_Label)) +
   geom_point() +
   geom_line() +
   scale_x_continuous(breaks = seq(10, 90, 10)) +
@@ -1008,7 +893,8 @@ figs$gini <- tabs$gini.coef %>%
   labs(x = lab.vars$rr,
       y = lab.vars$gini) +
   geom_label(data = tabs$gini.coef.labels,
-             aes(label = Sampler))
+             aes(label = Method_Label)) +
+  theme(legend.position = "none")
 
 figs$gini
 
@@ -1027,7 +913,7 @@ figs$gini.coef <-
   tabs$gini.count %>%
   filter(SB == 1,
          !(Rank_Factor %in% c("X9"))) %>%
-  ggplot(aes(x = c.prop.pop, y = c.prop.sel, group = Sampler, color = Sampler, linetype = Sampler)) +
+  ggplot(aes(x = c.prop.pop, y = c.prop.sel, group = Sampler, color = Method_Label, linetype = Sampler)) +
   geom_line() +
   geom_abline(slope = 1, intercept = 0, linetype = "dotted") +
   geom_label(aes(label = round(Gini_Coef, 2), x = x.pos, y = y.pos), 
@@ -1042,71 +928,6 @@ ggsave(filename = "Figs/Presentation/GINI.jpg", dpi = 100, width = 10, height = 
 ```
 
 
-# Export Plots
-
-```{r}
-# figs
-# 
-# # i <- 12
-# 
-# for(i in 1:length(figs)) {
-#   
-#   print.fig <- figs[[i]] +
-#     scale_color_brewer(type = "qual", palette = 2) +
-#     theme_bw() +
-#     theme(text = element_text(size = 20)) 
-#   
-#   f.name <- paste("Figs/Presentation/Fig ", i, " - ", names(figs)[i],".jpg", sep = "")
-#   
-#   ggsave(plot = print.fig, filename = f.name, dpi = 1000, width = (6*1.6), height = (6))
-# }
-
-```
-
-```{r}
-# library(cowplot)
-# 
-# fig.SCS <- list(
-#   figs$smd.ell +
-#     scale_color_brewer(type = "qual", palette = 2) +
-#     theme_bw() +
-#     theme(text = element_text(size = 10),
-#           legend.position = "none",
-#           axis.title.x = element_blank(),
-#           axis.ticks = element_blank(),
-#           axis.text.x = element_blank()) +
-#     labs(y = "SMD"),
-#   figs$B +
-#     scale_color_brewer(type = "qual", palette = 2) +
-#     theme_bw() +
-#     theme(text = element_text(size = 10),
-#           legend.position = "right",
-#           axis.title.x = element_blank(),
-#           axis.ticks = element_blank(),
-#           axis.text.x = element_blank()) +
-#     labs(y = "B-Index"),
-#   figs$samples.contacts +
-#     scale_color_brewer(type = "qual", palette = 2) +
-#     theme_bw() +
-#     theme(text = element_text(size = 10),
-#           legend.position = "none") +
-#     labs(y = "Contacts") +
-#     scale_y_continuous(breaks = seq(0, 4000, 1000),
-#                        limits = c(0, 4000))
-# )
-# 
-# plot_grid(plotlist = fig.SCS, 
-#           ncol = 1, 
-#           nrow = 3, 
-#           rel_heights = c(1, 1, 1.3),
-#           label_x = .5,
-#           align = "v",
-#           axis = "lr",
-#           label_fontface = "plain" ,
-#           label_size = 10)
-
- # ggsave(filename = "Figs/Presentation/Fig Middle.jpg", dpi = 1000, width = (6*1.6), height = (6))
-```
 
 ```{r}
 save(df.list,
@@ -1115,209 +936,6 @@ save(df.list,
      results,
      tabs,
      vars,
-     file = "Data/Paper/Paper Data 01-14-2021.rdata")
+     file = "Data/Paper/Paper Data 02-08-2021.rdata")
 ```
 
-
-# APPAM PLOTS
-
-## B-index
-```{r}
-appam <- list()
- 
-
-appam$B.label <- tabs$B %>%
-  ungroup() %>%
-  filter(RR == 10) %>%
-  mutate(RR = 5)  %>%
-  arrange(M) %>%
-  mutate(M = c(.53, .60, .7, .77, .9))
-
-appam$B <- tabs$B %>%
-  ggplot(aes(x = RR, y = M, color = Sampler, 
-             linetype = Sampler, group = Sampler)) +
-  geom_line(size = 1.5) +
-  # geom_label(data = tabs$B.label, aes(label = Sampler)) +
-  geom_label(data = appam$B.label,
-             aes(label = Sampler), size = 4) +
-  labs(y = lab.vars$B ,
-       x = lab.vars$rr) +
-  geom_hline(yintercept = .95, linetype = "dotted") +
-  geom_hline(yintercept = .8, linetype = "dashed") +
-  scale_x_continuous(breaks = seq(0, 100, 10)) + 
-  scale_y_continuous(limits = c(0.5, 1.0), expand = c(0,0)) +
-  theme_apa() +
-  scale_color_brewer(type = "qual", palette = 6) +
-  theme(legend.position = "none",
-        text = element_text(size = 15))
-
-ggsave(plot = appam$B , filename = "Figs/APPAM 2020/B index.jpg", dpi = 1000, width = (6), height = (6))
-
-```
-
-## Sample
-```{r}
-appam$samples <- tabs$samples %>%
-  filter(measure == "sch.contacted") %>%
-  ggplot(aes(x = RR, y = value, group = Sampler, color = Sampler, linetype = Sampler)) +
-  geom_line() +
-  theme(legend.position = "none") +
-  scale_x_continuous(breaks = seq(0, 100, 10)) +
-  scale_y_continuous(breaks = seq(0, 4000, 500),
-                     limits = c(0, 4000),
-                     labels = function(x) x / 1000) +
-  labs(x = lab.vars$rr,
-       y = lab.vars$contacts) +
-  geom_label(data = tabs$samples.contacts.labels,
-             aes(label = Sampler),
-             size = 4) +
-  theme_apa() +
-  scale_color_brewer(type = "qual", palette = 6) +
-  theme(legend.position = "none",
-        text = element_text(size = 15))
-
-ggsave(plot = appam$samples, filename = "Figs/APPAM 2020/Contacts.jpg", dpi = 1000, width = (6), height = (6))
-```
-
-## Non-Response
-
-```{r}
-appam$nonresp.lab <-  tabs$samples %>%
-  ungroup() %>%
-  filter(measure == "sch.response.rate") %>%
-  filter(RR == 10) %>%
-  mutate(RR = 45) %>%
-  # filter(RR == 10) %>%
-  arrange(value) %>%
-  mutate(value = c(93, 78, 65, 47, 30))
-  
-
-
-appam$nonresp <- tabs$samples %>%
-  filter(measure == "sch.response.rate") %>%
-  mutate(value = (1-value) * 100) %>%
-  ggplot(aes(x = RR, y = value, group = Sampler, color = Sampler, linetype = Sampler)) +
-  geom_line(size = 1.5) +
-  geom_abline(slope = -1, intercept = 100, linetype = "dotted", alpha = .5) +
-  expand_limits(y = 0) +
-  theme(legend.position = "none") +
-  labs(x = "Generated Participation Rate (%)",
-       y = "Nonresponse Rate (%)") +
-  scale_x_continuous(breaks = seq(0, 100, 10), limits = c(5, 90)) +
-  scale_y_continuous(breaks = seq(10, 100, 15), limits = c(5, 100)) +
-  geom_label(data = appam$nonresp.lab,
-             aes(label = Sampler)) +
-  theme_apa() +
-  scale_color_brewer(type = "qual", palette = 6) +
-  theme(legend.position = "none",
-        text = element_text(size = 15))
-
-
-ggsave(plot = appam$nonresp, filename = "Figs/APPAM 2020/Non Response.jpg", dpi = 1000, width = (6), height = (6))
-
-```
-
-## Combined
-
-```{r}
-appam$combined1 <- plot_grid(plotlist = list(appam$B + labs(x = ""),
-                          appam$samples),
-          ncol = 1, 
-          nrow = 2, 
-          label_x = .5,
-          align = "v",
-          label_fontface = "plain") 
-
-
-ggsave(plot = appam$combined1, filename = "Figs/APPAM 2020/Combined1.jpg", dpi = 1000, width = (7), height = (6))
-
-
-appam$combined2 <- plot_grid(plotlist = list(appam$B + labs(x = ""),
-                          appam$nonresp),
-          ncol = 1, 
-          nrow = 2, 
-          label_x = .5,
-          align = "v",
-          label_fontface = "plain") 
-
-
-ggsave(plot = appam$combined2, filename = "Figs/APPAM 2020/Combined2.jpg", dpi = 1000, width = (7), height = (6))
-```
-
-## Individual
-
-```{r}
-
-tfun <- function(x) {
-  x +
-    theme_apa() + 
-    theme(legend.position = "none",
-          axis.title.x = element_blank(),
-          axis.title.y = element_blank()) +
-  scale_color_brewer(type = "qual", palette = 6) 
-} 
-
-legend_plot <- function(x) {
-   x +
-    theme_apa() + 
-    theme(legend.position = "none",
-          axis.ticks.x = element_blank(),
-          axis.ticks.y = element_blank(),
-          axis.line.x = element_blank(),
-          axis.line.y = element_blank()) +
-    labs(x = "", y = "") +
-  scale_x_continuous(labels = rep("", 5), breaks = 1:5) +
-  scale_y_continuous(labels = rep("", 5), breaks = 1:5) +
-  scale_color_brewer(type = "qual", palette = 6) 
-    
-}
-
-
-
-appam$smd.list <- list(plot_grid(plotlist = list(tfun(figs$smd.Group1), 
-                                               tfun(figs$smd.Group2)), 
-                               labels = c("Group 1", "Group 2"), 
-                               ncol = 2, 
-                               nrow = 1, 
-                               rel_heights = c(1, 1),
-                               label_x = .2,
-                               align = "h",
-                               label_fontface = "plain" ,
-                               label_size = 10), 
-                     plot_grid(plotlist = list(tfun(figs$smd.Group3), legend_plot(figs$smd.label)),
-                               labels = c("Group 3", ""), 
-                               ncol = 2, 
-                               nrow = 1, 
-                               rel_heights = c(1, 1),
-                               label_x = .2,
-                               align = "h",
-                               label_fontface = "plain" ,
-                               label_size = 10)
-
-)
-
-appam$smd <- plot_grid(plotlist = appam$smd.list,
-                    ncol = 1, 
-                    nrow = 2, 
-                    rel_heights = c(1, 1),
-                    label_x = .5,
-                    align = "v",
-                    label_fontface = "plain" ,
-                    label_size = 10,
-                  scale = .9) 
-
-appam$smd  + #perhaps reduce this for a bit more space
-  draw_label(lab.vars$rr,
-             x= 0.5,
-             y = 0,
-             vjust = -0.25,
-             angle = 0) +
-  draw_label(lab.vars$smd,
-             x = 0,
-             y = 0.5,
-             vjust = 1.5,
-             angle = 90)
-
-
-ggsave( filename = "Figs/APPAM 2020/SMD.jpg", dpi = 1000, width = (8), height = (6))
-```
