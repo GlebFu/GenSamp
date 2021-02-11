@@ -894,12 +894,17 @@ ggsave(filename = "Figs/Presentation/GINI.jpg", dpi = 100, width = 10, height = 
 
 
 ```{r}
-save(df.list,
-     figs,
+save(figs,
      lab.vars,
      results,
      tabs,
      vars,
      file = "Data/Paper/Paper Data 02-08-2021.rdata")
+
+ls() %>%
+  tibble(Vars = .) %>%
+  mutate(MB = map(Vars, function(x) object.size(eval(parse(text = x))) %>% format(units = "MB", digits = 3))) %>%
+  unnest(MB) %>%
+  arrange(desc(parse_number(MB)))
 ```
 
