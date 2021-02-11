@@ -24,13 +24,27 @@ row_groups <- function(x, blank = F) {
 # PLOT FUNCTIONS
 ###################
 
-plot_smd <- function(data, y.var = "mSMD", l.pos = "right", g.title = waiver(), x.title = waiver(), y.title = waiver()) {
+common_line <- function(x, ...) {
+  x + 
+    geom_line(aes(color = Sample,
+                  group = Method_Label,
+                  ...))
+}
+  
+common_point <- function(x, ...) {
+  x +
+    geom_point(aes(color = Sample,
+                   shape = Cluster),
+               ...) +
+    scale_shape_manual(values = c(1, 16))
+}
+
+plot_smd <- function(data, l.pos = "right", g.title = waiver(), x.title = waiver(), y.title = waiver()) {
   data %>% 
-    ggplot(aes(x = RR, y = get(y.var), 
-               color = Sample, 
-               linetype = Cluster, 
-               group = Sampler)) +
-    geom_line(size = 1) +
+    ggplot(aes(x = RR, y = Value,
+               alpha = alpha.group)) %>%
+    common_line() %>%
+    common_point() +
     geom_hline(yintercept = c(.25), linetype = "dotted") +
     geom_hline(yintercept = 0, linetype = "solid") +
     labs(y = y.title,
@@ -38,6 +52,7 @@ plot_smd <- function(data, y.var = "mSMD", l.pos = "right", g.title = waiver(), 
          title = g.title) + 
     scale_x_continuous(breaks = seq(10, 90, 20),
                        limits = c(10, 100)) +
+    scale_alpha_continuous(guide = "none", range = c(.5, 1)) +
     theme(legend.position = l.pos) +
     facet_wrap(~SB, nrow = 1) 
 }

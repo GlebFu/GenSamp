@@ -213,7 +213,7 @@ figs$allocation <-
   geom_point(shape = "-", size = 15, alpha = .5) +
   labs(y = lab.vars$n_j,
        x = lab.vars$k) +
-  scale_x_continuous(breaks = seq(minK, K, 1)) +
+  scale_x_continuous(breaks = seq(2, 10, 1)) +
   scale_y_continuous(breaks = seq(0, 50, 5),
                      limits = c(0, 35),
                      sec.axis = sec_axis(~./.6, 
@@ -255,7 +255,7 @@ figs$joint.cluster.stats
 
 tabs$cluster.SMD <- 
   df.list$pop.data %>% 
-  select(strata, all_of(covariates)) %>%
+  select(strata, all_of(vars$cluster$dummy)) %>%
   gather(key = vnames, value = val, -strata) %>%
   group_by(strata, vnames) %>%
   summarise(strat.mean = mean(val), .groups = "drop_last") %>%
@@ -313,7 +313,8 @@ tabs$strata.data <-
 
  
 df.list$coefs %>% 
-  select(-vnames) %>%
+  select(Sub, Category, Type, Variables, log_odds) %>%
+  unique() %>%
   kable() %>%
   kable_styling()
 
@@ -345,7 +346,7 @@ tabs$intercepts %>%
 ```{r, fig.cap = "Distributions of Participation Logits"}
 
 df.list$PS %>%
-  mutate(RR = parse_number(RR) %>% as_factor()) %>%
+  mutate(RR = as_factor(RR)) %>%
   ggplot(aes(x = logit, y = RR, fill = RR)) +
   ggridges::geom_density_ridges(stat = "binline", 
                                 bins = 100, 
@@ -405,8 +406,9 @@ tabs$B <-
 ```{r, fig.cap = "Averge B-Index"}
 figs$B <- tabs$B %>%
   filter(!(Rank_Factor %in% c("X9"))) %>%
-  ggplot(aes(x = RR, y = M, color = Sample, linetype = Cluster)) +
-  geom_line() +
+  ggplot(aes(x = RR, y = M)) %>%
+  common_line() %>%
+  common_point() +
   geom_hline(yintercept = c(.8, .95), linetype = "dotted", alpha = .5) +
   theme_minimal() +
   facet_wrap(~SB) +
@@ -445,62 +447,29 @@ tabs$B %>%
 
 ```{r, fig.cap = "Average SMDs", fig.height = 7}
 
-df.list$smd.results <- 
+tabs$smd.results <- 
   results$smd.stats %>%
   select(any_of(vars$methods), any_of(vars$conditions),
-         log_odds, mSMD, abs.mSMD) %>%
+         strata, log_odds, mSMD, abs.mSMD) %>%
   unpack(Sample_Catagories) %>%
   filter(!(Rank_Factor %in% c("X9")),
          strata == 0) %>%
-  select(-K, -strata, -log_odds)
+  select(-strata, -log_odds) %>%
+  mutate(Value = abs.mSMD,
+         alpha.group = as.numeric(Value > .25))
 
-tabs$smd.by.scale <- df.list$smd.results %>%
-  nest(smd.plot.data = c(SB, RR, Sampler, Method_Label:abs.mSMD)) %>%
-  mutate(plots = pmap(.l = list(data = smd.plot.data, g.title = Variables), .f = plot_smd, y.var = "abs.mSMD", l.pos = "bottom"),
+tabs$smd.by.scale <- tabs$smd.results %>%
+  nest(smd.plot.data = -c(Variables, vnames)) %>%
+  mutate(plots = pmap(.l = list(data = smd.plot.data, g.title = Variables), .f = plot_smd, l.pos = "bottom"),
          plots = setNames(plots, vnames))
 
 figs$smd.by.scale <- tabs$smd.by.scale$plots %>% as.list
 
+
+
+
 ```
 
-```{r}
-
-df.list$smd.results
-
-test <- tabs$intercepts %>%
-  select(-Int) %>%
-  right_join(df.list$smd.results,
-             by = "RR") %>%
-  left_join(df.list$coefs,
-            by = c("vnames", "Variables")) %>%
-  mutate(y.val = SB * log_odds + Intercept)
-
-test %>%
-  filter(vnames == "Suburban") %>%
-  ggplot(aes(x = y.val, y = abs.mSMD, color = as.factor(SB))) +
-  geom_point() +
-  geom_line() +
-  facet_wrap(~Method_Label)
-
-test %>%
-  group_by(Method_Label, vnames) %>%
-  arrange(mSMD) %>%
-  mutate(rank = 1:n()) %>%
-  filter(vnames == "Suburban") %>%
-  ggplot(aes(x = rank, y = mSMD, color = RR)) +
-  geom_point() +
-  geom_line() +
-  facet_wrap(~ Method_Label)
-
-test %>%
-  filter(vnames == "Suburban") %>%
-  mutate(alpha.value = abs.mSMD > .2) %>%
-  ggplot(aes(x = RR, y = abs.mSMD, color = Method_Label, group = interaction(Method_Label, SB))) +
-  geom_line(aes(alpha = alpha.value)) +
-  scale_alpha_discrete(guide = "none", range = c(.25, 1)) +
-  geom_hline(yintercept = .2, linetype = "dotted") +
-  facet_grid(~SB)
-```
 
 
 ```{r}
@@ -529,7 +498,12 @@ figs$smd.by.scale$n
 figs$smd.by.scale$ethBlack
 figs$smd.by.scale$ToRu
 
+```
 
+```{r}
+
+figs$smd.by.scale$pFem
+figs$smd.by.scale$ST.ratio
 
 ```
 
@@ -542,7 +516,7 @@ vars$smd.groups <-
   tibble(group1 = list(c("Suburban", "T1", "Urban")),
          group2 = list(c("pTotfrl", "ethHisp", "ethWhite", "pELL", "dSCH")),
          group3 = list(c("n", "ethBlack", "ToRu")),
-         group4 = list(c("pFem", "St.ratio"))) %>%
+         group4 = list(c("pFem", "ST.ratio"))) %>%
   pivot_longer(cols = everything(), names_to = "Group", values_to = "vnames") %>%
   unnest(vnames)
 
@@ -556,30 +530,24 @@ vars$smd.examples <-c("Suburban", "dSCH", "n", "ST.ratio")
 
 
 ```{r}
-tabs$smd.examples <- df.list$smd.results %>%
+tabs$smd.examples <- tabs$smd.results %>%
   left_join(vars$smd.groups, by = "vnames") %>%
   filter(vnames %in% vars$smd.examples) 
 
 smd.examples.sep <-
   tabs$smd.examples %>%
   nest(data = -c(Variables, Group)) %>%
-  mutate(plots = map(data, plot_smd, l.pos = "none", y.var = "abs.mSMD"))
+  mutate(plots = map(data, plot_smd, l.pos = "none"))
 
-smd.examples.sep$plots[[1]]
-
-tabs$smd.examples %>%
-  ggplot(aes(x = RR, y = abs.mSMD, color = Method_Label)) +
-  geom_line(size = 1) +
-  geom_hline(yintercept = c(.25), linetype = "dotted") +
-  geom_hline(yintercept = 0, linetype = "solid") +
-  labs(y = lab.vars$smd,
-       x = lab.vars$rr) + 
-  scale_x_continuous(breaks = seq(10, 90, 20),
-                     limits = c(10, 100)) +
-  theme(legend.position = "bottom") +
-  facet_grid(Variables~SB, scales = "free_y") 
+# smd.examples.sep$plots[[1]]
 
 
+figs$smd.examples <- tabs$smd.examples %>%
+  plot_smd() +
+  facet_grid(Variables ~ SB) 
+
+
+figs$smd.examples
 ```
 
 
@@ -588,25 +556,20 @@ tabs$smd.examples %>%
 
 df.list$smd.by.strata.results <- 
   results$smd.stats %>%
-  select(SB:vnames, Variables, log_odds, Sample_Catagories, mSMD, abs.mSMD) %>%
+  # select(SB:vnames, Variables, log_odds, Sample_Catagories, mSMD, abs.mSMD) %>%
   unpack(Sample_Catagories) %>%
   filter(!(Rank_Factor %in% c("X9")),
          Cluster == "Stratified",
          strata != 0) %>%
-  select(-K, -log_odds)
+  select(-K, -log_odds) %>%
+  mutate(Value = abs.mSMD,
+         alpha.group = as.numeric(Value > .25))
 
 df.list$smd.by.strata.results %>%
   filter(SB == 1,
          vnames %in% c("ethBlack", "n")) %>%
-  mutate(strata = paste("Strata", strata)) %>%
-  ggplot(aes(x = RR, y = mSMD, color = strata)) +
-  geom_line() +
-  facet_grid(Variables ~ Cluster + Sample , scales = "free_y") +
-  geom_hline(yintercept = 0) +
-  geom_hline(yintercept = c(.25, -.25), linetype = "dotted") +
-  theme_minimal() +
-  theme(legend.position = "bottom",
-        legend.title = element_blank())
+  plot_smd() +
+  facet_grid(Variables ~ strata)
 
 ```
 ### Examples for presentations
@@ -750,9 +713,9 @@ tabs$samples.contacts.labels <-
 figs$samples.contacts <- 
   tabs$samples %>%
   filter(SB == 1) %>%
-  ggplot(aes(x = RR, y = contacted, group = Sampler, color = Sampler, linetype = Sampler)) +
-  geom_point() +
-  geom_line() +
+  ggplot(aes(x = RR, y = contacted)) %>%
+  common_line() %>%
+  common_point() +
   theme(legend.position = "none") +
   scale_x_continuous(breaks = seq(0, 100, 10)) +
   scale_y_continuous(breaks = seq(0, 4500, 500),
@@ -761,7 +724,7 @@ figs$samples.contacts <-
   labs(x = lab.vars$rr,
        y = lab.vars$contacts) +
   geom_label(data = tabs$samples.contacts.labels,
-             aes(label = Method_Label))
+             aes(label = Method_Label, color = Sample))
 
 figs$samples.contacts
 
@@ -774,23 +737,21 @@ figs$samples.contacts
 
 tabs$samples.response.rates.labels <-  
   tabs$samples %>%
-  filter(RR %in% c(40, 50)) %>%
-  group_by(Sampler, Method_Label) %>%
-  summarise(response_rate = (min(response_rate) + (max(response_rate) - min(response_rate)) / 2) * 100,
-            .groups = "drop") %>%
-  mutate(RR = 45) %>%
+  filter(RR == 10,
+         SB == 1) %>%
   arrange(response_rate) %>%
-  mutate(value = c(10, 25, 37, 50, 70))
-  
+  ungroup() %>%
+  mutate(value = c(10, 25, 37, 50, 70),
+         RR = 45)
 
 
 figs$samples.response.rates <- 
   tabs$samples %>%
   filter(SB == 1) %>%
   mutate(value = response_rate * 100) %>%
-  ggplot(aes(x = RR, y = value, group = Sampler, color = Sampler, linetype = Sampler)) +
-  geom_point() +
-  geom_line() +
+  ggplot(aes(x = RR, y = value)) %>%
+  common_line() %>%
+  common_point() +
   expand_limits(y = 0) +
   theme(legend.position = "none") +
   labs(x = lab.vars$rr,
@@ -798,7 +759,8 @@ figs$samples.response.rates <-
   scale_x_continuous(breaks = seq(0, 100, 10)) +
   scale_y_continuous(breaks = seq(0, 100, 10)) +
   geom_label(data = tabs$samples.response.rates.labels,
-             aes(label = Method_Label))
+             aes(label = Method_Label,
+                 color = Sample))
 
 figs$samples.response.rates
 
@@ -847,8 +809,9 @@ tabs$relative.counts <-
 figs$relative.counts <- 
   tabs$relative.counts %>%
   filter(SB == 1) %>%
-  ggplot(aes(x = RR, y = Comp.Rate, group = Sampler, color = Method_Label, linetype = Method_Label)) +
-  geom_line() +
+  ggplot(aes(x = RR, y = Comp.Rate)) %>%
+  common_line() %>%
+  common_point() +
   facet_wrap(~ Comp.Method, scales = "free") 
 
 figs$relative.counts
@@ -864,19 +827,18 @@ tabs$gini.coef <-
   results$gini %>%
   select(-count.data) %>%
   unpack(Sample_Catagories) %>%
-  filter(!(Rank_Factor %in% c("X9")),
-         SB == 1) %>%
-  group_by(RR) %>%
+  filter(!(Rank_Factor %in% c("X9"))) %>%
+  group_by(RR, SB) %>%
   arrange(Gini_Coef) %>%
   mutate(y.pos = 1 - (1:n()/n()) / 1.5,
          x.pos = 1 - y.pos)
 
-tabs$gini.coef.labels <-
-  tabs$gini.coef %>%
-  filter(RR == 10) %>%
-  mutate(RR = 5) %>%
-  arrange(Gini_Coef) %>%
-  mutate(Gini_Coef = c(.5, .65, .75, .85, .95))
+# tabs$gini.coef.labels <-
+#   tabs$gini.coef %>%
+#   filter(RR == 10) %>%
+#   mutate(RR = 5) %>%
+#   arrange(Gini_Coef) %>%
+#   mutate(Gini_Coef = c(.5, .65, .75, .85, .95))
 ```
 
 
@@ -884,17 +846,18 @@ tabs$gini.coef.labels <-
 
 
 figs$gini <- tabs$gini.coef %>%
-  ggplot(aes(x = RR, y = Gini_Coef, group = Sampler, color = Method_Label, linetype = Method_Label)) +
-  geom_point() +
-  geom_line() +
-  scale_x_continuous(breaks = seq(10, 90, 10)) +
+  ggplot(aes(x = RR, y = Gini_Coef)) %>%
+  common_line() %>%
+  common_point() +
+  scale_x_continuous(breaks = seq(0, 100, 20)) +
   scale_y_continuous(breaks = seq(0, 1, .1),
                      limits = c(0, 1), expand = c(0,0)) +
   labs(x = lab.vars$rr,
       y = lab.vars$gini) +
-  geom_label(data = tabs$gini.coef.labels,
-             aes(label = Method_Label)) +
-  theme(legend.position = "none")
+  facet_grid(~ SB)
+  # geom_label(data = tabs$gini.coef.labels,
+  #            aes(label = Method_Label,
+  #                color = Sample))
 
 figs$gini
 
@@ -913,8 +876,9 @@ figs$gini.coef <-
   tabs$gini.count %>%
   filter(SB == 1,
          !(Rank_Factor %in% c("X9"))) %>%
-  ggplot(aes(x = c.prop.pop, y = c.prop.sel, group = Sampler, color = Method_Label, linetype = Sampler)) +
-  geom_line() +
+  ggplot(aes(x = c.prop.pop, y = c.prop.sel))  %>%
+  common_line() %>%
+  common_point() +
   geom_abline(slope = 1, intercept = 0, linetype = "dotted") +
   geom_label(aes(label = round(Gini_Coef, 2), x = x.pos, y = y.pos), 
              data = tabs$gini.coef, size = 3) +

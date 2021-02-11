@@ -431,8 +431,7 @@ Figure \@ref(fig:fig-avg-B) displays the average $B$-index for each method acros
 ```{r fig-avg-B, fig.pos="bth", fig.cap = "(ref:fig-avg-B-caption)"}
 
 figs$B %>%
-  apa_style_plot() +
-  theme(legend.position = "none")
+  apa_style_plot()
   
 
 if (saveFigs) save.figures("Results - B Index")
@@ -450,78 +449,93 @@ The first group of covariates included nine variables where stratified methods o
 
 ```{r fig-SMD-groups, fig.height = 5, fig.width = 7, fig.pos = "tb", fig.cap = "(ref:fig-SMD-groups-caption)"}
 
-# figs$smd.examples %>%
-#   apa_style_plot() + 
-#   theme(legend.position = c(0.85, 0.07))
+# legend_plot <- function(x) {
+#    x %>%
+#     apa_style_plot() +
+#     theme(legend.position = "none",
+#           axis.ticks.x = element_blank(),
+#           axis.ticks.y = element_blank(),
+#           axis.line.x = element_blank(),
+#           axis.line.y = element_blank()) +
+#     labs(x = "", y = "") +
+#   scale_x_continuous(labels = rep("", 5), breaks = 1:5) +
+#   scale_y_continuous(labels = rep("", 5), breaks = 1:5) +
+#   scale_color_brewer(type = "qual", palette = 6) 
+#     
+# }
+
+
+test <- df.list$smd.results %>%
+  filter(vnames %in% c("n", "pELL", "T1")) %>%
+  nest(smd.plot.data = -c(Variables, vnames)) %>%
+  mutate(plots = pmap(.l = list(data = smd.plot.data), .f = plot_smd, l.pos = "bottom"),
+         plots = setNames(plots, vnames))
+
+
+# figs$smd.label <- df.list$smd.results %>%
+#   filter(SB == 1,
+#          vnames %in% c("n")) %>%
+#   group_by(across(any_of(vars$methods))) %>%
+#   summarise(Value = mean(Value), .groups = "drop") %>%
+#   arrange(Value) %>%
+#   mutate(Value = seq(.1, .5, .1),
+#          SB = 1,
+#          alpha.group = 1) %>%
+#   full_join(df.list$smd.results %>% select(RR) %>% unique, by = character()) %>%
+#   plot_smd() %>% legend_plot
 
 tfun <- function(x) {
   x %>% 
     apa_style_plot() + 
     theme(legend.position = "none",
           axis.title.x = element_blank(),
-          axis.title.y = element_blank()) +
+          axis.title.y = element_blank(),
+          plot.margin = margin(6, 6, 6, 0)) +
   scale_color_brewer(type = "qual", palette = 6) 
 } 
 
-legend_plot <- function(x) {
-   x %>%
-    apa_style_plot() +
-    theme(legend.position = "none",
-          axis.ticks.x = element_blank(),
-          axis.ticks.y = element_blank(),
-          axis.line.x = element_blank(),
-          axis.line.y = element_blank()) +
-    labs(x = "", y = "") +
-  scale_x_continuous(labels = rep("", 5), breaks = 1:5) +
-  scale_y_continuous(labels = rep("", 5), breaks = 1:5) +
-  scale_color_brewer(type = "qual", palette = 6) 
-    
-}
+
+```
+
+```{r}
+smd.example.list <-
+  list(tfun(test$plots[[1]]), 
+       tfun(test$plots[[2]]), 
+       tfun(test$plots[[3]]))
 
 
+test.legend <- (smd.example.list[[1]] + 
+  theme_update(legend.box.margin = margin(0, 0, 0, 0),
+               legend.position = "right")) %>% 
+  get_legend()
 
-smd.fig.list <- list(plot_grid(plotlist = list(tfun(figs$smd.Group1), tfun(figs$smd.Group2)), 
-                               labels = c("Group 1", "Group 2"), 
-                               ncol = 2, 
-                               nrow = 1, 
-                               rel_heights = c(1, 1),
-                               label_x = .2,
-                               align = "h",
-                               label_fontface = "plain" ,
-                               label_size = 10), 
-                     plot_grid(plotlist = list(tfun(figs$smd.Group3), legend_plot(figs$smd.label)),
-                               labels = c("Group 3", "Legend"), 
-                               ncol = 2, 
-                               nrow = 1, 
-                               rel_heights = c(1, 1),
-                               label_x = .2,
-                               align = "h",
-                               label_fontface = "plain" ,
-                               label_size = 10)
+smd.fig.list <- plot_grid(plotlist = smd.example.list,
+                          labels = c("Group 1", "Group 2", "Group 3"), 
+                          ncol = 1, 
+                          nrow = 3, 
+                          rel_heights = c(1, 1, 1),
+                          label_x = .45,
+                          align = "h",
+                          label_fontface = "plain" ,
+                          label_size = 10) + 
+  theme(plot.margin = margin(0, 0, 24, 24))
 
-)
 
-test <- plot_grid(plotlist = smd.fig.list,
-                    ncol = 1, 
-                    nrow = 2, 
-                    rel_heights = c(1, 1),
-                    label_x = .5,
-                    align = "v",
-                    label_fontface = "plain" ,
-                    label_size = 10,
-                  scale = .9) 
-
-test + #perhaps reduce this for a bit more space
+plot_grid(smd.fig.list, 
+          test.legend, 
+          rel_widths = c(3, .4)) +
   draw_label(lab.vars$rr,
              x= 0.5,
              y = 0,
              vjust = -0.25,
-             angle = 0) +
+             angle = 0,
+             size = 12) +
   draw_label(lab.vars$smd,
              x = 0,
              y = 0.5,
              vjust = 1.5,
-             angle = 90)
+             angle = 90,
+             size = 12)
 ```
 
 
