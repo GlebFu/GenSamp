@@ -45,7 +45,7 @@ df.K.ranks <- df.clusters %>%
 
 ```{r}
 params <- list(
-  iterations = 1000,
+  iterations = 10,
   RR.condition = unique(df.PS$RR),
   K.condition = c("K_05"),
   SB.condition = unique(df.PS$scale_factor)
@@ -56,11 +56,11 @@ param_df <- df.PS %>%
   nest(PS.data = -c(scale_factor, RR)) %>%
   rename(SB.condition = scale_factor,
          RR.condition = RR) %>%
-  right_join(cross_df(params)) %>%
-  left_join(df.K.ranks) %>%
+  right_join(cross_df(params), by = c("SB.condition", "RR.condition")) %>%
+  left_join(df.K.ranks, by = "K.condition") %>%
   mutate(B.index.formula = list(B.index.formula),
          B.index.data = list(B.index.data),
-         sim.data = map(cluster.ranks, function(x) select(x, strata, DSID) %>% left_join(sim.data)))
+         sim.data = map(cluster.ranks, function(x) select(x, strata, DSID) %>% left_join(sim.data, by = "DSID")))
 
 
 ```
@@ -94,7 +94,7 @@ plan(sequential)
 
 ```{r}
 sim.time.results[[3]] / 60 / 60
-(sim.time.results[[3]] / unique(param_df$iterations) * 50) / 60 / 60
+(sim.time.results[[3]] / unique(param_df$iterations) * 100) / 60 / 60
 
 
 ```
@@ -118,9 +118,9 @@ descript <-
 
 resultsFile <- paste("Data/Results/", date, " - ", descript, ".rdata", sep = "")
 
-save(sim.results, file = resultsFile)
+# save(sim.results, file = resultsFile)
 
-write_file(x = resultsFile, "Data/Results/LastResults.txt")
+# write_file(x = resultsFile, "Data/Results/LastResults.txt")
 
 
 ```

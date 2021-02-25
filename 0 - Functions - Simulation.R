@@ -201,7 +201,7 @@ Summarise_Condition_Results <- function(results) {
     results$df.recruitment.stats %>%
     bind_rows() %>%
     group_by(sample_method, strata) %>%
-    summarise_all(mean)
+    summarise_all(mean, .groups = "drop")
   
   samp.counts <-
     results$df.samp.counts %>%
@@ -219,7 +219,8 @@ Summarise_Condition_Results <- function(results) {
     bind_rows() %>%
     group_by(sample_method, strata, var) %>%
     summarise(sim.mean = mean(samp.mean),
-              sim.sd = sd(samp.mean))
+              sim.sd = sd(samp.mean), 
+              .groups = "drop")
   
   tibble(r.stats = list(r.stats),
          samp.counts = list(samp.counts), 

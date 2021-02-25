@@ -449,62 +449,32 @@ The first group of covariates included nine variables where stratified methods o
 
 ```{r fig-SMD-groups, fig.height = 5, fig.width = 7, fig.pos = "tb", fig.cap = "(ref:fig-SMD-groups-caption)"}
 
-# legend_plot <- function(x) {
-#    x %>%
-#     apa_style_plot() +
-#     theme(legend.position = "none",
-#           axis.ticks.x = element_blank(),
-#           axis.ticks.y = element_blank(),
-#           axis.line.x = element_blank(),
-#           axis.line.y = element_blank()) +
-#     labs(x = "", y = "") +
-#   scale_x_continuous(labels = rep("", 5), breaks = 1:5) +
-#   scale_y_continuous(labels = rep("", 5), breaks = 1:5) +
-#   scale_color_brewer(type = "qual", palette = 6) 
-#     
-# }
 
 
-test <- df.list$smd.results %>%
+figs$smd.examples <- tabs$smd.results %>%
   filter(vnames %in% c("n", "pELL", "T1")) %>%
   nest(smd.plot.data = -c(Variables, vnames)) %>%
   mutate(plots = pmap(.l = list(data = smd.plot.data), .f = plot_smd, l.pos = "bottom"),
          plots = setNames(plots, vnames))
 
-
-# figs$smd.label <- df.list$smd.results %>%
-#   filter(SB == 1,
-#          vnames %in% c("n")) %>%
-#   group_by(across(any_of(vars$methods))) %>%
-#   summarise(Value = mean(Value), .groups = "drop") %>%
-#   arrange(Value) %>%
-#   mutate(Value = seq(.1, .5, .1),
-#          SB = 1,
-#          alpha.group = 1) %>%
-#   full_join(df.list$smd.results %>% select(RR) %>% unique, by = character()) %>%
-#   plot_smd() %>% legend_plot
-
-tfun <- function(x) {
+tfun <- function(x, x.title = element_blank(), y.title = element_blank()) {
   x %>% 
     apa_style_plot() + 
     theme(legend.position = "none",
-          axis.title.x = element_blank(),
-          axis.title.y = element_blank(),
+          axis.title.x = x.title,
+          axis.title.y = y.title,
           plot.margin = margin(6, 6, 6, 0)) +
   scale_color_brewer(type = "qual", palette = 6) 
 } 
 
 
-```
-
-```{r}
 smd.example.list <-
-  list(tfun(test$plots[[1]]), 
-       tfun(test$plots[[2]]), 
-       tfun(test$plots[[3]]))
+  list(tfun(figs$smd.examples$plots[[1]]), 
+       tfun(figs$smd.examples$plots[[2]]), 
+       tfun(figs$smd.examples$plots[[3]]))
 
 
-test.legend <- (smd.example.list[[1]] + 
+smd.example.legend <- (smd.example.list[[1]] + 
   theme_update(legend.box.margin = margin(0, 0, 0, 0),
                legend.position = "right")) %>% 
   get_legend()
@@ -522,8 +492,42 @@ smd.fig.list <- plot_grid(plotlist = smd.example.list,
 
 
 plot_grid(smd.fig.list, 
-          test.legend, 
+          smd.example.legend, 
           rel_widths = c(3, .4)) +
+  draw_label(lab.vars$rr,
+             x= 0.5,
+             y = 0,
+             vjust = -0.25,
+             angle = 0,
+             size = 12) +
+  draw_label(lab.vars$smd,
+             x = 0,
+             y = 0.5,
+             vjust = 1.5,
+             angle = 90,
+             size = 12)
+
+figs$smd.examples2 <- tabs$smd.results %>%
+  filter(vnames %in% vars$smd.examples ) %>%
+  mutate(Group = factor(vnames, labels = c("Group 2", "Group 3", "Group 4", "Group 1"))) %>% 
+    ggplot(aes(x = RR, y = Value,
+               alpha = alpha.group)) %>%
+    common_line() %>%
+    common_point() +
+    geom_hline(yintercept = c(.25), linetype = "dotted") +
+    geom_hline(yintercept = 0, linetype = "solid") +
+    labs(y = lab.vars$smd,
+         x = lab.vars$rr) + 
+    scale_x_continuous(breaks = seq(10, 90, 40),
+                       limits = c(10, 100)) +
+    scale_alpha_continuous(guide = "none", range = c(.5, 1)) +
+    facet_grid(Group ~ SB, scales = "free_y")
+
+figs$smd.examples2 <- figs$smd.examples2 %>% 
+  apa_style_plot() +
+  theme(legend.position = "none")
+
+plot_grid(figs$smd.examples2, smd.example.legend, rel_widths = c(3, .5)) +
   draw_label(lab.vars$rr,
              x= 0.5,
              y = 0,
@@ -546,9 +550,9 @@ It can be seen that Group 1 consisted of covariates where a substantial fraction
 
 ```{r fig-Var-Coef, fig.cap = "(ref:fig-Var-Coef-caption)", fig.pos="tb"}
 
-figs$v.coef %>%
-  apa_style_plot()  + 
-  theme(legend.title = element_blank())
+# figs$v.coef %>%
+#   apa_style_plot()  + 
+#   theme(legend.title = element_blank())
 
 ```
 
@@ -564,17 +568,30 @@ It is important to note that, particularly in the lower population participation
 
 ```{r fig-responses, fig.height = 6, fig.width = 8, fig.cap = "(ref:fig-responses-caption)"}
 
-plot_grid(plotlist = list(figs$samples.contacts %>% apa_style_plot() + theme(legend.position = "none"),
-                          figs$samples.response.rates %>% apa_style_plot() + theme(legend.position = "none")), 
-          labels=c("(a)", "(b)"), 
-          ncol = 1, 
-          nrow = 2, 
-          label_x = .5,
-          align = "v",
-          label_fontface = "plain" ,
-          label_size = 10) %>%
-  plot_grid(get_legend(figs$samples.contacts %>% apa_style_plot()), 
-            rel_widths = c(3, .4))
+# responses.fig.list <- list(figs$samples.contacts %>% 
+#                              tfun(y.title = element_text(lab.vars$contacts)),
+#                            figs$samples.response.rates %>% 
+#                              tfun(y.title = NULL))
+# 
+# 
+# 
+# plot_grid(plotlist = responses.fig.list, 
+#           labels=c("(a)", "(b)"), 
+#           ncol = 1, 
+#           nrow = 2, 
+#           label_x = .5,
+#           align = "v",
+#           label_fontface = "plain" ,
+#           label_size = 10) %>%
+#   plot_grid(get_legend(figs$samples.contacts %>% apa_style_plot()), 
+#             rel_widths = c(3, .4)) + 
+#   theme(plot.margin = margin(0, 0, 24, 6)) +
+#   draw_label(lab.vars$rr,
+#              x= 0.5,
+#              y = 0,
+#              vjust = .75,
+#              angle = 0,
+#              size = 12)
 
 ```
 
@@ -739,25 +756,25 @@ Figures \@ref(fig:fig-smd-group1), \@ref(fig:fig-smd-group2), and \@ref(fig:fig-
 (ref:fig-smd-group1-caption) Group 1: Sampling methods performed as expected. All stratified methods outperformed non-stratified methods. Better balance was attained by balanced sampling followed by random sampling and convenience sampling.
 
 ```{r fig-smd-group1, fig.cap = "(ref:fig-smd-group1-caption)"}
-
-figs$smd.good %>%
-  apa_style_plot()
+# 
+# figs$smd.good %>%
+#   apa_style_plot()
 
 ```
 
 (ref:fig-smd-group2-caption) Group 2: Sampling methods equally well resultiing in good balance.
 
 ```{r fig-smd-group2, fig.cap = "(ref:fig-smd-group2-caption)"}
-figs$smd.neutral %>%
-  apa_style_plot()
+# figs$smd.neutral %>%
+#   apa_style_plot()
 ```
 
 
 (ref:fig-smd-group3-caption) Group 3: Stratification sometimes resulted in poorer balance. 
 
 ```{r fig-smd-group3, fig.cap = "(ref:fig-smd-group3-caption)"}
-figs$smd.bad %>%
-  apa_style_plot()
+# figs$smd.bad %>%
+#   apa_style_plot()
 ```
 
 
@@ -789,10 +806,10 @@ Figure \@ref(fig:fig-gini-curve) displays the Gini curve and coefficient for all
 (ref:fig-gini-curve-caption) Cumulative probability plot and Gini coefficients representing the inequality of school sampling across sampling methods and population response rates.
 
 ```{r fig-gini-curve, fig.pos = "p", fig.width = 10, fig.height = 6, fig.cap = "(ref:fig-gini-curve-caption)", fig.env = "sidewaysfigure"}
-
-figs$gini.coef %>%
-  apa_style_plot() +
-  labs(x = "Cumulative proportion of population",
-         y = "Cumulative percentage of times sampled") 
+# 
+# figs$gini.coef %>%
+#   apa_style_plot() +
+#   labs(x = "Cumulative proportion of population",
+#          y = "Cumulative percentage of times sampled") 
 
 ```
