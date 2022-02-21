@@ -240,7 +240,6 @@ R(S) = \sum_{j=1}^N I\left(S_j \leq S^{max}\right),
 \end{equation}
 where $S^{max} = \max \{S_1 Z_1, S_2 Z_2, ..., S_N Z_N\}$.
 
-Several of the sampling methods that we shall consider involve use of stratification. 
 Stratified sampling gives researchers more control over the characteristics of their sample. Consider the case of random sampling, which only produces a representative sample on average. To reduce the likelihood of an "unlucky" sample, a population can be split into strata based on characteristics specified by the researcher. Random sampling from within each of the strata will then ensure that each of those characteristics are represented in the final sample. Stratification is routinely used with probability or non-probability sampling methods in survey research. 
 
 To model stratified sampling methods, we will assume that the population is divided into a set of $K$ strata. Proportional allocation will be used to ensure the relative size of the strata in the sample reflects that of the population [@tiptonStratifiedSamplingUsing2013]. 
