@@ -14,7 +14,8 @@ Sample_Binomial <- function(ps) rbinom(length(ps), 1, prob = ps)
 Generate_Responses <- function(PS.data, cluster.ranks) {
   PS.data %>%
     mutate(Ej = Sample_Binomial(PS)) %>%
-    full_join(cluster.ranks)
+    full_join(cluster.ranks, 
+              by = "DSID")
 }
 
 Calc_H <- function(x){
@@ -54,7 +55,8 @@ Calc_Bindex <- function(PS, sampled) {
 Bindex_Summary <- function(sampled, B.index.data, B.index.formula) {
   sampled %>%
     select(DSID, accepted, sample_method) %>%
-    left_join(B.index.data) %>%
+    left_join(B.index.data, 
+              by = "DSID") %>%
     mutate(accepted = as.numeric(accepted)) %>%
     nest(data = -sample_method) %>%
     mutate(PS_sample = map(data, function(x) glm(data = x, formula = B.index.formula, family = quasibinomial()) %>% fitted()),
@@ -152,7 +154,8 @@ Calc_Recruitment_Stats <- function(data, include_strata = T) {
     bind_rows(mutate(., strata = 0)) %>%
     group_by(sample_method, strata) %>%
     summarise(contacted = sum(contacted),
-              accepted = sum(accepted))
+              accepted = sum(accepted),
+              .groups = "keep")
 
 }
 
@@ -163,7 +166,8 @@ Calc_Sample_Statistics <- function(sample.counts) {
     gather(key = var, value = val, -sample_method, -strata, -DSID) %>%
     group_by(sample_method, strata, var) %>%
     summarise(samp.mean = mean(val),
-              samp.sd = sd(val))
+              samp.sd = sd(val),
+              .groups = "keep")
 }
 
 
@@ -182,7 +186,8 @@ Run_Iteration <- function(x, PS.data, cluster.ranks, sim.data, B.index.data, B.i
     select(sample_method, DSID) 
   
   df.samp.stats <- df.samp.counts %>%
-    left_join(sim.data) %>%
+    left_join(sim.data, 
+              by = "DSID") %>%
     Calc_Sample_Statistics
   
   df.B.indicies <- Bindex_Summary(df.sampled, B.index.data, B.index.formula)
@@ -247,10 +252,10 @@ Sim_Driver  <- function(iterations, PS.data, cluster.ranks, sim.data, B.index.da
         )
     )
   
-  sim.stats$summary.runtime <-
-    system.time(
-      results <- Summarise_Condition_Results(results)
-    )
+  # sim.stats$summary.runtime <-
+  #   system.time(
+  #     results <- Summarise_Condition_Results(results)
+  #   )
   
   results %>%
     mutate(sim.stats = list(sim.stats))

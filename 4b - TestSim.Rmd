@@ -51,16 +51,25 @@ params <- list(
   SB.condition = unique(df.PS$scale_factor)
 )
 
+# params <- list(
+#   iterations = 2,
+#   RR.condition = unique(df.PS$RR)[5],
+#   K.condition = c("K_05"),
+#   SB.condition = unique(df.PS$scale_factor)[4]
+# )
+
 
 param_df <- df.PS %>%
   nest(PS.data = -c(scale_factor, RR)) %>%
   rename(SB.condition = scale_factor,
          RR.condition = RR) %>%
-  right_join(cross_df(params)) %>%
-  left_join(df.K.ranks) %>%
+  right_join(cross_df(params), 
+             by = c("SB.condition", "RR.condition")) %>%
+  left_join(df.K.ranks, 
+            by = "K.condition") %>%
   mutate(B.index.formula = list(B.index.formula),
          B.index.data = list(B.index.data),
-         sim.data = map(cluster.ranks, function(x) select(x, strata, DSID) %>% left_join(sim.data)))
+         sim.data = map(cluster.ranks, function(x) select(x, strata, DSID) %>% left_join(sim.data, by = "DSID")))
 
 
 
@@ -125,16 +134,21 @@ rstats.multitest <- sampled.multitest %>%
 
 
 ```
+
 ### Track Sampled Schools
 ```{r}
 
-df.samp.counts <- df.sampled %>%
+df.samp.counts <- 
+  df.sampled %>%
   filter(accepted) %>%
   select(sample_method, DSID) 
 
 
-sampcounts.multitest <- sampled.multitest %>%
-  mutate(df.samp.counts = map(df.sampled, function(x) filter(x, accepted) %>% select(sample_method, DSID))) %>%
+sampcounts.multitest <- 
+  sampled.multitest %>%
+  mutate(df.samp.counts = map(df.sampled, 
+                              function(x) filter(x, accepted) %>% 
+                                select(sample_method, DSID))) %>%
   select(-df.sampled)
 
 
@@ -143,12 +157,17 @@ sampcounts.multitest <- sampled.multitest %>%
 
 ### Means and SDs
 ```{r}
-df.samp.stats <- df.samp.counts %>%
-  left_join(sim.data) %>%
+df.samp.stats <- 
+  df.samp.counts %>%
+  left_join(sim.data, 
+            by = "DSID") %>%
   Calc_Sample_Statistics
 
-sampstats.multitest <- sampcounts.multitest %>%
-  mutate(df.samp.stats = map(df.samp.counts, function(x) left_join(x, sim.data) %>% Calc_Sample_Statistics)) %>%
+sampstats.multitest <- 
+  sampcounts.multitest %>%
+  mutate(df.samp.stats = map(df.samp.counts, 
+                             function(x) left_join(x, sim.data, by = "DSID") %>% 
+                               Calc_Sample_Statistics)) %>%
   select(-df.samp.counts)
 
 
@@ -169,15 +188,26 @@ bindex.multitest <- sampled.multitest %>%
 
 
 ```{r}
-test.results <- test %>%
+test.results <- 
+  test %>%
   mutate(df.responses = pmap(.l = list(PS.data = PS.data, 
                                cluster.ranks = cluster.ranks), 
                      .f = Generate_Responses),
-         df.sampled = map(df.responses, Create_Samples),
-         df.recruitment.stats = map(df.sampled, Calc_Recruitment_Stats),
-         df.samp.counts = map(df.sampled, function(x) filter(x, accepted) %>% select(sample_method, DSID)),
-         df.samp.stats = map2(df.samp.counts, sim.data, function(x, y) left_join(x, y) %>% Calc_Sample_Statistics),
-         df.B.indicies = pmap(.l = list(df.sampled, B.index.data, B.index.formula), .f = Bindex_Summary)) %>%
+         df.sampled = map(df.responses, 
+                          Create_Samples),
+         df.recruitment.stats = map(df.sampled, 
+                                    Calc_Recruitment_Stats),
+         df.samp.counts = map(df.sampled, 
+                              function(x) filter(x, accepted) %>% 
+                                select(sample_method, DSID)),
+         df.samp.stats = map2(df.samp.counts, 
+                              sim.data, 
+                              function(x, y) left_join(x, y, by = "DSID") %>% 
+                                Calc_Sample_Statistics),
+         df.B.indicies = pmap(.l = list(df.sampled, 
+                                        B.index.data, 
+                                        B.index.formula), 
+                              .f = Bindex_Summary)) %>%
   select(SB.condition, RR.condition, K.condition, df.recruitment.stats:df.B.indicies)
 
 
@@ -245,11 +275,13 @@ param_df <- df.PS %>%
   nest(PS.data = -c(scale_factor, RR)) %>%
   rename(SB.condition = scale_factor,
          RR.condition = RR) %>%
-  right_join(cross_df(params)) %>%
-  left_join(df.K.ranks) %>%
+  right_join(cross_df(params), 
+             by = c("SB.condition", "RR.condition")) %>%
+  left_join(df.K.ranks, 
+            by = "K.condition") %>%
   mutate(B.index.formula = list(B.index.formula),
          B.index.data = list(B.index.data),
-         sim.data = map(cluster.ranks, function(x) select(x, strata, DSID) %>% left_join(sim.data)))
+         sim.data = map(cluster.ranks, function(x) select(x, strata, DSID) %>% left_join(sim.data, by = "DSID")))
 
 
 test <- param_df %>% filter(SB.condition == 1 ,
@@ -262,14 +294,20 @@ test <- param_df %>% filter(SB.condition == 1 ,
 ```{r}
 
 
-Run_Iteration(test$PS.data[[1]], 
+Run_Iteration(x = 1,
+              test$PS.data[[1]], 
               test$cluster.ranks[[1]], 
               test$sim.data[[1]], 
               test$B.index.data[[1]], 
               test$B.index.formula[[1]])
 
 test %>%
-  mutate(results = pmap(.l = list(PS.data, cluster.ranks, sim.data, B.index.data, B.index.formula),
+  mutate(results = pmap(.l = list(x = 1, 
+                                  PS.data, 
+                                  cluster.ranks, 
+                                  sim.data, 
+                                  B.index.data, 
+                                  B.index.formula),
                         .f = Run_Iteration))
 
 
@@ -280,8 +318,18 @@ test %>%
 ## Iteration Timer
 
 ```{r}
-Time_Iteration <- function(x = 1, PS.data, cluster.ranks, sim.data, B.index.data, B.index.formula) {
-  system.time(Run_Iteration(x = x, PS.data, cluster.ranks, sim.data, B.index.data, B.index.formula))[3] / 60 
+Time_Iteration <- function(x = 1, 
+                           PS.data, 
+                           cluster.ranks, 
+                           sim.data, 
+                           B.index.data, 
+                           B.index.formula) {
+  system.time(Run_Iteration(x = x, 
+                            PS.data, 
+                            cluster.ranks, 
+                            sim.data, 
+                            B.index.data, 
+                            B.index.formula))[3] / 60 
 }
 ```
 
@@ -327,73 +375,181 @@ multitest.time
 
 # Parallel Test
 
+
+## Setup
+
+### Packages and Data
+
 ```{r}
-Sim_Driver  <- function(iterations, PS.data, cluster.ranks, sim.data, B.index.data, B.index.formula) {
+library(tidyverse)
+library(future)
+library(furrr)
 
-  results <- map_dfr(
-    .x = 1:iterations,
-    .f = Run_Iteration,
-    PS.data = PS.data, 
-    cluster.ranks = cluster.ranks, 
-    sim.data = sim.data,
-    B.index.data = B.index.data, 
-    B.index.formula = B.index.formula
-  )
-  
-  r.stats <- 
-    results$df.recruitment.stats %>%
-    bind_rows() %>%
-    group_by(sample_method, strata) %>%
-    summarise_all(mean)
-  
-  samp.counts <-
-    results$df.samp.counts %>%
-    bind_rows() %>%
-    group_by(sample_method, DSID) %>%
-    count()
-  
-  B <- results$df.B.indicies %>%
-    bind_rows()
-  
-  smd.stats <- results$df.samp.stats %>%
-    bind_rows() %>%
-    group_by(sample_method, strata, var) %>%
-    summarise(sim.mean = mean(samp.mean),
-              sim.sd = sd(samp.mean))
-  
-  tibble(r.stats = list(r.stats),
-         samp.counts = list(samp.counts), 
-         B = list(B),
-         smd.stats = list(smd.stats))
+rm(list = ls())
 
+source("0 - Functions - Simulation.R")
+
+load("Data/Simulation Data/Sim Data.Rdata")
+
+# ggplot(df.clusters, aes(UCS_Rank, SCS_Rank, color = factor(strata))) + 
+#   geom_point() + 
+#   facet_wrap(~ K) + 
+#   theme_minimal()
+
+
+```
+### Specify Parameters and inputs
+
+```{r}
+
+sim.data <- df.sim %>% 
+  select(DSID, all_of(covariates))
+
+B.index.covariates <- c(covariates[!(covariates %in% c("Urban", "Suburban", "ToRu"))], "urbanicity")
+
+B.index.formula <- as.formula(paste("accepted ~", paste(B.index.covariates, collapse = " + ")))
+
+B.index.data <- df.sim %>%
+  select(DSID, all_of(B.index.covariates))
+
+df.K.ranks <- df.clusters %>%
+              nest(cluster.ranks = -c(K)) %>%
+              rename(K.condition = K)
+
+params <- list(
+  iterations = 2,
+  RR.condition = unique(df.PS$RR),
+  K.condition = c("K_05"),
+  SB.condition = unique(df.PS$scale_factor)
+)
+
+
+param_df <- df.PS %>%
+  nest(PS.data = -c(scale_factor, RR)) %>%
+  rename(SB.condition = scale_factor,
+         RR.condition = RR) %>%
+  right_join(cross_df(params), 
+             by = c("SB.condition", "RR.condition")) %>%
+  left_join(df.K.ranks, 
+            by = "K.condition") %>%
+  mutate(B.index.formula = list(B.index.formula),
+         B.index.data = list(B.index.data),
+         sim.data = map(cluster.ranks, function(x) select(x, strata, DSID) %>% left_join(sim.data, by = "DSID")))
+
+
+test <- param_df %>% filter(SB.condition == 1 ,
+                            RR.condition %in% c("RR_20", "RR_50"))
+
+```
+
+
+
+## Test Driver
+
+### map_dfr function
+
+```{r}
+multitest.results <- map_dfr(
+  .x = 1:test$iterations[[1]],
+  .f = Run_Iteration,
+  PS.data = test$PS.data[[1]], 
+  cluster.ranks = test$cluster.ranks[[1]], 
+  sim.data = test$sim.data[[1]],
+  B.index.data = test$B.index.data[[1]], 
+  B.index.formula = test$B.index.formula[[1]]
+)
+```
+
+
+```{r}
+
+# 2 conditions, 2 iterations
+test
+
+# 1s condition, 2 iterations
+multitest.results
+```
+
+
+
+### future_pmap function, 1 core
+
+```{r}
+Sim_Driver  <- function(iterations, 
+                        PS.data, 
+                        cluster.ranks, 
+                        sim.data, 
+                        B.index.data, B.index.formula) {
+  
+
+  results <- 
+    map_dfr(
+      .x = 1:iterations,
+      .f = Run_Iteration,
+      PS.data = PS.data, 
+      cluster.ranks = cluster.ranks, 
+      sim.data = sim.data,
+      B.index.data = B.index.data, 
+      B.index.formula = B.index.formula
+      )
+  
+  results %>% return()
+  
 }
 
-test.results <- Sim_Driver(iterations = 2,
-                           PS.data = test$PS.data[[1]],
-                           cluster.ranks = test$cluster.ranks[[1]], 
-                           sim.data = test$sim.data[[1]], 
-                           B.index.data = test$B.index.data[[1]], 
-                           B.index.formula = test$B.index.formula[[1]])
+```
 
 
+```{r}
+plan(sequential)
+
+multitest.results <- 
+  test %>%
+  mutate(results = future_pmap(.l = list(x = iterations,
+                                         PS.data, 
+                                         cluster.ranks, 
+                                         sim.data, 
+                                         B.index.data, 
+                                         B.index.formula),
+                             .f = Sim_Driver,
+                             .options = furrr_options(seed = NULL)))
 
 
 ```
 
-```{r}
-library(future)
-library(furrr)
-plan(multisession)
 
-system.time(multitest.results <- test %>%
-    mutate(minutes = future_pmap(.l = list(x = 1, PS.data, cluster.ranks, sim.data, B.index.data, B.index.formula),
+```{r}
+# 2 conditions, 2 iterations
+multitest.results
+
+# first condition, 2 iterations
+test.results <- multitest.results$results[[1]]
+
+test.results$df.recruitment.stats[[1]] %>% count
+
+```
+
+### Timer
+
+```{r}
+plan(multisession(workers = 2))
+system.time(multitest.results <- 
+              test %>%
+              mutate(minutes = future_pmap(.l = list(x = 1, 
+                                                     PS.data, 
+                                                     cluster.ranks, 
+                                                     sim.data, 
+                                                     B.index.data, 
+                                                     B.index.formula),
                              .f = Time_Iteration,
                              .options = furrr_options(seed = NULL))) %>%
   select(SB.condition, RR.condition, K.condition, minutes) %>% 
   unnest(minutes) %>%
   mutate(seconds = minutes * 60))
 
+plan(sequential)
 ```
+
 
 ```{r}
 test$iterations <- 2
