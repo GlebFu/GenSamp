@@ -45,22 +45,29 @@ df.K.ranks <- df.clusters %>%
 
 ```{r}
 params <- list(
-  iterations = 10,
+  iterations = 5,
   RR.condition = unique(df.PS$RR),
   K.condition = c("K_05"),
   SB.condition = unique(df.PS$scale_factor)
 )
+
+# params <- list(
+#   iterations = 2,
+#   RR.condition = unique(df.PS$RR)[1],
+#   K.condition = c("K_05"),
+#   SB.condition = unique(df.PS$scale_factor)[1]
+# )
 
 
 param_df <- df.PS %>%
   nest(PS.data = -c(scale_factor, RR)) %>%
   rename(SB.condition = scale_factor,
          RR.condition = RR) %>%
-  right_join(cross_df(params)) %>%
-  left_join(df.K.ranks) %>%
+  right_join(cross_df(params), by = c("SB.condition", "RR.condition")) %>%
+  left_join(df.K.ranks, by = "K.condition") %>%
   mutate(B.index.formula = list(B.index.formula),
          B.index.data = list(B.index.data),
-         sim.data = map(cluster.ranks, function(x) select(x, strata, DSID) %>% left_join(sim.data)))
+         sim.data = map(cluster.ranks, function(x) select(x, strata, DSID) %>% left_join(sim.data, by = "DSID")))
 
 
 ```
@@ -68,8 +75,8 @@ param_df <- df.PS %>%
 ## Run Simulation
 
 ```{r}
-plan(multisession(workers = availableCores() - 1))
-# plan(multisession(workers = 2))
+# plan(multisession(workers = availableCores() - 1))
+plan(multisession(workers = 3))
 
 sim.time.results <- 
   system.time(
@@ -87,6 +94,25 @@ sim.time.results <-
     )
 
 plan(sequential)
+```
+
+
+```{r}
+test <- sim.results %>%
+  unnest(results)
+
+test
+
+```
+
+
+```{r}
+test$df.recruitment.stats[[1]] %>% group_by(sample_method, strata) %>% count
+
+test$df.samp.counts[[1]] %>% group_by(sample_method) %>% count
+
+
+test$df.recruitment.stats[[1]] %>% group_by(sample_method) %>% count
 
 
 
@@ -118,13 +144,10 @@ descript <-
 
 resultsFile <- paste("Data/Results/", date, " - ", descript, ".rdata", sep = "")
 
-save(sim.results, file = resultsFile)
+# save(sim.results, file = resultsFile)
 
-backup.results <- sim.results
+# write_file(x = resultsFile, "Data/Results/LastResults.txt")
 
-write_file(x = resultsFile, "Data/Results/LastResults.txt")
-
-load(resultsFile)
 
 ```
 

@@ -25,8 +25,7 @@ load("Data/Simulation Data/Sim Data.Rdata")
 
 load(read_file("Data/Results/LastResults.txt"))
 
-# save(sim.results, file = read_file("Data/Results/LastResults.txt"))
-# load("Data/Results/20201217 - 9RR 1K 3SB x100.rdata")
+
 
 sim.results <- sim.results %>%
   transmute(SB = SB.condition,
@@ -34,10 +33,12 @@ sim.results <- sim.results %>%
             K = parse_number(K.condition),
             results = results) %>%
   unnest(results)
+
 ```
 
 
 ```{r}
+
 ls() %>%
   tibble(Vars = .) %>%
   mutate(MB = map(Vars, function(x) object.size(eval(parse(text = x))) %>% format(units = "MB", digits = 3))) %>%
@@ -56,51 +57,90 @@ tabs <- list()
 figs <- list()
 
 
+vars$conditions <- c("SB", "RR", "Variables", "vnames") 
+vars$methods <- c("Sampler", "Sample_Catagories", "Cluster", "Sample", "Method_Label") 
+vars$cluster <- list(mixed = cluster_vars, dummy = covariates)
+```
 
+```{r}
 df.list$strata.id <- 
   df.clusters %>%
+  ungroup() %>%
   filter(K == "K_05") %>%
-  mutate(strata = factor(paste("Strata", strata)))
+  mutate(strata = factor(paste("Strata", strata))) %>%
+  select(DSID, strata, SBS_Rank, UCS_Rank, SCS_Rank)
 
+```
+
+```{r}
 
 df.list$pop.data <- 
-  left_join(df.sim, df.list$strata.id)
+  left_join(df.sim, df.list$strata.id, by = "DSID")
 
+
+```
+
+```{r}
 
 
 df.list$PS <- df.PS %>% 
-  mutate(logit = log(PS / (1 - PS)))
+  mutate(logit = log(PS / (1 - PS)),
+         RR = parse_number(RR))
 
+
+```
+
+```{r}
 df.list$coefs <- DGM.Bs %>%
   transmute(vnames = var, log_odds = Bs) %>%
-  full_join(read_csv("Data/Paper/Clustering Variables.csv"))
+  full_join(read_csv("Data/Paper/Clustering Variables.csv",
+                      col_types = cols()),
+            by = "vnames") %>%
+  full_join(intercepts, by = character()) %>%
+  mutate(Coeficient = log_odds * scale_factor,
+         RR = parse_number(RR)) %>%
+  rename(SB = scale_factor,
+         Intercept = Int) %>%
+  select(Sub, Category, Type, vnames, Variables, SB, RR, log_odds, Coeficient, Intercept) %>%
+  nest(DGM = c(SB, RR, Coeficient, Intercept))
 
+```
+
+
+```{r}
 df.list$pop.stats <- df.list$pop.data %>%
   select(DSID, all_of(covariates), strata) %>%
-  gather(key = vnames, value = value, covariates) %>%
+  gather(key = vnames, value = value, all_of(covariates)) %>%
   group_by(vnames) %>%
   mutate(T.SS = var(value) * (n() - 1)) %>%
   group_by(vnames, T.SS, strata) %>%
-  summarise(W.SS = var(value) * (n() - 1)) %>%
-  summarise(W.SS = sum(W.SS)) %>%
+  summarise(W.SS = var(value) * (n() - 1), 
+            .groups = "drop_last") %>%
+  summarise(W.SS = sum(W.SS), 
+            .groups = "drop_last") %>%
   mutate(B.SS = T.SS - W.SS,
          vratio = B.SS / T.SS) %>%
-  left_join(df.list$coefs) %>%
-  left_join(df.pop.stats %>% rename(vnames = var))
+  left_join(df.list$coefs, 
+            by = "vnames") %>%
+  left_join(df.pop.stats %>% rename(vnames = var), 
+            by = "vnames")
 
 df.list$k.stats <- cluster.stats
 
 df.list$cluster.pa <- df.clusters %>%
   select(K, strata, pa) %>%
   unique()
+
 ```
+
 
 ```{r}
 rename_results <- function(result.data) {
   result.data %>%
     separate(sample_method, into = c("Cluster", "Sample", "Rank_Type", "Rank_Factor"), remove = F, fill = "right") %>%
     rename(Sampler = sample_method) %>%
-    mutate(Cluster = factor(Cluster, 
+    mutate(Method_Label = paste(Cluster, Sample, sep = ""),
+           Cluster = factor(Cluster, 
                             level = c("S", "U"), 
                             label = c("Stratified", "Unstratified")),
            Sample = factor(Sample,
@@ -113,12 +153,20 @@ rename_results <- function(result.data) {
     pack(Sample_Catagories = c(Cluster, Sample, Rank_Type, Rank_Factor))
 }
 
+
+
 results$B <- 
   sim.results %>% 
   select(SB:K, B) %>%
   unnest(B) %>%
   rename_results
 
+
+# results$B  %>%
+#   # filter(SB == 1, RR == 10, Sampler == "U_CS_UR_X2") %>%
+#   arrange(Bs)
+
+# results$B %>% filter(is.na(Bs))
 
 results$r.stats <- sim.results %>% 
   select(SB:K, r.stats) %>%
@@ -131,8 +179,9 @@ results$smd.stats <- sim.results %>%
   unnest(smd.stats) %>% 
   rename(vnames = var) %>% 
   rename_results() %>%
-  left_join(df.list$pop.stats) %>%
-  mutate(mSMD = (sim.mean - pop.mean) / pop.sd)
+  left_join(df.list$pop.stats %>% unnest(DGM), by = c("SB", "RR", "vnames")) %>%
+  mutate(mSMD = (sim.mean - pop.mean) / pop.sd,
+         abs.mSMD = abs(mSMD))
 
 
 
@@ -145,7 +194,7 @@ results$smd.stats <- sim.results %>%
 
 calc_gini_curve <- function(count.data, pop.list) {
   count.data %>%
-    full_join(pop.list) %>%
+    full_join(pop.list, by = "DSID") %>%
     mutate(count = ifelse(is.na(n), 0, n),
            prop.selected = count / sum(count),
            n = n(),
@@ -178,9 +227,14 @@ rm(list = c("cluster.stats",
             "df.PS",
             "rename_results",
             "DGM.Bs",
-            "sim.results"))
-
-vars$cluster <- list(mixed = cluster_vars, dummy = covariates)
+            "sim.results",
+            "prop_allocations",
+            "clust_time",
+            "calc_gini_curve",
+            "covariates",
+            "K",
+            "minK",
+            "cluster_vars"))
 
 
 ```

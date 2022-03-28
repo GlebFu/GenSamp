@@ -102,7 +102,7 @@ library(kableExtra)
 ```{r data-prep}
 
 
-load("Data/Paper/Paper Data 09-27-2020.rdata")
+load("Data/Paper/Paper Data 02-08-2021.rdata")
 
 source("0 - Functions - Analysis and Paper.R")
 
@@ -117,7 +117,7 @@ Well-executed MRTs with low attrition support a high level of internal validity,
 
 In the context of intervention studies, generalizability describes how well the effect of an intervention would hold for units outside of the study. For instance, results of a randomized trial are often interpreted as estimates of the sample average treatment effect (SATE), or the average effect of intervention for the set of units that actually participated in the study [@gerberFieldExperimentsDesign2012]. If the study sample is representative of a larger population, a SATE estimate can also be interpreted as a reasonable estimate of the average effect of intervention within the larger population of units, or population average treatment effect (PATE), without any additional adjustments. However, if the sample is compositionally different from the population of interest, and if response to intervention varies across units or sites in the population, then the SATE no longer provides an unbiased estimate of the PATE [@imaiMisunderstandingsExperimentalistsObservationalists2008].
 
-Several studies have found that schools and districts that participate in large scale randomized trials differ substantially from the national population and from policy-relevant sub-populations [@fellersDevelopingApproachDetermine2017; @stuartCharacteristicsSchoolDistricts2017; @tiptonSystemEvidenceAll2020]. This suggests that current research practices yield non-representative samples. In turn, non-representative samples may lead to substantially biased estimates of population-level effects [@olsenExternalValidityPolicy2013; @shadishExperimentalQuasiexperimentalDesigns2002]. Beyond accurate effects estimates, lac of representation in MRTs can also be a question of equity. For instance, small under-served rural districts are under-represented in RCTs sponsored by Institute of Education Sciences [@fellersDevelopingApproachDetermine2017; @stuartCharacteristicsSchoolDistricts2017; @tiptonSystemEvidenceAll2020], and thus may be less likely to benefit from federally funded education research.
+Several studies have found that schools and districts that participate in large scale randomized trials differ substantially from the national population and from policy-relevant sub-populations [@fellersDevelopingApproachDetermine2017; @stuartCharacteristicsSchoolDistricts2017; @tiptonSystemEvidenceAll2020]. This suggests that current research practices yield non-representative samples. In turn, non-representative samples may lead to substantially biased estimates of population-level effects [@olsenExternalValidityPolicy2013; @shadishExperimentalQuasiexperimentalDesigns2002]. Beyond accurate effects estimates, lack of representation in MRTs can also be a question of equity. For instance, small under-served rural districts are under-represented in RCTs sponsored by Institute of Education Sciences [@fellersDevelopingApproachDetermine2017; @stuartCharacteristicsSchoolDistricts2017; @tiptonSystemEvidenceAll2020], and thus may be less likely to benefit from federally funded education research.
 
 One way to achieve strong generalizability is to select sites from a well-defined population with known probabilities of selection. Assuming random assignment with full compliance and low attrition, this design enables unbiased estimation of the SATE. Using the known sampling probabilities, the SATE can then be adjusted to estimate the PATE. Unfortunately, probability sampling is rarely used in large-scale impact evaluations [@shadishExperimentalQuasiexperimentalDesigns2002; @olsenExternalValidityPolicy2013]. Instead, researchers often opt for convenience or purposive sampling. These methods are much less expensive to implement, but are not usually designed to achieve population representation. 
 
@@ -178,7 +178,7 @@ We measure balance using the standardized mean difference ($SMD$) between the sa
 \begin{align} \label{eq:SMD}
 SMD_p = \frac{\bar{x}_p - \mu_p}{\sigma_p}
 \end{align}
-where $\bar{x}_p$ is the sample mean of covariate $p$, $\mu_p$ is the covariate mean in the population, and $\sigma_p$ is the standard deviation of the covariate in the population. $SMD$ values closer to zero indicate greater balance between the sample and the population. By this measure, obtaining a $SMD_p \le .25$ for all covariates in $P$ would indicate that the sample is well balanced and can be generalized to the population. Covariates for which $SMD_p > .25$ would likely require additional statistical adjustment in the final analysis. \GF{Should we foreshadow the B-Index here?}
+where $\bar{x}_p$ is the sample mean of covariate $p$, $\mu_p$ is the covariate mean in the population, and $\sigma_p$ is the standard deviation of the covariate in the population. $SMD$ values closer to zero indicate greater balance between the sample and the population. By this measure, obtaining a $SMD_p \le .25$ for all covariates in $P$ would indicate that the sample is well balanced and can be generalized to the population. Covariates for which $SMD_p > .25$ would likely require additional statistical adjustment in the final analysis.
 
 When recruiting a sample, selection bias--or imbalance between the sample and the population---can arise from at least two distinct sources: recruitment methods and the decisions of individual units about whether to participate. Our goal is to assess the effectiveness and costs of different recruitment methods, such as SBS, probability sampling, and convenience sampling. However, any of the recruitment methods must contend with non-response, such as when school leaders decline to participate in the research study. 
 Our proposed framework treats the two processes as distinct, allowing us to isolate the influence of different recruitment methods. 
@@ -196,7 +196,9 @@ In the remainder of this section, we introduce formal models for each component 
 To describe unit participation decisions (i.e., self-selection), we propose a response propensity score model that involves several key assumptions. 
 First, we assume that each individual school is responsible for deciding whether to participate, and that school decisions are independent. 
 That is to say, districts, administrators, teachers, research coordinators, etc., as individual units do not influence decision. 
-Second, we assume that schools' response decisions are related to their measured covariates, $\mathbf{x}_j$, but not to unmeasured characteristics.\JEP{Any further comments about this assumption?}
+Second, we assume that schools' response decisions are related to their measured covariates, $\mathbf{x}_j$, but not to unmeasured characteristics. Specifically, the decision to participate can be driven by school level characteristics (i.e., urbanicity, school size) or aggregated student data (i.e., student demographics, percent of students with IEPs). 
+  \JEP{Any further comments about this assumption?}\GF{Added}
+
 Third, we assume that response decisions are not influenced by the recruitment process itself, so that
 \begin{equation}
 \label{eq:potential-participation}
@@ -207,9 +209,7 @@ This simplifying assumption could fail to hold if the likelihood that a school r
 
 [^recruitment]: For example, a school might be more likely to respond to a recruitment attempt made through a face-to-face meeting than one from an email blast.
 
-Fourth and finally, we assume that the probability of responding can be approximated with a linear transformation of demographic covariates ($\mathbf{x}_j$). 
-Letting $\pi_j = \Pr\left(E_j = 1 | \mathbf{x}_j \right)$ represent the response propensity score, or the probability that unit $j$ would agree to participate in a study if approached, we assume that:
-\begin{align} 
+\begin{align}
 \label{eq:RGM}
 \log\left(\frac{\pi_j}{1 - \pi_j}\right) = \beta_0 + \mathbf{x}_j \boldsymbol\beta
 \end{align}
@@ -220,8 +220,17 @@ E_j \sim B(\pi_j).
 \end{equation}
 Under this model, $\pi_j$ is a constant school characteristic, whereas $E_j$ can vary across replications of the sampling process.
 
-These assumptions are clearly a stylized, and perhaps over-simplified, representation of a complicated and multifaceted decision-making process. We know, for instance, that in many cases districts act as gatekeepers by determining whether or not to approve research proposals.\JEP{Cite?} However, a more nuanced model may not necessarily be more accurate. Our understanding of school participation is limited to anecdotal evidence and studies that report sample characteristics. 
-In the case of the latter, these characteristics themselves are biased as they are subject to the recruitment strategy employed by the researcher. For instance, if a study employed some form of non-probability sampling, differences between that sample and its' intended inference population could be attributed to an uknowable conflation of the recruitment method and non-response. The purpose of this model is therefore utility rather than accuracy.\JEP{Discuss difficulty of estimating this model from extant data, due to non-representative samples. Also how will we develop assumptions about values of $\boldsymbol\beta$?}\GF{added}\JEP{Hrmm, any way to improve the rhetoric here?}
+These assumptions are clearly a stylized, and perhaps over-simplified, representation of a complicated and multifaceted decision-making process. 
+We know, for instance, that in many cases districts act as gatekeepers by determining whether or not to approve research proposals.
+  \JEP{Cite?}\GF{This is sort of just known. I don't have a specific citation. I can confirm that almost all of the 15 largest districts in TX require submission to a district review board, for instance} 
+However, a more nuanced model may not necessarily be more accurate. 
+Our understanding of school participation is limited to anecdotal evidence and studies that report sample characteristics. 
+In the case of the latter, these characteristics themselves are biased as they are subject to the recruitment strategy employed by the researcher. 
+For instance, if a study employed some form of non-probability sampling, differences between that sample and its' intended inference population could be attributed to an uknowable conflation of the recruitment method and non-response. 
+The purpose of this model is therefore utility rather than accuracy.
+  \JEP{Discuss difficulty of estimating this model from extant data, due to non-representative samples. Also how will we develop assumptions about values of $\boldsymbol\beta$?}
+  \GF{added}
+  \JEP{Hrmm, any way to improve the rhetoric here?}
 
 ## Sampling Methods
 
@@ -240,7 +249,6 @@ R(S) = \sum_{j=1}^N I\left(S_j \leq S^{max}\right),
 \end{equation}
 where $S^{max} = \max \{S_1 Z_1, S_2 Z_2, ..., S_N Z_N\}$.
 
-Several of the sampling methods that we shall consider involve use of stratification. 
 Stratified sampling gives researchers more control over the characteristics of their sample. Consider the case of random sampling, which only produces a representative sample on average. To reduce the likelihood of an "unlucky" sample, a population can be split into strata based on characteristics specified by the researcher. Random sampling from within each of the strata will then ensure that each of those characteristics are represented in the final sample. Stratification is routinely used with probability or non-probability sampling methods in survey research. 
 
 To model stratified sampling methods, we will assume that the population is divided into a set of $K$ strata. Proportional allocation will be used to ensure the relative size of the strata in the sample reflects that of the population [@tiptonStratifiedSamplingUsing2013]. 
@@ -314,11 +322,9 @@ We developed a sampling frame for this population using data from the Common Cor
 
 ```{r tab-RGM-Pars}
 tabs$pop.desc %>%
-  mutate(M = round(M, 2),
-         SD = round(SD, 2)) %>%
   select(-Category) %>%
   kable(booktabs = T,
-        caption = "Descriptive statistics for population of $N = 9,792$ schools and log odds of participation associated with each covariate (Fellers, 2017)",
+        caption = "Descriptive statistics for population of 9,792 schools and log odds of participation associated with each covariate (Fellers, 2017)",
         col.names = c("Variables", "M", "N", "Log-odds of participation")) %>%
   kable_styling(latex_options = c("hold_position"),
                 full_width = F) %>%
@@ -433,8 +439,7 @@ Figure \@ref(fig:fig-avg-B) displays the average $B$-index for each method acros
 ```{r fig-avg-B, fig.pos="bth", fig.cap = "(ref:fig-avg-B-caption)"}
 
 figs$B %>%
-  apa_style_plot() +
-  theme(legend.position = "none")
+  apa_style_plot()
   
 
 if (saveFigs) save.figures("Results - B Index")
@@ -452,78 +457,97 @@ The first group of covariates included nine variables where stratified methods o
 
 ```{r fig-SMD-groups, fig.height = 5, fig.width = 7, fig.pos = "tb", fig.cap = "(ref:fig-SMD-groups-caption)"}
 
-# figs$smd.examples %>%
-#   apa_style_plot() + 
-#   theme(legend.position = c(0.85, 0.07))
 
-tfun <- function(x) {
+
+figs$smd.examples <- tabs$smd.results %>%
+  filter(vnames %in% c("n", "pELL", "T1")) %>%
+  nest(smd.plot.data = -c(Variables, vnames)) %>%
+  mutate(plots = pmap(.l = list(data = smd.plot.data), .f = plot_smd, l.pos = "bottom"),
+         plots = setNames(plots, vnames))
+
+tfun <- function(x, x.title = element_blank(), y.title = element_blank()) {
   x %>% 
     apa_style_plot() + 
     theme(legend.position = "none",
-          axis.title.x = element_blank(),
-          axis.title.y = element_blank()) +
+          axis.title.x = x.title,
+          axis.title.y = y.title,
+          plot.margin = margin(6, 6, 6, 0)) +
   scale_color_brewer(type = "qual", palette = 6) 
 } 
 
-legend_plot <- function(x) {
-   x %>%
-    apa_style_plot() +
-    theme(legend.position = "none",
-          axis.ticks.x = element_blank(),
-          axis.ticks.y = element_blank(),
-          axis.line.x = element_blank(),
-          axis.line.y = element_blank()) +
-    labs(x = "", y = "") +
-  scale_x_continuous(labels = rep("", 5), breaks = 1:5) +
-  scale_y_continuous(labels = rep("", 5), breaks = 1:5) +
-  scale_color_brewer(type = "qual", palette = 6) 
-    
-}
+
+smd.example.list <-
+  list(tfun(figs$smd.examples$plots[[1]]), 
+       tfun(figs$smd.examples$plots[[2]]), 
+       tfun(figs$smd.examples$plots[[3]]))
 
 
+smd.example.legend <- (smd.example.list[[1]] + 
+  theme_update(legend.box.margin = margin(0, 0, 0, 0),
+               legend.position = "right")) %>% 
+  get_legend()
 
-smd.fig.list <- list(plot_grid(plotlist = list(tfun(figs$smd.Group1), tfun(figs$smd.Group2)), 
-                               labels = c("Group 1", "Group 2"), 
-                               ncol = 2, 
-                               nrow = 1, 
-                               rel_heights = c(1, 1),
-                               label_x = .2,
-                               align = "h",
-                               label_fontface = "plain" ,
-                               label_size = 10), 
-                     plot_grid(plotlist = list(tfun(figs$smd.Group3), legend_plot(figs$smd.label)),
-                               labels = c("Group 3", "Legend"), 
-                               ncol = 2, 
-                               nrow = 1, 
-                               rel_heights = c(1, 1),
-                               label_x = .2,
-                               align = "h",
-                               label_fontface = "plain" ,
-                               label_size = 10)
+smd.fig.list <- plot_grid(plotlist = smd.example.list,
+                          labels = c("Group 1", "Group 2", "Group 3"), 
+                          ncol = 1, 
+                          nrow = 3, 
+                          rel_heights = c(1, 1, 1),
+                          label_x = .45,
+                          align = "h",
+                          label_fontface = "plain" ,
+                          label_size = 10) + 
+  theme(plot.margin = margin(0, 0, 24, 24))
 
-)
 
-test <- plot_grid(plotlist = smd.fig.list,
-                    ncol = 1, 
-                    nrow = 2, 
-                    rel_heights = c(1, 1),
-                    label_x = .5,
-                    align = "v",
-                    label_fontface = "plain" ,
-                    label_size = 10,
-                  scale = .9) 
-
-test + #perhaps reduce this for a bit more space
+plot_grid(smd.fig.list, 
+          smd.example.legend, 
+          rel_widths = c(3, .4)) +
   draw_label(lab.vars$rr,
              x= 0.5,
              y = 0,
              vjust = -0.25,
-             angle = 0) +
+             angle = 0,
+             size = 12) +
   draw_label(lab.vars$smd,
              x = 0,
              y = 0.5,
              vjust = 1.5,
-             angle = 90)
+             angle = 90,
+             size = 12)
+
+figs$smd.examples2 <- tabs$smd.results %>%
+  filter(vnames %in% vars$smd.examples ) %>%
+  mutate(Group = factor(vnames, labels = c("Group 2", "Group 3", "Group 4", "Group 1"))) %>% 
+    ggplot(aes(x = RR, y = Value,
+               alpha = alpha.group)) %>%
+    common_line() %>%
+    common_point() +
+    geom_hline(yintercept = c(.25), linetype = "dotted") +
+    geom_hline(yintercept = 0, linetype = "solid") +
+    labs(y = lab.vars$smd,
+         x = lab.vars$rr) + 
+    scale_x_continuous(breaks = seq(10, 90, 40),
+                       limits = c(10, 100)) +
+    scale_alpha_continuous(guide = "none", range = c(.5, 1)) +
+    facet_grid(Group ~ SB, scales = "free_y")
+
+figs$smd.examples2 <- figs$smd.examples2 %>% 
+  apa_style_plot() +
+  theme(legend.position = "none")
+
+plot_grid(figs$smd.examples2, smd.example.legend, rel_widths = c(3, .5)) +
+  draw_label(lab.vars$rr,
+             x= 0.5,
+             y = 0,
+             vjust = -0.25,
+             angle = 0,
+             size = 12) +
+  draw_label(lab.vars$smd,
+             x = 0,
+             y = 0.5,
+             vjust = 1.5,
+             angle = 90,
+             size = 12)
 ```
 
 
@@ -534,9 +558,9 @@ It can be seen that Group 1 consisted of covariates where a substantial fraction
 
 ```{r fig-Var-Coef, fig.cap = "(ref:fig-Var-Coef-caption)", fig.pos="tb"}
 
-figs$v.coef %>%
-  apa_style_plot()  + 
-  theme(legend.title = element_blank())
+# figs$v.coef %>%
+#   apa_style_plot()  + 
+#   theme(legend.title = element_blank())
 
 ```
 
@@ -552,17 +576,30 @@ It is important to note that, particularly in the lower population participation
 
 ```{r fig-responses, fig.height = 6, fig.width = 8, fig.cap = "(ref:fig-responses-caption)"}
 
-plot_grid(plotlist = list(figs$samples.contacts %>% apa_style_plot() + theme(legend.position = "none"),
-                          figs$samples.response.rates %>% apa_style_plot() + theme(legend.position = "none")), 
-          labels=c("(a)", "(b)"), 
-          ncol = 1, 
-          nrow = 2, 
-          label_x = .5,
-          align = "v",
-          label_fontface = "plain" ,
-          label_size = 10) %>%
-  plot_grid(get_legend(figs$samples.contacts %>% apa_style_plot()), 
-            rel_widths = c(3, .4))
+# responses.fig.list <- list(figs$samples.contacts %>% 
+#                              tfun(y.title = element_text(lab.vars$contacts)),
+#                            figs$samples.response.rates %>% 
+#                              tfun(y.title = NULL))
+# 
+# 
+# 
+# plot_grid(plotlist = responses.fig.list, 
+#           labels=c("(a)", "(b)"), 
+#           ncol = 1, 
+#           nrow = 2, 
+#           label_x = .5,
+#           align = "v",
+#           label_fontface = "plain" ,
+#           label_size = 10) %>%
+#   plot_grid(get_legend(figs$samples.contacts %>% apa_style_plot()), 
+#             rel_widths = c(3, .4)) + 
+#   theme(plot.margin = margin(0, 0, 24, 6)) +
+#   draw_label(lab.vars$rr,
+#              x= 0.5,
+#              y = 0,
+#              vjust = .75,
+#              angle = 0,
+#              size = 12)
 
 ```
 
@@ -727,25 +764,25 @@ Figures \@ref(fig:fig-smd-group1), \@ref(fig:fig-smd-group2), and \@ref(fig:fig-
 (ref:fig-smd-group1-caption) Group 1: Sampling methods performed as expected. All stratified methods outperformed non-stratified methods. Better balance was attained by balanced sampling followed by random sampling and convenience sampling.
 
 ```{r fig-smd-group1, fig.cap = "(ref:fig-smd-group1-caption)"}
-
-figs$smd.good %>%
-  apa_style_plot()
+# 
+# figs$smd.good %>%
+#   apa_style_plot()
 
 ```
 
 (ref:fig-smd-group2-caption) Group 2: Sampling methods equally well resultiing in good balance.
 
 ```{r fig-smd-group2, fig.cap = "(ref:fig-smd-group2-caption)"}
-figs$smd.neutral %>%
-  apa_style_plot()
+# figs$smd.neutral %>%
+#   apa_style_plot()
 ```
 
 
 (ref:fig-smd-group3-caption) Group 3: Stratification sometimes resulted in poorer balance. 
 
 ```{r fig-smd-group3, fig.cap = "(ref:fig-smd-group3-caption)"}
-figs$smd.bad %>%
-  apa_style_plot()
+# figs$smd.bad %>%
+#   apa_style_plot()
 ```
 
 
@@ -777,10 +814,10 @@ Figure \@ref(fig:fig-gini-curve) displays the Gini curve and coefficient for all
 (ref:fig-gini-curve-caption) Cumulative probability plot and Gini coefficients representing the inequality of school sampling across sampling methods and population response rates.
 
 ```{r fig-gini-curve, fig.pos = "p", fig.width = 10, fig.height = 6, fig.cap = "(ref:fig-gini-curve-caption)", fig.env = "sidewaysfigure"}
-
-figs$gini.coef %>%
-  apa_style_plot() +
-  labs(x = "Cumulative proportion of population",
-         y = "Cumulative percentage of times sampled") 
+# 
+# figs$gini.coef %>%
+#   apa_style_plot() +
+#   labs(x = "Cumulative proportion of population",
+#          y = "Cumulative percentage of times sampled") 
 
 ```
