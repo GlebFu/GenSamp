@@ -190,24 +190,24 @@ One way to achieve strong generalizability is to select sites from a well-define
 \hypertarget{retrospective-generalization-methods}{%
 \subsection{Retrospective generalization methods}\label{retrospective-generalization-methods}}
 
-A growing body of methodological research has considered how to estimate PATEs from non-representative samples using retrospective propensity score analysis (Kern, Stuart, Hill, \& Green, 2016; O'Muircheartaigh \& Hedges, 2014; Stuart, Cole, Bradshaw, \& Leaf, 2011; Tipton, 2013a). Estimation entails re-weighing the sample (or otherwise adjusting) to represent a population of interest.
+A growing body of methodological research has considered how to estimate PATEs from non-representative samples using retrospective propensity score analysis (Kern, Stuart, Hill, \& Green, 2016; O'Muircheartaigh \& Hedges, 2014; Stuart, Cole, Bradshaw, \& Leaf, 2011; Tipton, 2013). Estimation entails re-weighing the sample (or otherwise adjusting) to represent a population of interest.
 These methods rely on the availability of extensive data clearly defining the inference population in order to justify a claim of generalizabilty. Specifically, data must enumerate all units in the population and include information on covariates that predict treatment effect heterogeneity. These requirements make retrospective methods particularly salient in the context of educational trials due to the availability of data on districts and schools (e.g., the Common Core of Data, the Stanford Education Data Archive, etc.).
 
-A shortcoming of retrospective generalization methods is under-coverage (Groves, 2004) which occurs when a sample lacks units corresponding to a sub-group of the inference population. Under-coverage can be assessed using several techniques that identify how well a sample would generalize to a specific population (Stuart et al., 2011; Tipton, 2014). If under-coverage is great enough to prevent use of statistical adjustment for estimating the PATE, then the inference population must be redefined. However, re-defining the inference population diminishes the relevance of study results, undermining the benefits of large-scale MRTs.
+A shortcoming of retrospective generalization methods is under-coverage (Groves, 2004) which occurs when a sample lacks units corresponding to a sub-group of the inference population. Under-coverage can be assessed using several techniques that identify how well a sample would generalize to a specific population (Stuart et al., 2011; Tipton, 2014a). If under-coverage is great enough to prevent use of statistical adjustment for estimating the PATE, then the inference population must be redefined. However, re-defining the inference population diminishes the relevance of study results, undermining the benefits of large-scale MRTs.
 
 \hypertarget{stratified-balanced-sampling}{%
 \subsection{Stratified balanced sampling}\label{stratified-balanced-sampling}}
 
-Rather than relying on retrospective adjustments, a series of recent papers instead advocate designing robust sampling methods that focus on generalizability at the recruitment stage (Tipton, 2013a, 2013b). Like retrospective adjustment, these methods also require a well-defined and enumerated population for which there is extant data.
+Rather than relying on retrospective adjustments, a series of recent papers instead advocate designing robust sampling methods that focus on generalizability at the recruitment stage (Tipton, 2013, 2014b). Like retrospective adjustment, these methods also require a well-defined and enumerated population for which there is extant data.
 One method in particular, Stratified Balanced Sampling (SBS), has received attention from intervention effectiveness researchers due to its accessibility.
 
 SBS involves using cluster analysis to split the population into smaller, more homogeneous strata. Sites within each stratum are then ranked according to how well they represent the stratum and highly representative sites are prioritized for recruitment.
 Researchers who are interested in using this approach to sample schools may even use a website (www.thegeneralizer.org) that guides them through the process using a sampling frame from the Common Core of Data.
 
-Several studies have described potential theoretical benefits of SBS (Tipton, 2013b; Tipton et al., 2016). First, SBS requires that researchers specify the inference population and justify targeting specific sites. Thus, it enforces a degree of clarity regarding the goal of generalization, which has often been lacking even in large-scale MRTs in education (Tipton et al., 2020). Second, SBS should theoretically improve sample representation and reduce under-coverage, thereby improving generalization to the specified target population. Further, SBS easily integrates with retrospective statistical adjustment techniques. Even if balance is only partially improved at the sampling stage, coverage errors should still be reduced, mitigating the need to redefine the inference population post-hoc.
+Several studies have described potential theoretical benefits of SBS (Tipton, 2014b; Tipton et al., 2016). First, SBS requires that researchers specify the inference population and justify targeting specific sites. Thus, it enforces a degree of clarity regarding the goal of generalization, which has often been lacking even in large-scale MRTs in education (Tipton et al., 2020). Second, SBS should theoretically improve sample representation and reduce under-coverage, thereby improving generalization to the specified target population. Further, SBS easily integrates with retrospective statistical adjustment techniques. Even if balance is only partially improved at the sampling stage, coverage errors should still be reduced, mitigating the need to redefine the inference population post-hoc.
 Finally, SBS requires researchers to carefully document the recruitment process, which supports transparency and enables more rigorous critique of the sampling design and study inferences, as well as enabling follow-up analysis on participation behavior such as systematic differences between participants and non-responders.
 
-There are, of course, several limitations as well. SBS depends on the existence of a rich set of observed covariates related to treatment heterogeneity and sample selection for each site in the population. Readily available extant data consist primarily of demographics and may not contain information on covariates that are more proximally related to variation in treatment effects, which can result in omitted variable bias (Tipton, 2013b). Additionally, implementing SBS requires more resources than a simple convenience sample because recruiting ranked sites from multiple strata requires a coordinated effort between recruiters (Tipton, Hallberg, Hedges, \& Chan, 2017). This means that recruiters cannot work independently and must rely on a partnership with researchers implementing this method.
+There are, of course, several limitations as well. SBS depends on the existence of a rich set of observed covariates related to treatment heterogeneity and sample selection for each site in the population. Readily available extant data consist primarily of demographics and may not contain information on covariates that are more proximally related to variation in treatment effects, which can result in omitted variable bias (Tipton, 2014b). Additionally, implementing SBS requires more resources than a simple convenience sample because recruiting ranked sites from multiple strata requires a coordinated effort between recruiters (Tipton, Hallberg, Hedges, \& Chan, 2017). This means that recruiters cannot work independently and must rely on a partnership with researchers implementing this method.
 
 At least one research group has implemented SBS in a large-scale multi-site educational intervention study and documented their experiences (Tipton \& Matlen, 2019). The authors reported success in selecting a highly generalizable sample, but substantial efforts were required to develop the sample frame, generate optimal strata, and coordinate with recruiters.
 This was compounded by the unavailability of data necessary for identifying the sampling frame.
@@ -243,7 +243,7 @@ We will follow the latter conceptualization of generalizability.
 
 Formally, we consider a population of \(N\) units (such as schools), indexed by \(j = 1,...,N\).
 We assume that we have a dataset containing \(P\) covariates, \(\mathbf{x}_j = \left(x_{1j},...,x_{Pj}\right)\), for every unit in the population. The covariates may be a mixture of continuous, binary, and categorical data.
-Following Tipton (2013b), we assume that the researcher's goal is to select a sample of \(n\) sites such that there is balance along \(\mathbf{x}_j\) between the sample and the population, indicating that the population is compositionally represented by the sample.
+Following Tipton (2014b), we assume that the researcher's goal is to select a sample of \(n\) sites such that there is balance along \(\mathbf{x}_j\) between the sample and the population, indicating that the population is compositionally represented by the sample.
 We measure balance using the standardized mean difference (\(SMD\)) between the sample and population for a given covariate. For covariate \(p\), the SMD is calculated as
 \begin{align} \label{eq:SMD}
 SMD_p = \frac{\bar{x}_p - \mu_p}{\sigma_p}
@@ -294,12 +294,13 @@ We know, for instance, that in many cases districts act as gatekeepers by determ
 \todo[color=blue!20]{Cite?}\todo[color=orange]{This is sort of just known. I don't have a specific citation. I can confirm that almost all of the 15 largest districts in TX require submission to a district review board, for instance}
 However, a more nuanced model may not necessarily be more accurate.
 Our understanding of school participation is limited to anecdotal evidence and studies that report sample characteristics.
-In the case of the latter, these characteristics themselves are biased as they are subject to the recruitment strategy employed by the researcher.
-For instance, if a study employed some form of non-probability sampling, differences between that sample and its' intended inference population could be attributed to an uknowable conflation of the recruitment method and non-response.
-The purpose of this model is therefore utility rather than accuracy.
+In the case of the latter, these characteristics themselves are biased as they are subject to the recruitment strategy employed by the researcher. For instance, if a study employed some form of non-probability sampling, differences between that sample and its' intended inference population could be attributed to an unknowable conflation of the recruitment method and non-response.
+In the absence of more concrete information about self selection, we believe that the model as proposed will serve as a reasonable representation of what drives schools to participate in effectiveness trials.
+While our results will not support inferences about these behaviors, they will nevertheless allow us to compare the performance of sampling methods and how they handle realistic challenges such as non-response.
 \todo[color=blue!20]{Discuss difficulty of estimating this model from extant data, due to non-representative samples. Also how will we develop assumptions about values of $\boldsymbol\beta$?}
 \todo[color=orange]{added}
 \todo[color=blue!20]{Hrmm, any way to improve the rhetoric here?}
+\todo[color=orange]{Added last two sentences}
 
 \hypertarget{sampling-methods}{%
 \subsection{Sampling Methods}\label{sampling-methods}}
@@ -321,7 +322,7 @@ where \(S^{max} = \max \{S_1 Z_1, S_2 Z_2, ..., S_N Z_N\}\).
 
 Stratified sampling gives researchers more control over the characteristics of their sample. Consider the case of random sampling, which only produces a representative sample on average. To reduce the likelihood of an ``unlucky'' sample, a population can be split into strata based on characteristics specified by the researcher. Random sampling from within each of the strata will then ensure that each of those characteristics are represented in the final sample. Stratification is routinely used with probability or non-probability sampling methods in survey research.
 
-To model stratified sampling methods, we will assume that the population is divided into a set of \(K\) strata. Proportional allocation will be used to ensure the relative size of the strata in the sample reflects that of the population (Tipton, 2013b).
+To model stratified sampling methods, we will assume that the population is divided into a set of \(K\) strata. Proportional allocation will be used to ensure the relative size of the strata in the sample reflects that of the population (Tipton, 2014b).
 Letting \(N_k\) denote the total number of schools in stratum \(k\), we set a target sample size of \(n_k = [n \times N_k / N]\) for stratum \(k = 1,...,K\), where \([x]\) is the integer nearest to \(x\).
 Let \(G_j \in \{1,...,K\}\) be the stratum assignment of unit \(j\), for \(j = 1,...,N\).
 For the stratified sampling methods, the process for determining participation is applied separately within each stratum, so that
@@ -369,15 +370,17 @@ SBS entails first stratifying the population, then selecting units so that the s
 \end{align}
 is small in absolute value for all \(k = 1,...,K\) and \(p = 1,...,P\).
 
-Following Tipton (2013b), we operationalize balanced sampling by prioritizing the recruitment of sites based on their similarity to the ``average'' site in each stratum.
+Following Tipton (2014b), we operationalize balanced sampling by prioritizing the recruitment of sites based on their similarity to the ``average'' site in each stratum.
 Specifically, we ranked each site within a stratum using a weighted Euclidean distance measure, with sites closer to the center of the strata ranked higher. The scores for SBS are thus:
 \begin{align} \label{eq:euclid}
 S_j = \sqrt{\sum^P_{p=1}w_p(X_{pj} - \mu_{p G_j})^2}
 \end{align}
-where \(w_p\) is a weight assigned to covariate \(X_p\). Different weights could be used such that distances depend more heavily on covariates thought to be more related to treatment effect heterogeneity. In the absence of information about predictors of treatment effect heterogeneity, we set the weight of each covariate equal to the inverse of its population variance as \(w_p = 1/\sigma^2_p\).\todo[color=blue!20]{Is this consistent with the Generalizer/Tipton 2013 approach?}
+where \(w_p\) is a weight assigned to covariate \(X_p\). Different weights could be used such that distances depend more heavily on covariates thought to be more related to treatment effect heterogeneity. In the absence of information about predictors of treatment effect heterogeneity, we set the weight of each covariate equal to the inverse of its population variance as \(w_p = 1/\sigma^2_p\).
+\todo[color=blue!20]{Is this consistent with the Generalizer/Tipton 2013 approach?}
+\todo[color=orange]{Tipton 2014b recommends this method if relationship between variables and participation is unknown or setting weights to 1 so that covariates with more variance drive stratification. Tipton + Olsen 2018 reccomend the latter strategy or using some proporotion of importance}
 
 SBS is unique in that rankings are directly related to school characteristics and are not stochastic (i.e., they do not change across replications of the process).
-Scores within strata are based on equation \eqref{eq:euclid}, where schools closer to the ``center'' of the stratum are more representative and are therefore a higher priority. Though extremely unlikely, it is possible that several schools could be equidistant from the center of the stratum; in such cases, schools are ordered randomly. Because Tipton (2013b) proposed balanced sampling in connection with stratification based on a cluster analysis, we only consider the stratified version, SBS.
+Scores within strata are based on equation \eqref{eq:euclid}, where schools closer to the ``center'' of the stratum are more representative and are therefore a higher priority. Though extremely unlikely, it is possible that several schools could be equidistant from the center of the stratum; in such cases, schools are ordered randomly. Because Tipton (2014b) proposed balanced sampling in connection with stratification based on a cluster analysis, we only consider the stratified version, SBS.
 
 \hypertarget{simulating-sample-recruitment}{%
 \section{Simulating sample recruitment}\label{simulating-sample-recruitment}}
@@ -391,7 +394,7 @@ The validity of simulation study findings rests on whether the models and assump
 \hypertarget{sampling-frame}{%
 \subsection{Sampling frame}\label{sampling-frame}}
 
-We study the performance of different recruitment methods for a study aimed at generalizing to the population of schools across a diverse set of six states: California, Oregon, Pennsylvania, South Carolina, Texas, and Wyoming. These six states were selected because they provided ready access to school- and district-level achievement data, which can be used to expand the current research.\todo[color=blue!20]{Weird justification}\todo[color=orange]{Leaving for now} For illustrative purposes, we selected as covariates school characteristics that previous research has found to be associated with participation in RCTs. The goal is for the sample to include schools not normally found in large-scale evaluations of interventions (Fellers, 2017; cf. Stuart et al., 2017; Tipton et al., 2016). These studies found that districts and schools with higher proportions of students who are English language learners (ELL), economically disadvantaged (ED), non-White, and living in urban settings are more likely to participate, as are larger districts and schools.\todo[color=blue!20]{Trim or condense this sentence?}
+We study the performance of different recruitment methods for a study aimed at generalizing to the population of schools across a diverse set of six states: California, Oregon, Pennsylvania, South Carolina, Texas, and Wyoming. These six states were selected because they provided ready access to school- and district-level achievement data, which can be used to expand the current research.\todo[color=blue!20]{Weird justification}\todo[color=orange]{Leaving for now} For illustrative purposes, we selected as covariates school characteristics that previous research has found to be associated with participation in RCTs. The goal is for the sample to include schools not normally found in large-scale evaluations of interventions (Fellers, 2017; cf. Stuart et al., 2017; Tipton et al., 2016). These studies found that districts and schools with higher proportions of students who are English language learners (ELL), economically disadvantaged (ED), non-White, and living in urban settings are more likely to participate.
 
 We developed a sampling frame for this population using data from the Common Core of Data (CCD; \url{https://nces.ed.gov/ccd/index.asp}). The CCD is a comprehensive database housing annually collected census data of all public schools and districts. Table \ref{tab:tab-RGM-Pars} displays population descriptives based on the selected covariates. Prior to stratification, we calculated log-transformations of school size (number of students), district size (number of schools) and the student-to-teacher ratio in order to allow proportional comparisons at the extremes of the distributions (Hennig \& Liao, 2013). Figure \ref{fig:fig-dist1} displays the distribution of the continuous variables used in the cluster analysis. In all, the population frame consisted of 6 states, 2,016 districts and 9,792 schools.
 
@@ -399,28 +402,34 @@ We developed a sampling frame for this population using data from the Common Cor
 
 \caption{\label{tab:tab-RGM-Pars}Descriptive statistics for population of 9,792 schools and log odds of participation associated with each covariate (Fellers, 2017)}
 \centering
-\begin{tabular}[t]{lrr>{\raggedleft\arraybackslash}p{1in}}
+\begin{tabular}[t]{lrr>{\raggedleft\arraybackslash}p{.75in}>{\raggedleft\arraybackslash}p{.75in}>{\raggedleft\arraybackslash}p{.75in}}
 \toprule
-Variables & M & N & Log-odds of participation\\
+\multicolumn{1}{c}{} & \multicolumn{1}{c}{} & \multicolumn{1}{c}{} & \multicolumn{3}{c}{Log-odds of participation} \\
+\cmidrule(l{3pt}r{3pt}){4-6}
+Variables & M & SD & SF = 1 & SF = .50 & SF = .25\\
 \midrule
 \addlinespace[0.3em]
-\multicolumn{4}{l}{\textbf{School Data}}\\
-\hspace{1em}District Size & 0.520 & 84.51 & 202.73\\
-\hspace{1em}School Size & 0.374 & 578.62 & 200.80\\
-\hspace{1em}Student/Teacher Ratio & -0.101 & 19.75 & 6.13\\
-\hspace{1em}Schoolwide Title I & 0.019 & 0.63 & 0.48\\
-\hspace{1em}Suburban & 0.007 & 0.41 & 0.49\\
-\hspace{1em}Town/Rural & -0.403 & 0.19 & 0.39\\
-\hspace{1em}Urban & 0.433 & 0.40 & 0.49\\
+\multicolumn{6}{l}{\textbf{School Data}}\\
+\hspace{1em}District Size & 84.51 & 202.73 & 0.520 & 0.260 & 0.130\\
+\hspace{1em}School Size & 578.62 & 200.80 & 0.374 & 0.187 & 0.094\\
+\hspace{1em}Student/Teacher Ratio & 19.75 & 6.13 & -0.101 & -0.051 & -0.025\\
+\hspace{1em}Schoolwide Title I & 0.63 & 0.48 & 0.019 & 0.010 & 0.005\\
+\hspace{1em}Suburban & 0.41 & 0.49 & 0.007 & 0.004 & 0.002\\
+\hspace{1em}Town/Rural & 0.19 & 0.39 & -0.403 & -0.202 & -0.101\\
+\hspace{1em}Urban & 0.40 & 0.49 & 0.433 & 0.216 & 0.108\\
 \addlinespace[0.3em]
-\multicolumn{4}{l}{\textbf{Student Data}}\\
-\hspace{1em}\% Black & 0.291 & 9.81 & 16.03\\
-\hspace{1em}\% Hispanic & 0.395 & 44.67 & 32.78\\
-\hspace{1em}\% White & -0.538 & 34.69 & 30.49\\
-\hspace{1em}\% Female & -0.019 & 48.56 & 2.35\\
-\hspace{1em}English Language Learners & 0.412 & 23.32 & 20.78\\
-\hspace{1em}Free/Reduced Lunch & 0.081 & 59.24 & 28.72\\
+\multicolumn{6}{l}{\textbf{Student Data}}\\
+\hspace{1em}\% Black & 9.81 & 16.03 & 0.291 & 0.146 & 0.073\\
+\hspace{1em}\% Hispanic & 44.67 & 32.78 & 0.395 & 0.198 & 0.099\\
+\hspace{1em}\% White & 34.69 & 30.49 & -0.538 & -0.269 & -0.134\\
+\hspace{1em}\% Female & 48.56 & 2.35 & -0.019 & -0.010 & -0.005\\
+\hspace{1em}English Language Learners & 23.32 & 20.78 & 0.412 & 0.206 & 0.103\\
+\hspace{1em}Free/Reduced Lunch & 59.24 & 28.72 & 0.081 & 0.040 & 0.020\\
 \bottomrule
+\multicolumn{6}{l}{\textsuperscript{} Note: SF is the scale factor used to manipulate the strength of the relationship between}\\
+\multicolumn{6}{l}{covariates and participation when multiplied by the originally reported log-odds. SF of}\\
+\multicolumn{6}{l}{1, .5, and .25 are displayed. SF = .01 was also used which resulted in values near zero}\\
+\multicolumn{6}{l}{(< .001) and are therefore not displayed.}\\
 \end{tabular}
 \end{table}
 
@@ -436,12 +445,12 @@ Variables & M & N & Log-odds of participation\\
 \subsection{Stratification}\label{stratification}}
 
 For recruitment methods involving stratification, we use strata generated through a cluster analysis of the school and student characteristics listed in Table \ref{tab:tab-RGM-Pars}.
-Our cluster analysis generally followed the approach and recommendations described by Tipton (2013b). Specifically, we implemented k-medoids clustering to divide the population into heterogeneous strata comprised of homogeneous sites. We used Gower's general similarity measure, which is appropriate for covariates that include both continuous and categorical variables (Gower, 1971; Tipton, 2013b).
+Our cluster analysis generally followed the approach and recommendations described by Tipton (2014b). Specifically, we implemented k-medoids clustering to divide the population into heterogeneous strata comprised of homogeneous sites. We used Gower's general similarity measure, which is appropriate for covariates that include both continuous and categorical variables (Gower, 1971; Tipton, 2014b).
 All analyses were performed in R (R Core Team, 2017) using the \emph{cluster} package (Mächler, Rousseeuw, Struyf, Hubert, \& Hornik, 2012).
 Section XX of the online appendix includes further details about the cluster analysis and stratification process.
 
 Based on empirical criteria as well as subjective appraisals of what is feasible to implement, we chose a cluster solution with five strata.
-The strata ranged in size from Inf to -Inf schools and explained 70.43\% of the variation across all covariates. The proportion of variance explained by the strata differed by covariate, with five covariates having between 0 and 11\% variance explained by the strata and eight covariates having from 45\% to 87\% variance explained. This discrepancy suggests that stratification will not be equally useful for balancing all covariates.\todo[color=blue!20]{Further take-aways? Foreshadow simulation findings?}
+The strata ranged in size from 1,222 to 2,863 schools and explained 70.43\% of the variation across all covariates. The proportion of variance explained by the strata differed by covariate, with five covariates having between 0 and 11\% variance explained by the strata and eight covariates having from 45\% to 87\% variance explained. This discrepancy suggests that stratification will not be equally useful for balancing all covariates.\todo[color=blue!20]{Further take-aways? Foreshadow simulation findings?}
 
 \hypertarget{participation-propensity-score}{%
 \subsection{Participation Propensity Score}\label{participation-propensity-score}}
@@ -453,10 +462,10 @@ In contrast, we are ideally interested in \(\Pr(E_j = 1 | \mathbf{x}_j)\), the \
 However, there is little data currently available to directly inform this participation model, and so we relied on the findings of Fellers (2017) to make tentative assumptions about the magnitude of the participation propensity model coefficients.
 
 Fellers (2017) reported absolute standardized mean differences between schools that participated in IES-funded randomized trials and the population. We standardized the covariates and used reported SMDs as coefficients in Equation \eqref{eq:RGM} to generated \(\pi_j\) values. The coefficients are reported in Table \ref{tab:tab-RGM-Pars}.
-These values lead to large variation in the response propensity scores. In order to examine the extent to which our results are driven by this assumption, we considered two further conditions, in which the propensity model coefficients were divided by a scaling factor of two or four.
-These conditions lead to successively weaker relationships between the covariates and the response propensity.
+These values lead to large variation in the response propensity scores. In order to examine the extent to which our results are driven by this assumption, we considered three further conditions, in which the propensity model coefficients were divided by a scaling factor of .5, .25, and .01.
+These conditions lead to successively weaker relationships between the covariates and the response propensity, with the smallest condition resulting in essentially no selection bias.
 
-The results of Fellers (2017) do not provide any information about the overall potential participation rate across the full population--that is, the fraction of the full population of schools that would agree to participate in a study, if the entire population were recruited. This is a key parameter of the simulation that has a strong influence on the performance of all recruitment methods. We therefore varied the overall participation propensity over a wide range, by manipulating the intercept term in Equation \eqref{eq:RGM}, given the other coefficients of the propensity score model and the scaling factor. We considered nine different levels for the average participation rate, ranging from 10\% to 90\%.
+The results of Fellers (2017) do not provide any information about the overall potential participation rate across the full population--that is, the fraction of the full population of schools that would agree to participate in a study, if the entire population were recruited. This is a key parameter of the simulation that has a strong influence on the performance of all recruitment methods. We therefore varied the overall participation propensity over a wide range, by manipulating the intercept term in Equation \eqref{eq:RGM}, given the other coefficients of the propensity score model and the scaling factor. We considered nine different levels for the average participation rate, ranging from 10\% to 90\%. We also included a participation rate of 99\% to compare sampling performance when there is near zero selection bias.
 
 \hypertarget{simulation-procedures}{%
 \subsection{Simulation procedures}\label{simulation-procedures}}
@@ -474,7 +483,7 @@ The order in which schools were approached varied by recruitment method and acro
 There are several methods to quantify how generalizable a sample is to a target population. One common method is to compare the sample to the population on a range of covariates by examining SMDs as shown in Equation \eqref{eq:SMD}. This method is limited as it only provides us with a measure of how close the sample means are to the population means.
 To have full generalizability, however, we should consider how the full distribution of the sample compares to that of the population.
 
-A more comprehensive measure of generalizability is the \(B\) index {[}\(B\);Tipton (2014){]}, which provides a single score summary of overlap between two groups. This index offers several advantages. First, it takes into account both the variance and distribution of the variables in each group by measuring the overlap of multiple density plots. Second, it quantifies what is typically a visual comparison and provides an intuitive interpretation. Third, it simultaneously compares two groups across a range of covariates and can easily be scaled to include various interactions and transformations.
+A more comprehensive measure of generalizability is the \(B\) index {[}\(B\);Tipton (2014a){]}, which provides a single score summary of overlap between two groups. This index offers several advantages. First, it takes into account both the variance and distribution of the variables in each group by measuring the overlap of multiple density plots. Second, it quantifies what is typically a visual comparison and provides an intuitive interpretation. Third, it simultaneously compares two groups across a range of covariates and can easily be scaled to include various interactions and transformations.
 
 The \(B\) index is defined in terms of a distribution of propensity scores, which are used to summarize into a single dimension the differences between an obtained sample and the population distribution of the covariates.
 For a given recruitment method, let \(\psi_j\) represent the sample selection propensity score, or the logistic transform of the probability that school \(j\) was included in an obtained sample:
@@ -523,7 +532,7 @@ In economic contexts, the Gini coefficient is used to describe the degree of inc
 \hypertarget{b-index}{%
 \subsubsection{B-Index}\label{b-index}}
 
-Figure \ref{fig:fig-avg-B} displays the average \(B\)-index for each method across participation rates. Acceptable values of \(B\) for generalizability vary depending on the size of the sample, the size of the population, and the number of covariates (Tipton, 2014). Given our design, a value of \(B = .95\) would indicate very good overlap with no need to adjust estimates. Generally \(B >= .80\) still supports generalizability with adjustment and likely no need to redefine the population. At population participation rates below 40\%, SBS consistently out-performed the other recruitment methods. Further, across population response rates, SBS never resulted in a \(B\) value below .85. This indicates that SBS is successful at sampling schools that are unlikely to participate and therefore tend to be underrepresented by the other sampling methods---particularly when overall participation propensities are low. Stratified random sampling consistently outperformed simple random sampling across all participation rates, though only slightly.
+Figure \ref{fig:fig-avg-B} displays the average \(B\)-index for each method across participation rates. Acceptable values of \(B\) for generalizability vary depending on the size of the sample, the size of the population, and the number of covariates (Tipton, 2014a). Given our design, a value of \(B = .95\) would indicate very good overlap with no need to adjust estimates. Generally \(B >= .80\) still supports generalizability with adjustment and likely no need to redefine the population. At population participation rates below 40\%, SBS consistently out-performed the other recruitment methods. Further, across population response rates, SBS never resulted in a \(B\) value below .85. This indicates that SBS is successful at sampling schools that are unlikely to participate and therefore tend to be underrepresented by the other sampling methods---particularly when overall participation propensities are low. Stratified random sampling consistently outperformed simple random sampling across all participation rates, though only slightly.
 
 
 
@@ -544,7 +553,11 @@ The first group of covariates included nine variables where stratified methods o
 
 
 
-\includegraphics{6---Paper_files/figure-latex/fig-SMD-groups-1.pdf} \includegraphics{6---Paper_files/figure-latex/fig-SMD-groups-2.pdf}
+\begin{figure}
+\centering
+\includegraphics{6---Paper_files/figure-latex/fig-SMD-groups-1.pdf}
+\caption{\label{fig:fig-SMD-groups}Patterns of relative performance based on standardized mean differences. The dotted horizontal line represents a threshold of 0.25 for acceptable balance. Results for the highest level of selection bias (SF = 1) is displayed to highlight differences in groups.}
+\end{figure}
 
 One potential explanation the patterns found in groups 2 and 3 is that the strata were poorly specified for these covariates. Figure \ref{fig:fig-Var-Coef} contains a plot of the proportion of variance explained by the strata for each covariate versus the log-odds coefficients associated with that covariate in the participation propensity model.
 It can be seen that Group 1 consisted of covariates where a substantial fraction of the variance was between clusters. Groups 2 and 3 both consisted of covariates that were poorly clustered, with no more than 15\% of variance between clusters. The major difference between groups 2 and 3 appears to be the relationship between the covariates and the likelihood of participation.\todo[color=blue!20]{Further explain each group. How does the plot explain the performance of stratified methods for each set of covariates?}
@@ -593,7 +606,7 @@ A further pattern in these simulation results relates the specification of the c
 
 The main goal of this study was to develop a framework for exploring the performance of different recruitment methods within the context of multi-site trials in education research. We have described several models for algorithmically representing how researchers might select samples of schools. Drawing on prior empirical work, we also attempted to model how schools may decide whether or not to participate in a study if approached by recruiters. The methods we proposed for modeling these behaviors can, in principle, be extended to more complex and realistic specifications and adapted to other population frames.
 
-A second goal was to use this framework to investigate the relative perfomance of different several sampling methods in terms of generalizability and feasibility. Based on these simulation, we draw several tentative conclusions. Stratified balanced sampling as proposed by Tipton (2013b) has the potential to greatly increase the generalizability of samples selected for MRTs. However, this method is not without limitations. Within our simulation, strict application of SBS came at a great cost in terms of the number of schools that needed to be contacted. Thus, implementing this method in practice may require allocating many more study resources to sample recruitment.
+A second goal was to use this framework to investigate the relative perfomance of different several sampling methods in terms of generalizability and feasibility. Based on these simulation, we draw several tentative conclusions. Stratified balanced sampling as proposed by Tipton (2014b) has the potential to greatly increase the generalizability of samples selected for MRTs. However, this method is not without limitations. Within our simulation, strict application of SBS came at a great cost in terms of the number of schools that needed to be contacted. Thus, implementing this method in practice may require allocating many more study resources to sample recruitment.
 
 We also found that the properties of the strata generated by cluster analysis have implications for the generalizability of samples recruited through stratified methods. If a covariate was predictive of participation propensity, then it was important for the stratification to explain a substantial fraction of its total variation. If a covariate was predictive of participation, but not prioritized when generating the strata, it had poor representation in samples collected through stratified methods. Ignoring the the quality of the cluster analysis solution has the potential to undermine the performance of SBS. Finally, while the balanced sampling approach does result in strong generalizability, it might also limit the pool of potential participants. Particularly for larger population response rates, the same subset of schools were likely to be recruited across replications of the simulation.
 
@@ -700,13 +713,13 @@ Stuart, E. A., Bell, S. H., Ebnesajjad, C., Olsen, R. B., \& Orr, L. L. (2017). 
 Stuart, E. A., Cole, S. R., Bradshaw, C. P., \& Leaf, P. J. (2011). The use of propensity scores to assess the generalizability of results from randomized trials: {Use} of {Propensity Scores} to {Assess Generalizability}. \emph{Journal of the Royal Statistical Society: Series A (Statistics in Society)}, \emph{174}(2), 369--386. \url{https://doi.org/10.1111/j.1467-985X.2010.00673.x}
 
 \leavevmode\vadjust pre{\hypertarget{ref-tiptonImprovingGeneralizationsExperiments2013}{}}%
-Tipton, E. (2013a). Improving {Generalizations From Experiments Using Propensity Score Subclassification}: {Assumptions}, {Properties}, and {Contexts}. \emph{Journal of Educational and Behavioral Statistics}, \emph{38}(3), 239--266. Retrieved from \url{https://www.jstor.org/stable/41999424}
-
-\leavevmode\vadjust pre{\hypertarget{ref-tiptonStratifiedSamplingUsing2013}{}}%
-Tipton, E. (2013b). Stratified {Sampling Using Cluster Analysis}: {A Sample Selection Strategy} for {Improved Generalizations From Experiments}. \emph{Evaluation Review}, \emph{37}(2), 109--139. \url{https://doi.org/10.1177/0193841X13516324}
+Tipton, E. (2013). Improving {Generalizations From Experiments Using Propensity Score Subclassification}: {Assumptions}, {Properties}, and {Contexts}. \emph{Journal of Educational and Behavioral Statistics}, \emph{38}(3), 239--266. Retrieved from \url{https://www.jstor.org/stable/41999424}
 
 \leavevmode\vadjust pre{\hypertarget{ref-tiptonHowGeneralizableYour2014}{}}%
-Tipton, E. (2014). How {Generalizable Is Your Experiment}? {An Index} for {Comparing Experimental Samples} and {Populations}. \emph{Journal of Educational and Behavioral Statistics}, \emph{39}(6), 478--501.
+Tipton, E. (2014a). How {Generalizable Is Your Experiment}? {An Index} for {Comparing Experimental Samples} and {Populations}. \emph{Journal of Educational and Behavioral Statistics}, \emph{39}(6), 478--501.
+
+\leavevmode\vadjust pre{\hypertarget{ref-tiptonStratifiedSamplingUsing2014}{}}%
+Tipton, E. (2014b). Stratified {Sampling Using Cluster Analysis}: {A Sample Selection Strategy} for {Improved Generalizations From Experiments}. \emph{Evaluation Review}, \emph{37}(2), 109--139. \url{https://doi.org/10.1177/0193841X13516324}
 
 \leavevmode\vadjust pre{\hypertarget{ref-tiptonSiteSelectionExperiments2016}{}}%
 Tipton, E., Fellers, L., Caverly, S., Vaden-Kiernan, M., Borman, G., Sullivan, K., \& de Castilla, V. R. (2016). Site {Selection} in {Experiments}: {An Assessment} of {Site Recruitment} and {Generalizability} in {Two Scale}-up {Studies}. \emph{Journal of Research on Educational Effectiveness}, \emph{9}, 209--228. \url{https://doi.org/10.1080/19345747.2015.1105895}
@@ -742,7 +755,7 @@ Cluster analysis serves as a dimension reduction tool to condense a high-dimensi
 \subsubsection{Distance metric}\label{distance-metric}}
 
 In a cluster analysis, the distance metric is how dis-similarity between pairs of units on a set of covariates is quantified. As such, the appropriate metric varies depending on the type of data in the matrix.
-In educational research contexts, data are likely to contain both continuous and categorical variables, and such was the case here. For mixed data such as this, it is appropriate to use Gower's general similarity measure (Gower, 1971; Tipton, 2013b). This measure relies on different calculations of distance depending on the type of covariates. Let \(x_{pi}\) and \(x_{pj}\) be the observed value of covariate \(p \in \{1, ..., P\}\) for units \(i\) and \(j\) respectively, where \(i \ne j\). Let \(d_{pij}\) be the distance between observed values of covariate \(p\) for sites \(i,j\). For categorical or dummy coded variables, \(d_{pij} = 1\) if \(x_{pi} = x_{pj}\) and \(d_{pij} = 0\) otherwise. For continuous covariates, we use the following formula:
+In educational research contexts, data are likely to contain both continuous and categorical variables, and such was the case here. For mixed data such as this, it is appropriate to use Gower's general similarity measure (Gower, 1971; Tipton, 2014b). This measure relies on different calculations of distance depending on the type of covariates. Let \(x_{pi}\) and \(x_{pj}\) be the observed value of covariate \(p \in \{1, ..., P\}\) for units \(i\) and \(j\) respectively, where \(i \ne j\). Let \(d_{pij}\) be the distance between observed values of covariate \(p\) for sites \(i,j\). For categorical or dummy coded variables, \(d_{pij} = 1\) if \(x_{pi} = x_{pj}\) and \(d_{pij} = 0\) otherwise. For continuous covariates, we use the following formula:
 \begin{align}
 \label{eq:gowerdist-p}
 d_{pij} = 1 - \frac{|X_{pi} - X_{pj}|}{R_p}
@@ -758,11 +771,11 @@ We computed a dissimilarity matrix for all \(N \times N\) pairs of units based o
 \hypertarget{number-of-strata}{%
 \subsubsection{Number of Strata}\label{number-of-strata}}
 
-Selecting an appropriate number of clusters is one of the most difficult problems in cluster analysis (Steinley, 2006). Tipton (2013b) argued that both empirical and practical criteria should be used in selecting \(K\). Hennig and Liao (2013) also argued that the method of selecting \(K\) should depend on the context of the clustering, framing the issue as one of obtaining an appropriate subject-matter-dependent definition rather than a purely statistical question.
+Selecting an appropriate number of clusters is one of the most difficult problems in cluster analysis (Steinley, 2006). Tipton (2014b) argued that both empirical and practical criteria should be used in selecting \(K\). Hennig and Liao (2013) also argued that the method of selecting \(K\) should depend on the context of the clustering, framing the issue as one of obtaining an appropriate subject-matter-dependent definition rather than a purely statistical question.
 
 Proportional allocation dictates that each stratum should contribute a number of units to the full sample that is proportional to the size of the strata. Having unequally sized strata means that recruiters will need to focus more on larger strata. Generating a larger set of strata would result in greater homogeneity within each stratum, but it may also be more difficult to manage for recruiters. For instance, if refusal and non-response rates are fairly high, having fewer sites spread across more strata may make it difficult to adequately recruit from all strata. Resource constraints (e.g.~time, funding, recruiters) may also be a factor in the number of strata selected.
 
-With these considerations in mind, we examined three criteria for choosing the number of strata: (1) a generalized form of the Calinski-Harabasz index (Cali'nski \& Harabasz, 1974) proposed by Hennig and Liao (2013), (2) the proportion of between-cluster variance as recommended by Tipton (2013b), and (3) the practicality of sampling from fewer clusters. Our strategy was to perform the cluster analysis several times for a specified number of clusters, then compare all performance criteria for each set of strata generated (Figure \ref{fig:fig-k-plots}).
+With these considerations in mind, we examined three criteria for choosing the number of strata: (1) a generalized form of the Calinski-Harabasz index (Cali'nski \& Harabasz, 1974) proposed by Hennig and Liao (2013), (2) the proportion of between-cluster variance as recommended by Tipton (2014b), and (3) the practicality of sampling from fewer clusters. Our strategy was to perform the cluster analysis several times for a specified number of clusters, then compare all performance criteria for each set of strata generated (Figure \ref{fig:fig-k-plots}).
 
 We first calculated the Calinski-Harabasz (CH) index using the \emph{cluster.stats} function from the \emph{fpc} (Hennig, 2019) package. Figure \ref{fig:fig-k-plots}a displays the CH index for each \(k\) clusters generated. In this case, generating 2 clusters maximizes the CH-index. Another potential solution is at 4 clusters where there is also a local maxima.
 
@@ -774,14 +787,14 @@ We first calculated the Calinski-Harabasz (CH) index using the \emph{cluster.sta
 
 We also considered the proportion of variance that lay between clusters. For each set of \(K = 1,..,10\) total strata, we computed the between and within cluster variability for each covariate. We then calculated the proportion of variability that is between strata by taking the sum of the between-cluster variance across all covariates, divided by the sum of the between-cluster and within-cluster variance across all covariates.
 
-Figure \ref{fig:fig-k-plots}b plots \(p_k\) against \(K\). The \(K\) for which the rate of change \(p_k\) slows is considered favorable. Tipton (2013b) also recommended selecting the number of clusters such that at least 80\% of the variability is between clusters; this threshold is indicated in the figure by a dashed line. In light of this criterion, it seems that at least 9 clusters should be generated. However, we also see that after a sharp initial increase, the slope of the graph begins to level out. This indicates that each additional cluster increases the sampling complexity while explaining less variability in covariates. In practice, the difficulty of sampling may not be worth the small increases in homogeneity within clusters obtained when using more than 4 or 5 clusters.
+Figure \ref{fig:fig-k-plots}b plots \(p_k\) against \(K\). The \(K\) for which the rate of change \(p_k\) slows is considered favorable. Tipton (2014b) also recommended selecting the number of clusters such that at least 80\% of the variability is between clusters; this threshold is indicated in the figure by a dashed line. In light of this criterion, it seems that at least 9 clusters should be generated. However, we also see that after a sharp initial increase, the slope of the graph begins to level out. This indicates that each additional cluster increases the sampling complexity while explaining less variability in covariates. In practice, the difficulty of sampling may not be worth the small increases in homogeneity within clusters obtained when using more than 4 or 5 clusters.
 
 Figure \ref{fig:fig-k-plots}c plots the required sample size from each cluster to fulfill the proportional allocation requirement. The dashed line indicates the ideal allocation if all clusters were of equal size. We see that the variability in cluster sizes decreases as more clusters are generated. A sensible cutoff may be determined by looking at the size of the smallest cluster. When \(K > 5\), the smallest clusters would require less than 5 sites being sampled, which may be very difficult in practice. Considering both the statistical criteria and the pragmatic constraints, we generated 5 clusters for purposes of stratification.
 
 \hypertarget{variation-explained-by-the-strata}{%
 \subsection{Variation explained by the strata}\label{variation-explained-by-the-strata}}
 
-The strata resulting from the cluster analysis range in size from Inf to -Inf schools. The strata explain 70.43\% of the variation across all covariates (Figure \ref{fig:fig-k-plots}b), with a CH-index of 5,827.31 (Figure \ref{fig:fig-k-plots}a). We also computed variance explained for individual covariates. The proportion of variance explained by the strata differed greatly by covariate, with 5 covariates having between 0 and 11\% variance explained by the strata and 8 variables having from 45\% to 87\% variance explained.
+The strata resulting from the cluster analysis range in size from 1,222 to 2,863 schools. The strata explain 70.43\% of the variation across all covariates (Figure \ref{fig:fig-k-plots}b), with a CH-index of 5,827.31 (Figure \ref{fig:fig-k-plots}a). We also computed variance explained for individual covariates. The proportion of variance explained by the strata differed greatly by covariate, with 5 covariates having between 0 and 11\% variance explained by the strata and 8 variables having from 45\% to 87\% variance explained.
 
 \hypertarget{standardized-mean-differences-1}{%
 \subsection{Standardized Mean Differences}\label{standardized-mean-differences-1}}
@@ -806,7 +819,7 @@ Figure \ref{fig:fig-rel-per} compares each sampling method to a reference method
 \begin{figure}
 \centering
 \includegraphics{6---Paper_files/figure-latex/fig-rel-per-1.pdf}
-\caption{\label{fig:fig-rel-per}Relative sampling difficulty of each method compared to other methods. The straight horizontal line indicates the reference method being compared to.}
+\caption{\label{fig:fig-rel-per}Relative sampling difficulty of each method compared to URS. The the dashed horizontal line indicates equal difficulty (factor of 1).}
 \end{figure}
 
 \newpage

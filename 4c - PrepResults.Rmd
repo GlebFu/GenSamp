@@ -128,8 +128,8 @@ df.list$pop.stats <- df.list$pop.data %>%
 df.list$k.stats <- cluster.stats
 
 df.list$cluster.pa <- df.clusters %>%
-  select(K, strata, pa) %>%
-  unique()
+  group_by(K, strata, pa) %>%
+  count()
 
 ```
 
