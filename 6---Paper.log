@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.19 (MiKTeX 2.9.6840 64-bit) (preloaded format=pdflatex 2019.2.13)  29 MAR 2022 12:52
+This is pdfTeX, Version 3.14159265-2.6-1.40.19 (MiKTeX 2.9.6840 64-bit) (preloaded format=pdflatex 2019.2.13)  29 MAR 2022 21:01
 entering extended mode
 **./6---Paper.tex
 (6---Paper.tex
@@ -1199,7 +1199,7 @@ LaTeX Warning: Marginpar on page 16 moved.
 LaTeX Warning: Marginpar on page 17 moved.
 
 [17]
-Overfull \hbox (10.68419pt too wide) in paragraph at lines 405--434
+Overfull \hbox (13.75125pt too wide) in paragraph at lines 405--434
  [][] 
  []
 
@@ -1221,19 +1221,23 @@ LaTeX Warning: Text page 19 contains only floats.
 File: 6---Paper_files/figure-latex/fig-avg-B-1.pdf Graphic file (type pdf)
 <use 6---Paper_files/figure-latex/fig-avg-B-1.pdf>
 Package pdftex.def Info: 6---Paper_files/figure-latex/fig-avg-B-1.pdf  used on 
-input line 541.
+input line 543.
 (pdftex.def)             Requested size: 458.92482pt x 327.80345pt.
 
 LaTeX Warning: Reference `fig:fig-smd-group1' on page 25 undefined on input lin
-e 550.
+e 554.
 
 
 LaTeX Warning: Reference `fig:fig-smd-group2' on page 25 undefined on input lin
-e 550.
+e 554.
 
 
 LaTeX Warning: Reference `fig:fig-smd-group3' on page 25 undefined on input lin
-e 550.
+e 554.
+
+
+LaTeX Warning: Reference `fig:fig-smd-group4' on page 25 undefined on input lin
+e 554.
 
 [25]
 <6---Paper_files/figure-latex/fig-SMD-groups-1.pdf, id=235, 505.89pt x 361.35pt
@@ -1242,91 +1246,95 @@ File: 6---Paper_files/figure-latex/fig-SMD-groups-1.pdf Graphic file (type pdf)
 
 <use 6---Paper_files/figure-latex/fig-SMD-groups-1.pdf>
 Package pdftex.def Info: 6---Paper_files/figure-latex/fig-SMD-groups-1.pdf  use
-d on input line 558.
+d on input line 566.
 (pdftex.def)             Requested size: 458.92482pt x 327.80345pt.
+[26 <./6---Paper_files/figure-latex/fig-avg-B-1.pdf>] [27 <./6---Paper_files/fi
+gure-latex/fig-SMD-groups-1.pdf>]
+<6---Paper_files/figure-latex/fig-Var-Coef-1.pdf, id=264, 650.43pt x 361.35pt>
+File: 6---Paper_files/figure-latex/fig-Var-Coef-1.pdf Graphic file (type pdf)
+<use 6---Paper_files/figure-latex/fig-Var-Coef-1.pdf>
+Package pdftex.def Info: 6---Paper_files/figure-latex/fig-Var-Coef-1.pdf  used 
+on input line 581.
+(pdftex.def)             Requested size: 458.93034pt x 254.9613pt.
+[28 <./6---Paper_files/figure-latex/fig-Var-Coef-1.pdf>]
+<6---Paper_files/figure-latex/fig-responses-1.pdf, id=287, 578.16pt x 433.62pt>
 
-LaTeX Warning: Reference `fig:fig-Var-Coef' on page 26 undefined on input line 
-562.
+File: 6---Paper_files/figure-latex/fig-responses-1.pdf Graphic file (type pdf)
+<use 6---Paper_files/figure-latex/fig-responses-1.pdf>
+Package pdftex.def Info: 6---Paper_files/figure-latex/fig-responses-1.pdf  used
+ on input line 599.
+(pdftex.def)             Requested size: 458.9116pt x 344.1837pt.
 
-[26 <./6---Paper_files/figure-latex/fig-avg-B-1.pdf>]
-
-LaTeX Warning: Reference `fig:fig-responses' on page 27 undefined on input line
- 573.
-
-
-LaTeX Warning: Reference `fig:fig-responses' on page 27 undefined on input line
- 573.
-
-[27 <./6---Paper_files/figure-latex/fig-SMD-groups-1.pdf>]
-
-LaTeX Warning: Reference `fig:fig-gini-curve' on page 28 undefined on input lin
-e 583.
-
-
-LaTeX Warning: Marginpar on page 28 moved.
+LaTeX Warning: Marginpar on page 29 moved.
 
 
-LaTeX Warning: Marginpar on page 28 moved.
+LaTeX Warning: Marginpar on page 29 moved.
 
-[28]
-<6---Paper_files/figure-latex/fig-gini-1.pdf, id=281, 650.43pt x 361.35pt>
+[29]
+<6---Paper_files/figure-latex/fig-gini-1.pdf, id=303, 650.43pt x 361.35pt>
 File: 6---Paper_files/figure-latex/fig-gini-1.pdf Graphic file (type pdf)
 <use 6---Paper_files/figure-latex/fig-gini-1.pdf>
 Package pdftex.def Info: 6---Paper_files/figure-latex/fig-gini-1.pdf  used on i
-nput line 593.
+nput line 617.
 (pdftex.def)             Requested size: 458.93034pt x 254.9613pt.
-[29 <./6---Paper_files/figure-latex/fig-gini-1.pdf>] [30] [31] [32] [33] [34]
+[30 <./6---Paper_files/figure-latex/fig-responses-1.pdf>] [31 <./6---Paper_file
+s/figure-latex/fig-gini-1.pdf>] [32] [33] [34] [35]
 
-LaTeX Warning: Marginpar on page 35 moved.
+LaTeX Warning: Marginpar on page 36 moved.
 
-[35] [36] [37] [38] [39] [40] [41]
-<6---Paper_files/figure-latex/fig-k-plots-1.pdf, id=419, 578.16pt x 505.89pt>
+[36] [37] [38] [39] [40] [41] [42]
+<6---Paper_files/figure-latex/fig-k-plots-1.pdf, id=446, 578.16pt x 505.89pt>
 File: 6---Paper_files/figure-latex/fig-k-plots-1.pdf Graphic file (type pdf)
 <use 6---Paper_files/figure-latex/fig-k-plots-1.pdf>
 Package pdftex.def Info: 6---Paper_files/figure-latex/fig-k-plots-1.pdf  used o
-n input line 785.
+n input line 809.
 (pdftex.def)             Requested size: 458.9116pt x 401.54764pt.
-[42] [43 <./6---Paper_files/figure-latex/fig-k-plots-1.pdf>]
+[43] [44 <./6---Paper_files/figure-latex/fig-k-plots-1.pdf>]
 
-LaTeX Warning: Reference `fig:fig-smd-group1' on page 44 undefined on input lin
-e 802.
-
-
-LaTeX Warning: Reference `fig:fig-smd-group2' on page 44 undefined on input lin
-e 802.
+LaTeX Warning: Reference `fig:fig-smd-group1' on page 45 undefined on input lin
+e 826.
 
 
-LaTeX Warning: Reference `fig:fig-smd-group3' on page 44 undefined on input lin
-e 802.
+LaTeX Warning: Reference `fig:fig-smd-group2' on page 45 undefined on input lin
+e 826.
 
-[44]
-<6---Paper_files/figure-latex/fig-rel-per-1.pdf, id=451, 650.43pt x 361.35pt>
+
+LaTeX Warning: Reference `fig:fig-smd-group3' on page 45 undefined on input lin
+e 826.
+
+[45]
+<6---Paper_files/figure-latex/fig-rel-per-1.pdf, id=478, 650.43pt x 361.35pt>
 File: 6---Paper_files/figure-latex/fig-rel-per-1.pdf Graphic file (type pdf)
 <use 6---Paper_files/figure-latex/fig-rel-per-1.pdf>
 Package pdftex.def Info: 6---Paper_files/figure-latex/fig-rel-per-1.pdf  used o
-n input line 821.
+n input line 845.
 (pdftex.def)             Requested size: 458.93034pt x 254.9613pt.
-[45 <./6---Paper_files/figure-latex/fig-rel-per-1.pdf>]
+[46 <./6---Paper_files/figure-latex/fig-rel-per-1.pdf>]
+<6---Paper_files/figure-latex/fig-gini-curve-1.pdf, id=491, 722.7pt x 433.62pt>
 
-LaTeX Warning: Reference `fig:fig-gini-curve' on page 46 undefined on input lin
-e 830.
+File: 6---Paper_files/figure-latex/fig-gini-curve-1.pdf Graphic file (type pdf)
 
-AED endfloat: Processing end Figures and Tables [46]
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 835.
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 835.
+<use 6---Paper_files/figure-latex/fig-gini-curve-1.pdf>
+Package pdftex.def Info: 6---Paper_files/figure-latex/fig-gini-curve-1.pdf  use
+d on input line 859.
+(pdftex.def)             Requested size: 650.43501pt x 390.26102pt.
+AED endfloat: Processing end Figures and Tables [47] [48 <./6---Paper_files/fig
+ure-latex/fig-gini-curve-1.pdf>]
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 863.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 863.
 (6---Paper.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 835.
-Package atveryend Info: Empty hook `AtEndAfterFileList' on input line 835.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 863.
+Package atveryend Info: Empty hook `AtEndAfterFileList' on input line 863.
 
 LaTeX Warning: There were undefined references.
 
  ) 
 Here is how much of TeX's memory you used:
- 27000 strings out of 492966
- 468843 string characters out of 3135727
- 603897 words of memory out of 3000000
- 30040 multiletter control sequences out of 15000+200000
- 79936 words of font info for 125 fonts, out of 3000000 for 9000
+ 27021 strings out of 492966
+ 469579 string characters out of 3135727
+ 601549 words of memory out of 3000000
+ 30046 multiletter control sequences out of 15000+200000
+ 80330 words of font info for 129 fonts, out of 3000000 for 9000
  1141 hyphenation exceptions out of 8191
  62i,13n,76p,2250b,743s stack positions out of 5000i,500n,10000p,200000b,50000s
 {C:/Program Files/MiKTeX 2.9/fonts/enc/dvips/lm/lm-mathsy.enc}{C:/Program Fil
@@ -1345,9 +1353,9 @@ fonts/type1/public/lm/lmr7.pfb><C:/Program Files/MiKTeX 2.9/fonts/type1/public/
 lm/lmr8.pfb><C:/Program Files/MiKTeX 2.9/fonts/type1/public/lm/lmri12.pfb><C:/P
 rogram Files/MiKTeX 2.9/fonts/type1/public/lm/lmsy10.pfb><C:/Program Files/MiKT
 eX 2.9/fonts/type1/public/lm/lmsy8.pfb>
-Output written on 6---Paper.pdf (46 pages, 472049 bytes).
+Output written on 6---Paper.pdf (48 pages, 22696084 bytes).
 PDF statistics:
- 686 PDF objects out of 1000 (max. 8388607)
- 203 named destinations out of 1000 (max. 500000)
- 10595 words of extra memory for PDF output out of 12000 (max. 10000000)
+ 725 PDF objects out of 1000 (max. 8388607)
+ 207 named destinations out of 1000 (max. 500000)
+ 10610 words of extra memory for PDF output out of 12000 (max. 10000000)
 
