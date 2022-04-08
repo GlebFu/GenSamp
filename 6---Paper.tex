@@ -127,6 +127,20 @@
 % \setlength{\parindent}{0.5in}
 % \setlength{\parskip}{0pt plus 0pt minus 0pt}
 
+% Overwrite redefinition of paragraph and subparagraph by the default LaTeX template
+% See https://github.com/crsh/papaja/issues/292
+\makeatletter
+\renewcommand{\paragraph}{\@startsection{paragraph}{4}{\parindent}%
+  {0\baselineskip \@plus 0.2ex \@minus 0.2ex}%
+  {-1em}%
+  {\normalfont\normalsize\bfseries\itshape\typesectitle}}
+
+\renewcommand{\subparagraph}[1]{\@startsection{subparagraph}{5}{1em}%
+  {0\baselineskip \@plus 0.2ex \@minus 0.2ex}%
+  {-\z@\relax}%
+  {\normalfont\normalsize\itshape\hspace{\parindent}{#1}\textit{\addperi}}{\relax}}
+\makeatother
+
 % \usepackage{etoolbox}
 \makeatletter
 \patchcmd{\HyOrg@maketitle}
@@ -138,7 +152,15 @@
   {\section*{\protect\normalfont{\@title}}}
   {}{\typeout{Failed to patch title.}}
 \makeatother
-\shorttitle{Assessing sampling methods for generalization from RCTs}
+
+\usepackage{xpatch}
+\makeatletter
+\xapptocmd\appendix
+  {\xapptocmd\section
+    {\addcontentsline{toc}{section}{\appendixname\ifoneappendix\else~\theappendix\fi\\: #1}}
+    {}{\InnerPatchFailed}%
+  }
+{}{\PatchFailed}
 \keywords{generalizability, sampling, MRT}
 \usepackage{csquotes}
 \usepackage{rotating}
@@ -163,9 +185,17 @@
 \fi
 
 
+\shorttitle{Assessing sampling methods for generalization from RCTs}
+
+\authornote{
+
+Correspondence concerning this article should be addressed to Gleb Furman, University of Texas at Austin, SZB 504, 1912 Speedway, Austin, Texas 78712. E-mail: \href{mailto:gleb.furman@utexas.edu}{\nolinkurl{gleb.furman@utexas.edu}}
+
+}
+
 \affiliation{\vspace{0.5cm}\textsuperscript{1} University of Texas at Austin\\\textsuperscript{2} University of Wisconsin-Madison\\\textsuperscript{3} Northwestern University}
 
-\abstract{
+\abstract{%
 Educational research aimed at informing policy decisions should ideally be designed to support causal inferences at the population level. Large scale, multi-site randomized trials often rely on vague convenience sampling methodology when recruiting districts and schools, resulting in relatively homogeneous samples that may differ systematically from the intended population of interest. Retrospective methods that quantify and statistically adjust for those differences are promising but may have difficulty overcoming substantial selection bias. Designing sampling methods that focus on generalizability may be a more effective approach. However, there is a lack of methodological research examining the effectiveness of such strategies in education research contexts. We propose a framework for conducting such research based on formal models for study recruitment and participation. Using this framework, we examine one promising method, stratified balanced sampling (SBS), in the context of recruiting a representative sample of schools for a large trial. Using simulations based on real sampling frames, we compare SBS to stratified and unstratified versions of convenience sampling and probability sampling. Under our modeling assumptions, we find that SBS and stratified random sampling result in highly generalizable samples. However, implementing these methods requires extensive recruitment efforts, especially when the population average willingness to participate is low. Stratified convenience sampling represents a potential compromise. Further research into recruitment and participation behavior is needed to design and test sampling methods under realistic conditions.
 }
 
@@ -680,7 +710,7 @@ Large scale MRTs are expensive to implement, and resource allocation for such st
 Cali'nski, T., \& Harabasz, J. (1974). A dendrite method for cluster analysis. \emph{Communications in Statistics}, \emph{3}(1), 1--27. \url{https://doi.org/10.1080/03610927408827101}
 
 \leavevmode\vadjust pre{\hypertarget{ref-fellersDevelopingApproachDetermine2017}{}}%
-Fellers, L. (2017). \emph{Developing an approach to determine generalizability: {A} review of efficacy and effectiveness trials funded by the {Institute} of {Education Sciences}} (Ph.D.). {Columbia University}, {United States -- New York}. Retrieved from \url{https://search.proquest.com/docview/1865595768/abstract/40FD82F4A0C24535PQ/1}
+Fellers, L. (2017). \emph{Developing an approach to determine generalizability: {A} review of efficacy and effectiveness trials funded by the {Institute} of {Education Sciences}} (Ph.D., {Columbia University}). {Columbia University}, {United States -- New York}. Retrieved from \url{https://search.proquest.com/docview/1865595768/abstract/40FD82F4A0C24535PQ/1}
 
 \leavevmode\vadjust pre{\hypertarget{ref-gerberFieldExperimentsDesign2012}{}}%
 Gerber, A. S., \& Green, D. P. (2012). \emph{Field experiments: Design, analysis, and interpretation} (1st ed). New York: {W. W. Norton}.
