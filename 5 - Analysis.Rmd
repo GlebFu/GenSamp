@@ -75,6 +75,9 @@ library(cowplot)
 
 rm(list = ls())
 
+```
+
+```{r}
 load(file = "Data/Paper/Summarised Sim Results.RData")
 
 source("0 - Functions - Analysis and Paper.R")
@@ -118,7 +121,11 @@ tabs$pop.desc <-
   select(Category, Variables, pop.mean, pop.sd, log_odds) %>%
   mutate(M = round(pop.mean, 2),
          SD = round(pop.sd, 2),
-         .keep = "unused")
+         .keep = "unused",
+         SF100 = (log_odds * 1) %>% round(3),
+         SF050 = (log_odds * .5) %>% round(3),
+         SF025 = (log_odds * .25) %>% round(3),
+         SF001 = (log_odds * .001) %>% round(3))
 
 ```
 
@@ -397,7 +404,8 @@ tabs$B <-
          Quantile = map(Bs, get_quant)) %>%
   select(-Bs) %>%
   unpack(Sample_Catagories) %>%
-  unnest(Quantile) 
+  unnest(Quantile) %>%
+  mutate(SB.factor = paste("SF = ", SB, sep = ""))
 
 
   
@@ -409,11 +417,28 @@ figs$B <- tabs$B %>%
   ggplot(aes(x = RR, y = M)) %>%
   common_line() %>%
   common_point() +
-  geom_hline(yintercept = c(.8, .95), linetype = "dotted", alpha = .5) +
   theme_minimal() +
-  facet_wrap(~SB) +
   labs(y = lab.vars$B,
-       x = lab.vars$rr)
+       x = lab.vars$rr) +
+  scale_x_continuous(breaks = seq(10, 100, 10)) +
+  scale_y_continuous(breaks = seq(.6, 1, .1), limits = c(.6, 1)) + 
+  annotate(geom = "rect",
+           ymax = .95,
+           ymin = -Inf,
+           xmax = -Inf,
+           xmin = Inf,
+           fill = "white",
+           alpha = .4) + 
+  annotate(geom = "rect",
+           ymax = .8,
+           ymin = -Inf,
+           xmax = -Inf,
+           xmin = Inf,
+           fill = "white",
+           alpha = .4) +
+  geom_hline(yintercept = c(.8, .95), linetype = "dotted", alpha = .5) +
+  facet_wrap(~SB.factor)
+
 
 figs$B
 ```
@@ -443,7 +468,7 @@ tabs$B %>%
 
 
 
-### Standardized mean differences
+### SMD
 
 ```{r, fig.cap = "Average SMDs", fig.height = 7}
 
@@ -458,12 +483,18 @@ tabs$smd.results <-
   mutate(Value = abs.mSMD,
          alpha.group = as.numeric(Value > .25))
 
-tabs$smd.by.scale <- tabs$smd.results %>%
+tabs$smd.by.scale <- 
+  tabs$smd.results %>%
   nest(smd.plot.data = -c(Variables, vnames)) %>%
-  mutate(plots = pmap(.l = list(data = smd.plot.data, g.title = Variables), .f = plot_smd, l.pos = "bottom"),
+  mutate(plots = pmap(.l = list(data = smd.plot.data, 
+                                g.title = Variables), 
+                      .f = plot_smd, 
+                      l.pos = "bottom"),
          plots = setNames(plots, vnames))
 
-figs$smd.by.scale <- tabs$smd.by.scale$plots %>% as.list
+figs$smd.by.scale <-
+  tabs$smd.by.scale$plots %>% 
+  as.list
 
 
 
@@ -471,284 +502,628 @@ figs$smd.by.scale <- tabs$smd.by.scale$plots %>% as.list
 ```
 
 
-#### Group 1
-```{r}
 
+```{r}
+# Group 1
+figs$smd.by.scale$pFem
+figs$smd.by.scale$ST.ratio
+
+```
+
+```{r}
+# Group 2
 figs$smd.by.scale$Suburban
 figs$smd.by.scale$T1
 figs$smd.by.scale$Urban
 
 
 ```
-#### Group 2
+
 ```{r}
-
-
+# Group 3
 figs$smd.by.scale$pTotfrl
 figs$smd.by.scale$ethHisp
 figs$smd.by.scale$ethWhite
 figs$smd.by.scale$pELL
 figs$smd.by.scale$dSCH
+figs$smd.by.scale$ToRu
 ```
+
+
+```{r}
+# Group 4
+figs$smd.by.scale$n
+figs$smd.by.scale$ethBlack
+
+```
+
+
+
+### SMD Groups
+
+
+```{r}
+vars$smd.groups <- 
+  tibble(`Group 1` = list(c("pFem", "ST.ratio")),
+         `Group 2` = list(c("Suburban", "T1", "Urban")),
+         `Group 3` = list(c("pTotfrl", "ethHisp", "ethWhite", "pELL", "dSCH", "ToRu")),
+         `Group 4` = list(c("n", "ethBlack"))) %>%
+  pivot_longer(cols = everything(), names_to = "Group", values_to = "vnames") %>%
+  unnest(vnames)
+
+```
+
+#### Example all SF
+
+```{r}
+vars$smd.examples <-
+  vars$smd.groups %>%
+  filter(vnames %in% c("Suburban", "dSCH", "n", "ST.ratio"))
+
+tabs$smd.examples <- 
+  vars$smd.examples %>%
+  left_join(tabs$smd.results, by = "vnames")
+
+figs$smd.examples <- 
+  tabs$smd.examples %>% 
+  ggplot(aes(x = RR, y = Value)) %>%
+  common_line() %>%
+  common_point()  + 
+  annotate(geom = "rect",
+           ymax = .25,
+           ymin = -Inf,
+           xmax = -Inf,
+           xmin = Inf,
+           fill = "white",
+           alpha = .5) +
+  labs(y = lab.vars$smd,
+       x = lab.vars$rr) + 
+  scale_x_continuous(breaks = seq(10, 100, 30),
+                     limits = c(10, 100)) +
+  facet_grid(Group ~ SB, scales = "free_y") +
+  geom_hline(yintercept = c(.25), linetype = "dotted") +
+  geom_hline(yintercept = 0, linetype = "solid")
+
+figs$smd.examples 
+
+```
+
+
+#### Example SF = 1
+```{r}
+figs$smd.examples.sf100 <-
+  tabs$smd.examples %>% 
+  filter(SB == 1) %>%
+  ggplot(aes(x = RR, y = Value)) %>%
+  common_line() %>%
+  common_point() + 
+  annotate(geom = "rect",
+           ymax = .25,
+           ymin = -Inf,
+           xmax = -Inf,
+           xmin = Inf,
+           fill = "white",
+           alpha = .5) +
+  labs(y = lab.vars$smd,
+       x = lab.vars$rr) + 
+  scale_x_continuous(breaks = seq(10, 100, 30),
+                     limits = c(10, 100)) +
+  facet_wrap(~ Group)  +
+  geom_hline(yintercept = c(.25), linetype = "dotted") +
+  geom_hline(yintercept = 0, linetype = "solid")
+
+figs$smd.examples.sf100
+
+```
+
+
+#### Original code
+```{r, eval = F}
+# figs$smd.examples <- tabs$smd.results %>%
+#   filter(vnames %in% c("n", "pELL", "T1")) %>%
+#   nest(smd.plot.data = -c(Variables, vnames)) %>%
+#   mutate(plots = pmap(.l = list(data = smd.plot.data), .f = plot_smd, l.pos = "bottom"),
+#          plots = setNames(plots, vnames))
+# 
+# tfun <- function(x, x.title = element_blank(), y.title = element_blank()) {
+#   x %>% 
+#     apa_style_plot() + 
+#     theme(legend.position = "none",
+#           axis.title.x = x.title,
+#           axis.title.y = y.title,
+#           plot.margin = margin(6, 6, 6, 0)) +
+#   scale_color_brewer(type = "qual", palette = 6) 
+# } 
+# 
+# 
+# smd.example.list <-
+#   list(tfun(figs$smd.examples$plots[[1]]), 
+#        tfun(figs$smd.examples$plots[[2]]), 
+#        tfun(figs$smd.examples$plots[[3]]))
+# 
+# 
+# smd.example.legend <- (smd.example.list[[1]] + 
+#   theme_update(legend.box.margin = margin(0, 0, 0, 0),
+#                legend.position = "right")) %>% 
+#   get_legend()
+# 
+# smd.fig.list <- plot_grid(plotlist = smd.example.list,
+#                           labels = c("Group 1", "Group 2", "Group 3"), 
+#                           ncol = 1, 
+#                           nrow = 3, 
+#                           rel_heights = c(1, 1, 1),
+#                           label_x = .45,
+#                           align = "h",
+#                           label_fontface = "plain" ,
+#                           label_size = 10) + 
+#   theme(plot.margin = margin(0, 0, 24, 24))
+# 
+# 
+# plot_grid(smd.fig.list, 
+#           smd.example.legend, 
+#           rel_widths = c(3, .4)) +
+#   draw_label(lab.vars$rr,
+#              x= 0.5,
+#              y = 0,
+#              vjust = -0.25,
+#              angle = 0,
+#              size = 12) +
+#   draw_label(lab.vars$smd,
+#              x = 0,
+#              y = 0.5,
+#              vjust = 1.5,
+#              angle = 90,
+#              size = 12)
+
+```
+
+### Auto-Grouping
+```{r}
+# note: all smd <= .25 considered 0
+
+test <- 
+  tabs$smd.results %>%
+  select(comp_Method = Method_Label,
+         comp_Cluster = Cluster,
+         comp_Sample = Sample,
+         SB, 
+         RR, 
+         vnames, 
+         comp = abs.mSMD) %>%
+  full_join(tabs$smd.results, by = c("SB", "RR", "vnames")) %>%
+  filter(Method_Label != comp_Method) %>%
+  select(SB,
+         RR, 
+         Variables, 
+         vnames, 
+         Method = Method_Label, 
+         comp_Method, 
+         abs.mSMD, 
+         comp,
+         Cluster,
+         Sample,
+         comp_Cluster,
+         comp_Sample) %>%
+  arrange(vnames, SB, RR, Method) 
+
+test.group <- 
+  test %>%
+  mutate(below_25 = abs.mSMD <= .25,
+         abs.mSMD = ifelse(abs.mSMD <= .25, 0, abs.mSMD),
+         comp = ifelse(comp <= .25, 0, comp),
+         less = abs.mSMD <= comp,
+         greater = abs.mSMD > comp) %>%
+  group_by(SB, Variables, vnames, across(contains(c("Method", "Cluster", "Sample")))) %>%
+  summarise(below_25 = prod(below_25),
+            less = prod(less),
+            greater = prod(greater),
+            .groups = "drop") 
+
+```
+
+
+#### Group 1
+```{r}
+# Group 1
+# All methods perform below .25
+
+test.g1 <- 
+  test.group %>%
+  select(SB, vnames, Method, below_25) %>% 
+  unique() %>%
+  arrange(SB, vnames) %>%
+  # filter(SB == 1) %>%
+  group_by(SB, vnames) %>%
+  summarize(g1_a = prod(below_25),
+            .groups = "drop_last") %>%
+  filter(g1_a == 1) %>%
+  mutate(Group = "Group 1") %>%
+  select(SB, vnames, Group) %>%
+  arrange(vnames, SB) 
+  
+
+test.g1
+```
+
+```{r}
+figs$smd.by.scale[unique(test.g1$vnames)]
+
+```
+
+#### Group 2
+```{r}
+# Group 2
+# a = smd below .25 across RR
+# b = stratified methods
+# c = unstratified methods
+# ab = all stratified methods with smd below .25 across RR
+# ac = no unstratified methods with smd below .25 across RR
+
+
+test.g2 <-
+  test.group %>%
+  select(SB, vnames, Method, Cluster, below_25) %>% 
+  unique() %>%
+  arrange(SB, vnames) %>%
+  # filter(SB == 1) %>%
+  group_by(SB, vnames, Cluster) %>%
+  summarize(g2_a = prod(below_25),
+            g2_b = prod(Cluster == "Stratified"),
+            g2_c = 1 - g2_b,
+            .groups = "drop_last") %>%
+  summarise(g2_ab = sum(g2_a * g2_b),
+            g2_ac = 1 - sum(g2_a * g2_c),
+            .groups = "drop") %>%
+  filter(g2_ab * g2_ac == 1) %>%
+  mutate(Group = "Group 2") %>%
+  select(SB, vnames, Group) %>%
+  arrange(vnames, SB) 
+  
+test.g2 
+```
+
+```{r}
+figs$smd.by.scale[unique(test.g2$vnames)]
+```
+
 
 #### Group 3
 
 ```{r}
 
-figs$smd.by.scale$n
-figs$smd.by.scale$ethBlack
-figs$smd.by.scale$ToRu
+# Group 3
+
+# a = all stratified vs unstratified counterpart comparisons, stratified methods only
+# b = all SBS bs unstratified comparisons
+# c = methods better than or equal to comparisons
+# abc = stratified methods that outperform their unstratified counterparts and SBS outperforms all unstratified methods
+
+# Not in Groups 1 or 2
+
+test.g3 <-
+  test.group %>%
+  group_by(SB, vnames, Method) %>%
+  mutate(g3_a = (Cluster != comp_Cluster) & 
+           (Sample == comp_Sample) & 
+           (Cluster == "Stratified"),
+         g3_b = (Method == "SBS") &
+           (comp_Cluster == "Unstratified")) %>%
+  filter(g3_a | g3_b) %>%
+  summarise(g3_c = prod(less),
+            .groups = "drop_last") %>%
+  summarise(g3_abc = prod(g3_c),
+            .groups = "drop") %>% 
+  filter(g3_abc == 1) %>%
+  anti_join(test.g1, 
+            by = c("SB", "vnames")) %>%
+  anti_join(test.g2, 
+            by = c("SB", "vnames")) %>%
+  mutate(Group = "Group 3") %>%
+  select(SB, vnames, Group) %>%
+  arrange(vnames, SB) 
+  
+
+test.g3
 
 ```
 
+```{r}
+figs$smd.by.scale[unique(test.g2$vnames)]
+
+```
 #### Group 4
 ```{r}
+# Group 4
 
-figs$smd.by.scale$pFem
-figs$smd.by.scale$ST.ratio
+# Not in groups 1, 2 and 3
 
-```
+test.g4 <-
+  test.group %>%
+  select(SB, vnames) %>%
+  unique() %>%
+  anti_join(test.g1, 
+            by = c("SB", "vnames")) %>%
+  anti_join(test.g2, 
+            by = c("SB", "vnames")) %>%
+  anti_join(test.g3, 
+            by = c("SB", "vnames")) %>%
+  mutate(Group = "Group 4") %>%
+  select(SB, vnames, Group) %>%
+  arrange(vnames, SB) 
 
-### Var Groups
-
-
-```{r}
-
-vars$smd.groups <- 
-  tibble(group1 = list(c("Suburban", "T1", "Urban")),
-         group2 = list(c("pTotfrl", "ethHisp", "ethWhite", "pELL", "dSCH")),
-         group3 = list(c("n", "ethBlack", "ToRu")),
-         group4 = list(c("pFem", "ST.ratio"))) %>%
-  pivot_longer(cols = everything(), names_to = "Group", values_to = "vnames") %>%
-  unnest(vnames)
-
-
-
-vars$smd.examples <-c("Suburban", "dSCH", "n", "ST.ratio")
+test.g4
 ```
 
 
 ```{r}
-tabs$smd.results  <- 
-  tabs$smd.results %>%
-  left_join(vars$smd.groups) 
+figs$smd.by.scale[unique(test.g4$vnames)]
 
-figs$smd.by.group.scale <- 
-  tabs$smd.results %>%
-  ggplot(aes(x = RR, 
-             y = Value, 
-             # alpha = alpha.group,
-             color = Sample, 
-             linetype = Cluster,
-             group = interaction(Variables, Sampler))) +
-  geom_line(size = 1) +
-  annotate(geom = "rect", 
-           ymax = .25, 
-           ymin = 0, 
-           xmax = Inf, 
-           xmin = -Inf, 
-           fill = "white", 
-           alpha = .5) +
-  scale_shape_manual(values = c(1, 16)) +
-    geom_hline(yintercept = c(.25), linetype = "dotted", size = .5) +
-    geom_hline(yintercept = 0, linetype = "solid", size = .5) +
-  facet_grid(SB~Group, scales = "free_y") +
-  theme_bw()
-
-figs$smd.by.group.scale 
 ```
 
+#### Fine Grain Groups
 ```{r}
-figs$smd.by.group <-
-  tabs$smd.results  %>%
-  ggplot(aes(x = RR, 
-             y = Value, 
-             color = Sample, 
-             linetype = Cluster,
-             group = interaction(Variables, Sampler, SB))) +
-  geom_line(size = 1) +
-  annotate(geom = "rect", 
-           ymax = .25, 
-           ymin = 0, 
-           xmax = Inf, 
-           xmin = -Inf, 
-           fill = "white", 
-           alpha = .5) +
-  scale_shape_manual(values = c(1, 16)) +
-    geom_hline(yintercept = c(.25), linetype = "dotted", size = .5) +
-    geom_hline(yintercept = 0, linetype = "solid", size = .5) +
-  facet_grid(Group~Sample) +
-  theme_bw()
-
-figs$smd.by.group
-
-```
-```{r}
-test <- df.list$coefs %>%
-  select(vnames, log_odds) %>%
-  right_join(tabs$smd.results) %>%
-  mutate(coef = abs(log_odds * SB)) %>%
-  select(Sampler:Sample, RR, Variables, Value, coef, log_odds, SB)
-
-test %>%
-  filter(RR == 50) %>% 
-  select(-coef) %>% 
-  unique() 
+test.fine.groups <-
+  bind_rows(test.g1, test.g2, test.g3, test.g4)
 ```
 
-
-```{r}
-tabs$smd.results %>% 
-  filter(SB == 1) %>%
-  ggplot(aes(x = RR, 
-             y = Value, 
-             color = Sample, 
-             linetype = Cluster,
-             group = interaction(Variables, Sampler, SB))) +
-  geom_line(size = 1) +
-  annotate(geom = "rect", 
-           ymax = .25, 
-           ymin = 0, 
-           xmax = Inf, 
-           xmin = -Inf, 
-           fill = "white", 
-           alpha = .5) +
-  scale_shape_manual(values = c(1, 16)) +
-    geom_hline(yintercept = c(.25), linetype = "dotted", size = .5) +
-    geom_hline(yintercept = 0, linetype = "solid", size = .5) +
-  facet_grid(Group~Sample) +
-  theme_bw()
-
-```
-
-
-```{r}
-tabs$smd.examples <- 
-  tabs$smd.results %>%
-  filter(vnames %in% vars$smd.examples) 
-
-smd.examples.sep <-
-  tabs$smd.examples %>%
-  nest(data = -c(Variables, Group)) %>%
-  mutate(plots = map(data, plot_smd, l.pos = "none"))
-
-figs$smd.examples <- 
-  tabs$smd.examples %>%
-  plot_smd(l.pos = "bottom") +
-  facet_grid(Variables ~ SB, scales = "free_y")
-
-
-figs$smd.examples
-```
-
-
-
-```{r}
-
-df.list$smd.by.strata.results <- 
-  results$smd.stats %>%
-  # select(SB:vnames, Variables, log_odds, Sample_Catagories, mSMD, abs.mSMD) %>%
-  unpack(Sample_Catagories) %>%
-  filter(!(Rank_Factor %in% c("X9")),
-         Cluster == "Stratified",
-         strata != 0) %>%
-  select(-K, -log_odds) %>%
-  mutate(Value = abs.mSMD,
-         alpha.group = as.numeric(Value > .25))
-
-df.list$smd.by.strata.results %>%
-  filter(SB == 1,
-         vnames %in% c("ethBlack", "n")) %>%
-  plot_smd() +
-  facet_grid(Variables ~ strata)
-
-```
-### Examples for presentations
-
-```{r, fig.cap = "Average SMDs", fig.height = 7}
-
-
-# vars$plot.smd.examples <- bind_rows(
-#   tibble(group = "Example", 
-#          desc = "each", 
-#          vnames = c("pELL", "n", "pFem")),
-#   tibble(group = "ELL", 
-#          desc = "ell", 
-#          vnames = c("pELL")),
-#   tibble(group = "N", 
-#          desc = "n", 
-#          vnames = c("n")),
-#   tibble(group = "Fem", 
-#          desc = "fem", 
-#          vnames = c("pFem"))
-#   )
-# 
-# SMDFigs <-  results$s.stats %>%
-#   left_join(df.list$pop.stats) %>%
-#   mutate(smd = (samp.mean - pop.mean) / pop.sd,
-#          RR = parse_number(RR)) %>%
-#   group_by(Sampler, RR, var, Sampling, Clustering, K) %>%
-#   summarise(mSMD = mean(abs(smd)),
-#             mSMD.sd = sd(abs(smd))) %>%
-#   rename(vnames = var) %>%
-#   left_join(df.list$coefs) %>%
-#   ungroup() %>%
-#   left_join(vars$plot.smd.examples ) %>%
-#   group_by(group, desc) %>%
-#   nest %>%
-#   mutate(plots = map(data, plot_smd),
-#          plots = set_names(plots, paste("smd.", desc, sep = "")),
-#          data = set_names(data, paste("smd.", desc, sep = ""))) %>%
-#   ungroup() %>%
-#   select(data, plots)
-# 
-# tabs <- c(tabs, SMDFigs$data)
-# figs <- c(figs, SMDFigs$plots)
-# 
-# figs$smd.ell
-```
 
 ### V-ratio and Log odds
+```{r}
+
+test <- 
+  df.list$pop.stats %>%
+  unnest(DGM) %>%
+  select(vnames:log_odds, SB, Coeficient) %>%
+  ungroup() %>%
+  unique() %>%
+  mutate(abs_log_odds = abs(Coeficient)) %>%
+  left_join(test.fine.groups, by = c("vnames", "SB"))
+  
+test
+
+
+```
+
+```{r}
+test  %>%
+  ggplot(aes(x = vratio, y = abs_log_odds, color = Group, fill = Group)) +
+  # geom_mark_rect(expand = 0.04, color = "black") +
+  geom_point(size = 2) +
+  geom_encircle(alpha = .2, s_shape = 0, expand = .05, spread = .01, color = "black") +
+  # geom_text_repel(aes(label = Variables), point.padding = .2, color = "black") +
+  labs(y = lab.vars$coef,
+       x = lab.vars$vratio) +
+  scale_x_continuous(breaks = seq(0, 1, .1)) +
+  # scale_y_continuous(breaks = seq(0, .6, .1),
+  # limits = c(0, .6)) + 
+  facet_wrap(~SB, scales = "free_y")
+
+
+```
+```{r}
+test  %>%
+  ggplot(aes(x = vratio, y = abs_log_odds, color = Group, fill = Group)) +
+  # geom_mark_rect(expand = 0.04, color = "black") +
+  geom_point(size = 2) +
+  geom_encircle(alpha = .2, s_shape = 0, expand = .05, spread = .01, color = "black") +
+  # geom_text_repel(aes(label = Variables), point.padding = .2, color = "black") +
+  labs(y = lab.vars$coef,
+       x = lab.vars$vratio) +
+  scale_x_continuous(breaks = seq(0, 1, .1)) +
+  # scale_y_continuous(breaks = seq(0, .6, .1),
+  # limits = c(0, .6)) + 
+  facet_wrap(~SB, scales = "free_y") +
+  scale_y_log10()
+
+
+```
 
 
 ```{r}
-
-# tabs$v.coef <- df.list$pop.data %>%
-#   select(DSID, all_of(covariates), strata) %>%
-#   gather(key = vnames, value = value, covariates) %>%
-#   group_by(vnames) %>%
-#   mutate(T.SS = var(value) * (n() - 1)) %>%
-#   group_by(vnames, T.SS, strata) %>%
-#   summarise(W.SS = var(value) * (n() - 1)) %>%
-#   summarise(W.SS = sum(W.SS)) %>%
-#   mutate(B.SS = T.SS - W.SS,
-#          vratio = B.SS / T.SS) %>%
-#   left_join(df.list$coefs) %>%
-#   left_join(vars$plot.groups) %>%
-#   mutate(SB_11 = log_odds,
-#          SB_12 = log_odds * .5,
-#          SB_14 = log_odds * .25) %>%
-#   gather(key = factor, value = coef, SB_11:SB_14) %>%
-#   mutate(abs_log_odds = abs(coef),
-#          odds = exp(coef),
-#          prob = odds / (1 + odds))%>%
-#   arrange(group)
-# 
-# figs$v.coef <- tabs$v.coef  %>%
-#   ggplot(aes(x = vratio, y = abs_log_odds, color = group, fill = group)) +
-#   geom_mark_rect(expand = 0.04, color = "black") +
-#   geom_point(size = 2) +
-#   # geom_encircle(alpha = .2, s_shape = 0, expand = .1, spread = .05, color = "black") +
-#   # geom_text_repel(aes(label = Variables), point.padding = .2, color = "black") +
-#   labs(y = lab.vars$coef,
-#        x = lab.vars$vratio) +
-#   scale_x_continuous(breaks = seq(0, 1, .1)) +
-#   scale_y_continuous(breaks = seq(0, .6, .1),
-#   limits = c(0, .6)) +
-#   theme(legend.position =)
-# 
-# figs$v.coef
+test %>%
+  ggplot(aes(x = vratio, y = abs_log_odds, color = Group)) +
+  geom_point() + 
+  facet_wrap(~SB, scales = "free_y")
 ```
+
+
+```{r}
+test %>%
+  ggplot(aes(x = vratio, y = abs_log_odds, color = Group)) +
+  geom_point() + 
+  facet_wrap(~SB, scales = "free_y") +
+  scale_y_log10()
+```
+
+
+#### Test 1 - same abs_log_odds
+
+```{r}
+figs$v.coef <- test %>%
+  mutate(abs_log_odds = abs(log_odds)) %>%
+  ggplot(aes(x = vratio, y = abs_log_odds, color = Group, fill = Group)) +
+  # geom_mark_rect(expand = 0.04, color = "black") +
+  geom_point(size = 2) +
+  geom_encircle(alpha = .2, s_shape = 0, expand = .05, spread = .01, color = "black") +
+  # geom_text_repel(aes(label = Variables), point.padding = .2, color = "black") +
+  labs(y = lab.vars$coef,
+       x = lab.vars$vratio) +
+  scale_x_continuous(breaks = seq(0, 1, .1)) +
+  # scale_y_continuous(breaks = seq(0, .6, .1),
+  # limits = c(0, .6)) + 
+  facet_wrap(~SB, scales = "free_y") +
+  scale_y_log10()
+
+figs$v.coef 
+```
+#### Test 2 - relative log_odds and relative vratio
+
+```{r}
+test.relative.values <- 
+  df.list$pop.stats %>%
+  select(vnames, vratio, log_odds) %>%
+  ungroup() %>%
+  mutate(rel_vrat = (vratio - mean(vratio)) / sd(vratio),
+         
+         rel_abs_odds = (abs(log_odds) - mean(abs(log_odds))) / sd(abs(log_odds)))
+```
+
+```{r}
+test %>%
+  left_join(test.relative.values, 
+            by = c("vnames", "vratio", "log_odds")) %>%
+  ggplot(aes(x = rel_vrat, y = rel_abs_odds, color = Group, fill = Group)) +
+  # ggplot(aes(x = rel_vrat, y = abs_log_odds, color = Group, fill = Group)) +
+  # geom_mark_rect(expand = 0.04, color = "black") +
+  geom_point(size = 2) +
+  geom_encircle(alpha = .2, s_shape = 0, expand = .05, spread = .01, color = "black") +
+  # geom_text_repel(aes(label = Variables), point.padding = .2, color = "black") +
+  labs(y = lab.vars$coef,
+       x = lab.vars$vratio) +
+  # scale_x_continuous(breaks = seq(0, 1, .1)) +
+  # scale_y_continuous(breaks = seq(0, .6, .1),
+  # limits = c(0, .6)) + 
+  facet_wrap(~SB, scales = "free_y")
+
+
+```
+<!-- ### Test Code -->
+
+<!-- ```{r} -->
+<!-- tabs$smd.results  <-  -->
+<!--   tabs$smd.results %>% -->
+<!--   left_join(vars$smd.groups)  -->
+
+<!-- figs$smd.by.group.scale <-  -->
+<!--   tabs$smd.results %>% -->
+<!--   ggplot(aes(x = RR,  -->
+<!--              y = Value,  -->
+<!--              # alpha = alpha.group, -->
+<!--              color = Sample,  -->
+<!--              linetype = Cluster, -->
+<!--              group = interaction(Variables, Sampler))) + -->
+<!--   geom_line(size = 1) + -->
+<!--   annotate(geom = "rect",  -->
+<!--            ymax = .25,  -->
+<!--            ymin = 0,  -->
+<!--            xmax = Inf,  -->
+<!--            xmin = -Inf,  -->
+<!--            fill = "white",  -->
+<!--            alpha = .5) + -->
+<!--   scale_shape_manual(values = c(1, 16)) + -->
+<!--     geom_hline(yintercept = c(.25), linetype = "dotted", size = .5) + -->
+<!--     geom_hline(yintercept = 0, linetype = "solid", size = .5) + -->
+<!--   facet_grid(SB~Group, scales = "free_y") + -->
+<!--   theme_bw() -->
+
+<!-- figs$smd.by.group.scale  -->
+<!-- ``` -->
+
+<!-- ```{r} -->
+<!-- figs$smd.by.group <- -->
+<!--   tabs$smd.results  %>% -->
+<!--   ggplot(aes(x = RR,  -->
+<!--              y = Value,  -->
+<!--              color = Sample,  -->
+<!--              linetype = Cluster, -->
+<!--              group = interaction(Variables, Sampler, SB))) + -->
+<!--   geom_line(size = 1) + -->
+<!--   annotate(geom = "rect",  -->
+<!--            ymax = .25,  -->
+<!--            ymin = 0,  -->
+<!--            xmax = Inf,  -->
+<!--            xmin = -Inf,  -->
+<!--            fill = "white",  -->
+<!--            alpha = .5) + -->
+<!--   scale_shape_manual(values = c(1, 16)) + -->
+<!--     geom_hline(yintercept = c(.25), linetype = "dotted", size = .5) + -->
+<!--     geom_hline(yintercept = 0, linetype = "solid", size = .5) + -->
+<!--   facet_grid(Group~Sample) + -->
+<!--   theme_bw() -->
+
+<!-- figs$smd.by.group -->
+
+<!-- ``` -->
+<!-- ```{r} -->
+<!-- test <- df.list$coefs %>% -->
+<!--   select(vnames, log_odds) %>% -->
+<!--   right_join(tabs$smd.results) %>% -->
+<!--   mutate(coef = abs(log_odds * SB)) %>% -->
+<!--   select(Sampler:Sample, RR, Variables, Value, coef, log_odds, SB) -->
+
+<!-- test %>% -->
+<!--   filter(RR == 50) %>%  -->
+<!--   select(-coef) %>%  -->
+<!--   unique()  -->
+<!-- ``` -->
+
+
+<!-- ```{r} -->
+<!-- tabs$smd.results %>%  -->
+<!--   filter(SB == 1) %>% -->
+<!--   ggplot(aes(x = RR,  -->
+<!--              y = Value,  -->
+<!--              color = Sample,  -->
+<!--              linetype = Cluster, -->
+<!--              group = interaction(Variables, Sampler, SB))) + -->
+<!--   geom_line(size = 1) + -->
+<!--   annotate(geom = "rect",  -->
+<!--            ymax = .25,  -->
+<!--            ymin = 0,  -->
+<!--            xmax = Inf,  -->
+<!--            xmin = -Inf,  -->
+<!--            fill = "white",  -->
+<!--            alpha = .5) + -->
+<!--   scale_shape_manual(values = c(1, 16)) + -->
+<!--     geom_hline(yintercept = c(.25), linetype = "dotted", size = .5) + -->
+<!--     geom_hline(yintercept = 0, linetype = "solid", size = .5) + -->
+<!--   facet_grid(Group~Sample) + -->
+<!--   theme_bw() -->
+
+<!-- ``` -->
+
+
+<!-- ```{r} -->
+<!-- tabs$smd.examples <-  -->
+<!--   tabs$smd.results %>% -->
+<!--   filter(vnames %in% vars$smd.examples)  -->
+
+<!-- smd.examples.sep <- -->
+<!--   tabs$smd.examples %>% -->
+<!--   nest(data = -c(Variables, Group)) %>% -->
+<!--   mutate(plots = map(data, plot_smd, l.pos = "none")) -->
+
+<!-- figs$smd.examples <-  -->
+<!--   tabs$smd.examples %>% -->
+<!--   plot_smd(l.pos = "bottom") + -->
+<!--   facet_grid(Variables ~ SB, scales = "free_y") -->
+
+
+<!-- figs$smd.examples -->
+<!-- ``` -->
+
+
+
+<!-- ```{r} -->
+
+<!-- df.list$smd.by.strata.results <-  -->
+<!--   results$smd.stats %>% -->
+<!--   # select(SB:vnames, Variables, log_odds, Sample_Catagories, mSMD, abs.mSMD) %>% -->
+<!--   unpack(Sample_Catagories) %>% -->
+<!--   filter(!(Rank_Factor %in% c("X9")), -->
+<!--          Cluster == "Stratified", -->
+<!--          strata != 0) %>% -->
+<!--   select(-K, -log_odds) %>% -->
+<!--   mutate(Value = abs.mSMD, -->
+<!--          alpha.group = as.numeric(Value > .25)) -->
+
+<!-- df.list$smd.by.strata.results %>% -->
+<!--   filter(SB == 1, -->
+<!--          vnames %in% c("ethBlack", "n")) %>% -->
+<!--   plot_smd() + -->
+<!--   facet_grid(Variables ~ strata) -->
+
+<!-- ``` -->
 
 
 ## Feasibility
@@ -766,33 +1141,10 @@ tabs$samples <-
 
 ```
 
-
-```{r, fig.cap = "Recruitment Counts"}
-# figs$samples <- tabs$samples  %>%
-#   ggplot(aes(x = RR, y = value, group = Sampler, color = Sampling, linetype = Clustering)) +
-#   geom_point() +
-#   geom_line() +
-#   facet_wrap( ~ measure, scales = "free_y") +
-#   expand_limits(y = 0) +
-#   theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
-# 
-# figs$samples
-# 
-# tabs$samples.contacts.labels <- 
-#   tabs$samples %>%
-#   filter(RR == 10) %>%
-#   arrange(contacted) %>%
-#   ungroup() %>%
-#   mutate(RR = 5)
-```
-
-
-
-
-
+#### SF = 1
 ```{r, fig.cap = "Schools Contacted"}
 
-tabs$samples.contacts.labels <-  
+tabs$samples.contacts.labels.sf100 <-  
   tabs$samples %>%
   filter(RR == 10,
          SB == 1) %>%
@@ -801,7 +1153,7 @@ tabs$samples.contacts.labels <-
   mutate(RR = 5,
          contacted = c(200, 1000, 2200, 2900, 3700))
 
-figs$samples.contacts <- 
+figs$samples.contacts.sf100 <- 
   tabs$samples %>%
   filter(SB == 1) %>%
   ggplot(aes(x = RR, y = contacted)) %>%
@@ -826,7 +1178,7 @@ figs$samples.contacts
 
 
 
-tabs$samples.response.rates.labels <-  
+tabs$samples.response.rates.labels.sf100 <-  
   tabs$samples %>%
   filter(RR == 10,
          SB == 1) %>%
@@ -836,7 +1188,7 @@ tabs$samples.response.rates.labels <-
          RR = 45)
 
 
-figs$samples.response.rates <- 
+figs$samples.response.rates.sf100 <- 
   tabs$samples %>%
   filter(SB == 1) %>%
   mutate(value = response_rate * 100) %>%
@@ -853,62 +1205,174 @@ figs$samples.response.rates <-
              aes(label = Method_Label,
                  color = Sample))
 
-figs$samples.response.rates
+figs$samples.response.rates.sf100
 
 
 ```
-
-
-
-
+#### SF = [1, .5, .25, .01]
 ```{r}
-
-legend <- get_legend(
-  figs$samples.contacts +
-  theme_apa(box = F) + 
-  theme(legend.box.margin = margin(0, 0, 0, 12))
-)
-
-figs$joint.feasibility <- plot_grid(plotlist = list(figs$samples.contacts + theme(legend.position = "none"),
-                                                    figs$samples.response.rates + theme(legend.position = "none")),
-                                    labels=c("(a)", "(b)"),
-                                    ncol = 1, 
-                                    nrow = 2, 
-                                    label_x = .5,
-                                    align = "v",
-                                    label_fontface = "plain",
-                                    label_size = 10)
-  # plot_grid(legend, rel_widths = c(3, .4))
-
-figs$joint.feasibility 
-
-```
-
-### Relative Performance
-
-```{r}
-tabs$relative.counts <- 
-  tabs$samples  %>%
-  ungroup() %>%
-  select(SB:strata, Method_Label, response_rate, -Sampler) %>%
-  spread(key = Method_Label, value = response_rate) %>%
-  right_join(tabs$samples, by = c("SB", "RR", "K", "strata")) %>%
-  gather(key = Comp.Method, value = Comp.Value,
-         SBS, SRS, SCS, URS, UCS) %>%
-  mutate(Comp.Rate = response_rate / Comp.Value) 
-
-figs$relative.counts <- 
-  tabs$relative.counts %>%
-  filter(SB == 1) %>%
-  ggplot(aes(x = RR, y = Comp.Rate)) %>%
+figs$samples.contacts.sf.all <- 
+  tabs$samples %>%
+  ggplot(aes(x = RR, y = contacted)) %>%
   common_line() %>%
   common_point() +
-  facet_wrap(~ Comp.Method, scales = "free") 
+  theme(legend.position = "none") +
+  labs(x = lab.vars$rr,
+       y = lab.vars$contacts) +
+  scale_y_log10() +
+  facet_wrap(~SB)
 
-figs$relative.counts
+
+figs$samples.contacts.sf.all
 
 ```
 
+
+
+```{r}
+
+figs$samples.response.rates.sf.all <- 
+  tabs$samples %>%
+  mutate(value = response_rate * 100) %>%
+  ggplot(aes(x = RR, y = value)) %>%
+  common_line() %>%
+  common_point() +
+  expand_limits(y = 0) +
+  theme(legend.position = "none") +
+  labs(x = lab.vars$rr,
+       y = lab.vars$rr.o) +
+  facet_wrap(~SB)
+
+
+figs$samples.response.rates.sf.all
+```
+
+
+
+
+### Difficulty Relative to Comparison Methods
+
+#### SF = 1
+
+
+```{r}
+tabs$relative.counts <-
+  tabs$samples %>%
+  select(SB, RR, Method_Label, Cluster, Sample, contacted, accepted, response_rate) %>%
+  pivot_longer(cols = c(contacted, 
+                        accepted, 
+                        response_rate), 
+               names_to = "metric", 
+               values_to = "value") %>%
+  left_join(select(.,
+                   SB, 
+         RR, 
+         metric,
+         comp.method = Method_Label, 
+         comp.value = value),
+         by = c("SB", "RR", "metric")) %>%
+  filter(Method_Label != comp.method) %>%
+  mutate(relative_contacts = value / comp.value)
+  
+
+
+```
+
+```{r}
+
+figs$relative.counts.URS  <- 
+  tabs$relative.counts %>%
+  filter(SB == 1,
+         comp.method == "URS",
+         metric == "contacted") %>%
+  ggplot(aes(x = RR, y = relative_contacts)) %>%
+  common_line() %>%
+  common_point() +
+  geom_hline(yintercept = 1, linetype = "dashed") +
+  labs(x = lab.vars$rr,
+       y = "Factor of difficulty") +
+  scale_x_continuous(breaks = seq(0, 100, 10)) +
+  scale_y_continuous(breaks = seq(0, 6, 1))
+  
+  
+
+figs$relative.counts.URS
+
+```
+
+```{r}
+
+figs$relative.counts.UCS  <- 
+  tabs$relative.counts %>%
+  filter(SB == 1,
+         comp.method == "UCS",
+         metric == "contacted") %>%
+  ggplot(aes(x = RR, y = relative_contacts)) %>%
+  common_line() %>%
+  common_point() +
+  geom_hline(yintercept = 1, linetype = "dashed") +
+  labs(x = lab.vars$rr,
+       y = "Factor of difficulty") +
+  scale_x_continuous(breaks = seq(0, 100, 10)) +
+  scale_y_continuous(limits = c(0, 14),
+                     breaks = seq(0, 14, 2))
+  
+  
+
+figs$relative.counts.UCS
+
+```
+
+#### SF = [1, .5, .25, .01]
+
+```{r}
+# test.limits <- function(lim) {
+#   rg <- abs(diff(lim)) / 10
+#   
+#   l.min <- max(0, min(lim) - rg)
+#   l.max <- max(lim) + rg
+#   
+#   
+#   new.lim <- 
+#     c(floor(l.min * 10) / 10, 
+#       ceiling(l.max * 10) / 10)
+#   
+#   new.lim
+# }
+# 
+# test.breaks <- function(lim) {
+#   lim = test.limits(lim)
+#   
+#   l.min <- min(lim)
+#   l.max <- max(lim)
+#   
+#   new.break <- 
+#     seq(l.min, 
+#         l.max, 
+#         (l.max - l.min) / 6)
+#   
+#   return(new.break)
+# }
+# 
+# chk <- c(1.1234, 3.6543)
+# 
+# test.limits(chk)
+# test.breaks(chk)
+
+figs$samples.relative.contacts.sf.all <- 
+  tabs$relative.counts %>%
+  filter(comp.method == "URS",
+         metric == "contacted") %>%
+  ggplot(aes(x = RR, y = relative_contacts)) %>%
+  common_line() %>%
+  common_point() +
+  geom_hline(yintercept = 1, linetype = "dashed") +
+  labs(x = lab.vars$rr,
+       y = "Factor of difficulty") +
+  facet_wrap(~SB, scales = "free_y") 
+
+figs$samples.relative.contacts.sf.all 
+```
 ### Gini Plot
 
 ```{r}
@@ -999,3 +1463,47 @@ ls() %>%
   arrange(desc(parse_number(MB)))
 ```
 
+# Presentation Figures
+
+```{r, fig.cap = "Average SMDs", fig.height = 7}
+
+
+# vars$plot.smd.examples <- bind_rows(
+#   tibble(group = "Example", 
+#          desc = "each", 
+#          vnames = c("pELL", "n", "pFem")),
+#   tibble(group = "ELL", 
+#          desc = "ell", 
+#          vnames = c("pELL")),
+#   tibble(group = "N", 
+#          desc = "n", 
+#          vnames = c("n")),
+#   tibble(group = "Fem", 
+#          desc = "fem", 
+#          vnames = c("pFem"))
+#   )
+# 
+# SMDFigs <-  results$s.stats %>%
+#   left_join(df.list$pop.stats) %>%
+#   mutate(smd = (samp.mean - pop.mean) / pop.sd,
+#          RR = parse_number(RR)) %>%
+#   group_by(Sampler, RR, var, Sampling, Clustering, K) %>%
+#   summarise(mSMD = mean(abs(smd)),
+#             mSMD.sd = sd(abs(smd))) %>%
+#   rename(vnames = var) %>%
+#   left_join(df.list$coefs) %>%
+#   ungroup() %>%
+#   left_join(vars$plot.smd.examples ) %>%
+#   group_by(group, desc) %>%
+#   nest %>%
+#   mutate(plots = map(data, plot_smd),
+#          plots = set_names(plots, paste("smd.", desc, sep = "")),
+#          data = set_names(data, paste("smd.", desc, sep = ""))) %>%
+#   ungroup() %>%
+#   select(data, plots)
+# 
+# tabs <- c(tabs, SMDFigs$data)
+# figs <- c(figs, SMDFigs$plots)
+# 
+# figs$smd.ell
+```
