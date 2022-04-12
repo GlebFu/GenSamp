@@ -102,7 +102,7 @@ lab.vars <- list(k = "Number of strata (k)",
                  smd = "Standardized mean difference",
                  vars = "Participation covariates",
                  intercept = "Participation model intercept",
-                 rr = "Population participation \n(generated %)",
+                 rr = "Potential participation rate (%)",
                  B = "Average B-index",
                  coef = "Participation model coeficients \n(absolute log-odds)",
                  contacts = expression("Schools contacted (" ~ 10^3 ~ ")"),
@@ -112,24 +112,25 @@ lab.vars <- list(k = "Number of strata (k)",
 # Data Summary
 
 
-## Covaraite Statistics
+## Covariate Statistics
+
 ```{r}
 tabs$pop.desc <- 
   df.list$pop.stats %>%
   ungroup() %>%
   arrange(Category, Sub) %>%
   select(Category, Variables, pop.mean, pop.sd, log_odds) %>%
-  mutate(M = round(pop.mean, 2),
-         SD = round(pop.sd, 2),
-         .keep = "unused",
-         SF100 = (log_odds * 1) %>% round(3),
-         SF050 = (log_odds * .5) %>% round(3),
-         SF025 = (log_odds * .25) %>% round(3),
-         SF001 = (log_odds * .001) %>% round(3))
+  mutate(
+    M = round(pop.mean, 2),
+    SD = round(pop.sd, 2),
+    .keep = "unused",
+    SF100 = (log_odds * 1) %>% round(3)
+  )
 
 ```
 
 ## Continuous variable distributions
+
 ```{r}
 tabs$dist <- 
   df.list$pop.data %>%
@@ -148,7 +149,7 @@ figs$dist <-
   geom_histogram() +
   scale_y_continuous(labels = function(x) x / 100) +
   facet_wrap(~ Variables, scales = "free", ncol = 3) +
-  labs(x = "", y = "Schools (10^2)")
+  labs(x = "", y = "Schools (100's)")
 
 figs$dist
 
@@ -263,6 +264,7 @@ figs$joint.cluster.stats
 tabs$cluster.SMD <- 
   df.list$pop.data %>% 
   select(strata, all_of(vars$cluster$dummy)) %>%
+  mutate(strata = str_replace(strata, "Strata", "Stratum")) %>%
   gather(key = vnames, value = val, -strata) %>%
   group_by(strata, vnames) %>%
   summarise(strat.mean = mean(val), .groups = "drop_last") %>%
@@ -301,6 +303,7 @@ figs$cluster.SMD
 
 ## Variation explained by the strata
 ```{r}
+
 tabs$strata.data <- 
   tabs$allocation %>%
   filter(k == 5) %>%
@@ -413,15 +416,18 @@ tabs$B <-
 
 ```{r, fig.cap = "Averge B-Index"}
 figs$B <- tabs$B %>%
-  filter(!(Rank_Factor %in% c("X9"))) %>%
+  filter(
+    !(Rank_Factor %in% c("X9")),
+    SB > 0.01
+  ) %>%
   ggplot(aes(x = RR, y = M)) %>%
   common_line() %>%
   common_point() +
   theme_minimal() +
   labs(y = lab.vars$B,
        x = lab.vars$rr) +
-  scale_x_continuous(breaks = seq(10, 100, 10)) +
-  scale_y_continuous(breaks = seq(.6, 1, .1), limits = c(.6, 1)) + 
+  scale_x_continuous(breaks = seq(10, 90, 10), minor_breaks = NULL) +
+  scale_y_continuous(breaks = seq(.6, 1, .1), limits = c(.6, 1), expand = expansion(0,0)) + 
   annotate(geom = "rect",
            ymax = .95,
            ymin = -Inf,
@@ -437,8 +443,7 @@ figs$B <- tabs$B %>%
            fill = "white",
            alpha = .4) +
   geom_hline(yintercept = c(.8, .95), linetype = "dotted", alpha = .5) +
-  facet_wrap(~SB.factor)
-
+  facet_wrap(~ SB.factor)
 
 figs$B
 ```
@@ -477,11 +482,17 @@ tabs$smd.results <-
   select(any_of(vars$methods), any_of(vars$conditions),
          strata, log_odds, mSMD, abs.mSMD) %>%
   unpack(Sample_Catagories) %>%
-  filter(!(Rank_Factor %in% c("X9")),
-         strata == 0) %>%
+  filter(
+    !(Rank_Factor %in% c("X9")),
+    strata == 0,
+    SB > 0.01
+  ) %>%
   select(-strata, -log_odds) %>%
-  mutate(Value = abs.mSMD,
-         alpha.group = as.numeric(Value > .25))
+  mutate(
+    Value = abs.mSMD,
+    alpha.group = as.numeric(Value > .25),
+    SF_fac = paste("SF =", SB)
+  )
 
 tabs$smd.by.scale <- 
   tabs$smd.results %>%
@@ -541,7 +552,6 @@ figs$smd.by.scale$ethBlack
 
 ### SMD Groups
 
-
 ```{r}
 vars$smd.groups <- 
   tibble(`Group 1` = list(c("pFem", "ST.ratio")),
@@ -590,6 +600,7 @@ figs$smd.examples
 
 
 #### Example SF = 1
+
 ```{r}
 figs$smd.examples.sf100 <-
   tabs$smd.examples %>% 
@@ -617,67 +628,9 @@ figs$smd.examples.sf100
 ```
 
 
-#### Original code
-```{r, eval = F}
-# figs$smd.examples <- tabs$smd.results %>%
-#   filter(vnames %in% c("n", "pELL", "T1")) %>%
-#   nest(smd.plot.data = -c(Variables, vnames)) %>%
-#   mutate(plots = pmap(.l = list(data = smd.plot.data), .f = plot_smd, l.pos = "bottom"),
-#          plots = setNames(plots, vnames))
-# 
-# tfun <- function(x, x.title = element_blank(), y.title = element_blank()) {
-#   x %>% 
-#     apa_style_plot() + 
-#     theme(legend.position = "none",
-#           axis.title.x = x.title,
-#           axis.title.y = y.title,
-#           plot.margin = margin(6, 6, 6, 0)) +
-#   scale_color_brewer(type = "qual", palette = 6) 
-# } 
-# 
-# 
-# smd.example.list <-
-#   list(tfun(figs$smd.examples$plots[[1]]), 
-#        tfun(figs$smd.examples$plots[[2]]), 
-#        tfun(figs$smd.examples$plots[[3]]))
-# 
-# 
-# smd.example.legend <- (smd.example.list[[1]] + 
-#   theme_update(legend.box.margin = margin(0, 0, 0, 0),
-#                legend.position = "right")) %>% 
-#   get_legend()
-# 
-# smd.fig.list <- plot_grid(plotlist = smd.example.list,
-#                           labels = c("Group 1", "Group 2", "Group 3"), 
-#                           ncol = 1, 
-#                           nrow = 3, 
-#                           rel_heights = c(1, 1, 1),
-#                           label_x = .45,
-#                           align = "h",
-#                           label_fontface = "plain" ,
-#                           label_size = 10) + 
-#   theme(plot.margin = margin(0, 0, 24, 24))
-# 
-# 
-# plot_grid(smd.fig.list, 
-#           smd.example.legend, 
-#           rel_widths = c(3, .4)) +
-#   draw_label(lab.vars$rr,
-#              x= 0.5,
-#              y = 0,
-#              vjust = -0.25,
-#              angle = 0,
-#              size = 12) +
-#   draw_label(lab.vars$smd,
-#              x = 0,
-#              y = 0.5,
-#              vjust = 1.5,
-#              angle = 90,
-#              size = 12)
-
-```
 
 ### Auto-Grouping
+
 ```{r}
 # note: all smd <= .25 considered 0
 
@@ -723,6 +676,7 @@ test.group <-
 
 
 #### Group 1
+
 ```{r}
 # Group 1
 # All methods perform below .25
@@ -861,6 +815,7 @@ figs$smd.by.scale[unique(test.g4$vnames)]
 ```
 
 #### Fine Grain Groups
+
 ```{r}
 test.fine.groups <-
   bind_rows(test.g1, test.g2, test.g3, test.g4)
@@ -868,6 +823,7 @@ test.fine.groups <-
 
 
 ### V-ratio and Log odds
+
 ```{r}
 
 test <- 

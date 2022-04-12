@@ -54,7 +54,7 @@ plot_smd <- function(data, l.pos = "right", g.title = waiver(), x.title = waiver
                        limits = c(10, 100)) +
     scale_alpha_continuous(guide = "none", range = c(.5, 1)) +
     theme(legend.position = l.pos) +
-    facet_wrap(~SB, nrow = 1) 
+    facet_wrap(~SF_fac, nrow = 1) 
 }
 
 apa_style_plot <- function(x) {
