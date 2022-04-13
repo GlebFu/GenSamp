@@ -437,22 +437,22 @@ SB vnames Group\\
 \hypertarget{v-ratio-and-log-odds}{%
 \subsubsection{V-ratio and Log odds}\label{v-ratio-and-log-odds}}
 
-\hypertarget{a-tibble-52-x-14}{%
-\section{A tibble: 52 x 14}\label{a-tibble-52-x-14}}
+\hypertarget{a-tibble-39-x-15}{%
+\section{A tibble: 39 x 15}\label{a-tibble-39-x-15}}
 
 vnames T.SS W.SS B.SS vratio Sub Category Type Variables log\_odds
 1 dSCH 4.02e8 3.62e8 4.05e7 0.101 Dist\textasciitilde{} School \textasciitilde{} Mean District\textasciitilde{} 0.52
 2 dSCH 4.02e8 3.62e8 4.05e7 0.101 Dist\textasciitilde{} School \textasciitilde{} Mean District\textasciitilde{} 0.52
 3 dSCH 4.02e8 3.62e8 4.05e7 0.101 Dist\textasciitilde{} School \textasciitilde{} Mean District\textasciitilde{} 0.52
-4 dSCH 4.02e8 3.62e8 4.05e7 0.101 Dist\textasciitilde{} School \textasciitilde{} Mean District\textasciitilde{} 0.52
+4 ethBlack 2.52e6 2.44e6 7.96e4 0.0316 Ethn\textasciitilde{} Student\textasciitilde{} Mean \% Black 0.291
 5 ethBlack 2.52e6 2.44e6 7.96e4 0.0316 Ethn\textasciitilde{} Student\textasciitilde{} Mean \% Black 0.291
 6 ethBlack 2.52e6 2.44e6 7.96e4 0.0316 Ethn\textasciitilde{} Student\textasciitilde{} Mean \% Black 0.291
-7 ethBlack 2.52e6 2.44e6 7.96e4 0.0316 Ethn\textasciitilde{} Student\textasciitilde{} Mean \% Black 0.291
-8 ethBlack 2.52e6 2.44e6 7.96e4 0.0316 Ethn\textasciitilde{} Student\textasciitilde{} Mean \% Black 0.291
+7 ethHisp 1.05e7 4.63e6 5.89e6 0.560 Ethn\textasciitilde{} Student\textasciitilde{} Mean \% Hispan\textasciitilde{} 0.395
+8 ethHisp 1.05e7 4.63e6 5.89e6 0.560 Ethn\textasciitilde{} Student\textasciitilde{} Mean \% Hispan\textasciitilde{} 0.395
 9 ethHisp 1.05e7 4.63e6 5.89e6 0.560 Ethn\textasciitilde{} Student\textasciitilde{} Mean \% Hispan\textasciitilde{} 0.395
-10 ethHisp 1.05e7 4.63e6 5.89e6 0.560 Ethn\textasciitilde{} Student\textasciitilde{} Mean \% Hispan\textasciitilde{} 0.395
-\# \ldots{} with 42 more rows, and 4 more variables: SB , Coeficient ,
-\# abs\_log\_odds , Group
+10 ethWhite 9.10e6 3.28e6 5.83e6 0.640 Ethn\textasciitilde{} Student\textasciitilde{} Mean \% White -0.538
+\# \ldots{} with 29 more rows, and 5 more variables: SB , Coeficient ,
+\# abs\_log\_odds , SF\_fac , Group
 
 \includegraphics{5---Analysis_files/figure-latex/unnamed-chunk-37-1.pdf}
 \includegraphics{5---Analysis_files/figure-latex/unnamed-chunk-38-1.pdf}
@@ -486,6 +486,7 @@ vnames T.SS W.SS B.SS vratio Sub Category Type Variables log\_odds
 
 \includegraphics{5---Analysis_files/figure-latex/unnamed-chunk-46-1.pdf}
 \#\#\#\# SF = {[}1, .5, .25, .01{]}
+
 \includegraphics{5---Analysis_files/figure-latex/unnamed-chunk-47-1.pdf}
 
 \includegraphics{5---Analysis_files/figure-latex/unnamed-chunk-48-1.pdf}
@@ -516,8 +517,8 @@ vnames T.SS W.SS B.SS vratio Sub Category Type Variables log\_odds
 
 Vars MB\\
 \strut \\
-1 tabs 473.667 Mb
-2 figs 301.628 Mb
+1 tabs 473.62 Mb
+2 figs 301.614 Mb
 3 results 84.955 Mb
 4 df.list 19.796 Mb
 5 df.sim 3.027 Mb\\
@@ -525,8 +526,50 @@ Vars MB\\
 7 test.group 0.066 Mb\\
 8 df.smd.ipsw 0.038 Mb\\
 9 get\_quant 0.03 Mb\\
-10 test 0.014 Mb\\
+10 test 0.013 Mb\\
 \# \ldots{} with 18 more rows
+\# A tibble: 20 x 2
+fig size\\
+\strut \\
+1 dist 263.1 Mb
+2 ch 0 Mb\\
+3 vratio 0 Mb\\
+4 allocation 0 Mb\\
+5 joint.cluster.stats 0 Mb\\
+6 cluster.SMD 0.2 Mb\\
+7 B 0.1 Mb\\
+8 smd.by.scale 0.4 Mb\\
+9 smd.examples 0.1 Mb\\
+10 smd.examples.sf100 0 Mb\\
+11 v.coef 0 Mb\\
+12 samples.contacts.sf100 0 Mb\\
+13 samples.response.rates.sf100 0 Mb\\
+14 samples.contacts.sf.all 0 Mb\\
+15 samples.response.rates.sf.all 0 Mb\\
+16 relative.counts.URS 0 Mb\\
+17 relative.counts.UCS 0 Mb\\
+18 samples.relative.contacts.sf.all 0 Mb\\
+19 gini 0 Mb\\
+20 gini.coef 37.4 Mb
+\# A tibble: 16 x 2
+tab size\\
+\strut \\
+1 pop.desc 0 Mb\\
+2 dist 263.1 Mb
+3 allocation 0 Mb\\
+4 cluster.SMD 0.2 Mb\\
+5 strata.data 0 Mb\\
+6 intercepts 0 Mb\\
+7 B 0 Mb\\
+8 smd.results 0.2 Mb\\
+9 smd.by.scale 0.6 Mb\\
+10 smd.examples 0.1 Mb\\
+11 samples 0 Mb\\
+12 samples.contacts.labels.sf100 0 Mb\\
+13 samples.response.rates.labels.sf100 0 Mb\\
+14 relative.counts 0.1 Mb\\
+15 gini.coef 0 Mb\\
+16 gini.count 209.2 Mb
 
 \hypertarget{presentation-figures}{%
 \section{Presentation Figures}\label{presentation-figures}}

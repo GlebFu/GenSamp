@@ -105,7 +105,7 @@ lab.vars <- list(k = "Number of strata (k)",
                  rr = "Potential participation rate (%)",
                  B = "Average B-index",
                  coef = "Participation model coeficients \n(absolute log-odds)",
-                 contacts = expression("Schools contacted (" ~ 10^3 ~ ")"),
+                 contacts = "Schools contacted ('000s)",
                  rr.o = "Population participation  \n(observed %)")
 ```
 
@@ -832,7 +832,11 @@ test <-
   select(vnames:log_odds, SB, Coeficient) %>%
   ungroup() %>%
   unique() %>%
-  mutate(abs_log_odds = abs(Coeficient)) %>%
+  mutate(
+    abs_log_odds = abs(Coeficient),
+    SF_fac = paste("SF =", SB)
+  ) %>%
+  filter(SB > .01) %>%
   left_join(test.fine.groups, by = c("vnames", "SB"))
   
 test
@@ -852,7 +856,7 @@ test  %>%
   scale_x_continuous(breaks = seq(0, 1, .1)) +
   # scale_y_continuous(breaks = seq(0, .6, .1),
   # limits = c(0, .6)) + 
-  facet_wrap(~SB, scales = "free_y")
+  facet_wrap(~SF_fac, scales = "free_y")
 
 
 ```
@@ -868,7 +872,7 @@ test  %>%
   scale_x_continuous(breaks = seq(0, 1, .1)) +
   # scale_y_continuous(breaks = seq(0, .6, .1),
   # limits = c(0, .6)) + 
-  facet_wrap(~SB, scales = "free_y") +
+    facet_wrap(~SF_fac, scales = "free_y") +
   scale_y_log10()
 
 
@@ -879,7 +883,7 @@ test  %>%
 test %>%
   ggplot(aes(x = vratio, y = abs_log_odds, color = Group)) +
   geom_point() + 
-  facet_wrap(~SB, scales = "free_y")
+  facet_wrap(~SF_fac, scales = "free_y")
 ```
 
 
@@ -887,7 +891,7 @@ test %>%
 test %>%
   ggplot(aes(x = vratio, y = abs_log_odds, color = Group)) +
   geom_point() + 
-  facet_wrap(~SB, scales = "free_y") +
+  facet_wrap(~SF_fac, scales = "free_y") +
   scale_y_log10()
 ```
 
@@ -895,7 +899,8 @@ test %>%
 #### Test 1 - same abs_log_odds
 
 ```{r}
-figs$v.coef <- test %>%
+figs$v.coef <- 
+  test %>%
   mutate(abs_log_odds = abs(log_odds)) %>%
   ggplot(aes(x = vratio, y = abs_log_odds, color = Group, fill = Group)) +
   # geom_mark_rect(expand = 0.04, color = "black") +
@@ -907,7 +912,7 @@ figs$v.coef <- test %>%
   scale_x_continuous(breaks = seq(0, 1, .1)) +
   # scale_y_continuous(breaks = seq(0, .6, .1),
   # limits = c(0, .6)) + 
-  facet_wrap(~SB, scales = "free_y") +
+  facet_wrap(~SF_fac, scales = "free_y") +
   scale_y_log10()
 
 figs$v.coef 
@@ -919,9 +924,10 @@ test.relative.values <-
   df.list$pop.stats %>%
   select(vnames, vratio, log_odds) %>%
   ungroup() %>%
-  mutate(rel_vrat = (vratio - mean(vratio)) / sd(vratio),
-         
-         rel_abs_odds = (abs(log_odds) - mean(abs(log_odds))) / sd(abs(log_odds)))
+  mutate(
+    rel_vrat = (vratio - mean(vratio)) / sd(vratio),
+    rel_abs_odds = (abs(log_odds) - mean(abs(log_odds))) / sd(abs(log_odds)),
+  )
 ```
 
 ```{r}
@@ -939,7 +945,7 @@ test %>%
   # scale_x_continuous(breaks = seq(0, 1, .1)) +
   # scale_y_continuous(breaks = seq(0, .6, .1),
   # limits = c(0, .6)) + 
-  facet_wrap(~SB, scales = "free_y")
+  facet_wrap(~SF_fac, scales = "free_y")
 
 
 ```
@@ -1090,9 +1096,15 @@ test %>%
 tabs$samples <- 
   results$r.stats %>% 
   unpack(Sample_Catagories) %>%
-  filter(strata == 0,
-         !(Rank_Factor %in% c("X9"))) %>%
-  mutate(response_rate = accepted/contacted)
+  filter(
+    strata == 0,
+    !(Rank_Factor %in% c("X9")),
+    SB > .01
+  ) %>%
+  mutate(
+    response_rate = accepted/contacted,
+    SF_fac = paste("SF =", SB)
+  )
 
 
 ```
@@ -1166,6 +1178,7 @@ figs$samples.response.rates.sf100
 
 ```
 #### SF = [1, .5, .25, .01]
+
 ```{r}
 figs$samples.contacts.sf.all <- 
   tabs$samples %>%
@@ -1176,7 +1189,7 @@ figs$samples.contacts.sf.all <-
   labs(x = lab.vars$rr,
        y = lab.vars$contacts) +
   scale_y_log10() +
-  facet_wrap(~SB)
+  facet_wrap(~SF_fac)
 
 
 figs$samples.contacts.sf.all
@@ -1197,7 +1210,7 @@ figs$samples.response.rates.sf.all <-
   theme(legend.position = "none") +
   labs(x = lab.vars$rr,
        y = lab.vars$rr.o) +
-  facet_wrap(~SB)
+  facet_wrap(~SF_fac)
 
 
 figs$samples.response.rates.sf.all
@@ -1338,11 +1351,17 @@ tabs$gini.coef <-
   results$gini %>%
   select(-count.data) %>%
   unpack(Sample_Catagories) %>%
-  filter(!(Rank_Factor %in% c("X9"))) %>%
+  filter(
+    !(Rank_Factor %in% c("X9")),
+    SB > .01
+  ) %>%
   group_by(RR, SB) %>%
   arrange(Gini_Coef) %>%
-  mutate(y.pos = 1 - (1:n()/n()) / 1.5,
-         x.pos = 1 - y.pos)
+  mutate(
+    y.pos = 1 - (1:n()/n()) / 1.5,
+    x.pos = 1 - y.pos,
+    SF_fac = paste("SF =", SB)
+  )
 
 # tabs$gini.coef.labels <-
 #   tabs$gini.coef %>%
@@ -1365,7 +1384,7 @@ figs$gini <- tabs$gini.coef %>%
                      limits = c(0, 1), expand = c(0,0)) +
   labs(x = lab.vars$rr,
       y = lab.vars$gini) +
-  facet_grid(~ SB)
+  facet_grid(~ SF_fac)
   # geom_label(data = tabs$gini.coef.labels,
   #            aes(label = Method_Label,
   #                color = Sample))
@@ -1417,6 +1436,16 @@ ls() %>%
   mutate(MB = map(Vars, function(x) object.size(eval(parse(text = x))) %>% format(units = "MB", digits = 3))) %>%
   unnest(MB) %>%
   arrange(desc(parse_number(MB)))
+
+tibble(
+  fig = names(figs), 
+  size = map_chr(figs, ~ format(object.size(.), units = "MB"))
+)
+
+tibble(
+  tab = names(tabs), 
+  size = map_chr(tabs, ~ format(object.size(.), units = "MB"))
+)
 ```
 
 # Presentation Figures
