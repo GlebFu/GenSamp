@@ -119,12 +119,13 @@ tabs$pop.desc <-
   df.list$pop.stats %>%
   ungroup() %>%
   arrange(Category, Sub) %>%
-  select(Category, Variables, pop.mean, pop.sd, log_odds) %>%
+  select(Category, Variables, pop.mean, pop.sd, log_odds, vratio) %>%
   mutate(
     M = round(pop.mean, 2),
     SD = round(pop.sd, 2),
     .keep = "unused",
-    SF100 = (log_odds * 1) %>% round(3)
+    SF100 = (log_odds * 10) %>% round(3) / 10,
+    vratio = round(vratio, 3)
   )
 
 ```
@@ -410,12 +411,24 @@ tabs$B <-
   unnest(Quantile) %>%
   mutate(SB.factor = paste("SF = ", SB, sep = ""))
 
+tabs$B.labs <-  
+  tabs$B %>%
+  filter(
+    !(Rank_Factor %in% c("X9")),
+    SB > 0.01,
+    RR == 10,
+  ) 
 
+seeds <- list()
+# seeds$fig.B <- floor(runif(1) * 10^4)
+seeds$fig.B <- 1841
   
 ```
 
 ```{r, fig.cap = "Averge B-Index"}
-figs$B <- tabs$B %>%
+
+figs$B <-
+  tabs$B %>%
   filter(
     !(Rank_Factor %in% c("X9")),
     SB > 0.01
@@ -423,11 +436,9 @@ figs$B <- tabs$B %>%
   ggplot(aes(x = RR, y = M)) %>%
   common_line() %>%
   common_point() +
-  theme_minimal() +
+  # theme_minimal() +
   labs(y = lab.vars$B,
        x = lab.vars$rr) +
-  scale_x_continuous(breaks = seq(10, 90, 10), minor_breaks = NULL) +
-  scale_y_continuous(breaks = seq(.6, 1, .1), limits = c(.6, 1), expand = expansion(0,0)) + 
   annotate(geom = "rect",
            ymax = .95,
            ymin = -Inf,
@@ -442,11 +453,30 @@ figs$B <- tabs$B %>%
            xmin = Inf,
            fill = "white",
            alpha = .4) +
-  geom_hline(yintercept = c(.8, .95), linetype = "dotted", alpha = .5) +
-  facet_wrap(~ SB.factor)
+  geom_hline(yintercept = c(.8, .95), linetype = "dotted", alpha = .5)  +
+  # facet_grid(SB.factor ~.) +
+  facet_grid(~ SB.factor)  +
+  scale_x_continuous(breaks = seq(0, 100, 20), minor_breaks = NULL, limits = c(-5, 100)) +
+  scale_y_continuous(breaks = seq(.6, 1, .1), limits = c(.6, 1)) +
+  geom_label_repel(aes(label = Method_Label, color = Sample), 
+                   data = tabs$B.labs,
+                   direction = "y",
+                   force_pull = 0,
+                   force = .5,
+                   nudge_x = -15,
+                   seed = seeds$fig.B,
+                   size = 3,
+                   label.padding	= .1,
+                   min.segment.length = 1) +
+  theme_minimal() +
+  theme(legend.position = "none")
+
 
 figs$B
+
 ```
+
+
 
 
 ```{r}
@@ -602,29 +632,121 @@ figs$smd.examples
 #### Example SF = 1
 
 ```{r}
+
+
+tabs$smd.sf100.labs <-  
+  tibble(Method_Label = c("SBS", "URS", "UCS", "SRS", "SCS"),
+       RR = c(10, 30, 50, 70, 90),
+       SB = 1) %>%
+  left_join(tabs$smd.examples, 
+            by = c("Method_Label", "RR", "SB")) %>%
+  mutate(Group = paste(Group, 
+                       Variables, 
+                       sep = ":\n"))
+
+
+seeds <- list()
+# seeds$fig.B <- floor(runif(1) * 10^4)
+seeds$fig.smd.sf100.labs <- 1841
+
 figs$smd.examples.sf100 <-
-  tabs$smd.examples %>% 
+  tabs$smd.examples %>%
   filter(SB == 1) %>%
+  mutate(Group = paste(Group, 
+                       Variables, 
+                       sep = ":\n")) %>%
   ggplot(aes(x = RR, y = Value)) %>%
   common_line() %>%
-  common_point() + 
+  common_point() +
+  # facet_wrap(~ Group, scales = "free_y") +
+  facet_wrap(~ Group) +
+  geom_hline(yintercept = c(.25), linetype = "dotted") +
+  geom_hline(yintercept = 0, linetype = "solid") +
+  geom_label_repel(aes(label = Method_Label, color = Sample), 
+                   data = tabs$smd.sf100.labs,
+                   direction = "y",
+                   # force_pull = 0,
+                   # force = .5,
+                   nudge_y = .50,
+                   nudge_x = 5,
+                   seed = seeds$fig.smd.sf100.labs,
+                   size = 3,
+                   label.padding	= .1,
+                   min.segment.length = 0) + 
   annotate(geom = "rect",
            ymax = .25,
            ymin = -Inf,
            xmax = -Inf,
            xmin = Inf,
            fill = "white",
-           alpha = .5) +
+           alpha = .4) +
   labs(y = lab.vars$smd,
-       x = lab.vars$rr) + 
-  scale_x_continuous(breaks = seq(10, 100, 30),
-                     limits = c(10, 100)) +
-  facet_wrap(~ Group)  +
-  geom_hline(yintercept = c(.25), linetype = "dotted") +
-  geom_hline(yintercept = 0, linetype = "solid")
+       x = lab.vars$rr) 
 
 figs$smd.examples.sf100
+```
 
+```{r}
+
+figs$smd.examples.sf100.v1 <-
+  figs$smd.examples.sf100 +
+  scale_x_continuous(breaks = seq(0, 100, 20), minor_breaks = NULL, limits = c(-5, 100)) +
+  scale_y_continuous(breaks = seq(0, 1.75, .5), limits = c(-.25, 1.6)) +
+  geom_label_repel(aes(label = Method_Label, color = Sample), 
+                   data = tabs$smd.sf100.labs %>% filter(Group != "Group 1"),
+                   direction = "y",
+                   force_pull = 0,
+                   force = 1,
+                   nudge_x = -7,
+                   seed = seeds$fig.smd.sf100.labs,
+                   size = 3,
+                   label.padding	= .1,
+                   min.segment.length = 2) +
+  facet_wrap(~ Group) +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+figs$smd.examples.sf100.v1
+
+```
+
+```{r}
+smd.limits <- 
+  function(x)  {
+    newlim <- c(-.1, ceiling(max(x) * 10) / 10)
+    newlim
+    }
+
+smd.break <- 
+  function(x) {
+    x.max <- max(smd.limits(x))
+    x.break <- ceiling(x.max * 2) / 10
+    newbreak <- seq(0, x.max, x.break)
+    newbreak
+}
+
+figs$smd.examples.sf100.v2 <-
+  figs$smd.examples.sf100 +
+  facet_wrap(~ Group, scales = "free_y") +
+  scale_x_continuous(breaks = seq(0, 100, 20), minor_breaks = NULL, limits = c(-5, 100)) +
+  # scale_y_continuous(breaks = seq(0, 1.75, .25)) +
+  scale_y_continuous(limits = smd.limits, breaks = smd.break) +
+  geom_label_repel(aes(label = Method_Label, color = Sample), 
+                   data = tabs$smd.sf100.labs,
+                   direction = "y",
+                   force_pull = 0,
+                   force = .5,
+                   nudge_x = -10,
+                   seed = seeds$fig.smd.sf100.labs,
+                   size = 3,
+                   label.padding	= .1,
+                   min.segment.length = 0) +
+  facet_wrap(~ Group, scales = "free_y") +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+
+figs$smd.examples.sf100.v2
 ```
 
 
@@ -819,8 +941,122 @@ figs$smd.by.scale[unique(test.g4$vnames)]
 ```{r}
 test.fine.groups <-
   bind_rows(test.g1, test.g2, test.g3, test.g4)
+
+
+```
+#### Fine Grain SMD plots
+
+```{r}
+tabs$smd.by.scale.fine <- 
+  tabs$smd.results %>%
+  left_join(test.fine.groups, 
+            by = c("SB", "vnames")) %>%
+  nest(smd.plot.data = -c(Variables, vnames)) %>%
+  mutate(plots = pmap(.l = list(data = smd.plot.data, 
+                                g.title = Variables), 
+                      .f = plot_smd2, 
+                      l.pos = "bottom"),
+         plots = setNames(plots, vnames))
+
+figs$smd.by.scale.fine <-
+  tabs$smd.by.scale.fine$plots %>% 
+  as.list
+
 ```
 
+```{r}
+
+t.g1 <- c("pFem", "ST.ratio")
+t.g2 <- c("Urban", "Suburban", "T1")
+t.g3 <- c("pELL", "dSCH", "ethHisp", "ethWhite")
+t.g4 <- c("pTotfrl", "ToRu", "ethBlack", "n")
+
+figs$smd.appx.1 <- 
+  tabs$smd.results %>%
+  left_join(test.fine.groups, 
+            by = c("SB", "vnames")) %>%
+  filter(vnames %in% t.g1) %>% 
+  mutate(Gshort = str_replace(Group, "Group ", "G")) %>%
+    ggplot(aes(x = RR, y = Value)) %>%
+    common_line() %>%
+    common_point() +
+    geom_hline(yintercept = c(.25), linetype = "dotted") +
+    geom_hline(yintercept = 0, linetype = "solid") + 
+    scale_x_continuous(breaks = seq(10, 100, 30),
+                       limits = c(10, 100)) +
+    theme(legend.position = "none") +
+  geom_label(aes(label = Gshort, x = 90, y = .2), size = 3) +
+    facet_grid(Variables~SF_fac) 
+
+figs$smd.appx.1 
+```
+
+```{r}
+
+
+figs$smd.appx.2 <- 
+  tabs$smd.results %>%
+  left_join(test.fine.groups, 
+            by = c("SB", "vnames")) %>%
+  filter(vnames %in% t.g2) %>% 
+  mutate(Gshort = str_replace(Group, "Group ", "G")) %>%
+    ggplot(aes(x = RR, y = Value)) %>%
+    common_line() %>%
+    common_point() +
+    geom_hline(yintercept = c(.25), linetype = "dotted") +
+    geom_hline(yintercept = 0, linetype = "solid") + 
+    scale_x_continuous(breaks = seq(10, 100, 30),
+                       limits = c(10, 100)) +
+    theme(legend.position = "bottom") +
+  geom_label(aes(label = Gshort, x = 90, y = .75), size = 3) +
+    facet_grid(Variables~SF_fac) 
+
+figs$smd.appx.2 
+```
+
+```{r}
+
+figs$smd.appx.3 <- 
+  tabs$smd.results %>%
+  left_join(test.fine.groups, 
+            by = c("SB", "vnames")) %>%
+  filter(vnames %in% t.g3) %>% 
+  mutate(Gshort = str_replace(Group, "Group ", "G")) %>%
+    ggplot(aes(x = RR, y = Value)) %>%
+    common_line() %>%
+    common_point() +
+    geom_hline(yintercept = c(.25), linetype = "dotted") +
+    geom_hline(yintercept = 0, linetype = "solid") + 
+    scale_x_continuous(breaks = seq(10, 100, 30),
+                       limits = c(10, 100)) +
+    theme(legend.position = "bottom") +
+  geom_label(aes(label = Gshort, x = 90, y = 1.25), size = 3) +
+    facet_grid(Variables~SF_fac) 
+
+figs$smd.appx.3 
+```
+
+```{r}
+
+figs$smd.appx.4 <- 
+  tabs$smd.results %>%
+  left_join(test.fine.groups, 
+            by = c("SB", "vnames")) %>%
+  filter(vnames %in% t.g4) %>% 
+  mutate(Gshort = str_replace(Group, "Group ", "G")) %>%
+    ggplot(aes(x = RR, y = Value)) %>%
+    common_line() %>%
+    common_point() +
+    geom_hline(yintercept = c(.25), linetype = "dotted") +
+    geom_hline(yintercept = 0, linetype = "solid") + 
+    scale_x_continuous(breaks = seq(10, 100, 30),
+                       limits = c(10, 100)) +
+    theme(legend.position = "bottom") +
+  geom_label(aes(label = Gshort, x = 90, y = .75), size = 3) +
+    facet_grid(Variables~SF_fac) 
+
+figs$smd.appx.4 
+```
 
 ### V-ratio and Log odds
 
@@ -909,11 +1145,13 @@ figs$v.coef <-
   # geom_text_repel(aes(label = Variables), point.padding = .2, color = "black") +
   labs(y = lab.vars$coef,
        x = lab.vars$vratio) +
-  scale_x_continuous(breaks = seq(0, 1, .1)) +
-  # scale_y_continuous(breaks = seq(0, .6, .1),
-  # limits = c(0, .6)) + 
+  scale_x_continuous(breaks = seq(0, 1, .2),
+                     limits = c(0, 1)) +
+  # scale_y_continuous(breaks = seq(0, .4, .1), limits = c(0, .4)) +
+  scale_y_log10(n.breaks = 6,
+                limits = c(.005, 1)) +
   facet_wrap(~SF_fac, scales = "free_y") +
-  scale_y_log10()
+  theme(legend.title = element_blank(), legend.position = "bottom", legend.direction = "horizontal")
 
 figs$v.coef 
 ```
@@ -1109,6 +1347,100 @@ tabs$samples <-
 
 ```
 
+#### SF ALL
+
+```{r, fig.cap = "Schools Contacted"}
+# seeds <- list()
+# seeds$contacts <- floor(runif(1) * 10^4)
+seeds$contacts <- 1841
+
+tabs$samples.contacts.labels  <-
+  tibble(Method_Label = c("SBS", "URS", "UCS", "SRS", "SCS"),
+       RR = c(10, 10, 10, 10, 10),
+       n_x = c(10, 30, 40, 10, 20),
+       n_y = c(0, 200, 200, 0, 0)) %>%
+  left_join(tabs$samples, 
+            by = c("Method_Label", "RR")) %>%
+  ungroup()
+
+figs$samples.contacts <- 
+  tabs$samples %>%
+  ggplot(aes(x = RR, y = contacted)) %>%
+  common_line() %>%
+  common_point() +
+  theme(legend.position = "none") +
+  scale_x_continuous(breaks = seq(0, 100, 20),
+                     limits = c(0, 100)) +
+  scale_y_continuous(labels = function(x) x / 1000) +
+  labs(x = lab.vars$rr,
+       y = lab.vars$contacts) +
+  facet_wrap(~ SB, scales = "free_y") +
+  geom_label_repel(aes(label = Method_Label, color = Sample), 
+                   data = tabs$samples.contacts.labels,
+                   direction = "y",
+                   force_pull = 0,
+                   force = .5,
+                   nudge_x = tabs$samples.contacts.labels$n_x,
+                   nudge_y = tabs$samples.contacts.labels$n_y,
+                   seed = seeds$contacts ,
+                   size = 3,
+                   label.padding	= .1,
+                   min.segment.length = 0)
+
+figs$samples.contacts
+
+
+```
+
+```{r, fig.cap = "Sampling response rates"}
+
+tabs$samples.response.rates.labels  <-
+  tibble(Method_Label = c("SBS", "URS", "UCS", "SRS", "SCS"),
+       RR = c(10, 20, 30, 50, 40),
+       n_x = c(30, -5, -5, 30, 30),
+       n_y = c(5, 20, 20, 5, 5)) %>%
+  left_join(tabs$samples, 
+            by = c("Method_Label", "RR")) %>%
+  ungroup()  %>%
+  arrange(response_rate) %>%
+  ungroup() %>%
+  mutate(value = response_rate * 100) 
+
+
+
+
+
+figs$samples.response.rates <- 
+  tabs$samples %>%
+  mutate(value = response_rate * 100) %>%
+  ggplot(aes(x = RR, y = value)) %>%
+  common_line() %>%
+  common_point() +
+  expand_limits(y = 0) +
+  theme(legend.position = "none") +
+  labs(x = lab.vars$rr,
+       y = lab.vars$rr.o) +
+  scale_x_continuous(breaks = seq(0, 100, 20),
+                     limits = c(0, 100)) +
+  scale_y_continuous(breaks = seq(0, 100, 20)) +
+  facet_wrap(~ SB) +
+  geom_label_repel(aes(label = Method_Label, color = Sample), 
+                   data = tabs$samples.response.rates.labels,
+                   direction = "y",
+                   force_pull = 0,
+                   force = .5,
+                   nudge_x = tabs$samples.response.rates.labels$n_x,
+                   nudge_y = tabs$samples.response.rates.labels$n_y,
+                   seed = seeds$seeds$contacts,
+                   size = 3,
+                   label.padding	= .1,
+                   min.segment.length = 0)
+
+figs$samples.response.rates
+
+
+```
+
 #### SF = 1
 ```{r, fig.cap = "Schools Contacted"}
 
@@ -1137,7 +1469,7 @@ figs$samples.contacts.sf100 <-
   geom_label(data = tabs$samples.contacts.labels,
              aes(label = Method_Label, color = Sample))
 
-figs$samples.contacts
+figs$samples.contacts.sf100
 
 
 ```
@@ -1243,6 +1575,27 @@ tabs$relative.counts <-
   filter(Method_Label != comp.method) %>%
   mutate(relative_contacts = value / comp.value)
   
+tabs$relative.counts %>%
+  filter(comp.method == "URS",
+         metric == "contacted")
+```
+
+
+```{r}
+
+tabs$relative.counts.labs <-  
+  tabs$relative.counts %>%
+  filter(comp.method == "URS",
+         metric == "contacted") %>%
+  filter(
+    SB > 0.01,
+    RR == 10,
+  ) %>%
+  mutate(SB = paste("SF = ", SB, sep = "")) 
+
+seeds <- list()
+# seeds$fig.relative.counts <- floor(runif(1) * 10^4)
+seeds$fig.relative.counts <- 1841
 
 
 ```
@@ -1251,17 +1604,30 @@ tabs$relative.counts <-
 
 figs$relative.counts.URS  <- 
   tabs$relative.counts %>%
-  filter(SB == 1,
-         comp.method == "URS",
+  filter(comp.method == "URS",
          metric == "contacted") %>%
+  mutate(SB = paste("SF = ", SB, sep = "")) %>%
   ggplot(aes(x = RR, y = relative_contacts)) %>%
   common_line() %>%
   common_point() +
   geom_hline(yintercept = 1, linetype = "dashed") +
   labs(x = lab.vars$rr,
        y = "Factor of difficulty") +
-  scale_x_continuous(breaks = seq(0, 100, 10)) +
-  scale_y_continuous(breaks = seq(0, 6, 1))
+  scale_x_continuous(breaks = seq(0, 100, 20), minor_breaks = NULL, limits = c(-5, 100)) +
+  scale_y_continuous(breaks = seq(0, 6, 1)) +
+  facet_wrap(~ SB) +
+  geom_label_repel(aes(label = Method_Label, color = Sample), 
+                   data = tabs$relative.counts.labs,
+                   direction = "y",
+                   force_pull = 0,
+                   force = .5,
+                   nudge_x = -15,
+                   seed = seeds$fig.B,
+                   size = 3,
+                   label.padding	= .1,
+                   min.segment.length = 2) +
+  theme_minimal() +
+  theme(legend.position = "none")
   
   
 
@@ -1346,9 +1712,13 @@ figs$samples.relative.contacts.sf.all
 
 ```{r}
 lab.vars$gini <- "Gini Coeficient"
+gini <- list()
+
+gini$results <- results$gini
+
 
 tabs$gini.coef <-
-  results$gini %>%
+  gini$results %>%
   select(-count.data) %>%
   unpack(Sample_Catagories) %>%
   filter(
@@ -1373,69 +1743,91 @@ tabs$gini.coef <-
 
 
 ```{r}
+tabs$gini.labs <-  
+  tabs$gini.coef %>%
+  filter(
+    !(Rank_Factor %in% c("X9")),
+    SB > 0.01,
+    RR == 10,
+  ) 
 
 
-figs$gini <- tabs$gini.coef %>%
+# seeds$gini <- floor(runif(1) * 10^4)
+seeds$gini <- 1841
+
+figs$gini.coef <- tabs$gini.coef %>%
   ggplot(aes(x = RR, y = Gini_Coef)) %>%
   common_line() %>%
   common_point() +
-  scale_x_continuous(breaks = seq(0, 100, 20)) +
-  scale_y_continuous(breaks = seq(0, 1, .1),
-                     limits = c(0, 1), expand = c(0,0)) +
   labs(x = lab.vars$rr,
       y = lab.vars$gini) +
-  facet_grid(~ SF_fac)
-  # geom_label(data = tabs$gini.coef.labels,
-  #            aes(label = Method_Label,
-  #                color = Sample))
+  facet_grid(~ SF_fac) +
+  scale_x_continuous(breaks = seq(0, 100, 20), minor_breaks = NULL, limits = c(-5, 100)) +
+  scale_y_continuous(breaks = seq(0, 1, .1),
+                     limits = c(0, 1), expand = c(0,0)) +
+  geom_label_repel(aes(label = Method_Label, color = Sample), 
+                   data = tabs$gini.labs,
+                   direction = "y",
+                   force_pull = 0,
+                   force = .5,
+                   nudge_x = -15,
+                   seed = seeds$gini,
+                   size = 3,
+                   label.padding	= .1,
+                   min.segment.length = 1) +
+  theme_minimal() +
+  theme(legend.position = "none")
 
-figs$gini
+figs$gini.coef
 
 
 ```
 
 ```{r}
 
-tabs$gini.count <-
-  results$gini %>%
-  select(SB:Sample_Catagories) %>%
-  unpack(Sample_Catagories) %>%
-  unnest(count.data)
-
-figs$gini.coef <- 
-  tabs$gini.count %>%
-  filter(SB == 1,
-         !(Rank_Factor %in% c("X9"))) %>%
-  ggplot(aes(x = c.prop.pop, y = c.prop.sel))  %>%
-  common_line() %>%
-  common_point() +
-  geom_abline(slope = 1, intercept = 0, linetype = "dotted") +
-  geom_label(aes(label = round(Gini_Coef, 2), x = x.pos, y = y.pos), 
-             data = tabs$gini.coef, size = 3) +
-  facet_wrap(~RR) +  
-  # (if (grey.plots) {scale_colour_grey(start = 0, end = .7)}) +
-  labs(x = "Cumulative proportion of population",
-         y = "Cumulative percentage of times sampled") +
-  theme_apa()
-
-ggsave(filename = "Figs/Presentation/GINI.jpg", dpi = 100, width = 10, height = 6)
+# gini$tabs.count <-
+#   gini$results %>%
+#   select(SB:Sample_Catagories) %>%
+#   unpack(Sample_Catagories) %>%
+#   unnest(count.data)
+# 
+# gini$figs.count <- 
+#   gini$tabs.count %>%
+#   filter(SB == 1,
+#          !(Rank_Factor %in% c("X9"))) %>%
+#   ggplot(aes(x = c.prop.pop, y = c.prop.sel))  %>%
+#   common_line() %>%
+#   common_point() +
+#   geom_abline(slope = 1, intercept = 0, linetype = "dotted") +
+#   geom_label(aes(label = round(Gini_Coef, 2), x = x.pos, y = y.pos), 
+#              data = gini$tabs.coef, size = 3) +
+#   facet_wrap(~RR) +  
+#   # (if (grey.plots) {scale_colour_grey(start = 0, end = .7)}) +
+#   labs(x = "Cumulative proportion of population",
+#          y = "Cumulative percentage of times sampled") +
+#   theme_apa()
+# 
+# # ggsave(filename = "Figs/Presentation/GINI.jpg", dpi = 100, width = 10, height = 6)
 ```
 
-# Export Data
+# Save Data
 
 ```{r}
-save(figs,
-     lab.vars,
-     results,
-     tabs,
-     vars,
-     file = "Data/Paper/Paper Data 02-08-2021.rdata")
 
+results$gini <- NA
+
+```
+
+## Size of data
+```{r}
 ls() %>%
   tibble(Vars = .) %>%
-  mutate(MB = map(Vars, function(x) object.size(eval(parse(text = x))) %>% format(units = "MB", digits = 3))) %>%
+  mutate(MB = map(Vars, 
+                  function(x) object.size(eval(parse(text = x))) %>% 
+                    format(units = "MB", digits = 3))) %>%
   unnest(MB) %>%
   arrange(desc(parse_number(MB)))
+
 
 tibble(
   fig = names(figs), 
@@ -1446,6 +1838,26 @@ tibble(
   tab = names(tabs), 
   size = map_chr(tabs, ~ format(object.size(.), units = "MB"))
 )
+
+```
+
+## Export
+```{r}
+save(lab.vars,
+     tabs,
+     vars,
+     seeds,
+     file = "Data/Paper/Paper Data 02-08-2021.rdata")
+
+save(figs,
+     file = "Data/Paper/Analysis Figures 02-08-2021.rdata")
+
+# save(gini,
+#      file = "Data/Paper/Gini Data 02-08-2021.rdata")
+
+
+
+
 ```
 
 # Presentation Figures
